@@ -5,57 +5,47 @@
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --foreground: 240 10% 3.9%;
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 240 10% 3.9%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 262 83% 58%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222.2 84% 4.9%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 262 83% 58%;
-    --accent-foreground: 210 40% 98%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 262 83% 58%; /* ink-purple-500 */
+    --primary-foreground: 0 0% 98%;
+    --secondary: 217 91% 60%; /* ink-blue-500 */
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 39 85% 59%; /* ink-gold-500 */
+    --accent-foreground: 240 5.9% 10%;
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 262 83% 58%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 262 83% 58%; /* ink-purple-500 */
     --radius: 0.5rem;
-    --chart-1: 262 83% 58%;
-    --chart-2: 37 91% 55%;
-    --chart-3: 210 98% 78%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 262 83% 58%;
-    --primary-foreground: 222.2 84% 4.9%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 262 83% 58%;
-    --accent-foreground: 210 40% 98%;
+    --background: 222 84% 4.9%; /* ink-dark-900 */
+    --foreground: 0 0% 98%;
+    --card: 222 84% 4.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 222 84% 4.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 262 83% 58%; /* ink-purple-500 */
+    --primary-foreground: 0 0% 98%;
+    --secondary: 217 91% 60%; /* ink-blue-500 */
+    --secondary-foreground: 0 0% 98%;
+    --muted: 215 27.9% 16.9%;
+    --muted-foreground: 217.9 10.6% 64.9%;
+    --accent: 39 85% 59%; /* ink-gold-500 */
+    --accent-foreground: 0 0% 98%;
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 262 83% 58%;
-    --chart-1: 262 83% 58%;
-    --chart-2: 37 91% 55%;
-    --chart-3: 210 98% 78%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 215 27.9% 16.9%;
+    --input: 215 27.9% 16.9%;
+    --ring: 262 83% 58%; /* ink-purple-500 */
   }
 }
 
@@ -68,147 +58,94 @@
   }
 }
 
+/* Custom ink-themed styles */
 @layer components {
-  .map-container {
-    @apply relative overflow-hidden rounded-lg shadow-map-shadow;
+  .ink-gradient {
+    background: linear-gradient(135deg, theme("colors.ink.purple.500"), theme("colors.ink.blue.500"));
   }
 
-  .location-pin {
-    @apply flex items-center justify-center w-8 h-8 bg-accent rounded-full shadow-lg;
-    animation: pulse-glow 2s ease-in-out infinite;
-  }
-
-  .map-overlay {
-    @apply absolute top-4 left-4 right-4 z-10 bg-background/80 backdrop-blur-sm rounded-lg p-4 border border-border;
-  }
-
-  .search-radius {
-    @apply absolute inset-0 border-2 border-accent/30 rounded-full;
-    animation: pulse 2s ease-in-out infinite;
-  }
-
-  .map-scrollbar {
-    width: 8px;
-  }
-
-  .map-scrollbar::-webkit-scrollbar-track {
-    @apply bg-muted;
-  }
-
-  .map-scrollbar::-webkit-scrollbar-thumb {
-    @apply bg-ink-purple-400 rounded-full;
-  }
-
-  .map-scrollbar::-webkit-scrollbar-thumb:hover {
-    @apply bg-ink-purple-500;
-  }
-}
-
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
-
-  .map-marker {
-    @apply bg-ink-purple-600 border-2 border-white shadow-lg;
-    transition: all 0.3s ease;
-  }
-
-  .map-marker:hover {
-    @apply bg-ink-purple-700 scale-110;
-    box-shadow: 0 0 20px rgba(168, 85, 247, 0.6);
-  }
-
-  .map-marker.shop {
-    @apply bg-ink-blue-600;
-  }
-
-  .map-marker.shop:hover {
-    @apply bg-ink-blue-700;
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.6);
-  }
-
-  .card-hover {
-    transition: all 0.3s ease;
-  }
-
-  .card-hover:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-  }
-
-  .gradient-text {
-    background: linear-gradient(135deg, #a855f7, #3b82f6, #f59e0b);
+  .ink-gradient-text {
+    background: linear-gradient(135deg, theme("colors.ink.purple.500"), theme("colors.ink.blue.500"));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
-  .pulse-ink {
-    animation: pulse-ink 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  .ink-shadow {
+    box-shadow: 0 10px 25px -5px rgba(168, 85, 247, 0.1), 0 4px 6px -2px rgba(168, 85, 247, 0.05);
   }
 
-  @keyframes pulse-ink {
-    0%,
-    100% {
-      opacity: 1;
-      box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.7);
-    }
-    50% {
-      opacity: 0.8;
-      box-shadow: 0 0 0 10px rgba(168, 85, 247, 0);
-    }
+  .ink-border {
+    border-color: theme("colors.ink.purple.200");
+  }
+
+  .ink-hover {
+    @apply transition-all duration-300 hover:shadow-lg hover:shadow-ink-purple-500/20 hover:-translate-y-1;
+  }
+
+  .ink-button {
+    @apply bg-ink-purple-500 hover:bg-ink-purple-600 text-white font-medium px-6 py-3 rounded-lg transition-all duration-200 hover:shadow-lg hover:shadow-ink-purple-500/25;
+  }
+
+  .ink-button-secondary {
+    @apply bg-ink-blue-500 hover:bg-ink-blue-600 text-white font-medium px-6 py-3 rounded-lg transition-all duration-200 hover:shadow-lg hover:shadow-ink-blue-500/25;
+  }
+
+  .ink-button-accent {
+    @apply bg-ink-gold-500 hover:bg-ink-gold-600 text-white font-medium px-6 py-3 rounded-lg transition-all duration-200 hover:shadow-lg hover:shadow-ink-gold-500/25;
+  }
+
+  .ink-card {
+    @apply bg-white dark:bg-ink-dark-800 border border-ink-gray-200 dark:border-ink-gray-700 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200;
+  }
+
+  .ink-input {
+    @apply bg-white dark:bg-ink-dark-800 border border-ink-gray-300 dark:border-ink-gray-600 rounded-lg px-4 py-2 focus:ring-2 focus:ring-ink-purple-500 focus:border-transparent transition-all duration-200;
   }
 }
 
-/* Map-specific animations */
-@keyframes mapPulse {
-  0%,
-  100% {
-    transform: scale(1);
-    opacity: 1;
+/* Animation utilities */
+@layer utilities {
+  .animate-ink-flow {
+    animation: ink-flow 2s ease-in-out infinite;
   }
-  50% {
-    transform: scale(1.1);
-    opacity: 0.7;
+
+  .animate-fade-in {
+    animation: fade-in 0.5s ease-out;
+  }
+
+  .animate-slide-up {
+    animation: slide-up 0.3s ease-out;
   }
 }
 
-.map-pulse {
-  animation: mapPulse 2s ease-in-out infinite;
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
 }
 
-/* Location-based hover effects */
-.location-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+::-webkit-scrollbar-track {
+  background: theme("colors.ink.gray.100");
 }
 
-/* Interactive map elements */
-.map-interactive {
-  cursor: pointer;
-  transition: all 0.2s ease-in-out;
+::-webkit-scrollbar-thumb {
+  background: theme("colors.ink.purple.300");
+  border-radius: 4px;
 }
 
-.map-interactive:hover {
-  transform: scale(1.05);
-  z-index: 10;
+::-webkit-scrollbar-thumb:hover {
+  background: theme("colors.ink.purple.400");
 }
 
-/* Ink flow animation for special elements */
-.ink-flow {
-  background: linear-gradient(-45deg, #a855f7, #3b82f6, #f59e0b, #a855f7);
-  background-size: 400% 400%;
-  animation: ink-flow 3s ease-in-out infinite;
+/* Dark mode scrollbar */
+.dark ::-webkit-scrollbar-track {
+  background: theme("colors.ink.dark.800");
 }
 
-/* Custom button hover effects */
-.btn-ink {
-  @apply bg-ink-purple-600 hover:bg-ink-purple-700 text-white transition-all duration-300;
-  box-shadow: 0 4px 15px 0 rgba(168, 85, 247, 0.3);
+.dark ::-webkit-scrollbar-thumb {
+  background: theme("colors.ink.purple.600");
 }
 
-.btn-ink:hover {
-  box-shadow: 0 6px 20px 0 rgba(168, 85, 247, 0.4);
-  transform: translateY(-2px);
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: theme("colors.ink.purple.500");
 }
