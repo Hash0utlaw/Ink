@@ -29,6 +29,10 @@
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
+    /* Adding pricing guide specific colors */
+    --pricing-accent: 139 92% 58%;
+    --pricing-secondary: 217 91% 60%;
+    --pricing-muted: 240 3.7% 15.9%;
   }
 
   .dark {
@@ -51,11 +55,16 @@
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
     --ring: 262 83% 58%;
+    --radius: 0.5rem;
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
+    /* Dark theme pricing colors */
+    --pricing-accent: 139 92% 58%;
+    --pricing-secondary: 217 91% 60%;
+    --pricing-muted: 240 3.7% 15.9%;
   }
 }
 
@@ -69,6 +78,23 @@
 }
 
 @layer components {
+  /* Adding pricing guide specific components */
+  .pricing-card {
+    @apply bg-card border border-border rounded-xl p-6 hover:border-accent/50 transition-all duration-300 relative overflow-hidden;
+  }
+
+  .pricing-card-featured {
+    @apply border-accent shadow-lg shadow-accent/20;
+  }
+
+  .pricing-calculator {
+    @apply bg-muted/50 border border-border rounded-lg p-4 space-y-4;
+  }
+
+  .pricing-step {
+    @apply bg-card border border-border rounded-lg p-6 space-y-4;
+  }
+
   /* Ink-themed button styles */
   .btn-ink-primary {
     @apply bg-ink-purple-600 hover:bg-ink-purple-700 text-white font-medium px-6 py-2 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl;

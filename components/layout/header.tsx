@@ -70,6 +70,9 @@ export function Header() {
           <Link href="/styles" className="text-foreground/80 hover:text-foreground transition-colors">
             Styles
           </Link>
+          <Link href="/pricing" className="text-foreground/80 hover:text-foreground transition-colors">
+            Pricing Guide
+          </Link>
         </nav>
 
         {/* Auth Section */}
