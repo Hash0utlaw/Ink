@@ -1,14 +1,14 @@
 "use client"
 
 import type React from "react"
-import { useActionState, useEffect, useState } from "react"
+import { useState } from "react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Droplet } from 'lucide-react'
+import { Droplet } from "lucide-react"
 import { login, signup } from "@/app/(auth)/actions"
 
 // A simple SVG for Google Icon
@@ -25,19 +25,23 @@ interface AuthFormProps {
 
 export function AuthForm({ mode }: AuthFormProps) {
   const searchParams = useSearchParams()
-  const [loginState, loginAction, isLoginPending] = useActionState(login, null)
-  const [signupState, signupAction, isSignupPending] = useActionState(signup, null)
   const [message, setMessage] = useState(searchParams.get("message") || "")
+  const [isPending, setIsPending] = useState(false)
 
-  const isPending = isLoginPending || isSignupPending
-  const action = mode === "login" ? loginAction : signupAction
-  const state = mode === "login" ? loginState : signupState
-
-  useEffect(() => {
-    if (state?.message) {
-      setMessage(state.message)
+  const handleSubmit = async (formData: FormData) => {
+    setIsPending(true)
+    try {
+      const action = mode === "login" ? login : signup
+      const result = await action(null, formData)
+      if (result?.message) {
+        setMessage(result.message)
+      }
+    } catch (error) {
+      setMessage("An error occurred. Please try again.")
+    } finally {
+      setIsPending(false)
     }
-  }, [state])
+  }
 
   const title = mode === "login" ? "Welcome Back" : "Create an Account"
   const description = mode === "login" ? "Sign in to access your dashboard." : "Join the Inkfinder community."
@@ -52,7 +56,7 @@ export function AuthForm({ mode }: AuthFormProps) {
         <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent>
-        <form action={action} className="space-y-4">
+        <form action={handleSubmit} className="space-y-4">
           {mode === "signup" && (
             <div className="space-y-2">
               <Label htmlFor="name">Full Name</Label>
@@ -67,15 +71,7 @@ export function AuthForm({ mode }: AuthFormProps) {
             <Label htmlFor="password">Password</Label>
             <Input id="password" name="password" type="password" required disabled={isPending} />
           </div>
-          {message && (
-            <div
-              className={`text-sm text-center p-2 rounded-md ${
-                state?.success ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"
-              }`}
-            >
-              {message}
-            </div>
-          )}
+          {message && <div className="text-sm text-center p-2 rounded-md bg-red-500/20 text-red-400">{message}</div>}
           <Button type="submit" className="w-full" disabled={isPending}>
             {isPending ? "Processing..." : mode === "login" ? "Log In" : "Sign Up"}
           </Button>

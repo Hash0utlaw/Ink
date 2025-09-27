@@ -2,16 +2,18 @@ import { NextResponse } from "next/server"
 import { getArtists } from "@/lib/mock-data"
 import type { Artist } from "@/types/artist"
 
+export const dynamic = "force-dynamic"
+
 export async function GET(request: Request) {
   try {
-    const { searchParams } = new URL(request.url)
-    const stylesParam = searchParams.get("styles")
-    const priceParam = searchParams.get("price")
+    const url = new URL(request.url)
+    const stylesParam = url.searchParams.get("styles")
+    const priceParam = url.searchParams.get("price")
 
     const styles = stylesParam ? stylesParam.split(",") : []
     const price = priceParam ? priceParam.split(",") : []
-    const rating = Number(searchParams.get("rating")) || 0
-    const availableNow = searchParams.get("availableNow") === "true"
+    const rating = Number(url.searchParams.get("rating")) || 0
+    const availableNow = url.searchParams.get("availableNow") === "true"
 
     let artists: Artist[] = await getArtists()
 

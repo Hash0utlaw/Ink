@@ -2,14 +2,16 @@ import { NextResponse } from "next/server"
 import { getShops } from "@/lib/mock-data"
 import type { Shop } from "@/types/shop"
 
+export const dynamic = "force-dynamic"
+
 export async function GET(request: Request) {
   try {
-    const { searchParams } = new URL(request.url)
-    const stylesParam = searchParams.get("styles")
+    const url = new URL(request.url)
+    const stylesParam = url.searchParams.get("styles")
 
     const styles = stylesParam ? stylesParam.split(",") : []
-    const rating = Number(searchParams.get("rating")) || 0
-    const acceptsWalkIns = searchParams.get("acceptsWalkIns") === "true"
+    const rating = Number(url.searchParams.get("rating")) || 0
+    const acceptsWalkIns = url.searchParams.get("acceptsWalkIns") === "true"
 
     let shops: Shop[] = await getShops()
 

@@ -1,3 +1,8 @@
+import type { Artist } from "@/types/artist"
+import type { Shop } from "@/types/shop"
+import type { UserData } from "@/types/user"
+import type { ArtistDashboardData } from "@/types/artist-dashboard"
+
 export interface MockLocation {
   id: string
   name: string
@@ -22,6 +27,294 @@ export interface MockLocation {
   images: string[]
   description: string
   artists?: string[] // For shops
+}
+
+const artists: Artist[] = [
+  {
+    id: "1",
+    name: "Valerie",
+    shopName: "Black Oak Tattoo",
+    specialties: ["Fine Line", "Botanical", "Blackwork", "Micro-Realism"],
+    rating: 4.9,
+    reviewCount: 124,
+    location: {
+      address: "123 Art St",
+      city: "San Francisco, CA",
+      lat: 37.7749,
+      lng: -122.4194,
+    },
+    avatarUrl: "/female-tattoo-artist-portrait-1.png",
+    portfolioImages: [
+      "/fine-line-tattoo-1.png",
+      "/botanical-tattoo-1.png",
+      "/placeholder-g6gvv.png",
+      "/placeholder-lpicf.png",
+      "/japanese-dragon-tattoo.png",
+      "/placeholder-kafzv.png",
+    ],
+    isAvailable: true,
+    priceRange: "medium",
+    bio: "Valerie is a San Francisco-based artist specializing in delicate fine line and botanical tattoos. With over 8 years of experience, she brings a unique and elegant touch to every piece, creating timeless art that flows with the body's natural form. Her studio, Black Oak, is a serene space designed to make every client feel comfortable and inspired.",
+    reviews: [
+      {
+        id: "r1",
+        userName: "Jessica L.",
+        userAvatar: "JL",
+        rating: 5,
+        comment:
+          "Valerie is incredibly talented! She brought my vision to life perfectly. The studio is clean and has a great vibe.",
+        date: "2 weeks ago",
+      },
+      {
+        id: "r2",
+        userName: "Mark T.",
+        userAvatar: "MT",
+        rating: 5,
+        comment:
+          "An amazing experience from start to finish. Professional, kind, and a true artist. I couldn't be happier with my tattoo.",
+        date: "1 month ago",
+      },
+    ],
+    hours: {
+      Monday: "Closed",
+      Tuesday: "11am - 7pm",
+      Wednesday: "11am - 7pm",
+      Thursday: "11am - 7pm",
+      Friday: "11am - 8pm",
+      Saturday: "11am - 8pm",
+      Sunday: "12pm - 5pm",
+    },
+  },
+  {
+    id: "3",
+    name: "Chloe",
+    shopName: "Black Oak Tattoo",
+    specialties: ["Watercolor", "Abstract"],
+    rating: 4.8,
+    reviewCount: 88,
+    location: { address: "San Francisco, CA", city: "San Francisco, CA", lat: 37.7749, lng: -122.4194 },
+    avatarUrl: "/placeholder.svg?height=100&width=100",
+    portfolioImages: ["/placeholder.svg?height=300&width=300", "/placeholder.svg?height=300&width=300"],
+    isAvailable: true,
+    priceRange: "medium",
+    bio: "Chloe's work is a vibrant explosion of color and form. She pushes the boundaries of watercolor tattoos, creating fluid, dreamlike pieces that are both bold and beautiful.",
+    reviews: [],
+    hours: {},
+  },
+  {
+    id: "2",
+    name: "Kenji",
+    shopName: "Oni Tattoo",
+    specialties: ["Japanese", "Irezumi", "Dragons", "Large Scale"],
+    rating: 4.5,
+    reviewCount: 150,
+    location: {
+      address: "456 Dragon Ave",
+      city: "Los Angeles, CA",
+      lat: 34.0522,
+      lng: -118.2437,
+    },
+    avatarUrl: "/placeholder-lpicf.png",
+    portfolioImages: ["/japanese-dragon-tattoo.png", "/placeholder-kafzv.png"],
+    isAvailable: true,
+    priceRange: "high",
+    bio: "Kenji is a master artist specializing in Japanese and Irezumi tattoos. With a deep understanding of tradition and history, he brings authenticity and excellence to every piece.",
+    reviews: [
+      {
+        id: "r3",
+        userName: "Emily W.",
+        userAvatar: "EW",
+        rating: 5,
+        comment: "Kenji's work is stunning. He captured the essence of my vision perfectly. Highly recommend!",
+        date: "1 week ago",
+      },
+    ],
+    hours: {
+      Monday: "12pm - 8pm",
+      Tuesday: "12pm - 8pm",
+      Wednesday: "12pm - 8pm",
+      Thursday: "12pm - 8pm",
+      Friday: "12pm - 10pm",
+      Saturday: "12pm - 10pm",
+      Sunday: "Closed",
+    },
+  },
+]
+
+const shops: Shop[] = [
+  {
+    id: "s1",
+    name: "Black Oak Tattoo",
+    logoUrl: "/black-oak-logo.png",
+    coverImageUrl: "/tattoo-shop-interior.png",
+    rating: 4.9,
+    reviewCount: 312,
+    location: {
+      address: "123 Art St",
+      city: "San Francisco, CA",
+      lat: 37.7749,
+      lng: -122.4194,
+    },
+    residentArtistIds: ["1", "3"],
+    about:
+      "Black Oak Tattoo is a premier, custom tattoo studio located in the heart of San Francisco. We provide a clean, comfortable, and inspiring environment for both our artists and clients. Our diverse team of world-class artists specializes in a wide range of styles, ensuring we can bring any vision to life. We are committed to artistic excellence and providing a memorable, professional experience for every person who walks through our doors.",
+    reviews: [
+      {
+        id: "sr1",
+        userName: "David P.",
+        userAvatar: "DP",
+        rating: 5,
+        comment:
+          "The best shop in the city. Super clean, professional, and everyone is so talented. The vibe is perfect.",
+        date: "3 days ago",
+      },
+      {
+        id: "sr2",
+        userName: "Samantha B.",
+        userAvatar: "SB",
+        rating: 5,
+        comment:
+          "I felt so comfortable here for my first tattoo. The staff was welcoming and helped me find the perfect artist for my idea.",
+        date: "2 months ago",
+      },
+    ],
+    hours: {
+      Monday: "Closed",
+      Tuesday: "11am - 7pm",
+      Wednesday: "11am - 7pm",
+      Thursday: "11am - 7pm",
+      Friday: "11am - 8pm",
+      Saturday: "11am - 8pm",
+      Sunday: "12pm - 5pm",
+    },
+    specialties: ["Fine Line", "Botanical", "Blackwork", "Watercolor", "Abstract", "Realism"],
+    acceptsWalkIns: true,
+  },
+  {
+    id: "s2",
+    name: "Oni Tattoo",
+    logoUrl: "/placeholder.svg?height=100&width=100",
+    coverImageUrl: "/placeholder.svg?height=400&width=1200",
+    rating: 5.0,
+    reviewCount: 210,
+    location: { address: "456 Dragon Ave", city: "Los Angeles, CA", lat: 34.0522, lng: -118.2437 },
+    residentArtistIds: ["2"],
+    about:
+      "Authentic Japanese and Irezumi tattoos by master artists. We honor the tradition and history of this timeless art form.",
+    reviews: [],
+    hours: {
+      Monday: "12pm - 8pm",
+      Tuesday: "12pm - 8pm",
+      Wednesday: "12pm - 8pm",
+      Thursday: "12pm - 8pm",
+      Friday: "12pm - 10pm",
+      Saturday: "12pm - 10pm",
+      Sunday: "Closed",
+    },
+    specialties: ["Japanese", "Irezumi", "Dragons", "Large Scale"],
+    acceptsWalkIns: false,
+  },
+]
+
+const userData: UserData = {
+  profile: {
+    id: "u1",
+    name: "Alex Doe",
+    email: "alex.doe@example.com",
+    avatarUrl: "/diverse-user-avatars.png",
+    location: "San Francisco, CA",
+  },
+  savedDesigns: [
+    {
+      id: "d1",
+      prompt: "A stoic wolf in a pine forest, geometric patterns",
+      style: "Geometric",
+      imageUrl: "/placeholder-76soj.png",
+      createdAt: "2 weeks ago",
+    },
+    {
+      id: "d2",
+      prompt: "Cosmic jellyfish with vibrant nebula colors",
+      style: "Watercolor",
+      imageUrl: "/placeholder-4xvx8.png",
+      createdAt: "1 month ago",
+    },
+  ],
+  appointments: [
+    {
+      id: "a1",
+      artist: { id: "1", name: "Valerie", avatarUrl: "/female-tattoo-artist-portrait-1.png" },
+      shop: { id: "s1", name: "Black Oak Tattoo" },
+      date: "2025-08-15",
+      time: "02:00 PM",
+      status: "upcoming",
+    },
+    {
+      id: "a2",
+      artist: { id: "2", name: "Kenji", avatarUrl: "/placeholder-lpicf.png" },
+      shop: { id: "s2", name: "Oni Tattoo" },
+      date: "2025-05-20",
+      time: "04:00 PM",
+      status: "completed",
+    },
+  ],
+  favoriteArtists: [
+    {
+      id: "1",
+      name: "Valerie",
+      avatarUrl: "/female-tattoo-artist-portrait-1.png",
+      specialties: ["Fine Line", "Botanical"],
+    },
+  ],
+  favoriteShops: [
+    {
+      id: "s1",
+      name: "Black Oak Tattoo",
+      logoUrl: "/black-oak-logo.png",
+      location: { city: "San Francisco, CA", address: "", lat: 0, lng: 0 },
+    },
+  ],
+}
+
+const artistDashboardData: ArtistDashboardData = {
+  clients: [
+    {
+      id: "c1",
+      name: "Jessica L.",
+      avatarUrl: "/placeholder.svg",
+      email: "jess.l@example.com",
+      totalAppointments: 1,
+      lastAppointmentDate: "2025-06-15",
+      notes: "Loves floral designs, sits very well.",
+    },
+    {
+      id: "c2",
+      name: "Mark T.",
+      avatarUrl: "/placeholder.svg",
+      email: "mark.t@example.com",
+      totalAppointments: 3,
+      lastAppointmentDate: "2025-05-20",
+      notes: "Working on a full sleeve. Next session is for the forearm.",
+    },
+  ],
+  analytics: {
+    profileViews: { currentMonth: 1234, changePercent: 15.2 },
+    bookingRequests: { currentMonth: 42, changePercent: -5.1 },
+    estimatedRevenue: { currentMonth: 8500, changePercent: 20.0 },
+    revenueChartData: [
+      { month: "Jan", revenue: 4500 },
+      { month: "Feb", revenue: 5200 },
+      { month: "Mar", revenue: 7100 },
+      { month: "Apr", revenue: 6500 },
+      { month: "May", revenue: 8200 },
+      { month: "Jun", revenue: 8500 },
+    ],
+    stylePopularity: [
+      { style: "Botanical", count: 45 },
+      { style: "Fine Line", count: 38 },
+      { style: "Blackwork", count: 12 },
+    ],
+  },
 }
 
 export const mockLocations: MockLocation[] = [
@@ -86,187 +379,50 @@ export const mockLocations: MockLocation[] = [
     images: ["/female-tattoo-artist-portrait-1.png", "/fine-line-tattoo-1.png"],
     description: "Specializing in delicate fine line work and botanical designs with over 8 years of experience.",
   },
-  {
-    id: "3",
-    name: "Black Oak Tattoo",
-    type: "shop",
-    address: "456 Valencia Street",
-    city: "San Francisco",
-    state: "CA",
-    zipCode: "94110",
-    coordinates: [-122.4214, 37.7599],
-    rating: 4.7,
-    reviewCount: 203,
-    specialties: ["Blackwork", "Geometric", "Traditional"],
-    priceRange: "medium",
-    isOpen: false,
-    hours: {
-      monday: "Closed",
-      tuesday: "12:00 PM - 8:00 PM",
-      wednesday: "12:00 PM - 8:00 PM",
-      thursday: "12:00 PM - 8:00 PM",
-      friday: "12:00 PM - 9:00 PM",
-      saturday: "11:00 AM - 9:00 PM",
-      sunday: "12:00 PM - 6:00 PM",
-    },
-    phone: "(415) 555-0125",
-    email: "info@blackoaktattoo.com",
-    website: "https://blackoaktattoo.com",
-    instagram: "@blackoaksf",
-    images: ["/black-oak-logo.png", "/dark-artistic-tattoo-studio.png"],
-    description: "Bold blackwork and geometric designs in a welcoming, artistic environment.",
-    artists: ["Marcus Johnson", "Luna Martinez", "David Kim"],
-  },
-  {
-    id: "4",
-    name: "Luna Martinez",
-    type: "artist",
-    address: "789 Sunset Boulevard",
-    city: "Los Angeles",
-    state: "CA",
-    zipCode: "90028",
-    coordinates: [-118.2437, 34.0522],
-    rating: 4.6,
-    reviewCount: 156,
-    specialties: ["Watercolor", "Abstract", "Floral"],
-    priceRange: "medium",
-    isOpen: true,
-    hours: {
-      monday: "Closed",
-      tuesday: "Closed",
-      wednesday: "1:00 PM - 8:00 PM",
-      thursday: "1:00 PM - 8:00 PM",
-      friday: "1:00 PM - 9:00 PM",
-      saturday: "11:00 AM - 9:00 PM",
-      sunday: "12:00 PM - 7:00 PM",
-    },
-    phone: "(323) 555-0126",
-    email: "luna@example.com",
-    instagram: "@lunamartineztattoo",
-    images: ["/placeholder-user.jpg", "/botanical-tattoo-1.png"],
-    description: "Creating vibrant watercolor tattoos that flow like painted art on skin.",
-  },
-  {
-    id: "5",
-    name: "Golden State Ink",
-    type: "shop",
-    address: "321 Hollywood Boulevard",
-    city: "Los Angeles",
-    state: "CA",
-    zipCode: "90028",
-    coordinates: [-118.2437, 34.0522],
-    rating: 4.5,
-    reviewCount: 298,
-    specialties: ["Realism", "Portraits", "Japanese"],
-    priceRange: "high",
-    isOpen: true,
-    hours: {
-      monday: "11:00 AM - 8:00 PM",
-      tuesday: "11:00 AM - 8:00 PM",
-      wednesday: "11:00 AM - 8:00 PM",
-      thursday: "11:00 AM - 8:00 PM",
-      friday: "11:00 AM - 9:00 PM",
-      saturday: "10:00 AM - 9:00 PM",
-      sunday: "12:00 PM - 7:00 PM",
-    },
-    phone: "(323) 555-0127",
-    email: "info@goldenstateink.com",
-    website: "https://goldenstateink.com",
-    instagram: "@goldenstateink",
-    images: ["/tattoo-shop-interior.png", "/japanese-dragon-tattoo.png"],
-    description: "Los Angeles premier destination for photorealistic tattoos and Japanese traditional work.",
-    artists: ["Carlos Rivera", "Emma Thompson", "Kenji Nakamura"],
-  },
-  {
-    id: "6",
-    name: "Carlos Rivera",
-    type: "artist",
-    address: "321 Hollywood Boulevard",
-    city: "Los Angeles",
-    state: "CA",
-    zipCode: "90028",
-    coordinates: [-118.2437, 34.0522],
-    rating: 4.8,
-    reviewCount: 134,
-    specialties: ["Realism", "Portraits", "Black & Gray"],
-    priceRange: "high",
-    isOpen: false,
-    hours: {
-      monday: "Closed",
-      tuesday: "Closed",
-      wednesday: "12:00 PM - 8:00 PM",
-      thursday: "12:00 PM - 8:00 PM",
-      friday: "12:00 PM - 9:00 PM",
-      saturday: "11:00 AM - 9:00 PM",
-      sunday: "1:00 PM - 7:00 PM",
-    },
-    phone: "(323) 555-0128",
-    email: "carlos@goldenstateink.com",
-    instagram: "@carlosriveratattoo",
-    images: ["/placeholder-user.jpg", "/placeholder.jpg"],
-    description: "Award-winning realism artist with 12+ years creating lifelike portraits and detailed artwork.",
-  },
-  {
-    id: "7",
-    name: "Electric Canvas",
-    type: "shop",
-    address: "654 Market Street",
-    city: "San Francisco",
-    state: "CA",
-    zipCode: "94104",
-    coordinates: [-122.4058, 37.7875],
-    rating: 4.4,
-    reviewCount: 87,
-    specialties: ["Neo-Traditional", "Color Work", "Custom Designs"],
-    priceRange: "medium",
-    isOpen: true,
-    hours: {
-      monday: "Closed",
-      tuesday: "12:00 PM - 8:00 PM",
-      wednesday: "12:00 PM - 8:00 PM",
-      thursday: "12:00 PM - 8:00 PM",
-      friday: "12:00 PM - 9:00 PM",
-      saturday: "11:00 AM - 9:00 PM",
-      sunday: "1:00 PM - 6:00 PM",
-    },
-    phone: "(415) 555-0129",
-    email: "info@electriccanvas.com",
-    website: "https://electriccanvas.com",
-    instagram: "@electriccanvassf",
-    images: ["/placeholder.jpg", "/abstract-geometric-shapes.png"],
-    description: "Modern tattoo studio focusing on vibrant neo-traditional and custom artistic designs.",
-    artists: ["Riley Park", "Jordan Smith"],
-  },
-  {
-    id: "8",
-    name: "Jordan Smith",
-    type: "artist",
-    address: "987 Venice Beach",
-    city: "Los Angeles",
-    state: "CA",
-    zipCode: "90291",
-    coordinates: [-118.4694, 33.985],
-    rating: 4.7,
-    reviewCount: 76,
-    specialties: ["Geometric", "Dotwork", "Sacred Geometry"],
-    priceRange: "medium",
-    isOpen: true,
-    hours: {
-      monday: "Closed",
-      tuesday: "Closed",
-      wednesday: "2:00 PM - 9:00 PM",
-      thursday: "2:00 PM - 9:00 PM",
-      friday: "2:00 PM - 10:00 PM",
-      saturday: "12:00 PM - 10:00 PM",
-      sunday: "12:00 PM - 8:00 PM",
-    },
-    phone: "(310) 555-0130",
-    email: "jordan@example.com",
-    instagram: "@jordansmithgeometric",
-    images: ["/placeholder-user.jpg", "/abstract-geometric-shapes.png"],
-    description: "Precision geometric tattoos and sacred geometry designs with mathematical perfection.",
-  },
 ]
+
+// Export functions
+export async function getArtistById(id: string): Promise<Artist | undefined> {
+  await new Promise((resolve) => setTimeout(resolve, 200))
+  return artists.find((artist) => artist.id === id)
+}
+
+export async function getShopById(id: string): Promise<Shop | undefined> {
+  await new Promise((resolve) => setTimeout(resolve, 200))
+  return shops.find((shop) => shop.id === id)
+}
+
+export async function getArtistsByIds(ids: string[]): Promise<Artist[]> {
+  await new Promise((resolve) => setTimeout(resolve, 200))
+  return artists.filter((artist) => ids.includes(artist.id))
+}
+
+export async function getShops(): Promise<Shop[]> {
+  await new Promise((resolve) => setTimeout(resolve, 200))
+  return shops
+}
+
+export async function getArtists(): Promise<Artist[]> {
+  await new Promise((resolve) => setTimeout(resolve, 200))
+  return artists
+}
+
+export async function getUserData(): Promise<UserData> {
+  await new Promise((resolve) => setTimeout(resolve, 200))
+  return userData
+}
+
+export async function getArtistDashboardData(): Promise<ArtistDashboardData> {
+  await new Promise((resolve) => setTimeout(resolve, 200))
+  return artistDashboardData
+}
+
+export async function getArtistsByStyle(style: string): Promise<Artist[]> {
+  await new Promise((resolve) => setTimeout(resolve, 200))
+  // Case-insensitive matching for style
+  const normalizedStyle = style.toLowerCase().replace("-", " ")
+  return artists.filter((artist) => artist.specialties.some((s) => s.toLowerCase() === normalizedStyle))
+}
 
 export const getMapLocations = async (): Promise<MockLocation[]> => {
   // Simulate API delay
@@ -274,218 +430,19 @@ export const getMapLocations = async (): Promise<MockLocation[]> => {
   return mockLocations
 }
 
-// Existing mock data exports
-export const mockArtists = [
-  {
-    id: "1",
-    name: "Sarah Chen",
-    specialties: ["Fine Line", "Botanical", "Minimalist"],
-    location: "San Francisco, CA",
-    rating: 4.9,
-    reviewCount: 127,
-    image: "/female-tattoo-artist-portrait-1.png",
-    portfolio: ["/fine-line-tattoo-1.png", "/botanical-tattoo-1.png"],
-    priceRange: "$200-400/hour",
-    availability: "Available",
-    bio: "Specializing in delicate fine line work and botanical designs.",
-    experience: "8 years",
-    shop: "Ink Masters Studio",
-  },
-  {
-    id: "2",
-    name: "Marcus Johnson",
-    specialties: ["Traditional", "Japanese", "Bold Lines"],
-    location: "Los Angeles, CA",
-    rating: 4.8,
-    reviewCount: 203,
-    image: "/placeholder-user.jpg",
-    portfolio: ["/japanese-dragon-tattoo.png", "/placeholder.jpg"],
-    priceRange: "$250-450/hour",
-    availability: "Booked",
-    bio: "Master of traditional American and Japanese tattoo styles.",
-    experience: "12 years",
-    shop: "Golden State Ink",
-  },
-  {
-    id: "3",
-    name: "Luna Martinez",
-    specialties: ["Watercolor", "Abstract", "Floral"],
-    location: "San Francisco, CA",
-    rating: 4.7,
-    reviewCount: 156,
-    image: "/placeholder-user.jpg",
-    portfolio: ["/botanical-tattoo-1.png", "/placeholder.jpg"],
-    priceRange: "$180-350/hour",
-    availability: "Available",
-    bio: "Creating vibrant watercolor tattoos that flow like painted art.",
-    experience: "6 years",
-    shop: "Black Oak Tattoo",
-  },
-]
-
-export const mockShops = [
-  {
-    id: "1",
-    name: "Ink Masters Studio",
-    location: "San Francisco, CA",
-    rating: 4.8,
-    reviewCount: 127,
-    image: "/tattoo-shop-interior.png",
-    specialties: ["Traditional", "Japanese", "Realism"],
-    priceRange: "$200-500/hour",
-    artists: ["Sarah Chen", "Mike Rodriguez", "Alex Thompson"],
-    hours: "Mon-Sat: 10AM-8PM, Sun: 12PM-6PM",
-    phone: "(415) 555-0123",
-    address: "123 Mission Street, San Francisco, CA 94103",
-  },
-  {
-    id: "2",
-    name: "Black Oak Tattoo",
-    location: "San Francisco, CA",
-    rating: 4.7,
-    reviewCount: 203,
-    image: "/black-oak-logo.png",
-    specialties: ["Blackwork", "Geometric", "Traditional"],
-    priceRange: "$150-400/hour",
-    artists: ["Marcus Johnson", "Luna Martinez", "David Kim"],
-    hours: "Tue-Sat: 12PM-8PM, Sun: 12PM-6PM",
-    phone: "(415) 555-0125",
-    address: "456 Valencia Street, San Francisco, CA 94110",
-  },
-  {
-    id: "3",
-    name: "Golden State Ink",
-    location: "Los Angeles, CA",
-    rating: 4.9,
-    reviewCount: 298,
-    image: "/tattoo-shop-interior.png",
-    specialties: ["Realism", "Portraits", "Japanese"],
-    priceRange: "$250-600/hour",
-    artists: ["Carlos Rivera", "Emma Thompson", "Kenji Nakamura"],
-    hours: "Mon-Sat: 11AM-8PM, Sun: 12PM-7PM",
-    phone: "(323) 555-0127",
-    address: "321 Hollywood Boulevard, Los Angeles, CA 90028",
-  },
-]
-
 export const tattooStyles = [
-  {
-    name: "Realism",
-    description: "Photorealistic tattoos that capture incredible detail and lifelike imagery.",
-    heroImage: "/styles/heroes/realism-hero.png",
-    images: [
-      "/styles/realism-portrait-1.png",
-      "/styles/realism-animal-1.png",
-      "/styles/realism-nature-1.png",
-      "/styles/realism-portrait-2.png",
-      "/styles/realism-flower-1.png",
-      "/styles/realism-eye-1.png",
-      "/styles/realism-landscape-1.png",
-      "/styles/realism-animal-2.png",
-      "/styles/realism-portrait-3.png",
-    ],
-    artists: mockArtists.filter((artist) => artist.specialties.includes("Realism")),
-  },
-  {
-    name: "Traditional",
-    description: "Classic American traditional tattoos with bold lines and vibrant colors.",
-    heroImage: "/styles/heroes/traditional-hero.png",
-    images: [
-      "/styles/traditional-rose-1.png",
-      "/styles/traditional-anchor-1.png",
-      "/styles/traditional-eagle-1.png",
-      "/styles/traditional-skull-1.png",
-      "/styles/traditional-ship-1.png",
-      "/styles/traditional-dagger-1.png",
-      "/styles/traditional-heart-1.png",
-      "/styles/traditional-swallow-1.png",
-      "/styles/traditional-pin-up-1.png",
-    ],
-    artists: mockArtists.filter((artist) => artist.specialties.includes("Traditional")),
-  },
-  {
-    name: "Japanese",
-    description: "Traditional Japanese tattoo art featuring dragons, koi, and cherry blossoms.",
-    heroImage: "/styles/heroes/japanese-hero.png",
-    images: [
-      "/styles/japanese-dragon-1.png",
-      "/styles/japanese-koi-1.png",
-      "/styles/japanese-cherry-1.png",
-      "/styles/japanese-tiger-1.png",
-      "/styles/japanese-phoenix-1.png",
-      "/styles/japanese-wave-1.png",
-      "/styles/japanese-oni-1.png",
-      "/styles/japanese-samurai-1.png",
-      "/styles/japanese-lotus-1.png",
-    ],
-    artists: mockArtists.filter((artist) => artist.specialties.includes("Japanese")),
-  },
-  {
-    name: "Geometric",
-    description: "Precise geometric patterns and sacred geometry designs.",
-    heroImage: "/styles/heroes/geometric-hero.png",
-    images: [
-      "/styles/geometric-mandala-1.png",
-      "/styles/geometric-animal-1.png",
-      "/styles/geometric-sacred-1.png",
-      "/styles/geometric-abstract-1.png",
-      "/styles/geometric-flower-1.png",
-      "/styles/geometric-triangle-1.png",
-      "/styles/geometric-hexagon-1.png",
-      "/styles/geometric-spiral-1.png",
-      "/styles/geometric-crystal-1.png",
-    ],
-    artists: mockArtists.filter((artist) => artist.specialties.includes("Geometric")),
-  },
-  {
-    name: "Watercolor",
-    description: "Vibrant watercolor-style tattoos with flowing, painterly effects.",
-    heroImage: "/styles/heroes/watercolor-hero.png",
-    images: [
-      "/styles/watercolor-flower-1.png",
-      "/styles/watercolor-bird-1.png",
-      "/styles/watercolor-abstract-1.png",
-      "/styles/watercolor-butterfly-1.png",
-      "/styles/watercolor-tree-1.png",
-      "/styles/watercolor-splash-1.png",
-      "/styles/watercolor-feather-1.png",
-      "/styles/watercolor-galaxy-1.png",
-      "/styles/watercolor-ocean-1.png",
-    ],
-    artists: mockArtists.filter((artist) => artist.specialties.includes("Watercolor")),
-  },
-  {
-    name: "Blackwork",
-    description: "Bold black ink designs ranging from tribal to modern abstract patterns.",
-    heroImage: "/styles/heroes/blackwork-hero.png",
-    images: [
-      "/styles/blackwork-tribal-1.png",
-      "/styles/blackwork-abstract-1.png",
-      "/styles/blackwork-ornamental-1.png",
-      "/styles/blackwork-botanical-1.png",
-      "/styles/blackwork-geometric-1.png",
-      "/styles/blackwork-mandala-1.png",
-      "/styles/blackwork-animal-1.png",
-      "/styles/blackwork-pattern-1.png",
-      "/styles/blackwork-minimalist-1.png",
-    ],
-    artists: mockArtists.filter((artist) => artist.specialties.includes("Blackwork")),
-  },
-  {
-    name: "Fine Line",
-    description: "Delicate, precise line work creating minimalist and detailed designs.",
-    heroImage: "/styles/heroes/fine-line-hero.png",
-    images: [
-      "/styles/fine-line-flower-1.png",
-      "/styles/fine-line-minimalist-1.png",
-      "/styles/fine-line-script-1.png",
-      "/styles/fine-line-botanical-1.png",
-      "/styles/fine-line-geometric-1.png",
-      "/styles/fine-line-animal-1.png",
-      "/styles/fine-line-constellation-1.png",
-      "/styles/fine-line-portrait-1.png",
-      "/styles/fine-line-abstract-1.png",
-    ],
-    artists: mockArtists.filter((artist) => artist.specialties.includes("Fine Line")),
-  },
+  "Traditional",
+  "Realism",
+  "Japanese",
+  "Geometric",
+  "Watercolor",
+  "Blackwork",
+  "Fine Line",
+  "Neo-Traditional",
+  "Tribal",
+  "Minimalist",
+  "Portrait",
+  "Abstract",
+  "Botanical",
+  "Cover-up",
 ]
