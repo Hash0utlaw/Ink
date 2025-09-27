@@ -1,24 +1,24 @@
 "use client"
 
 import { useEffect, useRef, useState, useCallback } from "react"
-import mapboxgl from "mapbox-gl"
 import { type MapboxLocation, defaultMapConfig, mapStyles } from "@/lib/mapbox"
 import { createRoot } from "react-dom/client"
 import { MapMarkerPopup } from "./map-marker-popup"
-import "mapbox-gl/dist/mapbox-gl.css"
 
 interface MapboxMapProps {
+  accessToken: string
   locations: MapboxLocation[]
   selectedLocation: MapboxLocation | null
   onLocationSelect: (location: MapboxLocation | null) => void
   center?: [number, number]
   zoom?: number
   style?: keyof typeof mapStyles
-  onMapLoad?: (map: mapboxgl.Map) => void
+  onMapLoad?: (map: any) => void
   className?: string
 }
 
 export function MapboxMap({
+  accessToken,
   locations,
   selectedLocation,
   onLocationSelect,
@@ -29,15 +29,47 @@ export function MapboxMap({
   className = "",
 }: MapboxMapProps) {
   const mapContainer = useRef<HTMLDivElement>(null)
-  const map = useRef<mapboxgl.Map | null>(null)
-  const markers = useRef<{ [key: string]: mapboxgl.Marker }>({})
+  const map = useRef<any>(null)
+  const markers = useRef<{ [key: string]: any }>({})
   const [mapLoaded, setMapLoaded] = useState(false)
+  const [mapboxLoaded, setMapboxLoaded] = useState(false)
+
+  useEffect(() => {
+    const loadMapbox = () => {
+      // Check if already loaded
+      if (window.mapboxgl) {
+        setMapboxLoaded(true)
+        return
+      }
+
+      // Load CSS
+      const cssLink = document.createElement("link")
+      cssLink.rel = "stylesheet"
+      cssLink.href = "https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.css"
+      document.head.appendChild(cssLink)
+
+      // Load JS
+      const script = document.createElement("script")
+      script.src = "https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.js"
+      script.onload = () => {
+        setMapboxLoaded(true)
+      }
+      script.onerror = (error) => {
+        console.error("Failed to load Mapbox GL:", error)
+      }
+      document.head.appendChild(script)
+    }
+
+    loadMapbox()
+  }, [])
 
   // Initialize map
   useEffect(() => {
-    if (!mapContainer.current || map.current) return
+    if (!mapContainer.current || map.current || !accessToken || !mapboxLoaded || !window.mapboxgl) return
 
-    map.current = new mapboxgl.Map({
+    window.mapboxgl.accessToken = accessToken
+
+    map.current = new window.mapboxgl.Map({
       container: mapContainer.current,
       style: mapStyles[style],
       center,
@@ -46,11 +78,11 @@ export function MapboxMap({
     })
 
     // Add navigation controls
-    map.current.addControl(new mapboxgl.NavigationControl(), "top-right")
+    map.current.addControl(new window.mapboxgl.NavigationControl(), "top-right")
 
     // Add geolocate control
     map.current.addControl(
-      new mapboxgl.GeolocateControl({
+      new window.mapboxgl.GeolocateControl({
         positionOptions: {
           enableHighAccuracy: true,
         },
@@ -62,7 +94,7 @@ export function MapboxMap({
 
     // Add attribution
     map.current.addControl(
-      new mapboxgl.AttributionControl({
+      new window.mapboxgl.AttributionControl({
         customAttribution: "© TattooMaps 2024",
       }),
       "bottom-right",
@@ -79,11 +111,11 @@ export function MapboxMap({
         map.current = null
       }
     }
-  }, [])
+  }, [accessToken, style, center, zoom, onMapLoad, mapboxLoaded])
 
   // Update map style
   useEffect(() => {
-    if (map.current && mapLoaded) {
+    if (map.current && mapLoaded && window.mapboxgl) {
       map.current.setStyle(mapStyles[style])
     }
   }, [style, mapLoaded])
@@ -144,7 +176,7 @@ export function MapboxMap({
 
   // Update markers
   useEffect(() => {
-    if (!map.current || !mapLoaded) return
+    if (!map.current || !mapLoaded || !window.mapboxgl) return
 
     // Clear existing markers
     Object.values(markers.current).forEach((marker) => marker.remove())
@@ -154,14 +186,14 @@ export function MapboxMap({
     locations.forEach((location) => {
       const el = createMarkerElement(location)
 
-      const marker = new mapboxgl.Marker(el).setLngLat(location.coordinates).addTo(map.current!)
+      const marker = new window.mapboxgl.Marker(el).setLngLat(location.coordinates).addTo(map.current!)
 
       // Create popup
       const popupContainer = document.createElement("div")
       const root = createRoot(popupContainer)
       root.render(<MapMarkerPopup location={location} />)
 
-      const popup = new mapboxgl.Popup({
+      const popup = new window.mapboxgl.Popup({
         offset: 25,
         closeButton: false,
         closeOnClick: false,
@@ -206,9 +238,9 @@ export function MapboxMap({
 
   // Fit bounds to show all locations
   const fitBounds = useCallback(() => {
-    if (!map.current || !mapLoaded || locations.length === 0) return
+    if (!map.current || !mapLoaded || locations.length === 0 || !window.mapboxgl) return
 
-    const bounds = new mapboxgl.LngLatBounds()
+    const bounds = new window.mapboxgl.LngLatBounds()
     locations.forEach((location) => {
       bounds.extend(location.coordinates)
     })
@@ -234,11 +266,11 @@ export function MapboxMap({
       <div ref={mapContainer} className="w-full h-full" />
 
       {/* Loading overlay */}
-      {!mapLoaded && (
+      {(!mapLoaded || !mapboxLoaded) && (
         <div className="absolute inset-0 bg-gray-100 flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-burgundy-500 mx-auto mb-2"></div>
-            <p className="text-sm text-gray-600">Loading map...</p>
+            <p className="text-sm text-gray-600">{!mapboxLoaded ? "Loading Mapbox..." : "Loading map..."}</p>
           </div>
         </div>
       )}
@@ -248,10 +280,17 @@ export function MapboxMap({
         <button
           onClick={fitBounds}
           className="bg-white hover:bg-gray-50 border border-gray-300 rounded-md px-3 py-2 text-sm font-medium text-gray-700 shadow-sm transition-colors"
+          disabled={!mapLoaded || !mapboxLoaded}
         >
           Show All
         </button>
       </div>
     </div>
   )
+}
+
+declare global {
+  interface Window {
+    mapboxgl: any
+  }
 }

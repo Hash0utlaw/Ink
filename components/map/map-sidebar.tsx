@@ -1,15 +1,17 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
-import { Search, MapPin, Filter, ChevronLeft, ChevronRight } from "lucide-react"
+import { Search, MapPin, Filter, ChevronLeft, ChevronRight, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { Card, CardContent } from "@/components/ui/card"
+import { Separator } from "@/components/ui/separator"
 import { MapFilters } from "./map-filters"
 import type { MapboxLocation } from "@/lib/mapbox"
+import { Star } from "lucide-react"
 
 interface MapSidebarProps {
   isOpen: boolean
@@ -55,7 +57,7 @@ export function MapSidebar({
         variant="outline"
         size="sm"
         onClick={onToggle}
-        className="absolute top-4 left-4 z-40 bg-white hover:bg-gray-50"
+        className="absolute top-4 left-4 z-40 bg-white hover:bg-gray-50 shadow-lg"
       >
         {isOpen ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
       </Button>
@@ -63,15 +65,15 @@ export function MapSidebar({
       {/* Sidebar */}
       <div
         className={`
-        bg-white border-r border-gray-200 flex flex-col transition-all duration-300 z-30
-        ${isOpen ? "w-80" : "w-0"}
+        bg-white border-r border-gray-200 flex flex-col transition-all duration-300 z-30 shadow-lg
+        ${isOpen ? "w-96" : "w-0"}
         ${isOpen ? "opacity-100" : "opacity-0 pointer-events-none"}
       `}
       >
         {/* Header */}
-        <div className="p-4 border-b border-gray-200">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">Find Locations</h2>
+        <div className="p-6 border-b border-gray-200">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold text-gray-900">Find Locations</h2>
             <Button
               variant="ghost"
               size="sm"
@@ -83,7 +85,7 @@ export function MapSidebar({
           </div>
 
           {/* Search */}
-          <form onSubmit={handleSearch} className="space-y-3">
+          <form onSubmit={handleSearch} className="space-y-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input
@@ -91,16 +93,10 @@ export function MapSidebar({
                 placeholder="Search location, artist, or style..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
+                className="pl-10 h-12"
               />
             </div>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={onCurrentLocation}
-              className="w-full bg-transparent"
-            >
+            <Button type="button" variant="outline" onClick={onCurrentLocation} className="w-full h-12 bg-transparent">
               <MapPin className="w-4 h-4 mr-2" />
               Use Current Location
             </Button>
@@ -108,7 +104,7 @@ export function MapSidebar({
 
           {/* Filters */}
           {showFilters && (
-            <div className="mt-4 pt-4 border-t border-gray-200">
+            <div className="mt-6 pt-6 border-t border-gray-200">
               <MapFilters filters={filters} onFilterChange={onFilterChange} />
             </div>
           )}
@@ -116,10 +112,17 @@ export function MapSidebar({
 
         {/* Results */}
         <div className="flex-1 flex flex-col">
-          <div className="p-4 border-b border-gray-200">
+          <div className="p-6 border-b border-gray-200">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">
-                {loading ? "Loading..." : `${locations.length} locations found`}
+              <span className="text-sm font-medium text-gray-600">
+                {loading ? (
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Loading...
+                  </div>
+                ) : (
+                  `${locations.length} locations found`
+                )}
               </span>
               {filters.searchQuery && (
                 <Button
@@ -138,101 +141,107 @@ export function MapSidebar({
           </div>
 
           <ScrollArea className="flex-1">
-            <div className="p-4 space-y-3">
+            <div className="p-6 space-y-4">
               {loading ? (
                 // Loading skeleton
                 Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className="animate-pulse">
-                    <div className="flex items-start gap-3 p-3 rounded-lg border">
-                      <div className="w-12 h-12 bg-gray-200 rounded-lg"></div>
-                      <div className="flex-1 space-y-2">
-                        <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                        <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                        <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+                  <Card key={i} className="animate-pulse">
+                    <CardContent className="p-4">
+                      <div className="flex items-start gap-4">
+                        <div className="w-16 h-16 bg-gray-200 rounded-lg"></div>
+                        <div className="flex-1 space-y-2">
+                          <div className="h-5 bg-gray-200 rounded w-3/4"></div>
+                          <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                          <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
+                    </CardContent>
+                  </Card>
                 ))
               ) : locations.length === 0 ? (
-                <div className="text-center py-8">
-                  <div className="text-gray-400 mb-2">
-                    <MapPin className="w-8 h-8 mx-auto" />
+                <div className="text-center py-12">
+                  <div className="text-gray-400 mb-4">
+                    <MapPin className="w-12 h-12 mx-auto" />
                   </div>
-                  <p className="text-sm text-gray-600">No locations found</p>
-                  <p className="text-xs text-gray-500 mt-1">Try adjusting your filters</p>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No locations found</h3>
+                  <p className="text-gray-500">Try adjusting your filters or search terms</p>
                 </div>
               ) : (
                 locations.map((location) => (
-                  <div
+                  <Card
                     key={location.id}
                     onClick={() => handleLocationClick(location)}
                     className={`
-                    cursor-pointer p-3 rounded-lg border transition-all duration-200
+                    cursor-pointer transition-all duration-200 hover:shadow-md
                     ${
                       selectedLocation?.id === location.id
-                        ? "border-burgundy-500 bg-burgundy-50"
-                        : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                        ? "ring-2 ring-burgundy-500 bg-burgundy-50"
+                        : "hover:bg-gray-50"
                     }
                   `}
                   >
-                    <div className="flex items-start gap-3">
-                      <img
-                        src={location.image || "/placeholder.svg"}
-                        alt={location.name}
-                        className="w-12 h-12 rounded-lg object-cover"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-medium text-gray-900 truncate">{location.name}</h3>
-                          <Badge variant={location.type === "artist" ? "default" : "secondary"} className="text-xs">
-                            {location.type}
-                          </Badge>
-                        </div>
-                        <div className="flex items-center gap-1 mb-1">
-                          <div className="flex items-center">
-                            {Array.from({ length: 5 }).map((_, i) => (
-                              <div
-                                key={i}
-                                className={`w-3 h-3 ${
-                                  i < Math.floor(location.rating) ? "text-yellow-400" : "text-gray-300"
-                                }`}
-                              >
-                                ★
-                              </div>
-                            ))}
+                    <CardContent className="p-4">
+                      <div className="flex items-start gap-4">
+                        <img
+                          src={location.image || "/placeholder.svg?height=64&width=64&query=tattoo shop"}
+                          alt={location.name}
+                          className="w-16 h-16 rounded-lg object-cover"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-2">
+                            <h3 className="font-semibold text-gray-900 truncate">{location.name}</h3>
+                            <Badge variant={location.type === "artist" ? "default" : "secondary"}>
+                              {location.type}
+                            </Badge>
                           </div>
-                          <span className="text-xs text-gray-600">
-                            {location.rating} ({location.reviewCount})
-                          </span>
-                        </div>
-                        <p className="text-xs text-gray-600 truncate mb-1">{location.address}</p>
-                        <div className="flex items-center justify-between">
-                          <div className="flex flex-wrap gap-1">
-                            {location.specialties.slice(0, 2).map((specialty) => (
-                              <span key={specialty} className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
-                                {specialty}
+                          <div className="flex items-center gap-1 mb-2">
+                            <div className="flex items-center">
+                              {Array.from({ length: 5 }).map((_, i) => (
+                                <Star
+                                  key={i}
+                                  className={`w-4 h-4 ${
+                                    i < Math.floor(location.rating)
+                                      ? "fill-yellow-400 text-yellow-400"
+                                      : "text-gray-300"
+                                  }`}
+                                />
+                              ))}
+                            </div>
+                            <span className="text-sm font-medium">{location.rating}</span>
+                            <span className="text-sm text-gray-500">({location.reviewCount})</span>
+                          </div>
+                          <p className="text-sm text-gray-600 truncate mb-2">{location.address}</p>
+                          <div className="flex items-center justify-between">
+                            <div className="flex flex-wrap gap-1">
+                              {location.specialties.slice(0, 2).map((specialty) => (
+                                <Badge key={specialty} variant="outline" className="text-xs">
+                                  {specialty}
+                                </Badge>
+                              ))}
+                              {location.specialties.length > 2 && (
+                                <span className="text-xs text-gray-500">+{location.specialties.length - 2}</span>
+                              )}
+                            </div>
+                            {location.distance && (
+                              <span className="text-xs text-gray-500">
+                                {location.distance < 1
+                                  ? `${(location.distance * 5280).toFixed(0)} ft`
+                                  : `${location.distance.toFixed(1)} mi`}
                               </span>
-                            ))}
-                            {location.specialties.length > 2 && (
-                              <span className="text-xs text-gray-500">+{location.specialties.length - 2}</span>
                             )}
                           </div>
-                          {location.distance && (
-                            <span className="text-xs text-gray-500">
-                              {location.distance < 1
-                                ? `${(location.distance * 5280).toFixed(0)} ft`
-                                : `${location.distance.toFixed(1)} mi`}
+                          <Separator className="my-2" />
+                          <div className="flex items-center justify-between">
+                            <span
+                              className={`text-sm font-medium ${location.isOpen ? "text-green-600" : "text-red-600"}`}
+                            >
+                              {location.isOpen ? "Open Now" : "Closed"}
                             </span>
-                          )}
-                        </div>
-                        <div className="mt-2">
-                          <span className={`text-xs ${location.isOpen ? "text-green-600" : "text-red-600"}`}>
-                            {location.isOpen ? "Open Now" : "Closed"}
-                          </span>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </div>
+                    </CardContent>
+                  </Card>
                 ))
               )}
             </div>

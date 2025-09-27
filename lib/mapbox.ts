@@ -21,7 +21,7 @@ export interface MapboxConfig {
 }
 
 export const mapboxConfig: MapboxConfig = {
-  accessToken: process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || "",
+  accessToken: "pk.eyJ1IjoiaGFzaG91dGxhdyIsImEiOiJjbWcycjNudG0xMXFkMnJxMmtlc2E4aDUxIn0.l5XDuDhexleDLffaG2czKg",
   style: "mapbox://styles/mapbox/streets-v12",
   center: [-122.4194, 37.7749], // San Francisco
   zoom: 12,
@@ -44,54 +44,81 @@ export function calculateDistance(coord1: [number, number], coord2: [number, num
   return R * c
 }
 
-export function geocodeAddress(address: string): Promise<[number, number] | null> {
-  // Mock geocoding - in real implementation, this would call Mapbox Geocoding API
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      // Mock coordinates for common cities
-      const mockCoordinates: Record<string, [number, number]> = {
-        "san francisco": [-122.4194, 37.7749],
-        "los angeles": [-118.2437, 34.0522],
-        "new york": [-74.006, 40.7128],
-        chicago: [-87.6298, 41.8781],
-        miami: [-80.1918, 25.7617],
-        seattle: [-122.3321, 47.6062],
-        austin: [-97.7431, 30.2672],
-        denver: [-104.9903, 39.7392],
-      }
+export async function geocodeAddress(address: string): Promise<[number, number] | null> {
+  try {
+    const response = await fetch(
+      `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(address)}.json?access_token=${mapboxConfig.accessToken}&limit=1`,
+    )
 
-      const normalizedAddress = address.toLowerCase()
-      for (const [city, coords] of Object.entries(mockCoordinates)) {
-        if (normalizedAddress.includes(city)) {
-          resolve(coords)
-          return
-        }
-      }
+    if (!response.ok) {
+      throw new Error("Geocoding request failed")
+    }
 
-      // Default to San Francisco if no match
-      resolve([-122.4194, 37.7749])
-    }, 300)
-  })
+    const data = await response.json()
+
+    if (data.features && data.features.length > 0) {
+      const [lng, lat] = data.features[0].center
+      return [lng, lat]
+    }
+
+    return null
+  } catch (error) {
+    console.warn("Geocoding error:", error)
+    // Fallback to mock coordinates for common cities
+    const mockCoordinates: Record<string, [number, number]> = {
+      "san francisco": [-122.4194, 37.7749],
+      "los angeles": [-118.2437, 34.0522],
+      "new york": [-74.006, 40.7128],
+      chicago: [-87.6298, 41.8781],
+      miami: [-80.1918, 25.7617],
+      seattle: [-122.3321, 47.6062],
+      austin: [-97.7431, 30.2672],
+      denver: [-104.9903, 39.7392],
+    }
+
+    const normalizedAddress = address.toLowerCase()
+    for (const [city, coords] of Object.entries(mockCoordinates)) {
+      if (normalizedAddress.includes(city)) {
+        return coords
+      }
+    }
+
+    return [-122.4194, 37.7749] // Default to San Francisco
+  }
 }
 
-export function reverseGeocode(coordinates: [number, number]): Promise<string> {
-  // Mock reverse geocoding
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const [lng, lat] = coordinates
+export async function reverseGeocode(coordinates: [number, number]): Promise<string> {
+  try {
+    const [lng, lat] = coordinates
+    const response = await fetch(
+      `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${mapboxConfig.accessToken}&limit=1`,
+    )
 
-      // Simple mock based on coordinates
-      if (Math.abs(lng + 122.4194) < 0.1 && Math.abs(lat - 37.7749) < 0.1) {
-        resolve("San Francisco, CA")
-      } else if (Math.abs(lng + 118.2437) < 0.1 && Math.abs(lat - 34.0522) < 0.1) {
-        resolve("Los Angeles, CA")
-      } else if (Math.abs(lng + 74.006) < 0.1 && Math.abs(lat - 40.7128) < 0.1) {
-        resolve("New York, NY")
-      } else {
-        resolve("Unknown Location")
-      }
-    }, 300)
-  })
+    if (!response.ok) {
+      throw new Error("Reverse geocoding request failed")
+    }
+
+    const data = await response.json()
+
+    if (data.features && data.features.length > 0) {
+      return data.features[0].place_name
+    }
+
+    return "Unknown Location"
+  } catch (error) {
+    console.warn("Reverse geocoding error:", error)
+    // Fallback to simple mock based on coordinates
+    const [lng, lat] = coordinates
+    if (Math.abs(lng + 122.4194) < 0.1 && Math.abs(lat - 37.7749) < 0.1) {
+      return "San Francisco, CA"
+    } else if (Math.abs(lng + 118.2437) < 0.1 && Math.abs(lat - 34.0522) < 0.1) {
+      return "Los Angeles, CA"
+    } else if (Math.abs(lng + 74.006) < 0.1 && Math.abs(lat - 40.7128) < 0.1) {
+      return "New York, NY"
+    } else {
+      return "Unknown Location"
+    }
+  }
 }
 
 export function getCurrentLocation(): Promise<[number, number]> {
@@ -118,3 +145,15 @@ export function getCurrentLocation(): Promise<[number, number]> {
     )
   })
 }
+
+export const defaultMapConfig = {
+  center: [-122.4194, 37.7749] as [number, number], // San Francisco
+  zoom: 12,
+}
+
+export const mapStyles = {
+  streets: "mapbox://styles/mapbox/streets-v12",
+  satellite: "mapbox://styles/mapbox/satellite-v9",
+  light: "mapbox://styles/mapbox/light-v11",
+  dark: "mapbox://styles/mapbox/dark-v11",
+} as const

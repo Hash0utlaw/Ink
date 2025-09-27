@@ -1,12 +1,12 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { InteractiveMap } from "./interactive-map"
+import { MapboxMap } from "./mapbox-map"
 import { MapSidebar } from "./map-sidebar"
 import { LocationDetails } from "./location-details"
 import { mockLocations, getMapLocations } from "@/lib/mock-data"
 import type { MapboxLocation } from "@/lib/mapbox"
-import { calculateDistance, getCurrentLocation, geocodeAddress } from "@/lib/mapbox"
+import { calculateDistance, getCurrentLocation, geocodeAddress, mapboxConfig } from "@/lib/mapbox"
 
 interface MapFilters {
   locationType: "all" | "artist" | "shop"
@@ -202,13 +202,14 @@ export function MapInterface() {
 
       {/* Map */}
       <div className="flex-1 relative">
-        <InteractiveMap
+        <MapboxMap
+          accessToken={mapboxConfig.accessToken}
           locations={filteredLocations}
           selectedLocation={selectedLocation}
           onLocationSelect={handleLocationSelect}
           center={mapCenter}
           zoom={mapZoom}
-          style={mapStyle}
+          style={mapStyle as keyof typeof import("@/lib/mapbox").mapStyles}
           className="w-full h-full"
         />
 
@@ -217,7 +218,7 @@ export function MapInterface() {
           <select
             value={mapStyle}
             onChange={(e) => handleMapStyleChange(e.target.value)}
-            className="px-3 py-2 bg-white border border-gray-300 rounded-lg shadow-sm text-sm"
+            className="px-3 py-2 bg-white border border-gray-300 rounded-lg shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-burgundy-500 focus:border-burgundy-500"
           >
             <option value="streets">Streets</option>
             <option value="satellite">Satellite</option>
@@ -227,7 +228,13 @@ export function MapInterface() {
         </div>
 
         {/* Location Details Modal */}
-        {selectedLocation && <LocationDetails location={selectedLocation} onClose={() => setSelectedLocation(null)} />}
+        {selectedLocation && (
+          <LocationDetails
+            location={selectedLocation}
+            isOpen={!!selectedLocation}
+            onClose={() => setSelectedLocation(null)}
+          />
+        )}
       </div>
     </div>
   )
