@@ -1,8 +1,8 @@
+"use client"
+
 import Link from "next/link"
-import Image from "next/image"
-import { createClient } from "@/utils/supabase/server"
 import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,150 +11,119 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Menu, LayoutDashboard, LogOut } from "lucide-react"
-import { signout } from "@/app/(auth)/actions"
+import { MapPin, User, Settings, LogOut, Map } from "lucide-react"
+import { useState, useEffect } from "react"
 
-// ---------- Helper component ----------
-const UserNav = ({ userEmail }: { userEmail: string }) => (
-  <DropdownMenu>
-    <DropdownMenuTrigger asChild>
-      <Button variant="ghost" className="relative h-9 w-9 rounded-full">
-        <Avatar className="h-9 w-9">
-          <AvatarFallback className="bg-accent text-accent-foreground">{userEmail?.[0].toUpperCase()}</AvatarFallback>
-        </Avatar>
-      </Button>
-    </DropdownMenuTrigger>
+export function Header() {
+  const [user, setUser] = useState<any>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
-    <DropdownMenuContent className="w-56" align="end" forceMount>
-      <DropdownMenuLabel className="font-normal">
-        <div className="flex flex-col space-y-1">
-          <p className="text-sm font-medium leading-none">Logged in as</p>
-          <p className="text-xs leading-none text-muted-foreground truncate">{userEmail}</p>
-        </div>
-      </DropdownMenuLabel>
-      <DropdownMenuSeparator />
-      <DropdownMenuItem asChild>
-        <Link href="/dashboard">
-          <LayoutDashboard className="mr-2 h-4 w-4" />
-          Dashboard
-        </Link>
-      </DropdownMenuItem>
-      <DropdownMenuItem asChild>
-        <Link href="/artist-dashboard">
-          <LayoutDashboard className="mr-2 h-4 w-4" />
-          Artist Dashboard
-        </Link>
-      </DropdownMenuItem>
-      <DropdownMenuSeparator />
-      <form action={signout}>
-        <DropdownMenuItem asChild>
-          <button className="w-full">
-            <LogOut className="mr-2 h-4 w-4" />
-            Log out
-          </button>
-        </DropdownMenuItem>
-      </form>
-    </DropdownMenuContent>
-  </DropdownMenu>
-)
+  useEffect(() => {
+    // Simulate auth check - replace with actual Supabase auth
+    const checkAuth = async () => {
+      try {
+        // const { data: { user } } = await supabase.auth.getUser()
+        // setUser(user)
+        setUser(null) // Temporarily set to null until auth is fixed
+      } catch (error) {
+        console.error("Auth error:", error)
+        setUser(null)
+      } finally {
+        setIsLoading(false)
+      }
+    }
 
-// ---------- Main header ----------
-export async function Header() {
-  const supabase = createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+    checkAuth()
+  }, [])
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-secondary/95 backdrop-blur">
-      <div className="container flex h-16 max-w-screen-2xl items-center">
-        {/* Left – logo & primary nav */}
-        <div className="mr-4 hidden md:flex">
-          <Link href="/" className="mr-6 flex items-center space-x-2">
-            <Image src="/logo.png" alt="Inkfinder Logo" width={28} height={28} />
-            <span className="hidden font-extrabold tracking-wide sm:inline-block">Inkfinder</span>
+    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container flex h-16 items-center justify-between">
+        {/* Logo */}
+        <Link href="/" className="flex items-center space-x-2">
+          <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
+            <MapPin className="w-5 h-5 text-accent-foreground" />
+          </div>
+          <span className="text-xl font-bold bg-gradient-to-r from-accent to-accent/80 bg-clip-text text-transparent">
+            TattooMaps
+          </span>
+        </Link>
+
+        {/* Navigation */}
+        <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
+          <Link
+            href="/map"
+            className="flex items-center gap-2 text-foreground/80 hover:text-foreground transition-colors"
+          >
+            <Map className="w-4 h-4" />
+            Explore Map
           </Link>
+          <Link href="/artists" className="text-foreground/80 hover:text-foreground transition-colors">
+            Find Artists
+          </Link>
+          <Link href="/shops" className="text-foreground/80 hover:text-foreground transition-colors">
+            Find Shops
+          </Link>
+          <Link href="/generator" className="text-foreground/80 hover:text-foreground transition-colors">
+            AI Generator
+          </Link>
+          <Link href="/styles" className="text-foreground/80 hover:text-foreground transition-colors">
+            Styles
+          </Link>
+        </nav>
 
-          <nav className="flex items-center gap-6 text-sm font-medium">
-            <Link href="/generator" className="text-foreground/80 hover:text-foreground">
-              AI Generator
-            </Link>
-            <Link href="/artists" className="text-foreground/80 hover:text-foreground">
-              Artists
-            </Link>
-            <Link href="/shops" className="text-foreground/80 hover:text-foreground">
-              Shops
-            </Link>
-            <Link href="/styles" className="text-foreground/80 hover:text-foreground">
-              Styles
-            </Link>
-          </nav>
-        </div>
-
-        {/* Center spacer / future search */}
-        <div className="flex flex-1 items-center justify-between md:justify-end">
-          <div className="w-full flex-1 md:w-auto md:flex-none" />
-          {/* Desktop auth controls */}
-          <nav className="hidden md:flex items-center gap-2">
-            {user ? (
-              <UserNav userEmail={user.email ?? ""} />
-            ) : (
-              <>
-                <Button variant="ghost" asChild>
-                  <Link href="/login">Log In</Link>
+        {/* Auth Section */}
+        <div className="flex items-center space-x-4">
+          {isLoading ? (
+            <div className="w-8 h-8 rounded-full bg-muted animate-pulse" />
+          ) : user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={user.user_metadata?.avatar_url || "/placeholder.svg"} alt={user.email} />
+                    <AvatarFallback>{user.email?.charAt(0).toUpperCase()}</AvatarFallback>
+                  </Avatar>
                 </Button>
-                <Button className="bg-accent text-accent-foreground hover:bg-accent/90" asChild>
-                  <Link href="/signup">Sign Up</Link>
-                </Button>
-              </>
-            )}
-          </nav>
-        </div>
-
-        {/* Mobile menu */}
-        <Sheet>
-          <SheetTrigger asChild>
-            <Button variant="ghost" className="md:hidden">
-              <Menu className="h-5 w-5" />
-              <span className="sr-only">Toggle Menu</span>
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="right" className="w-[300px] sm:w-[400px]">
-            <nav className="flex flex-col gap-4 text-lg font-medium">
-              <Link href="/generator">AI Generator</Link>
-              <Link href="/artists">Artists</Link>
-              <Link href="/shops">Shops</Link>
-              <Link href="/styles">Styles</Link>
-            </nav>
-            <div className="mt-6 pt-6 border-t border-border">
-              {user ? (
-                <div className="flex flex-col gap-2">
-                  <Button variant="ghost" asChild>
-                    <Link href="/dashboard">Dashboard</Link>
-                  </Button>
-                  <form action={signout}>
-                    <Button
-                      variant="ghost"
-                      className="justify-start text-red-500 hover:text-red-500 hover:bg-red-500/10"
-                    >
-                      Log Out
-                    </Button>
-                  </form>
-                </div>
-              ) : (
-                <div className="flex flex-col gap-2">
-                  <Button variant="ghost" asChild>
-                    <Link href="/login">Log In</Link>
-                  </Button>
-                  <Button className="bg-accent text-accent-foreground hover:bg-accent/90" asChild>
-                    <Link href="/signup">Sign Up</Link>
-                  </Button>
-                </div>
-              )}
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56" align="end" forceMount>
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">{user.user_metadata?.full_name || "User"}</p>
+                    <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href="/dashboard" className="flex items-center">
+                    <User className="mr-2 h-4 w-4" />
+                    <span>Dashboard</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/dashboard/profile" className="flex items-center">
+                    <Settings className="mr-2 h-4 w-4" />
+                    <span>Settings</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="flex items-center">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Log out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <div className="flex items-center space-x-2">
+              <Button variant="ghost" asChild>
+                <Link href="/login">Log in</Link>
+              </Button>
+              <Button asChild>
+                <Link href="/signup">Sign up</Link>
+              </Button>
             </div>
-          </SheetContent>
-        </Sheet>
+          )}
+        </div>
       </div>
     </header>
   )

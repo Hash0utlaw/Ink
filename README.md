@@ -1,53 +1,54 @@
-# InkFinder 🎨
+# TattooMaps 🗺️
 
-A comprehensive platform connecting tattoo enthusiasts with talented artists and reputable shops worldwide.
+A comprehensive platform connecting tattoo enthusiasts with talented artists and reputable shops worldwide through location-based discovery.
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/misfitderbysocietygmailcoms-projects/v0-ink-finder)
+[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/misfitderbysocietygmailcoms-projects/v0-tattoo-maps)
 [![Built with Next.js](https://img.shields.io/badge/Built%20with-Next.js-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
 [![Powered by Supabase](https://img.shields.io/badge/Powered%20by-Supabase-green?style=for-the-badge&logo=supabase)](https://supabase.com/)
 
 ## 🌟 Features
 
 ### For Tattoo Enthusiasts
+- **Interactive Map Discovery**: Find artists and shops on an interactive map interface
 - **AI Tattoo Generator**: Create unique tattoo designs using advanced AI technology
-- **Artist Discovery**: Find and connect with talented tattoo artists worldwide
-- **Shop Locator**: Discover reputable tattoo shops in your area
+- **Location-Based Search**: Discover artists and shops near you or any location
 - **Style Explorer**: Browse different tattoo styles with curated galleries
+- **Route Planning**: Plan visits to multiple shops and artists
 - **Booking System**: Schedule consultations and appointments directly
-- **Portfolio Browsing**: View artist portfolios and previous work
 
 ### For Tattoo Artists
-- **Professional Profiles**: Showcase your work and expertise
+- **Geographic Presence**: Showcase your location and service areas on the map
+- **Professional Profiles**: Display your work and expertise with location context
 - **Portfolio Management**: Upload and organize your tattoo artwork
 - **Appointment Management**: Handle bookings and client communications
-- **Analytics Dashboard**: Track your performance and client engagement
-- **Client Reviews**: Build reputation through verified reviews
+- **Analytics Dashboard**: Track your geographic reach and client engagement
 
 ### For Tattoo Shops
-- **Shop Profiles**: Highlight your studio and resident artists
-- **Multi-Artist Management**: Manage multiple artists under one roof
-- **Booking Coordination**: Handle appointments for all shop artists
-- **Shop Analytics**: Monitor business performance and metrics
+- **Shop Mapping**: Highlight your studio location and catchment area
+- **Multi-Artist Coordination**: Manage multiple artists with location-based services
+- **Area Coverage**: Show service areas and travel availability
+- **Local SEO**: Improve discoverability in local searches
 
 ## 🛠️ Tech Stack
 
 ### Frontend
 - **Framework**: Next.js 14 with App Router
 - **Styling**: Tailwind CSS + shadcn/ui components
+- **Maps**: Mapbox integration for interactive mapping
 - **State Management**: React Hooks + Context API
 - **Animations**: Framer Motion
 - **Forms**: React Hook Form + Zod validation
 - **Icons**: Lucide React
 
 ### Backend & Database
-- **Database**: Supabase (PostgreSQL)
+- **Database**: Supabase (PostgreSQL) with PostGIS for geospatial data
 - **Authentication**: Supabase Auth
 - **File Storage**: Supabase Storage
 - **Real-time**: Supabase Realtime
 
 ### AI & External Services
 - **AI Image Generation**: Replicate API
-- **Maps**: Mapbox (planned)
+- **Maps & Geocoding**: Mapbox API
 - **Payments**: Stripe (planned)
 - **Email**: Resend (planned)
 
@@ -63,13 +64,14 @@ A comprehensive platform connecting tattoo enthusiasts with talented artists and
 - Node.js 18+ 
 - npm or yarn
 - Supabase account (for database and auth)
+- Mapbox account (for mapping features)
 
 ### Installation
 
 1. **Clone the repository**
    \`\`\`bash
-   git clone https://github.com/your-username/inkfinder.git
-   cd inkfinder
+   git clone https://github.com/your-username/tattoomaps.git
+   cd tattoomaps
    \`\`\`
 
 2. **Install dependencies**
@@ -86,6 +88,9 @@ A comprehensive platform connecting tattoo enthusiasts with talented artists and
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
    SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
    
+   # Mapbox Configuration
+   NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=your_mapbox_access_token
+   
    # Replicate API (for AI tattoo generation)
    REPLICATE_API_TOKEN=your_replicate_api_token
    
@@ -95,6 +100,7 @@ A comprehensive platform connecting tattoo enthusiasts with talented artists and
 
 4. **Set up Supabase**
    - Create a new Supabase project
+   - Enable PostGIS extension for geospatial features
    - Run the database migrations (coming soon)
    - Configure authentication providers
    - Set up storage buckets for images
@@ -110,7 +116,7 @@ A comprehensive platform connecting tattoo enthusiasts with talented artists and
 ## 📁 Project Structure
 
 \`\`\`
-inkfinder/
+tattoomaps/
 ├── app/                          # Next.js App Router pages
 │   ├── (auth)/                   # Authentication pages
 │   ├── api/                      # API routes
@@ -118,6 +124,7 @@ inkfinder/
 │   ├── dashboard/                # User dashboard
 │   ├── generator/                # AI tattoo generator
 │   ├── shops/                    # Shop-related pages
+│   ├── map/                      # Interactive map pages
 │   └── styles/                   # Tattoo style pages
 ├── components/                   # Reusable React components
 │   ├── ui/                       # shadcn/ui components
@@ -125,6 +132,7 @@ inkfinder/
 │   ├── auth/                     # Authentication components
 │   ├── artists/                  # Artist-specific components
 │   ├── shops/                    # Shop-specific components
+│   ├── map/                      # Map-related components
 │   └── generator/                # AI generator components
 ├── hooks/                        # Custom React hooks
 ├── lib/                          # Utility functions and configurations
@@ -137,15 +145,25 @@ inkfinder/
 └── styles/                       # Global CSS files
 \`\`\`
 
+## 🗺️ Mapping Features
+
+TattooMaps leverages advanced mapping technology to provide:
+
+- **Interactive Map Interface**: Explore artists and shops visually
+- **Geospatial Search**: Find services within specific radius
+- **Route Optimization**: Plan efficient visits to multiple locations
+- **Area Coverage**: Visualize artist service areas
+- **Location Analytics**: Understand geographic distribution of services
+
 ## 🎨 Design System
 
-The project uses a custom design system built on top of Tailwind CSS and shadcn/ui:
+The project uses a map-inspired design system:
 
-- **Colors**: Custom burgundy accent color palette
-- **Typography**: Consistent font scales and weights
-- **Components**: Reusable UI components with consistent styling
-- **Spacing**: Standardized spacing system
-- **Responsive**: Mobile-first responsive design
+- **Colors**: Earth tones with map-like color palette
+- **Typography**: Clean, readable fonts suitable for map interfaces
+- **Components**: Location-aware UI components
+- **Icons**: Map and location-focused iconography
+- **Responsive**: Mobile-first with map-optimized layouts
 
 ## 🔧 Development
 
@@ -165,25 +183,11 @@ npm run db:seed      # Seed database with sample data
 npm run db:reset     # Reset database
 \`\`\`
 
-### Code Style
-
-- **ESLint**: Configured for Next.js and TypeScript
-- **Prettier**: Code formatting (coming soon)
-- **TypeScript**: Strict mode enabled
-- **Naming**: camelCase for variables, PascalCase for components
-
-### Git Workflow
-
-1. Create feature branches from `main`
-2. Use conventional commit messages
-3. Submit pull requests for review
-4. Ensure all tests pass before merging
-
 ## 🌐 Deployment
 
 The application is automatically deployed to Vercel when changes are pushed to the main branch.
 
-**Live URL**: [https://vercel.com/misfitderbysocietygmailcoms-projects/v0-ink-finder](https://vercel.com/misfitderbysocietygmailcoms-projects/v0-ink-finder)
+**Live URL**: [https://vercel.com/misfitderbysocietygmailcoms-projects/v0-tattoo-maps](https://vercel.com/misfitderbysocietygmailcoms-projects/v0-tattoo-maps)
 
 ### Environment Variables (Production)
 
@@ -191,25 +195,18 @@ Ensure the following environment variables are set in your Vercel dashboard:
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
+- `NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN`
 - `REPLICATE_API_TOKEN`
 
 ## 🤝 Contributing
 
-We welcome contributions to InkFinder! Please follow these guidelines:
+We welcome contributions to TattooMaps! Please follow these guidelines:
 
 1. **Fork the repository**
 2. **Create a feature branch**: `git checkout -b feature/amazing-feature`
 3. **Commit your changes**: `git commit -m 'Add amazing feature'`
 4. **Push to the branch**: `git push origin feature/amazing-feature`
 5. **Open a Pull Request**
-
-### Contribution Guidelines
-
-- Follow the existing code style and conventions
-- Write clear, descriptive commit messages
-- Add tests for new features (when testing is implemented)
-- Update documentation as needed
-- Ensure your code is accessible and responsive
 
 ## 📋 Roadmap
 
@@ -218,26 +215,21 @@ We welcome contributions to InkFinder! Please follow these guidelines:
 - [x] AI tattoo generator
 - [x] Artist and shop discovery
 - [x] User authentication setup
-- [ ] Database schema implementation
-- [ ] Booking system
+- [ ] Interactive map integration
+- [ ] Geospatial database schema
+- [ ] Location-based search
 
-### Phase 2: Enhanced Features
-- [ ] Real-time messaging
-- [ ] Payment integration
-- [ ] Advanced search and filtering
-- [ ] Mobile app (React Native)
+### Phase 2: Enhanced Mapping
+- [ ] Advanced map filters
+- [ ] Route planning features
+- [ ] Area coverage visualization
+- [ ] Mobile location services
 
-### Phase 3: Community Features
-- [ ] User reviews and ratings
-- [ ] Social features and sharing
-- [ ] Artist verification system
-- [ ] Community forums
-
-## 🐛 Known Issues
-
-- Supabase authentication integration needs completion
-- Mobile responsiveness needs optimization on some pages
-- Search functionality requires backend API implementation
+### Phase 3: Community & Analytics
+- [ ] Location-based reviews
+- [ ] Geographic analytics
+- [ ] Territory management for artists
+- [ ] Local community features
 
 ## 📄 License
 
@@ -245,16 +237,16 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
+- **Mapbox** for powerful mapping capabilities
 - **shadcn/ui** for the beautiful component library
 - **Vercel** for seamless deployment
-- **Supabase** for backend infrastructure
+- **Supabase** for backend infrastructure with PostGIS
 - **Replicate** for AI image generation capabilities
-- **Lucide** for the icon library
 
 ## 📞 Support
 
-For support, email support@inkfinder.com or join our Discord community.
+For support, email support@tattoomaps.com or join our Discord community.
 
 ---
 
-**Built with ❤️ for the tattoo community**
+**Built with ❤️ for the global tattoo community**

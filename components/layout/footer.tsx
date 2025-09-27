@@ -1,87 +1,129 @@
 import Link from "next/link"
-import { Droplet, Twitter, Instagram, Facebook } from "lucide-react"
+import { MapPin, Instagram, Twitter, Facebook, Mail } from "lucide-react"
 
 export function Footer() {
   return (
-    <footer className="border-t border-border/40">
+    <footer className="bg-secondary border-t border-border">
       <div className="container mx-auto px-4 py-12">
-        <div className="grid gap-8 md:grid-cols-4">
-          <div className="flex flex-col gap-4">
-            <Link href="/" className="flex items-center space-x-2">
-              <Droplet className="h-6 w-6 text-accent" />
-              <span className="font-bold text-lg">Inkfinder</span>
-            </Link>
-            <p className="text-muted-foreground">Where Art Meets Skin.</p>
-            <div className="flex gap-4 mt-2">
-              <Link href="#" className="text-muted-foreground hover:text-accent">
-                <Twitter />
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          {/* Brand */}
+          <div className="space-y-4">
+            <div className="flex items-center space-x-2">
+              <div className="flex items-center justify-center w-8 h-8 bg-accent rounded-lg">
+                <MapPin className="w-5 h-5 text-accent-foreground" />
+              </div>
+              <span className="font-extrabold tracking-wide text-lg">TattooMaps</span>
+            </div>
+            <p className="text-muted-foreground text-sm leading-relaxed">
+              Discover tattoo artists and shops worldwide through interactive maps. Your journey to the perfect tattoo
+              starts here.
+            </p>
+            <div className="flex space-x-4">
+              <Link href="#" className="text-muted-foreground hover:text-accent transition-colors">
+                <Instagram className="w-5 h-5" />
               </Link>
-              <Link href="#" className="text-muted-foreground hover:text-accent">
-                <Instagram />
+              <Link href="#" className="text-muted-foreground hover:text-accent transition-colors">
+                <Twitter className="w-5 h-5" />
               </Link>
-              <Link href="#" className="text-muted-foreground hover:text-accent">
-                <Facebook />
+              <Link href="#" className="text-muted-foreground hover:text-accent transition-colors">
+                <Facebook className="w-5 h-5" />
+              </Link>
+              <Link href="#" className="text-muted-foreground hover:text-accent transition-colors">
+                <Mail className="w-5 h-5" />
               </Link>
             </div>
           </div>
-          <div>
-            <h4 className="font-semibold mb-4">Platform</h4>
-            <ul className="space-y-2">
+
+          {/* Discover */}
+          <div className="space-y-4">
+            <h3 className="font-semibold text-foreground">Discover</h3>
+            <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/generator" className="text-muted-foreground hover:text-accent">
-                  AI Generator
+                <Link href="/map" className="text-muted-foreground hover:text-accent transition-colors">
+                  Explore Map
                 </Link>
               </li>
               <li>
-                <Link href="/artists" className="text-muted-foreground hover:text-accent">
+                <Link href="/artists" className="text-muted-foreground hover:text-accent transition-colors">
                   Find Artists
                 </Link>
               </li>
               <li>
-                <Link href="/shops" className="text-muted-foreground hover:text-accent">
-                  Find Shops
+                <Link href="/shops" className="text-muted-foreground hover:text-accent transition-colors">
+                  Browse Shops
+                </Link>
+              </li>
+              <li>
+                <Link href="/styles" className="text-muted-foreground hover:text-accent transition-colors">
+                  Tattoo Styles
+                </Link>
+              </li>
+              <li>
+                <Link href="/generator" className="text-muted-foreground hover:text-accent transition-colors">
+                  AI Generator
                 </Link>
               </li>
             </ul>
           </div>
-          <div>
-            <h4 className="font-semibold mb-4">Resources</h4>
-            <ul className="space-y-2">
+
+          {/* For Artists */}
+          <div className="space-y-4">
+            <h3 className="font-semibold text-foreground">For Artists</h3>
+            <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/blog" className="text-muted-foreground hover:text-accent">
-                  Blog
+                <Link href="/artist-dashboard" className="text-muted-foreground hover:text-accent transition-colors">
+                  Artist Dashboard
                 </Link>
               </li>
               <li>
-                <Link href="/faq" className="text-muted-foreground hover:text-accent">
-                  FAQ
+                <Link href="/signup" className="text-muted-foreground hover:text-accent transition-colors">
+                  Join as Artist
                 </Link>
               </li>
               <li>
-                <Link href="/support" className="text-muted-foreground hover:text-accent">
-                  Support
+                <Link href="#" className="text-muted-foreground hover:text-accent transition-colors">
+                  Portfolio Tips
+                </Link>
+              </li>
+              <li>
+                <Link href="#" className="text-muted-foreground hover:text-accent transition-colors">
+                  Pricing Guide
                 </Link>
               </li>
             </ul>
           </div>
-          <div>
-            <h4 className="font-semibold mb-4">Legal</h4>
-            <ul className="space-y-2">
+
+          {/* Support */}
+          <div className="space-y-4">
+            <h3 className="font-semibold text-foreground">Support</h3>
+            <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/privacy" className="text-muted-foreground hover:text-accent">
+                <Link href="#" className="text-muted-foreground hover:text-accent transition-colors">
+                  Help Center
+                </Link>
+              </li>
+              <li>
+                <Link href="#" className="text-muted-foreground hover:text-accent transition-colors">
+                  Contact Us
+                </Link>
+              </li>
+              <li>
+                <Link href="#" className="text-muted-foreground hover:text-accent transition-colors">
                   Privacy Policy
                 </Link>
               </li>
               <li>
-                <Link href="/terms" className="text-muted-foreground hover:text-accent">
+                <Link href="#" className="text-muted-foreground hover:text-accent transition-colors">
                   Terms of Service
                 </Link>
               </li>
             </ul>
           </div>
         </div>
-        <div className="mt-12 pt-8 border-t border-border/40 text-center text-muted-foreground text-sm">
-          <p>&copy; {new Date().getFullYear()} Inkfinder. All rights reserved.</p>
+
+        <div className="border-t border-border mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
+          <p className="text-muted-foreground text-sm">© 2025 TattooMaps. All rights reserved.</p>
+          <p className="text-muted-foreground text-sm mt-4 md:mt-0">Built with ❤️ for the global tattoo community</p>
         </div>
       </div>
     </footer>
