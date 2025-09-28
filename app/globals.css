@@ -33,6 +33,11 @@
     --pricing-accent: 139 92% 58%;
     --pricing-secondary: 217 91% 60%;
     --pricing-muted: 240 3.7% 15.9%;
+    /* Updated color palette inspired by design inspiration */
+    --hero-accent: 280 100% 70%;
+    --hero-secondary: 45 100% 60%;
+    --hero-tertiary: 160 100% 50%;
+    --hero-grid: 240 5% 96%;
   }
 
   .dark {
@@ -65,6 +70,11 @@
     --pricing-accent: 139 92% 58%;
     --pricing-secondary: 217 91% 60%;
     --pricing-muted: 240 3.7% 15.9%;
+    /* Dark theme hero colors */
+    --hero-accent: 280 100% 70%;
+    --hero-secondary: 45 100% 60%;
+    --hero-tertiary: 160 100% 50%;
+    --hero-grid: 240 5% 8%;
   }
 }
 
@@ -164,6 +174,29 @@
   .shadow-ink-lg {
     box-shadow: 0 10px 15px -3px rgba(139, 92, 246, 0.1), 0 4px 6px -2px rgba(139, 92, 246, 0.05);
   }
+
+  /* Hero-specific components inspired by design inspiration */
+  .hero-grid {
+    background-image: linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    background-size: 50px 50px;
+  }
+
+  .hero-text-glow {
+    text-shadow: 0 0 20px hsl(var(--hero-accent) / 0.3);
+  }
+
+  .hero-card {
+    @apply bg-card/80 backdrop-blur-xl border border-white/10 rounded-2xl;
+  }
+
+  .hero-button-primary {
+    @apply bg-white text-black hover:bg-gray-100 font-medium px-8 py-4 rounded-full transition-all duration-300 hover:scale-105;
+  }
+
+  .hero-button-secondary {
+    @apply border border-white/30 text-white hover:bg-white/10 font-medium px-8 py-4 rounded-full transition-all duration-300;
+  }
 }
 
 @layer utilities {
@@ -180,5 +213,24 @@
   .bg-ink-pattern {
     background-image: radial-gradient(circle at 1px 1px, rgba(139, 92, 246, 0.15) 1px, transparent 0);
     background-size: 20px 20px;
+  }
+
+  /* Hero animation utilities */
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .animate-pulse-slow {
+    animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-20px);
+    }
   }
 }

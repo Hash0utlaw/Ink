@@ -1,77 +1,101 @@
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Search, MapPin, Navigation } from "lucide-react"
+import { Search, MapPin, Navigation, Sparkles, Users, Star } from "lucide-react"
 import Link from "next/link"
 
 export function HeroSection() {
   return (
-    <section className="relative h-[70vh] min-h-[500px] w-full flex items-center justify-center text-center text-white">
-      <div className="absolute inset-0 bg-black/70 z-10" />
+    <section className="relative min-h-screen w-full flex items-center justify-center overflow-hidden">
+      <div className="absolute inset-0 hero-grid opacity-50" />
+
+      <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-br from-hero-accent/20 to-hero-secondary/20 rounded-full blur-xl animate-float" />
       <div
-        className="absolute inset-0 bg-cover bg-center"
-        style={{
-          backgroundImage: "url('/tattoomaps-hero-background.jpg')",
-        }}
+        className="absolute bottom-20 right-10 w-48 h-48 bg-gradient-to-br from-hero-tertiary/20 to-hero-accent/20 rounded-full blur-xl animate-float"
+        style={{ animationDelay: "2s" }}
       />
-      <div className="relative z-20 container mx-auto px-4">
-        <div className="flex items-center justify-center gap-3 mb-6">
-          <div className="flex items-center justify-center w-12 h-12 bg-accent rounded-xl">
-            <MapPin className="w-7 h-7 text-accent-foreground" />
-          </div>
-          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight">TattooMaps</h1>
-        </div>
-        <p className="mt-4 max-w-3xl mx-auto text-xl md:text-2xl text-gray-300 leading-relaxed">
-          Discover tattoo artists and shops worldwide through interactive maps.
-          <br className="hidden md:block" />
-          Find your perfect artist, explore styles, and book appointments near you.
-        </p>
-        <div className="mt-10 max-w-2xl mx-auto">
-          <div className="flex flex-col sm:flex-row items-center gap-3 bg-black/20 backdrop-blur-sm p-3 rounded-xl border border-white/20">
-            <div className="relative flex-grow w-full">
-              <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-              <Input
-                type="search"
-                placeholder="Search by location, artist, or style..."
-                className="pl-10 bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-white placeholder:text-gray-400 h-12"
-              />
+      <div className="absolute top-1/2 left-1/4 w-24 h-24 bg-gradient-to-br from-hero-secondary/20 to-hero-tertiary/20 rounded-full blur-xl animate-pulse-slow" />
+
+      <div className="relative z-20 container mx-auto px-4 py-20">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center space-y-8">
+            <div className="space-y-4">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 text-sm text-white/80">
+                <Sparkles className="w-4 h-4" />
+                <span>Discover Your Perfect Ink</span>
+              </div>
+
+              <h1 className="text-6xl md:text-8xl lg:text-9xl font-black tracking-tight text-white hero-text-glow">
+                TATTOO
+                <span className="block text-transparent bg-gradient-to-r from-hero-accent via-hero-secondary to-hero-tertiary bg-clip-text">
+                  MAPS
+                </span>
+              </h1>
+
+              <p className="max-w-2xl mx-auto text-xl md:text-2xl text-white/70 leading-relaxed font-light">
+                Connect with world-class tattoo artists.
+                <br className="hidden md:block" />
+                Explore portfolios. Book your next masterpiece.
+              </p>
             </div>
-            <div className="flex gap-2 w-full sm:w-auto">
-              <Button
-                asChild
-                size="lg"
-                className="flex-1 sm:flex-none bg-accent text-accent-foreground hover:bg-accent/90 transition-all hover:shadow-accent-glow h-12"
-              >
-                <Link href="/map">
-                  <Navigation className="mr-2 h-5 w-5" />
-                  Explore Map
-                </Link>
-              </Button>
-              <Button
-                asChild
-                variant="outline"
-                size="lg"
-                className="flex-1 sm:flex-none border-white/30 text-white hover:bg-white/10 h-12 bg-transparent"
-              >
-                <Link href="/artists">
-                  <Search className="mr-2 h-5 w-5" />
-                  Search
-                </Link>
-              </Button>
+
+            <div className="max-w-3xl mx-auto">
+              <div className="hero-card p-6">
+                <div className="flex flex-col lg:flex-row items-center gap-4">
+                  <div className="relative flex-grow w-full">
+                    <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-white/50" />
+                    <Input
+                      type="search"
+                      placeholder="Search by location, artist, or style..."
+                      className="pl-12 bg-white/5 border-white/20 focus:border-hero-accent text-white placeholder:text-white/50 h-14 text-lg rounded-xl"
+                    />
+                  </div>
+                  <div className="flex gap-3 w-full lg:w-auto">
+                    <Button asChild className="hero-button-primary flex-1 lg:flex-none h-14 text-lg">
+                      <Link href="/map">
+                        <Navigation className="mr-2 h-5 w-5" />
+                        Explore Map
+                      </Link>
+                    </Button>
+                    <Button
+                      asChild
+                      variant="outline"
+                      className="hero-button-secondary flex-1 lg:flex-none h-14 text-lg bg-transparent"
+                    >
+                      <Link href="/artists">
+                        <Search className="mr-2 h-5 w-5" />
+                        Browse Artists
+                      </Link>
+                    </Button>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-        <div className="mt-8 flex items-center justify-center gap-6 text-sm text-gray-400">
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-            <span>10,000+ Artists</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-            <span>5,000+ Shops</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
-            <span>50+ Countries</span>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mt-16">
+              <div className="hero-card p-6 text-center group hover:scale-105 transition-transform duration-300">
+                <div className="w-12 h-12 bg-gradient-to-br from-hero-accent to-hero-secondary rounded-xl mx-auto mb-4 flex items-center justify-center">
+                  <Users className="w-6 h-6 text-white" />
+                </div>
+                <div className="text-3xl font-bold text-white mb-2">10,000+</div>
+                <div className="text-white/60">Verified Artists</div>
+              </div>
+
+              <div className="hero-card p-6 text-center group hover:scale-105 transition-transform duration-300">
+                <div className="w-12 h-12 bg-gradient-to-br from-hero-secondary to-hero-tertiary rounded-xl mx-auto mb-4 flex items-center justify-center">
+                  <MapPin className="w-6 h-6 text-white" />
+                </div>
+                <div className="text-3xl font-bold text-white mb-2">5,000+</div>
+                <div className="text-white/60">Studios Worldwide</div>
+              </div>
+
+              <div className="hero-card p-6 text-center group hover:scale-105 transition-transform duration-300">
+                <div className="w-12 h-12 bg-gradient-to-br from-hero-tertiary to-hero-accent rounded-xl mx-auto mb-4 flex items-center justify-center">
+                  <Star className="w-6 h-6 text-white" />
+                </div>
+                <div className="text-3xl font-bold text-white mb-2">4.9/5</div>
+                <div className="text-white/60">Average Rating</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
