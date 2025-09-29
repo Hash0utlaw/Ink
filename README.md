@@ -2,7 +2,7 @@
 
 A comprehensive platform connecting tattoo enthusiasts with talented artists and reputable shops worldwide through location-based discovery.
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/misfitderbysocietygmailcoms-projects/v0-tattoo-maps)
+[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/)
 [![Built with Next.js](https://img.shields.io/badge/Built%20with-Next.js-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
 [![Powered by Supabase](https://img.shields.io/badge/Powered%20by-Supabase-green?style=for-the-badge&logo=supabase)](https://supabase.com/)
 
@@ -88,8 +88,8 @@ A comprehensive platform connecting tattoo enthusiasts with talented artists and
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
    SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
    
-   # Mapbox Configuration
-   NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=your_mapbox_access_token
+   # Mapbox Configuration (get from Mapbox dashboard)
+   NEXT_PUBLIC_MAPBOX_TOKEN=your_mapbox_token_here
    
    # Replicate API (for AI tattoo generation)
    REPLICATE_API_TOKEN=your_replicate_api_token
@@ -195,7 +195,7 @@ Ensure the following environment variables are set in your Vercel dashboard:
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
-- `NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN`
+- `NEXT_PUBLIC_MAPBOX_TOKEN` (Mapbox access token)
 - `REPLICATE_API_TOKEN`
 
 ## 🤝 Contributing
