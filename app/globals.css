@@ -38,6 +38,15 @@
     --hero-secondary: 45 100% 60%;
     --hero-tertiary: 160 100% 50%;
     --hero-grid: 240 5% 96%;
+    /* Modern sidebar design tokens inspired by Closet Creations and Casa Portufornia */
+    --sidebar-background: 0 0% 99%;
+    --sidebar-card: 0 0% 100%;
+    --sidebar-border: 240 5.9% 92%;
+    --sidebar-muted: 240 4.8% 96%;
+    --sidebar-accent: 240 5.9% 10%;
+    --sidebar-text-primary: 240 10% 3.9%;
+    --sidebar-text-secondary: 240 3.8% 46.1%;
+    --sidebar-hover: 240 4.8% 98%;
   }
 
   .dark {
@@ -75,6 +84,15 @@
     --hero-secondary: 45 100% 60%;
     --hero-tertiary: 160 100% 50%;
     --hero-grid: 240 5% 8%;
+    /* Dark theme sidebar tokens */
+    --sidebar-background: 240 10% 3.9%;
+    --sidebar-card: 240 3.7% 15.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-muted: 240 3.7% 8%;
+    --sidebar-accent: 0 0% 98%;
+    --sidebar-text-primary: 0 0% 98%;
+    --sidebar-text-secondary: 240 5% 64.9%;
+    --sidebar-hover: 240 3.7% 20%;
   }
 }
 
@@ -196,6 +214,47 @@
 
   .hero-button-secondary {
     @apply border border-white/30 text-white hover:bg-white/10 font-medium px-8 py-4 rounded-full transition-all duration-300;
+  }
+
+  /* Modern sidebar components inspired by design inspiration */
+  .sidebar-modern {
+    @apply bg-background border-r border-border backdrop-blur-xl;
+  }
+
+  .sidebar-header {
+    @apply border-b border-border/50 bg-background/80;
+  }
+
+  .modern-location-card {
+    @apply bg-card border border-border/50 rounded-xl hover:border-accent/30 hover:bg-muted/50 transition-all duration-300 cursor-pointer;
+  }
+
+  .modern-location-card-selected {
+    @apply border-accent bg-accent/5 shadow-sm;
+  }
+
+  .sidebar-filter-section {
+    @apply bg-muted/30 border border-border/30 rounded-lg p-4;
+  }
+
+  .sidebar-search {
+    @apply bg-card border border-border/50 rounded-xl focus-within:border-accent/50 focus-within:ring-1 focus-within:ring-accent/20 transition-all duration-200;
+  }
+
+  .sidebar-button {
+    @apply bg-card hover:bg-muted/50 border border-border/50 text-foreground hover:border-accent/30 rounded-lg transition-all duration-200;
+  }
+
+  .sidebar-toggle {
+    @apply bg-card/90 backdrop-blur-sm border border-border/50 hover:bg-muted/50 shadow-lg hover:shadow-xl transition-all duration-300;
+  }
+
+  .location-card-image {
+    @apply rounded-lg object-cover transition-transform duration-300;
+  }
+
+  .filter-badge {
+    @apply bg-accent/10 text-accent border-accent/20 hover:bg-accent/20 transition-colors duration-200;
   }
 }
 

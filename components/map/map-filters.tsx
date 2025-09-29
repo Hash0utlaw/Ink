@@ -6,7 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Slider } from "@/components/ui/slider"
 import { Badge } from "@/components/ui/badge"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-import { ChevronDown, ChevronUp } from "lucide-react"
+import { Plus, Minus } from "lucide-react"
 
 interface MapFiltersProps {
   filters: {
@@ -103,16 +103,15 @@ export function MapFilters({ filters, onFilterChange }: MapFiltersProps) {
     filters.availableNow
 
   return (
-    <div className="space-y-4">
-      {/* Clear Filters */}
+    <div className="space-y-6">
       {hasActiveFilters && (
-        <div className="flex justify-between items-center">
-          <span className="text-sm font-medium text-gray-700">Active Filters</span>
+        <div className="flex justify-between items-center pb-4 border-b border-sidebar-border/30">
+          <span className="text-sm font-semibold text-sidebar-text-primary">Active Filters</span>
           <Button
             variant="ghost"
             size="sm"
             onClick={clearAllFilters}
-            className="text-xs text-gray-500 hover:text-gray-700"
+            className="text-xs text-sidebar-text-secondary hover:text-sidebar-text-primary h-auto p-2"
           >
             Clear All
           </Button>
@@ -121,61 +120,59 @@ export function MapFilters({ filters, onFilterChange }: MapFiltersProps) {
 
       {/* Location Type */}
       <Collapsible open={openSections.type} onOpenChange={() => toggleSection("type")}>
-        <CollapsibleTrigger className="flex items-center justify-between w-full text-sm font-medium text-gray-700 hover:text-gray-900">
+        <CollapsibleTrigger className="flex items-center justify-between w-full text-sm font-semibold text-sidebar-text-primary hover:text-accent transition-colors py-2">
           Location Type
-          {openSections.type ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          {openSections.type ? (
+            <Minus className="w-4 h-4 text-sidebar-text-secondary" />
+          ) : (
+            <Plus className="w-4 h-4 text-sidebar-text-secondary" />
+          )}
         </CollapsibleTrigger>
-        <CollapsibleContent className="mt-2 space-y-2">
-          <div className="flex gap-2">
-            <Button
-              variant={filters.locationType === "all" ? "default" : "outline"}
-              size="sm"
-              onClick={() => handleLocationTypeChange("all")}
-              className="text-xs"
-            >
-              All
-            </Button>
-            <Button
-              variant={filters.locationType === "artist" ? "default" : "outline"}
-              size="sm"
-              onClick={() => handleLocationTypeChange("artist")}
-              className="text-xs"
-            >
-              Artists
-            </Button>
-            <Button
-              variant={filters.locationType === "shop" ? "default" : "outline"}
-              size="sm"
-              onClick={() => handleLocationTypeChange("shop")}
-              className="text-xs"
-            >
-              Shops
-            </Button>
+        <CollapsibleContent className="mt-4 space-y-3">
+          <div className="grid grid-cols-3 gap-2">
+            {["all", "artist", "shop"].map((type) => (
+              <Button
+                key={type}
+                variant={filters.locationType === type ? "default" : "outline"}
+                size="sm"
+                onClick={() => handleLocationTypeChange(type as "all" | "artist" | "shop")}
+                className="text-xs font-medium capitalize h-9"
+              >
+                {type === "all" ? "All" : type}
+              </Button>
+            ))}
           </div>
         </CollapsibleContent>
       </Collapsible>
 
       {/* Tattoo Styles */}
       <Collapsible open={openSections.styles} onOpenChange={() => toggleSection("styles")}>
-        <CollapsibleTrigger className="flex items-center justify-between w-full text-sm font-medium text-gray-700 hover:text-gray-900">
-          Tattoo Styles{" "}
-          {filters.styles.length > 0 && (
-            <Badge variant="secondary" className="text-xs">
-              {filters.styles.length}
-            </Badge>
+        <CollapsibleTrigger className="flex items-center justify-between w-full text-sm font-semibold text-sidebar-text-primary hover:text-accent transition-colors py-2">
+          <div className="flex items-center gap-2">
+            Tattoo Styles
+            {filters.styles.length > 0 && (
+              <Badge variant="secondary" className="text-xs h-5 px-2">
+                {filters.styles.length}
+              </Badge>
+            )}
+          </div>
+          {openSections.styles ? (
+            <Minus className="w-4 h-4 text-sidebar-text-secondary" />
+          ) : (
+            <Plus className="w-4 h-4 text-sidebar-text-secondary" />
           )}
-          {openSections.styles ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
         </CollapsibleTrigger>
-        <CollapsibleContent className="mt-2">
-          <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto">
+        <CollapsibleContent className="mt-4">
+          <div className="grid grid-cols-2 gap-3 max-h-48 overflow-y-auto scrollbar-ink">
             {tattooStyles.map((style) => (
-              <div key={style} className="flex items-center space-x-2">
+              <div key={style} className="flex items-center space-x-3">
                 <Checkbox
                   id={style}
                   checked={filters.styles.includes(style)}
                   onCheckedChange={() => handleStyleToggle(style)}
+                  className="rounded"
                 />
-                <label htmlFor={style} className="text-xs text-gray-700 cursor-pointer">
+                <label htmlFor={style} className="text-xs text-sidebar-text-primary cursor-pointer font-medium">
                   {style}
                 </label>
               </div>
@@ -186,25 +183,35 @@ export function MapFilters({ filters, onFilterChange }: MapFiltersProps) {
 
       {/* Price Range */}
       <Collapsible open={openSections.price} onOpenChange={() => toggleSection("price")}>
-        <CollapsibleTrigger className="flex items-center justify-between w-full text-sm font-medium text-gray-700 hover:text-gray-900">
-          Price Range{" "}
-          {filters.priceRange.length > 0 && (
-            <Badge variant="secondary" className="text-xs">
-              {filters.priceRange.length}
-            </Badge>
+        <CollapsibleTrigger className="flex items-center justify-between w-full text-sm font-semibold text-sidebar-text-primary hover:text-accent transition-colors py-2">
+          <div className="flex items-center gap-2">
+            Price Range
+            {filters.priceRange.length > 0 && (
+              <Badge variant="secondary" className="text-xs h-5 px-2">
+                {filters.priceRange.length}
+              </Badge>
+            )}
+          </div>
+          {openSections.price ? (
+            <Minus className="w-4 h-4 text-sidebar-text-secondary" />
+          ) : (
+            <Plus className="w-4 h-4 text-sidebar-text-secondary" />
           )}
-          {openSections.price ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
         </CollapsibleTrigger>
-        <CollapsibleContent className="mt-2 space-y-2">
+        <CollapsibleContent className="mt-4 space-y-3">
           {["low", "medium", "high"].map((range) => (
-            <div key={range} className="flex items-center space-x-2">
+            <div key={range} className="flex items-center space-x-3">
               <Checkbox
                 id={range}
                 checked={filters.priceRange.includes(range)}
                 onCheckedChange={() => handlePriceRangeToggle(range)}
+                className="rounded"
               />
-              <label htmlFor={range} className="text-xs text-gray-700 cursor-pointer capitalize">
-                {range} ($)
+              <label
+                htmlFor={range}
+                className="text-xs text-sidebar-text-primary cursor-pointer capitalize font-medium"
+              >
+                {range} ({range === "low" ? "$" : range === "medium" ? "$$" : "$$$"})
               </label>
             </div>
           ))}
@@ -213,17 +220,23 @@ export function MapFilters({ filters, onFilterChange }: MapFiltersProps) {
 
       {/* Rating */}
       <Collapsible open={openSections.rating} onOpenChange={() => toggleSection("rating")}>
-        <CollapsibleTrigger className="flex items-center justify-between w-full text-sm font-medium text-gray-700 hover:text-gray-900">
-          Minimum Rating{" "}
-          {filters.rating > 0 && (
-            <Badge variant="secondary" className="text-xs">
-              {filters.rating}+
-            </Badge>
+        <CollapsibleTrigger className="flex items-center justify-between w-full text-sm font-semibold text-sidebar-text-primary hover:text-accent transition-colors py-2">
+          <div className="flex items-center gap-2">
+            Minimum Rating
+            {filters.rating > 0 && (
+              <Badge variant="secondary" className="text-xs h-5 px-2">
+                {filters.rating}+
+              </Badge>
+            )}
+          </div>
+          {openSections.rating ? (
+            <Minus className="w-4 h-4 text-sidebar-text-secondary" />
+          ) : (
+            <Plus className="w-4 h-4 text-sidebar-text-secondary" />
           )}
-          {openSections.rating ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
         </CollapsibleTrigger>
-        <CollapsibleContent className="mt-2">
-          <div className="px-2">
+        <CollapsibleContent className="mt-4">
+          <div className="px-3 py-2">
             <Slider
               value={[filters.rating]}
               onValueChange={handleRatingChange}
@@ -232,8 +245,8 @@ export function MapFilters({ filters, onFilterChange }: MapFiltersProps) {
               step={0.5}
               className="w-full"
             />
-            <div className="flex justify-between text-xs text-gray-500 mt-1">
-              <span>Any</span>
+            <div className="flex justify-between text-xs text-sidebar-text-secondary mt-3 font-medium">
+              <span>Any rating</span>
               <span>{filters.rating}+ stars</span>
             </div>
           </div>
@@ -242,15 +255,21 @@ export function MapFilters({ filters, onFilterChange }: MapFiltersProps) {
 
       {/* Distance */}
       <Collapsible open={openSections.distance} onOpenChange={() => toggleSection("distance")}>
-        <CollapsibleTrigger className="flex items-center justify-between w-full text-sm font-medium text-gray-700 hover:text-gray-900">
-          Distance{" "}
-          <Badge variant="secondary" className="text-xs">
-            {filters.radius} mi
-          </Badge>
-          {openSections.distance ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+        <CollapsibleTrigger className="flex items-center justify-between w-full text-sm font-semibold text-sidebar-text-primary hover:text-accent transition-colors py-2">
+          <div className="flex items-center gap-2">
+            Distance
+            <Badge variant="secondary" className="text-xs h-5 px-2">
+              {filters.radius} mi
+            </Badge>
+          </div>
+          {openSections.distance ? (
+            <Minus className="w-4 h-4 text-sidebar-text-secondary" />
+          ) : (
+            <Plus className="w-4 h-4 text-sidebar-text-secondary" />
+          )}
         </CollapsibleTrigger>
-        <CollapsibleContent className="mt-2">
-          <div className="px-2">
+        <CollapsibleContent className="mt-4">
+          <div className="px-3 py-2">
             <Slider
               value={[filters.radius]}
               onValueChange={handleRadiusChange}
@@ -259,8 +278,8 @@ export function MapFilters({ filters, onFilterChange }: MapFiltersProps) {
               step={1}
               className="w-full"
             />
-            <div className="flex justify-between text-xs text-gray-500 mt-1">
-              <span>1 mi</span>
+            <div className="flex justify-between text-xs text-sidebar-text-secondary mt-3 font-medium">
+              <span>1 mile</span>
               <span>{filters.radius} miles</span>
             </div>
           </div>
@@ -269,20 +288,31 @@ export function MapFilters({ filters, onFilterChange }: MapFiltersProps) {
 
       {/* Availability */}
       <Collapsible open={openSections.availability} onOpenChange={() => toggleSection("availability")}>
-        <CollapsibleTrigger className="flex items-center justify-between w-full text-sm font-medium text-gray-700 hover:text-gray-900">
-          Availability{" "}
-          {filters.availableNow && (
-            <Badge variant="secondary" className="text-xs">
-              Open Now
-            </Badge>
+        <CollapsibleTrigger className="flex items-center justify-between w-full text-sm font-semibold text-sidebar-text-primary hover:text-accent transition-colors py-2">
+          <div className="flex items-center gap-2">
+            Availability
+            {filters.availableNow && (
+              <Badge variant="secondary" className="text-xs h-5 px-2">
+                Open Now
+              </Badge>
+            )}
+          </div>
+          {openSections.availability ? (
+            <Minus className="w-4 h-4 text-sidebar-text-secondary" />
+          ) : (
+            <Plus className="w-4 h-4 text-sidebar-text-secondary" />
           )}
-          {openSections.availability ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
         </CollapsibleTrigger>
-        <CollapsibleContent className="mt-2">
-          <div className="flex items-center space-x-2">
-            <Checkbox id="availableNow" checked={filters.availableNow} onCheckedChange={handleAvailabilityToggle} />
-            <label htmlFor="availableNow" className="text-xs text-gray-700 cursor-pointer">
-              Open Now
+        <CollapsibleContent className="mt-4">
+          <div className="flex items-center space-x-3">
+            <Checkbox
+              id="availableNow"
+              checked={filters.availableNow}
+              onCheckedChange={handleAvailabilityToggle}
+              className="rounded"
+            />
+            <label htmlFor="availableNow" className="text-xs text-sidebar-text-primary cursor-pointer font-medium">
+              Show only locations open now
             </label>
           </div>
         </CollapsibleContent>
