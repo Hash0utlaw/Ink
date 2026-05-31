@@ -45,7 +45,7 @@ export function AuthForm({ mode }: AuthFormProps) {
   }
 
   const title = mode === "login" ? "Welcome Back" : "Create an Account"
-  const description = mode === "login" ? "Sign in to access your dashboard." : "Join the Inkfinder community."
+  const description = mode === "login" ? "Sign in to access your dashboard." : "Join the Ink community."
 
   return (
     <Card className="w-full max-w-md bg-muted/50 border-border/50">
