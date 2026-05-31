@@ -7,8 +7,8 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
     <div className="flex min-h-screen flex-col items-center justify-center bg-secondary p-4">
       <div className="absolute top-8 left-8">
         <Link href="/" className="flex items-center space-x-2 text-foreground/80 hover:text-foreground">
-          <Image src="/logo.png" alt="Inkfinder Logo" width={28} height={28} />
-          <span className="font-bold">Inkfinder</span>
+          <Image src="/logo.png" alt="Tattoo Maps Logo" width={28} height={28} />
+          <span className="font-bold">Tattoo Maps</span>
         </Link>
       </div>
       {children}

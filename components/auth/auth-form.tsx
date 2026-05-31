@@ -45,7 +45,7 @@ export function AuthForm({ mode }: AuthFormProps) {
   }
 
   const title = mode === "login" ? "Welcome Back" : "Create an Account"
-  const description = mode === "login" ? "Sign in to access your dashboard." : "Join the Inkfinder community."
+  const description = mode === "login" ? "Sign in to access your dashboard." : "Join the Tattoo Maps community."
 
   return (
     <Card className="w-full max-w-md bg-muted/50 border-border/50">
@@ -141,8 +141,13 @@ export function AuthForm({ mode }: AuthFormProps) {
           </Button>
         </div>
       </CardContent>
-      <CardFooter className="justify-center">
-        <p className="text-sm text-muted-foreground">
+      <CardFooter className="flex flex-col gap-3">
+        {mode === "login" && (
+          <Button variant="outline" className="w-full" asChild>
+            <Link href="/signup">Create an account</Link>
+          </Button>
+        )}
+        <p className="text-sm text-muted-foreground text-center">
           {mode === "login" ? "Don't have an account?" : "Already have an account?"}{" "}
           <Link href={mode === "login" ? "/signup" : "/login"} className="font-semibold text-accent hover:underline">
             {mode === "login" ? "Sign up" : "Log in"}
