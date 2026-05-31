@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Droplet } from "lucide-react"
+import { Droplet, Palette, Search } from "lucide-react"
 import { login, signup } from "@/app/(auth)/actions"
 
 // A simple SVG for Google Icon
@@ -27,6 +27,7 @@ export function AuthForm({ mode }: AuthFormProps) {
   const searchParams = useSearchParams()
   const [message, setMessage] = useState(searchParams.get("message") || "")
   const [isPending, setIsPending] = useState(false)
+  const [selectedRole, setSelectedRole] = useState<"artist" | "client" | null>(null)
 
   const handleSubmit = async (formData: FormData) => {
     setIsPending(true)
@@ -71,8 +72,50 @@ export function AuthForm({ mode }: AuthFormProps) {
             <Label htmlFor="password">Password</Label>
             <Input id="password" name="password" type="password" required disabled={isPending} />
           </div>
+          {mode === "signup" && (
+            <div className="space-y-2">
+              <input type="hidden" name="role" value={selectedRole ?? ""} />
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setSelectedRole("artist")}
+                  disabled={isPending}
+                  className={`flex flex-col items-center gap-1.5 rounded-lg border p-4 text-left transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                    selectedRole === "artist"
+                      ? "border-[#7C3AED] bg-[#7C3AED]/10"
+                      : "border-border bg-muted/30 hover:bg-muted/60"
+                  }`}
+                >
+                  <Palette className={`h-5 w-5 ${selectedRole === "artist" ? "text-[#7C3AED]" : "text-muted-foreground"}`} />
+                  <span className={`text-sm font-semibold ${selectedRole === "artist" ? "text-[#7C3AED]" : "text-foreground"}`}>
+                    {"I'm an Artist"}
+                  </span>
+                  <span className="text-xs text-muted-foreground">Showcase your work</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedRole("client")}
+                  disabled={isPending}
+                  className={`flex flex-col items-center gap-1.5 rounded-lg border p-4 text-left transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                    selectedRole === "client"
+                      ? "border-[#7C3AED] bg-[#7C3AED]/10"
+                      : "border-border bg-muted/30 hover:bg-muted/60"
+                  }`}
+                >
+                  <Search className={`h-5 w-5 ${selectedRole === "client" ? "text-[#7C3AED]" : "text-muted-foreground"}`} />
+                  <span className={`text-sm font-semibold ${selectedRole === "client" ? "text-[#7C3AED]" : "text-foreground"}`}>
+                    {"I'm a Client"}
+                  </span>
+                  <span className="text-xs text-muted-foreground">Find your next artist</span>
+                </button>
+              </div>
+              {selectedRole === null && (
+                <p className="text-xs text-muted-foreground text-center">Please select your account type to continue</p>
+              )}
+            </div>
+          )}
           {message && <div className="text-sm text-center p-2 rounded-md bg-red-500/20 text-red-400">{message}</div>}
-          <Button type="submit" className="w-full" disabled={isPending}>
+          <Button type="submit" className="w-full" disabled={isPending || (mode === "signup" && selectedRole === null)}>
             {isPending ? "Processing..." : mode === "login" ? "Log In" : "Sign Up"}
           </Button>
         </form>

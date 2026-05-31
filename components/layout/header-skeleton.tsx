@@ -7,8 +7,8 @@ export function HeaderSkeleton() {
       <div className="container flex h-16 max-w-screen-2xl items-center">
         <div className="mr-4 hidden md:flex">
           <div className="mr-6 flex items-center space-x-2">
-            <Image src="/logo.png" alt="Inkfinder Logo" width={28} height={28} className="opacity-50" />
-            <span className="hidden font-extrabold tracking-wide sm:inline-block text-muted-foreground">Inkfinder</span>
+            <Image src="/logo.png" alt="TattooMaps Logo" width={28} height={28} className="opacity-50" />
+            <span className="hidden font-extrabold tracking-wide sm:inline-block text-muted-foreground">TattooMaps</span>
           </div>
           <nav className="flex items-center gap-6 text-sm font-medium">
             <Skeleton className="h-4 w-24" />

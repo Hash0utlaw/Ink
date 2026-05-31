@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react"
 import { FilterSidebar } from "./filter-sidebar"
 import { ResultsList } from "./results-list"
-import { MapView } from "./map-view"
 import type { Artist } from "@/types/artist"
 
 export function ArtistSearchInterface() {
@@ -50,7 +49,6 @@ export function ArtistSearchInterface() {
         <FilterSidebar filters={filters} onFilterChange={setFilters} />
       </div>
       <div className="lg:col-span-3 space-y-8">
-        <MapView artists={filteredArtists} />
         <ResultsList artists={filteredArtists} isLoading={isLoading} />
       </div>
     </div>

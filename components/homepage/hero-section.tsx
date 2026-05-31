@@ -1,6 +1,6 @@
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Search, MapPin, Navigation, Sparkles, Users, Star } from "lucide-react"
+import { Search, MapPin, Sparkles, Users, Star } from "lucide-react"
 import Link from "next/link"
 
 export function HeroSection() {
@@ -49,24 +49,12 @@ export function HeroSection() {
                       className="pl-12 bg-white/5 border-white/20 focus:border-hero-accent text-white placeholder:text-white/50 h-14 text-lg rounded-xl"
                     />
                   </div>
-                  <div className="flex gap-3 w-full lg:w-auto">
-                    <Button asChild className="hero-button-primary flex-1 lg:flex-none h-14 text-lg">
-                      <Link href="/map">
-                        <Navigation className="mr-2 h-5 w-5" />
-                        Explore Map
-                      </Link>
-                    </Button>
-                    <Button
-                      asChild
-                      variant="outline"
-                      className="hero-button-secondary flex-1 lg:flex-none h-14 text-lg bg-transparent"
-                    >
-                      <Link href="/artists">
-                        <Search className="mr-2 h-5 w-5" />
-                        Browse Artists
-                      </Link>
-                    </Button>
-                  </div>
+                  <Button asChild className="hero-button-primary w-full lg:w-auto h-14 text-lg">
+                    <Link href="/artists">
+                      <Search className="mr-2 h-5 w-5" />
+                      Browse Artists
+                    </Link>
+                  </Button>
                 </div>
               </div>
             </div>

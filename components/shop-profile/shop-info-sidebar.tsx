@@ -3,7 +3,8 @@ import { Badge } from "@/components/ui/badge"
 import { Clock, MapPin } from "lucide-react"
 import type { Shop } from "@/types/shop"
 
-export function ShopInfoSidebar({ shop }: { shop: Shop }) {
+export function ShopInfoSidebar({ shop, isOwned = false }: { shop: Shop; isOwned?: boolean }) {
+  const today = new Date().toLocaleDateString("en-US", { weekday: "long" })
   return (
     <div className="space-y-8 sticky top-20">
       <Card className="bg-muted/50 border-border/50">
@@ -25,13 +26,27 @@ export function ShopInfoSidebar({ shop }: { shop: Shop }) {
               <p className="font-semibold">Hours</p>
               <ul className="text-muted-foreground">
                 {Object.entries(shop.hours).map(([day, hours]) => (
-                  <li key={day}>
-                    <span className="font-medium text-foreground">{day}:</span> {hours}
+                  <li
+                    key={day}
+                    style={day === today ? { borderLeft: "3px solid #7C3AED", paddingLeft: "6px" } : undefined}
+                  >
+                    <span className={day === today ? "font-semibold text-foreground" : "font-medium text-foreground"}>
+                      {day}:
+                    </span>{" "}
+                    {hours}
                   </li>
                 ))}
               </ul>
             </div>
           </div>
+          {!isOwned && (
+            <p className="text-xs text-muted-foreground pt-2 border-t border-border/40">
+              Is this your shop?{" "}
+              <a href={`/claim?shop=${shop.id}`} className="underline hover:text-foreground transition-colors">
+                Claim this listing
+              </a>
+            </p>
+          )}
         </CardContent>
       </Card>
 

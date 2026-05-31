@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { MapPin, Bot, Calendar, Navigation, Search, Users } from "lucide-react"
+import { Calendar, Navigation, Search, Users } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { MotionView } from "@/components/utils/motion-view"
 
@@ -11,18 +11,6 @@ interface Feature {
 
 const features: Feature[] = [
   {
-    icon: MapPin,
-    title: "Interactive Map Discovery",
-    description:
-      "Explore tattoo artists and shops on an interactive map. Find exactly what you're looking for in your area or anywhere in the world.",
-  },
-  {
-    icon: Bot,
-    title: "AI Tattoo Generator",
-    description:
-      "Bring your ideas to life with our AI-powered tattoo generator. Create unique designs and find artists who specialize in your style.",
-  },
-  {
     icon: Navigation,
     title: "Location-Based Search",
     description:
@@ -30,7 +18,7 @@ const features: Feature[] = [
   },
   {
     icon: Calendar,
-    title: "Easy Booking",
+    title: "Booking System",
     description:
       "Book consultations and appointments directly through the platform. Manage your tattoo schedule seamlessly.",
   },
@@ -56,7 +44,7 @@ export function FeatureHighlights() {
             TattooMaps combines the power of interactive mapping with comprehensive artist discovery
           </p>
         </div>
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
           {features.map((feature, i) => (
             <MotionView key={feature.title} delay={i * 0.1}>
               <Card className="bg-card border-border/60 transition-all duration-300 hover:border-accent/50 hover:shadow-lg hover:-translate-y-1 hover:scale-[1.02] h-full">
