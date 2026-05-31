@@ -85,3 +85,15 @@ export async function getArtistsByIds(ids: string[]): Promise<Artist[]> {
     return []
   }
 }
+
+// Looks up by the slug column (add a slug text column to the artists table).
+export async function getArtistBySlug(slug: string): Promise<Artist | null> {
+  try {
+    const supabase = createClient()
+    const { data, error } = await supabase.from("artists").select("*").eq("slug", slug).single()
+    if (error || !data) return null
+    return rowToArtist(data as Record<string, unknown>)
+  } catch {
+    return null
+  }
+}

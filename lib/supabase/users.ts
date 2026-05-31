@@ -1,10 +1,12 @@
 import { createClient } from "@/utils/supabase/server"
 
 // Mirrors the user_profiles table created in app/(auth)/actions.ts.
-// Columns: user_id, role, created_at (plus optional: email, name, avatar_url, location)
+// Columns: user_id, role, created_at, subscription_tier
+// (plus optional: email, name, avatar_url, location)
 export interface UserProfile {
   userId: string
   role: "artist" | "client"
+  subscriptionTier: "free" | "pro"
   email?: string
   name?: string
   avatarUrl?: string
@@ -36,6 +38,7 @@ export async function getUserProfile(userId: string): Promise<UserProfile | null
     return {
       userId: String(row.user_id ?? ""),
       role: (row.role as "artist" | "client") ?? "client",
+      subscriptionTier: (row.subscription_tier as "free" | "pro") ?? "free",
       email: row.email != null ? String(row.email) : undefined,
       name: row.name != null ? String(row.name) : undefined,
       avatarUrl: row.avatar_url != null ? String(row.avatar_url) : undefined,

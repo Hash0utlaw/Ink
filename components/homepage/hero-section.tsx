@@ -13,7 +13,7 @@ export function HeroSection() {
   function handleSearch(e: React.FormEvent) {
     e.preventDefault()
     const q = query.trim()
-    router.push(q ? `/artists?q=${encodeURIComponent(q)}` : "/artists")
+    router.push(q ? `/search?q=${encodeURIComponent(q)}` : "/search")
   }
 
   return (
@@ -65,7 +65,7 @@ export function HeroSection() {
                   </div>
                   <Button type="submit" className="hero-button-primary w-full lg:w-auto h-14 text-lg">
                     <Search className="mr-2 h-5 w-5" />
-                    Browse Artists
+                    Search
                   </Button>
                 </div>
               </form>
