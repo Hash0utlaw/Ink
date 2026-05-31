@@ -141,8 +141,13 @@ export function AuthForm({ mode }: AuthFormProps) {
           </Button>
         </div>
       </CardContent>
-      <CardFooter className="justify-center">
-        <p className="text-sm text-muted-foreground">
+      <CardFooter className="flex flex-col gap-3">
+        {mode === "login" && (
+          <Button variant="outline" className="w-full" asChild>
+            <Link href="/signup">Create an account</Link>
+          </Button>
+        )}
+        <p className="text-sm text-muted-foreground text-center">
           {mode === "login" ? "Don't have an account?" : "Already have an account?"}{" "}
           <Link href={mode === "login" ? "/signup" : "/login"} className="font-semibold text-accent hover:underline">
             {mode === "login" ? "Sign up" : "Log in"}
