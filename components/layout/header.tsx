@@ -26,6 +26,11 @@ export function Header() {
   useEffect(() => {
     const supabase = getClient()
 
+    if (!supabase) {
+      setIsLoading(false)
+      return
+    }
+
     const fetchUserAndRole = async (authUser: SupabaseUser | null) => {
       if (!authUser) {
         setUser(null)
@@ -62,7 +67,9 @@ export function Header() {
 
   const handleSignOut = async () => {
     const supabase = getClient()
-    await supabase.auth.signOut()
+    if (supabase) {
+      await supabase.auth.signOut()
+    }
     router.push("/")
   }
 
