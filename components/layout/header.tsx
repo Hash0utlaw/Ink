@@ -158,14 +158,9 @@ export function Header() {
               </DropdownMenu>
             </>
           ) : (
-            <div className="flex items-center space-x-2">
-              <Button variant="ghost" asChild>
-                <Link href="/login">Log in</Link>
-              </Button>
-              <Button asChild>
-                <Link href="/signup">Sign up</Link>
-              </Button>
-            </div>
+            <Button asChild>
+              <Link href="/login">Sign in</Link>
+            </Button>
           )}
         </div>
       </div>
