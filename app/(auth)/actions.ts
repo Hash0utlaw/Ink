@@ -31,10 +31,11 @@ export async function signup(prevState: any, formData: FormData) {
 
   const email = formData.get("email") as string
   const password = formData.get("password") as string
+  const role = formData.get("role") as "artist" | "client"
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
 
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
@@ -46,6 +47,21 @@ export async function signup(prevState: any, formData: FormData) {
     return {
       success: false,
       message: error.message,
+    }
+  }
+
+  if (data.user) {
+    const { error: profileError } = await supabase.from("user_profiles").insert({
+      user_id: data.user.id,
+      role,
+      created_at: new Date().toISOString(),
+    })
+
+    if (profileError) {
+      return {
+        success: false,
+        message: profileError.message,
+      }
     }
   }
 

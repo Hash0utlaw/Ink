@@ -3,10 +3,10 @@ import { Suspense } from "react"
 import { HeaderSkeleton } from "@/components/layout/header-skeleton"
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
-import { getArtistById } from "@/lib/mock-data"
+import { getArtistById } from "@/lib/supabase/artists"
 import { ArtistHeader } from "@/components/artist-profile/artist-header"
 import { ProfileTabs } from "@/components/artist-profile/profile-tabs"
-import { InfoSidebar } from "@/components/artist-profile/info-sidebar"
+import { BookingSection } from "@/components/artist-profile/booking-section"
 
 export default async function ArtistProfilePage({ params }: { params: { id: string } }) {
   const artist = await getArtistById(params.id)
@@ -28,7 +28,7 @@ export default async function ArtistProfilePage({ params }: { params: { id: stri
               <ProfileTabs artist={artist} />
             </div>
             <div className="lg:col-span-1">
-              <InfoSidebar artist={artist} />
+              <BookingSection artist={artist} />
             </div>
           </div>
         </div>

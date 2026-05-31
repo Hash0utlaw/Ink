@@ -18,7 +18,9 @@ export default function ShopsPage() {
               Browse our curated list of top-rated tattoo shops from around the world.
             </p>
           </div>
-          <ShopSearchInterface />
+          <Suspense fallback={<div className="h-96 flex items-center justify-center text-muted-foreground">Loading shops…</div>}>
+            <ShopSearchInterface />
+          </Suspense>
         </div>
       </main>
       <Footer />

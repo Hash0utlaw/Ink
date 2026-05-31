@@ -1,9 +1,21 @@
+"use client"
+
+import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Search, MapPin, Sparkles, Users, Star } from "lucide-react"
-import Link from "next/link"
 
 export function HeroSection() {
+  const router = useRouter()
+  const [query, setQuery] = useState("")
+
+  function handleSearch(e: React.FormEvent) {
+    e.preventDefault()
+    const q = query.trim()
+    router.push(q ? `/artists?q=${encodeURIComponent(q)}` : "/artists")
+  }
+
   return (
     <section className="relative min-h-screen w-full flex items-center justify-center overflow-hidden">
       <div className="absolute inset-0 hero-grid opacity-50" />
@@ -39,24 +51,24 @@ export function HeroSection() {
             </div>
 
             <div className="max-w-3xl mx-auto">
-              <div className="hero-card p-6">
+              <form onSubmit={handleSearch} className="hero-card p-6">
                 <div className="flex flex-col lg:flex-row items-center gap-4">
                   <div className="relative flex-grow w-full">
                     <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-white/50" />
                     <Input
                       type="search"
+                      value={query}
+                      onChange={(e) => setQuery(e.target.value)}
                       placeholder="Search by location, artist, or style..."
                       className="pl-12 bg-white/5 border-white/20 focus:border-hero-accent text-white placeholder:text-white/50 h-14 text-lg rounded-xl"
                     />
                   </div>
-                  <Button asChild className="hero-button-primary w-full lg:w-auto h-14 text-lg">
-                    <Link href="/artists">
-                      <Search className="mr-2 h-5 w-5" />
-                      Browse Artists
-                    </Link>
+                  <Button type="submit" className="hero-button-primary w-full lg:w-auto h-14 text-lg">
+                    <Search className="mr-2 h-5 w-5" />
+                    Browse Artists
                   </Button>
                 </div>
-              </div>
+              </form>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mt-16">
