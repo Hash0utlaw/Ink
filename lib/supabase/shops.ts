@@ -69,6 +69,18 @@ export async function getShopById(id: string): Promise<Shop | null> {
   }
 }
 
+// Looks up by the slug column (add a slug text column to the shops table).
+export async function getShopBySlug(slug: string): Promise<Shop | null> {
+  try {
+    const supabase = createClient()
+    const { data, error } = await supabase.from("shops").select("*").eq("slug", slug).single()
+    if (error || !data) return null
+    return rowToShop(data as Record<string, unknown>)
+  } catch {
+    return null
+  }
+}
+
 // Looks up resident artists via the shop_artists join table.
 // Assumed table: shop_artists (shop_id, artist_id)
 export async function getShopArtists(shopId: string): Promise<Artist[]> {

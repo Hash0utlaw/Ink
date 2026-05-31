@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { Resend } from "resend"
 import { createClient } from "@/utils/supabase/server"
-import { getArtistById } from "@/lib/mock-data"
+import { getArtistById } from "@/lib/supabase/artists"
 
 export const dynamic = "force-dynamic"
 
