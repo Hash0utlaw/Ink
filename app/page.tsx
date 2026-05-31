@@ -4,8 +4,14 @@ import { Header } from "@/components/layout/header"
 import { HeroSection } from "@/components/homepage/hero-section"
 import { FeatureHighlights } from "@/components/homepage/feature-highlights"
 import { PopularCategories } from "@/components/homepage/popular-categories"
-import { FeaturedArtists } from "@/components/homepage/featured-artists"
+import { FeaturedArtists, FeaturedArtistsSkeleton } from "@/components/homepage/featured-artists"
 import { Footer } from "@/components/layout/footer"
+import { getArtists } from "@/lib/supabase/artists"
+
+async function FeaturedArtistsSection() {
+  const artists = await getArtists()
+  return <FeaturedArtists artists={artists} />
+}
 
 export default function HomePage() {
   return (
@@ -17,7 +23,9 @@ export default function HomePage() {
         <HeroSection />
         <FeatureHighlights />
         <PopularCategories />
-        <FeaturedArtists />
+        <Suspense fallback={<FeaturedArtistsSkeleton />}>
+          <FeaturedArtistsSection />
+        </Suspense>
       </main>
       <Footer />
     </div>

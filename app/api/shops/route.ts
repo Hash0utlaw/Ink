@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server"
-import { getShops } from "@/lib/mock-data"
-import type { Shop } from "@/types/shop"
+import { getShops } from "@/lib/supabase/shops"
 
 export const dynamic = "force-dynamic"
 
@@ -8,22 +7,16 @@ export async function GET(request: Request) {
   try {
     const url = new URL(request.url)
     const stylesParam = url.searchParams.get("styles")
-
-    const styles = stylesParam ? stylesParam.split(",") : []
     const rating = Number(url.searchParams.get("rating")) || 0
     const acceptsWalkIns = url.searchParams.get("acceptsWalkIns") === "true"
 
-    let shops: Shop[] = await getShops()
+    const styles = stylesParam ? stylesParam.split(",").filter(Boolean) : []
 
-    if (styles.length > 0 && styles[0]) {
-      shops = shops.filter((shop) => styles.every((style) => shop.specialties.includes(style)))
-    }
-    if (rating > 0) {
-      shops = shops.filter((shop) => shop.rating >= rating)
-    }
-    if (acceptsWalkIns) {
-      shops = shops.filter((shop) => shop.acceptsWalkIns)
-    }
+    const shops = await getShops({
+      styles: styles.length > 0 ? styles : undefined,
+      rating: rating > 0 ? rating : undefined,
+      acceptsWalkIns: acceptsWalkIns || undefined,
+    })
 
     return NextResponse.json(shops)
   } catch (error) {

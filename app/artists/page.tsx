@@ -18,7 +18,9 @@ export default function ArtistsPage() {
               Filter by style, location, and availability to discover the perfect artist for your vision.
             </p>
           </div>
-          <ArtistSearchInterface />
+          <Suspense fallback={<div className="h-96 flex items-center justify-center text-muted-foreground">Loading artists…</div>}>
+            <ArtistSearchInterface />
+          </Suspense>
         </div>
       </main>
       <Footer />

@@ -39,11 +39,6 @@ export function Footer() {
             <h3 className="font-semibold text-foreground">Discover</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/map" className="text-muted-foreground hover:text-accent transition-colors">
-                  Explore Map
-                </Link>
-              </li>
-              <li>
                 <Link href="/artists" className="text-muted-foreground hover:text-accent transition-colors">
                   Find Artists
                 </Link>
@@ -56,11 +51,6 @@ export function Footer() {
               <li>
                 <Link href="/styles" className="text-muted-foreground hover:text-accent transition-colors">
                   Tattoo Styles
-                </Link>
-              </li>
-              <li>
-                <Link href="/generator" className="text-muted-foreground hover:text-accent transition-colors">
-                  AI Generator
                 </Link>
               </li>
             </ul>

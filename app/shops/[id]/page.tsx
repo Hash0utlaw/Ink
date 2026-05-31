@@ -3,7 +3,7 @@ import { Suspense } from "react"
 import { Header } from "@/components/layout/header"
 import { HeaderSkeleton } from "@/components/layout/header-skeleton"
 import { Footer } from "@/components/layout/footer"
-import { getShopById, getArtistsByIds } from "@/lib/mock-data"
+import { getShopById, getShopArtists } from "@/lib/supabase/shops"
 import { ShopHeader } from "@/components/shop-profile/shop-header"
 import { ShopTabs } from "@/components/shop-profile/shop-tabs"
 import { ShopInfoSidebar } from "@/components/shop-profile/shop-info-sidebar"
@@ -15,7 +15,7 @@ export default async function ShopProfilePage({ params }: { params: { id: string
     notFound()
   }
 
-  const residentArtists = await getArtistsByIds(shop.residentArtistIds)
+  const residentArtists = await getShopArtists(params.id)
 
   return (
     <div className="flex min-h-screen flex-col">
