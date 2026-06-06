@@ -4,9 +4,10 @@ import type { Shop } from "@/types/shop"
 interface ShopResultsListProps {
   shops: Shop[]
   isLoading: boolean
+  distancesById?: Record<string, number>
 }
 
-export function ShopResultsList({ shops, isLoading }: ShopResultsListProps) {
+export function ShopResultsList({ shops, isLoading, distancesById }: ShopResultsListProps) {
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -29,7 +30,11 @@ export function ShopResultsList({ shops, isLoading }: ShopResultsListProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {shops.map((shop) => (
-        <ShopCard key={shop.id} shop={shop} />
+        <ShopCard
+          key={shop.id}
+          shop={shop}
+          distanceMi={distancesById?.[shop.id]}
+        />
       ))}
     </div>
   )
