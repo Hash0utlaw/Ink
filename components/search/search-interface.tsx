@@ -53,16 +53,26 @@ export function SearchInterface() {
   useEffect(() => {
     const fetchAll = async () => {
       setIsLoading(true)
-      const params = new URLSearchParams()
-      if (filters.styles.length > 0) params.set("styles", filters.styles.join(","))
-      if (filters.price.length > 0) params.set("price", filters.price.join(","))
-      if (filters.rating > 0) params.set("rating", filters.rating.toString())
-      if (filters.availableNow) params.set("availableNow", "true")
+
+      // Artist params
+      const artistParams = new URLSearchParams()
+      if (filters.styles.length > 0) artistParams.set("styles", filters.styles.join(","))
+      if (filters.price.length > 0) artistParams.set("price", filters.price.join(","))
+      if (filters.rating > 0) artistParams.set("rating", filters.rating.toString())
+      if (filters.availableNow) artistParams.set("availableNow", "true")
+      if (q) artistParams.set("q", q)
+
+      // Shop params — map artist-centric keys to shop equivalents
+      const shopParams = new URLSearchParams()
+      if (filters.styles.length > 0) shopParams.set("styles", filters.styles.join(","))
+      if (filters.rating > 0) shopParams.set("rating", filters.rating.toString())
+      if (filters.availableNow) shopParams.set("acceptsWalkIns", "true")
+      if (q) shopParams.set("query", q)
 
       try {
         const [artistsRes, shopsRes] = await Promise.all([
-          fetch(`/api/artists?${params.toString()}`),
-          fetch(`/api/shops?${params.toString()}`),
+          fetch(`/api/artists?${artistParams.toString()}`),
+          fetch(`/api/shops?${shopParams.toString()}`),
         ])
         setArtists(artistsRes.ok ? await artistsRes.json() : [])
         const shopsJson = shopsRes.ok ? await shopsRes.json() : []
@@ -76,7 +86,7 @@ export function SearchInterface() {
     }
 
     fetchAll()
-  }, [filters])
+  }, [filters, q])
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">

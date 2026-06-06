@@ -21,7 +21,7 @@ export async function GET(request: Request) {
     const sortBy = validSortBy.includes(sortByRaw as (typeof validSortBy)[number])
       ? (sortByRaw as ShopFilters["sortBy"])
       : undefined
-    const page = Number(searchParams.get("page")) || 0
+    const page = searchParams.has("page") ? (Number(searchParams.get("page")) || 0) : undefined
 
     const { data, count, error } = await getShops({
       styles: styles.length > 0 ? styles : undefined,

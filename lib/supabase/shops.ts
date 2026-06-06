@@ -79,10 +79,12 @@ export async function getShops(
     const sortMap: Record<string, string> = { rating: "rating", review_count: "review_count", name: "name" }
     query = query.order(sortMap[sortCol], { ascending: sortCol === "name" })
 
-    // Pagination
-    const page = filters.page ?? 0
-    const size = filters.pageSize ?? 24
-    query = query.range(page * size, (page + 1) * size - 1)
+    // Pagination — only applied when the caller explicitly passes a page number
+    if (filters.page !== undefined) {
+      const page = filters.page
+      const size = filters.pageSize ?? 24
+      query = query.range(page * size, (page + 1) * size - 1)
+    }
 
     const { data, count, error } = await query
     if (error) return { data: [], count: 0, error: error.message }
