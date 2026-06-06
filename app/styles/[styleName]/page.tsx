@@ -1,150 +1,208 @@
 import { notFound } from "next/navigation"
 import { Suspense } from "react"
-import { HeaderSkeleton } from "@/components/layout/header-skeleton"
+import Image from "next/image"
+import Link from "next/link"
 import { Header } from "@/components/layout/header"
+import { HeaderSkeleton } from "@/components/layout/header-skeleton"
 import { Footer } from "@/components/layout/footer"
-import { getArtistsByStyle } from "@/lib/mock-data"
-import { StyleHeader } from "@/components/styles/style-header"
-import { StyleImageGallery } from "@/components/styles/style-image-gallery"
-import { StyleArtistsList } from "@/components/styles/style-artists-list"
+import { ShopCard, ShopCardSkeleton } from "@/components/shops/shop-card"
+import { ArtistCard, ArtistCardSkeleton } from "@/components/artists/artist-card"
+import { Button } from "@/components/ui/button"
+import { getShops } from "@/lib/supabase/shops"
+import { getArtists } from "@/lib/supabase/artists"
 
-const styleData: { [key: string]: { title: string; description: string; images: string[] } } = {
+// ─── Style metadata ───────────────────────────────────────────────────────────
+
+type StyleMeta = {
+  displayName: string
+  description: string
+  heroImage: string
+}
+
+const STYLES: Record<string, StyleMeta> = {
   realism: {
-    title: "Realism Tattoos",
-    description:
-      "Realism tattoos are works of art that depict subjects truthfully, without stylization. From lifelike portraits to breathtaking nature scenes, these tattoos capture the world as it is.",
-    images: [
-      "/styles/realism-portrait-1.png",
-      "/styles/realism-animal-1.png",
-      "/styles/realism-nature-1.png",
-      "/styles/realism-portrait-2.png",
-      "/styles/realism-flower-1.png",
-      "/styles/realism-eye-1.png",
-      "/styles/realism-landscape-1.png",
-      "/styles/realism-animal-2.png",
-      "/styles/realism-portrait-3.png",
-    ],
+    displayName: "Realism",
+    description: "Lifelike portraits and hyper-realistic artwork",
+    heroImage: "https://images.unsplash.com/photo-1590246814883-55516d489f2a?w=1200&q=80",
   },
   traditional: {
-    title: "Traditional Tattoos",
-    description:
-      "Also known as American Traditional or Old School, this style is defined by bold black outlines, a limited color palette, and iconic imagery like roses, anchors, and eagles.",
-    images: [
-      "/styles/traditional-rose-1.png",
-      "/styles/traditional-anchor-1.png",
-      "/styles/traditional-eagle-1.png",
-      "/styles/traditional-skull-1.png",
-      "/styles/traditional-ship-1.png",
-      "/styles/traditional-dagger-1.png",
-      "/styles/traditional-heart-1.png",
-      "/styles/traditional-swallow-1.png",
-      "/styles/traditional-pin-up-1.png",
-    ],
+    displayName: "Traditional",
+    description: "Bold lines and classic American imagery",
+    heroImage: "https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=1200&q=80",
   },
   geometric: {
-    title: "Geometric Tattoos",
-    description:
-      "Geometric tattoos use lines, shapes, and patterns to create intricate and often abstract designs. This style is celebrated for its precision, symmetry, and symbolic depth.",
-    images: [
-      "/styles/geometric-mandala-1.png",
-      "/styles/geometric-animal-1.png",
-      "/styles/geometric-sacred-1.png",
-      "/styles/geometric-abstract-1.png",
-      "/styles/geometric-flower-1.png",
-      "/styles/geometric-triangle-1.png",
-      "/styles/geometric-hexagon-1.png",
-      "/styles/geometric-spiral-1.png",
-      "/styles/geometric-crystal-1.png",
-    ],
+    displayName: "Geometric",
+    description: "Sacred geometry and mathematical precision",
+    heroImage: "https://images.unsplash.com/photo-1611501275019-9b5cda994e8d?w=1200&q=80",
   },
   watercolor: {
-    title: "Watercolor Tattoos",
-    description:
-      "Mimicking the fluid and vibrant look of watercolor paintings, these tattoos feature soft edges, color splashes, and a painterly feel. They are a beautiful way to create a unique, artistic statement.",
-    images: [
-      "/styles/watercolor-flower-1.png",
-      "/styles/watercolor-bird-1.png",
-      "/styles/watercolor-abstract-1.png",
-      "/styles/watercolor-butterfly-1.png",
-      "/styles/watercolor-tree-1.png",
-      "/styles/watercolor-splash-1.png",
-      "/styles/watercolor-feather-1.png",
-      "/styles/watercolor-galaxy-1.png",
-      "/styles/watercolor-ocean-1.png",
-    ],
+    displayName: "Watercolor",
+    description: "Fluid colors and painterly brush strokes",
+    heroImage: "https://images.unsplash.com/photo-1542396601-dca920ea2807?w=1200&q=80",
   },
   japanese: {
-    title: "Japanese Tattoos",
-    description:
-      "Rooted in centuries of tradition, Japanese tattoos (Irezumi) are rich with symbolism and storytelling. They often feature large-scale designs with mythological creatures and natural elements.",
-    images: [
-      "/styles/japanese-dragon-1.png",
-      "/styles/japanese-koi-1.png",
-      "/styles/japanese-cherry-1.png",
-      "/styles/japanese-tiger-1.png",
-      "/styles/japanese-phoenix-1.png",
-      "/styles/japanese-wave-1.png",
-      "/styles/japanese-oni-1.png",
-      "/styles/japanese-samurai-1.png",
-      "/styles/japanese-lotus-1.png",
-    ],
+    displayName: "Japanese",
+    description: "Traditional Irezumi and oriental motifs",
+    heroImage: "https://images.unsplash.com/photo-1614036417651-efe5912149d8?w=1200&q=80",
   },
   blackwork: {
-    title: "Blackwork Tattoos",
-    description:
-      "Blackwork is a broad style that uses solid black ink to create bold and striking tattoos. It encompasses everything from ancient tribal patterns to modern abstract and geometric designs.",
-    images: [
-      "/styles/blackwork-tribal-1.png",
-      "/styles/blackwork-abstract-1.png",
-      "/styles/blackwork-ornamental-1.png",
-      "/styles/blackwork-botanical-1.png",
-      "/styles/blackwork-geometric-1.png",
-      "/styles/blackwork-mandala-1.png",
-      "/styles/blackwork-animal-1.png",
-      "/styles/blackwork-pattern-1.png",
-      "/styles/blackwork-minimalist-1.png",
-    ],
+    displayName: "Blackwork",
+    description: "Bold black ink, tribal and ornamental patterns",
+    heroImage: "https://images.unsplash.com/photo-1568515045052-f9a854d70bfd?w=1200&q=80",
   },
   "fine-line": {
-    title: "Fine Line Tattoos",
-    description:
-      "Characterized by thin, delicate lines, this style is perfect for creating detailed and elegant designs. It's a popular choice for subtle yet impactful tattoos.",
-    images: [
-      "/styles/fine-line-flower-1.png",
-      "/styles/fine-line-minimalist-1.png",
-      "/styles/fine-line-script-1.png",
-      "/styles/fine-line-botanical-1.png",
-      "/styles/fine-line-geometric-1.png",
-      "/styles/fine-line-animal-1.png",
-      "/styles/fine-line-constellation-1.png",
-      "/styles/fine-line-portrait-1.png",
-      "/styles/fine-line-abstract-1.png",
-    ],
+    displayName: "Fine Line",
+    description: "Delicate single-needle and minimalist designs",
+    heroImage: "https://images.unsplash.com/photo-1604881991720-f91add269bed?w=1200&q=80",
   },
 }
 
-export default async function StylePage({ params }: { params: { styleName: string } }) {
-  const styleInfo = styleData[params.styleName]
-  if (!styleInfo) {
-    notFound()
-  }
+// ─── Page ─────────────────────────────────────────────────────────────────────
 
-  const artists = await getArtistsByStyle(params.styleName)
+export default async function StylePage({
+  params,
+}: {
+  params: { styleName: string }
+}) {
+  const meta = STYLES[params.styleName]
+  if (!meta) notFound()
+
+  const { displayName, description, heroImage } = meta
+
+  // Fetch shops and artists filtered by this style (limit 6 each)
+  const [shopsResult, artists] = await Promise.all([
+    getShops({ styles: [displayName], pageSize: 6, page: 0 }),
+    getArtists({ styles: [displayName] }),
+  ])
+  const shops = shopsResult.data.slice(0, 6)
+  const topArtists = artists.slice(0, 6)
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col bg-background">
       <Suspense fallback={<HeaderSkeleton />}>
         <Header />
       </Suspense>
-      <main className="flex-1 bg-background">
-        <div className="container mx-auto px-4 py-8 md:py-12">
-          <StyleHeader title={styleInfo.title} description={styleInfo.description} />
-          <div className="my-12">
-            <StyleImageGallery images={styleInfo.images} />
+
+      <main className="flex-1">
+
+        {/* ─── Section 1: Hero banner ─────────────────────────────────────── */}
+        <div className="container mx-auto px-4 pt-8">
+          <div className="relative w-full overflow-hidden rounded-xl" style={{ maxHeight: 320, aspectRatio: "21/9" }}>
+            <Image
+              src={heroImage}
+              alt={`${displayName} tattoo style`}
+              fill
+              className="object-cover"
+              priority
+              sizes="(max-width: 768px) 100vw, 1200px"
+            />
+            {/* Dark gradient overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+            {/* Text anchored bottom-left */}
+            <div className="absolute bottom-0 left-0 p-6">
+              <h1 className="text-4xl font-bold text-white leading-tight">{displayName}</h1>
+              <p className="mt-1 text-white/80 text-base">{description}</p>
+            </div>
           </div>
-          <StyleArtistsList artists={artists} />
         </div>
+
+        {/* ─── Section 2: Shops ───────────────────────────────────────────── */}
+        <section className="container mx-auto px-4 py-12">
+          <div className="flex items-baseline justify-between mb-6">
+            <h2 className="text-2xl font-bold">Shops specialising in {displayName}</h2>
+            <Link
+              href={`/shops?styles=${encodeURIComponent(displayName)}`}
+              className="text-sm text-accent hover:underline underline-offset-4"
+            >
+              Browse all {displayName} shops
+            </Link>
+          </div>
+
+          {shops.length === 0 ? (
+            <div className="flex flex-col items-center gap-4 py-12 text-center text-muted-foreground">
+              <p>No shops listed for this style yet.</p>
+              <Button asChild variant="outline">
+                <Link href="/shops">Browse all shops</Link>
+              </Button>
+            </div>
+          ) : (
+            <Suspense
+              fallback={
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <ShopCardSkeleton key={i} />
+                  ))}
+                </div>
+              }
+            >
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {shops.map((shop) => (
+                  <ShopCard key={shop.id} shop={shop} />
+                ))}
+              </div>
+            </Suspense>
+          )}
+        </section>
+
+        {/* ─── Section 3: Artists ─────────────────────────────────────────── */}
+        <section className="container mx-auto px-4 pb-12">
+          <div className="flex items-baseline justify-between mb-6">
+            <h2 className="text-2xl font-bold">Artists specialising in {displayName}</h2>
+            <Link
+              href={`/artists?styles=${encodeURIComponent(displayName)}`}
+              className="text-sm text-accent hover:underline underline-offset-4"
+            >
+              Browse all {displayName} artists
+            </Link>
+          </div>
+
+          {topArtists.length === 0 ? (
+            <div className="flex flex-col items-center gap-4 py-12 text-center text-muted-foreground">
+              <p>No artists listed for this style yet.</p>
+              <Button asChild variant="outline">
+                <Link href="/artists">Browse all artists</Link>
+              </Button>
+            </div>
+          ) : (
+            <Suspense
+              fallback={
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <ArtistCardSkeleton key={i} />
+                  ))}
+                </div>
+              }
+            >
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {topArtists.map((artist) => (
+                  <ArtistCard key={artist.id} artist={artist} />
+                ))}
+              </div>
+            </Suspense>
+          )}
+        </section>
+
+        {/* ─── Section 4: Bottom CTA ──────────────────────────────────────── */}
+        <section className="container mx-auto px-4 pb-16">
+          <div className="rounded-xl bg-muted/50 px-8 py-12 text-center">
+            <h2 className="text-2xl font-bold mb-2">
+              Looking for a {displayName} artist near you?
+            </h2>
+            <p className="text-muted-foreground mb-6">
+              Browse our full directory of shops and artists.
+            </p>
+            <div className="flex items-center justify-center gap-4 flex-wrap">
+              <Button asChild>
+                <Link href={`/shops?styles=${encodeURIComponent(displayName)}`}>Find Shops</Link>
+              </Button>
+              <Button asChild variant="outline">
+                <Link href={`/artists?styles=${encodeURIComponent(displayName)}`}>Find Artists</Link>
+              </Button>
+            </div>
+          </div>
+        </section>
       </main>
+
       <Footer />
     </div>
   )
