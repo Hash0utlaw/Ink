@@ -135,14 +135,14 @@ export function ShopFilterSidebar({ filters, onFilterChange, onNearMe }: ShopFil
           <div className="space-y-1.5">
             <Label className="text-xs text-muted-foreground">State</Label>
             <Select
-              value={filters.state ?? ''}
-              onValueChange={(value) => onFilterChange({ ...filters, state: value })}
+              value={filters.state || "all"}
+              onValueChange={(value) => onFilterChange({ ...filters, state: value === "all" ? "" : value })}
             >
               <SelectTrigger>
                 <SelectValue placeholder="All States" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All States</SelectItem>
+                <SelectItem value="all">All States</SelectItem>
                 {US_STATES.map((s) => (
                   <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
                 ))}
