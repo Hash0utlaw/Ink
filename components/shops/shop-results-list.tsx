@@ -30,7 +30,11 @@ export function ShopResultsList({ shops, isLoading, distancesById }: ShopResults
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {shops.map((shop) => (
-        <ShopCard key={shop.id} shop={shop} distance={distancesById?.[shop.id]} />
+        <ShopCard
+          key={shop.id}
+          shop={shop}
+          distanceMi={distancesById?.[shop.id]}
+        />
       ))}
     </div>
   )
