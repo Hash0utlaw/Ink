@@ -8,52 +8,45 @@ import { MotionView } from "@/components/utils/motion-view"
 const styles = [
   {
     name: "Realism",
-    query: "photorealistic+tattoo",
     slug: "realism",
-    heroImage: "/styles/heroes/realism-hero.png",
     description: "Lifelike portraits and detailed artwork",
+    heroImage: "https://images.unsplash.com/photo-1590246814883-55516d489f2a?w=600&q=80",
   },
   {
     name: "Traditional",
-    query: "american+traditional+tattoo",
     slug: "traditional",
-    heroImage: "/styles/heroes/traditional-hero.png",
     description: "Bold lines and classic American imagery",
+    heroImage: "https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=600&q=80",
   },
   {
     name: "Geometric",
-    query: "geometric+tattoo",
     slug: "geometric",
-    heroImage: "/styles/heroes/geometric-hero.png",
     description: "Sacred geometry and mathematical precision",
+    heroImage: "https://images.unsplash.com/photo-1611501275019-9b5cda994e8d?w=600&q=80",
   },
   {
     name: "Watercolor",
-    query: "watercolor+tattoo",
     slug: "watercolor",
-    heroImage: "/styles/heroes/watercolor-hero.png",
     description: "Fluid colors and artistic brush strokes",
+    heroImage: "https://images.unsplash.com/photo-1542396601-dca920ea2807?w=600&q=80",
   },
   {
     name: "Japanese",
-    query: "japanese+irezumi+tattoo",
     slug: "japanese",
-    heroImage: "/styles/heroes/japanese-hero.png",
     description: "Traditional Irezumi and oriental motifs",
+    heroImage: "https://images.unsplash.com/photo-1614036417651-efe5912149d8?w=600&q=80",
   },
   {
     name: "Blackwork",
-    query: "blackwork+tattoo",
     slug: "blackwork",
-    heroImage: "/styles/heroes/blackwork-hero.png",
     description: "Bold black ink and tribal patterns",
+    heroImage: "https://images.unsplash.com/photo-1568515045052-f9a854d70bfd?w=600&q=80",
   },
   {
     name: "Fine Line",
-    query: "fine+line+tattoo",
     slug: "fine-line",
-    heroImage: "/styles/heroes/fine-line-hero.png",
     description: "Delicate lines and minimalist designs",
+    heroImage: "https://images.unsplash.com/photo-1604881991720-f91add269bed?w=600&q=80",
   },
 ]
 
@@ -74,7 +67,7 @@ export default function AllStylesPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {styles.map((style, i) => (
               <MotionView key={style.name} delay={i * 0.1}>
-                <Link href={`/styles/${style.slug}`}>
+                <Link href={`/shops?styles=${style.name}`}>
                   <div className="group relative overflow-hidden rounded-xl cursor-pointer aspect-[4/3] shadow-lg hover:shadow-2xl transition-all duration-300">
                     <img
                       src={style.heroImage || "/placeholder.svg"}
