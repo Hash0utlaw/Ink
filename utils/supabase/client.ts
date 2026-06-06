@@ -4,8 +4,9 @@ let browserClient: SupabaseClient | undefined
 
 /**
  * Returns a singleton Supabase client for Client Components.
+ * Returns null if environment variables are not configured.
  */
-export function getClient(): SupabaseClient {
+export function getClient(): SupabaseClient | null {
   if (browserClient) {
     return browserClient
   }
@@ -14,9 +15,7 @@ export function getClient(): SupabaseClient {
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
   if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error(
-      "Supabase URL and Anon Key are required. Please add the Supabase integration or set the environment variables.",
-    )
+    return null
   }
 
   browserClient = createBrowserClient(supabaseUrl, supabaseAnonKey)
