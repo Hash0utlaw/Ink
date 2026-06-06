@@ -20,5 +20,6 @@ export interface Shop {
     [key: string]: string
   }
   specialties: string[]
-  acceptsWalkIns: boolean // New property
+  acceptsWalkIns: boolean
+  distance_mi?: number
 }
