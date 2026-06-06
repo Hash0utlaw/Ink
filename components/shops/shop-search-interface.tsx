@@ -132,10 +132,10 @@ export function ShopSearchInterface() {
       const params = new URLSearchParams({
         lat: String(lat),
         lng: String(lng),
-        radiusMiles: String(filters.radiusMiles),
+        radius: String(filters.radiusMiles),
       })
       if (filters.rating > 0) params.set("rating", String(filters.rating))
-      if (filters.acceptsWalkIns) params.set("acceptsWalkIns", "true")
+      if (filters.acceptsWalkIns) params.set("walkIns", "true")
       const res = await fetch(`/api/shops/nearby?${params}`)
       if (!res.ok) throw new Error("Failed to fetch nearby shops")
       const json = await res.json()

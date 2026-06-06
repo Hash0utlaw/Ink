@@ -8,17 +8,18 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
     const lat = Number(searchParams.get("lat"))
     const lng = Number(searchParams.get("lng"))
-    const radiusMiles = Number(searchParams.get("radiusMiles")) || 25
+    const radius = Number(searchParams.get("radius")) || 25
     const rating = Number(searchParams.get("rating")) || 0
-    const acceptsWalkIns = searchParams.get("acceptsWalkIns") === "true"
+    const walkInsParam = searchParams.get("walkIns")
+    const walkIns = walkInsParam === null ? null : walkInsParam === "true"
 
     if (!lat || !lng) {
       return NextResponse.json({ message: "lat and lng are required" }, { status: 400 })
     }
 
-    const { data, error } = await getShopsNearMe(lat, lng, radiusMiles, {
+    const { data, error } = await getShopsNearMe(lat, lng, radius, {
       rating: rating > 0 ? rating : undefined,
-      acceptsWalkIns: acceptsWalkIns || undefined,
+      acceptsWalkIns: walkIns ?? undefined,
     })
 
     if (error) return NextResponse.json({ message: error }, { status: 500 })
