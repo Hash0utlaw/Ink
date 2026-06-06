@@ -5,21 +5,31 @@ import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Switch } from "@/components/ui/switch"
 import { Slider } from "@/components/ui/slider"
-import { Filter } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Filter, Navigation } from "lucide-react"
 
 const shopSpecialties = ["Fine Line", "Botanical", "Blackwork", "Japanese", "Irezumi", "Watercolor", "Traditional"]
 
 interface ShopFilterSidebarProps {
   filters: any
   onFilterChange: (filters: any) => void
+  onNearMe?: (lat: number, lng: number) => void
 }
 
-export function ShopFilterSidebar({ filters, onFilterChange }: ShopFilterSidebarProps) {
+export function ShopFilterSidebar({ filters, onFilterChange, onNearMe }: ShopFilterSidebarProps) {
   const handleStyleChange = (style: string) => {
     const newStyles = filters.styles.includes(style)
       ? filters.styles.filter((s: string) => s !== style)
       : [...filters.styles, style]
     onFilterChange({ ...filters, styles: newStyles })
+  }
+
+  function handleNearMeClick() {
+    if (!onNearMe || !navigator.geolocation) return
+    navigator.geolocation.getCurrentPosition(
+      (pos) => onNearMe(pos.coords.latitude, pos.coords.longitude),
+      (err) => console.error("Geolocation error:", err),
+    )
   }
 
   return (
@@ -31,6 +41,13 @@ export function ShopFilterSidebar({ filters, onFilterChange }: ShopFilterSidebar
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
+        {onNearMe && (
+          <Button variant="outline" className="w-full gap-2" onClick={handleNearMeClick}>
+            <Navigation className="w-4 h-4" />
+            Near Me
+          </Button>
+        )}
+
         <div className="space-y-2">
           <Label>Shop Specialties</Label>
           <div className="space-y-2">

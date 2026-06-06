@@ -4,9 +4,19 @@ import type { Artist, Review } from "@/types/artist"
 import { rowToArtist } from "./artists"
 
 export type ShopFilters = {
+  // Existing (keep these)
   styles?: string[]
   rating?: number
   acceptsWalkIns?: boolean
+
+  // New
+  zip?: string         // exact match: WHERE zip = $1
+  state?: string       // exact: WHERE state = $1 (2-letter code)
+  city?: string        // partial: WHERE city ILIKE '%$1%'
+  query?: string       // name search: WHERE name ILIKE '%$1%'
+  sortBy?: 'rating' | 'review_count' | 'name'
+  page?: number        // default 0
+  pageSize?: number    // default 24
 }
 
 // Assumed table columns: id, name, logo_url, cover_image_url, rating, review_count,
@@ -35,10 +45,12 @@ function rowToShop(row: Record<string, unknown>): Shop {
   }
 }
 
-export async function getShops(filters: ShopFilters = {}): Promise<Shop[]> {
+export async function getShops(
+  filters: ShopFilters = {}
+): Promise<{ data: Shop[]; count: number; error: string | null }> {
   try {
     const supabase = createClient()
-    let query = supabase.from("shops").select("*")
+    let query = supabase.from("shops").select("*", { count: "exact", head: false })
 
     if (filters.styles && filters.styles.length > 0) {
       query = query.contains("specialties", filters.styles)
@@ -49,12 +61,64 @@ export async function getShops(filters: ShopFilters = {}): Promise<Shop[]> {
     if (filters.acceptsWalkIns) {
       query = query.eq("accepts_walk_ins", true)
     }
+    if (filters.zip) {
+      query = query.eq("zip", filters.zip.trim())
+    }
+    if (filters.state) {
+      query = query.eq("state", filters.state.toUpperCase())
+    }
+    if (filters.city) {
+      query = query.ilike("city", `%${filters.city.trim()}%`)
+    }
+    if (filters.query) {
+      query = query.ilike("name", `%${filters.query.trim()}%`)
+    }
 
-    const { data, error } = await query
-    if (error || !data) return []
-    return data.map((row) => rowToShop(row as Record<string, unknown>))
-  } catch {
-    return []
+    // Sorting
+    const sortCol = filters.sortBy ?? "rating"
+    const sortMap: Record<string, string> = { rating: "rating", review_count: "review_count", name: "name" }
+    query = query.order(sortMap[sortCol], { ascending: sortCol === "name" })
+
+    // Pagination
+    const page = filters.page ?? 0
+    const size = filters.pageSize ?? 24
+    query = query.range(page * size, (page + 1) * size - 1)
+
+    const { data, count, error } = await query
+    if (error) return { data: [], count: 0, error: error.message }
+    return {
+      data: (data ?? []).map((row) => rowToShop(row as Record<string, unknown>)),
+      count: count ?? 0,
+      error: null,
+    }
+  } catch (e: unknown) {
+    return { data: [], count: 0, error: (e as Error).message }
+  }
+}
+
+export async function getShopsNearMe(
+  lat: number,
+  lng: number,
+  radiusMiles: number,
+  filters: Pick<ShopFilters, "rating" | "acceptsWalkIns"> = {}
+): Promise<{ data: (Shop & { distance_mi: number })[]; error: string | null }> {
+  try {
+    const supabase = createClient()
+    const { data, error } = await supabase.rpc("search_shops_near", {
+      p_lat: lat,
+      p_lng: lng,
+      p_radius_mi: radiusMiles,
+      p_min_rating: filters.rating ?? 0,
+      p_walk_ins: filters.acceptsWalkIns ?? null,
+    })
+    if (error) return { data: [], error: error.message }
+    const shops = (data ?? []).map((row: Record<string, unknown>) => ({
+      ...rowToShop(row),
+      distance_mi: Number(row.distance_mi ?? 0),
+    }))
+    return { data: shops, error: null }
+  } catch (e: unknown) {
+    return { data: [], error: (e as Error).message }
   }
 }
 
@@ -101,6 +165,39 @@ export async function getShopArtists(shopId: string): Promise<Artist[]> {
 
     if (artistsError || !artists) return []
     return artists.map((row) => rowToArtist(row as Record<string, unknown>))
+  } catch {
+    return []
+  }
+}
+
+export async function getStates(): Promise<{ code: string; label: string; count: number }[]> {
+  const STATE_NAMES: Record<string, string> = {
+    CA: "California", TX: "Texas", FL: "Florida", NC: "North Carolina",
+    LA: "Louisiana", NY: "New York", IL: "Illinois", AZ: "Arizona",
+    CO: "Colorado", PA: "Pennsylvania", OR: "Oregon", NV: "Nevada",
+    VA: "Virginia", NJ: "New Jersey", MO: "Missouri", WA: "Washington",
+    MI: "Michigan", TN: "Tennessee", VT: "Vermont", MA: "Massachusetts",
+    GA: "Georgia", UT: "Utah", SC: "South Carolina", WI: "Wisconsin",
+    CT: "Connecticut", OH: "Ohio",
+  }
+  try {
+    const supabase = createClient()
+    const { data } = await supabase
+      .from("shops")
+      .select("state")
+      .eq("is_active", true)
+    if (!data) return []
+    const counts: Record<string, number> = {}
+    data.forEach((r: { state: string | null }) => {
+      if (r.state) counts[r.state] = (counts[r.state] ?? 0) + 1
+    })
+    return Object.entries(counts)
+      .sort((a, b) => b[1] - a[1])
+      .map(([code, count]) => ({
+        code,
+        label: STATE_NAMES[code] ?? code,
+        count,
+      }))
   } catch {
     return []
   }

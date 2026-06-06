@@ -7,7 +7,12 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Star, MapPin } from "lucide-react"
 import type { Shop } from "@/types/shop"
 
-export function ShopCard({ shop }: { shop: Shop }) {
+interface ShopCardProps {
+  shop: Shop
+  distance?: number
+}
+
+export function ShopCard({ shop, distance }: ShopCardProps) {
   return (
     <Card className="overflow-hidden transition-all hover:border-accent/50 hover:-translate-y-1 flex flex-col">
       <div className="h-32 w-full overflow-hidden">
@@ -24,9 +29,16 @@ export function ShopCard({ shop }: { shop: Shop }) {
         </Avatar>
         <div className="flex-1 pt-12">
           <h3 className="font-bold text-xl">{shop.name}</h3>
-          <div className="flex items-center gap-1 text-sm text-muted-foreground">
-            <MapPin className="w-3 h-3" />
-            {shop.location.city}
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <span className="flex items-center gap-1">
+              <MapPin className="w-3 h-3" />
+              {shop.location.city}
+            </span>
+            {distance != null && (
+              <Badge className="bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded-full font-normal">
+                {distance.toFixed(1)} mi away
+              </Badge>
+            )}
           </div>
         </div>
       </CardHeader>
