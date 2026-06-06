@@ -65,7 +65,8 @@ export function SearchInterface() {
           fetch(`/api/shops?${params.toString()}`),
         ])
         setArtists(artistsRes.ok ? await artistsRes.json() : [])
-        setShops(shopsRes.ok ? await shopsRes.json() : [])
+        const shopsJson = shopsRes.ok ? await shopsRes.json() : []
+        setShops(Array.isArray(shopsJson) ? shopsJson : (shopsJson.data ?? []))
       } catch {
         setArtists([])
         setShops([])
