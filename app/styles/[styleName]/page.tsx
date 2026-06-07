@@ -1,16 +1,16 @@
 import { notFound } from "next/navigation"
 import { Suspense } from "react"
-import Image from "next/image"
 import Link from "next/link"
 import { Header } from "@/components/layout/header"
 import { HeaderSkeleton } from "@/components/layout/header-skeleton"
 import { Footer } from "@/components/layout/footer"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { ArrowRight, ChevronLeft, MapPin, User } from "lucide-react"
+import { ArrowRight, MapPin, User } from "lucide-react"
 import { ALL_STYLES } from "@/app/styles/page"
 import { StyleGallery } from "@/components/styles/style-gallery"
 import { StyleRelated } from "@/components/styles/style-related"
+import { StyleHero } from "@/components/styles/style-hero"
 
 // ─── Metadata ─────────────────────────────────────────────────────────────────
 
@@ -46,48 +46,7 @@ export default function StylePage({ params }: { params: { styleName: string } })
       <main className="flex-1">
 
         {/* ── Hero ─────────────────────────────────────────────────────────── */}
-        <div className="relative w-full overflow-hidden" style={{ height: "clamp(280px, 40vh, 420px)" }}>
-          <Image
-            src={style.heroImage}
-            alt={`${style.name} tattoo style`}
-            fill
-            className="object-cover"
-            priority
-            sizes="100vw"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/10" />
-
-          {/* Back link */}
-          <div className="absolute top-5 left-5">
-            <Link
-              href="/styles"
-              className="inline-flex items-center gap-1.5 bg-black/50 backdrop-blur-sm text-white/90 hover:text-white text-sm font-medium px-3 py-1.5 rounded-full transition-colors"
-            >
-              <ChevronLeft className="w-3.5 h-3.5" />
-              All Styles
-            </Link>
-          </div>
-
-          {/* Hero text */}
-          <div className="absolute bottom-0 left-0 right-0 container mx-auto px-4 pb-8">
-            <div className="flex flex-wrap gap-1.5 mb-3">
-              <Badge variant="outline" className="bg-black/40 backdrop-blur-sm border-white/20 text-white/80 text-xs">
-                {style.category}
-              </Badge>
-              {style.tags.map((tag) => (
-                <Badge
-                  key={tag}
-                  variant="outline"
-                  className="bg-black/40 backdrop-blur-sm border-white/20 text-white/80 text-xs"
-                >
-                  {tag}
-                </Badge>
-              ))}
-            </div>
-            <h1 className="text-4xl md:text-5xl font-extrabold text-white leading-tight mb-2">{style.name}</h1>
-            <p className="text-white/75 text-base md:text-lg max-w-xl">{style.description}</p>
-          </div>
-        </div>
+        <StyleHero style={style} />
 
         {/* ── Sticky CTA bar ───────────────────────────────────────────────── */}
         <div className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur-md shadow-sm">

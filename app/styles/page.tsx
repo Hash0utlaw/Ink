@@ -6,6 +6,7 @@ import { Footer } from "@/components/layout/footer"
 import { MotionView } from "@/components/utils/motion-view"
 import { Badge } from "@/components/ui/badge"
 import { ArrowRight } from "lucide-react"
+import { StyleCard } from "@/components/styles/style-card"
 
 export const metadata = {
   title: "Tattoo Styles | Ink",
@@ -384,45 +385,7 @@ export default function AllStylesPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {categoryStyles.map((style, i) => (
                     <MotionView key={style.slug} delay={i * 0.07}>
-                      <Link href={`/styles/${style.slug}`} className="group block">
-                        <div className="relative overflow-hidden rounded-xl aspect-[4/3] shadow-sm hover:shadow-xl transition-all duration-300 border border-border/60">
-                          {/* Hero image */}
-                          <img
-                            src={style.heroImage}
-                            alt={`${style.name} tattoo style`}
-                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                          />
-                          {/* Gradient overlay */}
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
-
-                          {/* Tags top-left */}
-                          <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
-                            {style.tags.slice(0, 2).map((tag) => (
-                              <span
-                                key={tag}
-                                className="bg-black/50 backdrop-blur-sm text-white/90 text-[10px] font-medium px-2 py-0.5 rounded-full"
-                              >
-                                {tag}
-                              </span>
-                            ))}
-                          </div>
-
-                          {/* Arrow top-right */}
-                          <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                            <div className="bg-primary rounded-full p-1.5">
-                              <ArrowRight className="w-3.5 h-3.5 text-primary-foreground" />
-                            </div>
-                          </div>
-
-                          {/* Text bottom */}
-                          <div className="absolute bottom-0 left-0 right-0 p-5">
-                            <h3 className="font-bold text-white text-xl mb-1 group-hover:text-primary/90 transition-colors">
-                              {style.name}
-                            </h3>
-                            <p className="text-white/70 text-xs leading-relaxed line-clamp-2">{style.description}</p>
-                          </div>
-                        </div>
-                      </Link>
+                      <StyleCard style={style} />
                     </MotionView>
                   ))}
                 </div>
