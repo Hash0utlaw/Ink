@@ -35,8 +35,7 @@ export async function GET(request: Request) {
       page,
     })
 
-    // Return empty data gracefully when the table doesn't exist yet or a DB error occurs
-    if (error) return NextResponse.json({ data: [], count: 0, error })
+    if (error) return NextResponse.json({ message: error }, { status: 500 })
     return NextResponse.json({ data, count })
   } catch (err) {
     console.error("Failed to fetch shops:", err)
