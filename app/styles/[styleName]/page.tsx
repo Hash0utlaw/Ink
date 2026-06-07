@@ -5,77 +5,37 @@ import Link from "next/link"
 import { Header } from "@/components/layout/header"
 import { HeaderSkeleton } from "@/components/layout/header-skeleton"
 import { Footer } from "@/components/layout/footer"
-import { ShopCard, ShopCardSkeleton } from "@/components/shops/shop-card"
-import { ArtistCard, ArtistCardSkeleton } from "@/components/artists/artist-card"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { getShops } from "@/lib/supabase/shops"
-import { getArtists } from "@/lib/supabase/artists"
+import { ArrowRight, ChevronLeft, MapPin, User } from "lucide-react"
+import { ALL_STYLES } from "@/app/styles/page"
+import { StyleGallery } from "@/components/styles/style-gallery"
+import { StyleRelated } from "@/components/styles/style-related"
 
-// ─── Style metadata ───────────────────────────────────────────────────────────
+// ─── Metadata ─────────────────────────────────────────────────────────────────
 
-type StyleMeta = {
-  displayName: string
-  description: string
-  heroImage: string
+export async function generateMetadata({ params }: { params: { styleName: string } }) {
+  const style = ALL_STYLES.find((s) => s.slug === params.styleName)
+  if (!style) return {}
+  return {
+    title: `${style.name} Tattoos | Ink`,
+    description: style.description,
+  }
 }
 
-const STYLES: Record<string, StyleMeta> = {
-  realism: {
-    displayName: "Realism",
-    description: "Lifelike portraits and hyper-realistic artwork",
-    heroImage: "https://images.unsplash.com/photo-1590246814883-55516d489f2a?w=1200&q=80",
-  },
-  traditional: {
-    displayName: "Traditional",
-    description: "Bold lines and classic American imagery",
-    heroImage: "https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=1200&q=80",
-  },
-  geometric: {
-    displayName: "Geometric",
-    description: "Sacred geometry and mathematical precision",
-    heroImage: "https://images.unsplash.com/photo-1611501275019-9b5cda994e8d?w=1200&q=80",
-  },
-  watercolor: {
-    displayName: "Watercolor",
-    description: "Fluid colors and painterly brush strokes",
-    heroImage: "https://images.unsplash.com/photo-1542396601-dca920ea2807?w=1200&q=80",
-  },
-  japanese: {
-    displayName: "Japanese",
-    description: "Traditional Irezumi and oriental motifs",
-    heroImage: "https://images.unsplash.com/photo-1614036417651-efe5912149d8?w=1200&q=80",
-  },
-  blackwork: {
-    displayName: "Blackwork",
-    description: "Bold black ink, tribal and ornamental patterns",
-    heroImage: "https://images.unsplash.com/photo-1568515045052-f9a854d70bfd?w=1200&q=80",
-  },
-  "fine-line": {
-    displayName: "Fine Line",
-    description: "Delicate single-needle and minimalist designs",
-    heroImage: "https://images.unsplash.com/photo-1604881991720-f91add269bed?w=1200&q=80",
-  },
+export async function generateStaticParams() {
+  return ALL_STYLES.map((s) => ({ styleName: s.slug }))
 }
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-export default async function StylePage({
-  params,
-}: {
-  params: { styleName: string }
-}) {
-  const meta = STYLES[params.styleName]
-  if (!meta) notFound()
+export default function StylePage({ params }: { params: { styleName: string } }) {
+  const style = ALL_STYLES.find((s) => s.slug === params.styleName)
+  if (!style) notFound()
 
-  const { displayName, description, heroImage } = meta
-
-  // Fetch shops and artists filtered by this style (limit 6 each)
-  const [shopsResult, artists] = await Promise.all([
-    getShops({ styles: [displayName], pageSize: 6, page: 0 }),
-    getArtists({ styles: [displayName] }),
-  ])
-  const shops = shopsResult.data.slice(0, 6)
-  const topArtists = artists.slice(0, 6)
+  const related = ALL_STYLES.filter(
+    (s) => s.slug !== style.slug && s.category === style.category
+  ).slice(0, 3)
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -85,122 +45,165 @@ export default async function StylePage({
 
       <main className="flex-1">
 
-        {/* ─── Section 1: Hero banner ─────────────────────────────────────── */}
-        <div className="container mx-auto px-4 pt-8">
-          <div className="relative w-full overflow-hidden rounded-xl" style={{ maxHeight: 320, aspectRatio: "21/9" }}>
-            <Image
-              src={heroImage}
-              alt={`${displayName} tattoo style`}
-              fill
-              className="object-cover"
-              priority
-              sizes="(max-width: 768px) 100vw, 1200px"
-            />
-            {/* Dark gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-            {/* Text anchored bottom-left */}
-            <div className="absolute bottom-0 left-0 p-6">
-              <h1 className="text-4xl font-bold text-white leading-tight">{displayName}</h1>
-              <p className="mt-1 text-white/80 text-base">{description}</p>
+        {/* ── Hero ─────────────────────────────────────────────────────────── */}
+        <div className="relative w-full overflow-hidden" style={{ height: "clamp(280px, 40vh, 420px)" }}>
+          <Image
+            src={style.heroImage}
+            alt={`${style.name} tattoo style`}
+            fill
+            className="object-cover"
+            priority
+            sizes="100vw"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/10" />
+
+          {/* Back link */}
+          <div className="absolute top-5 left-5">
+            <Link
+              href="/styles"
+              className="inline-flex items-center gap-1.5 bg-black/50 backdrop-blur-sm text-white/90 hover:text-white text-sm font-medium px-3 py-1.5 rounded-full transition-colors"
+            >
+              <ChevronLeft className="w-3.5 h-3.5" />
+              All Styles
+            </Link>
+          </div>
+
+          {/* Hero text */}
+          <div className="absolute bottom-0 left-0 right-0 container mx-auto px-4 pb-8">
+            <div className="flex flex-wrap gap-1.5 mb-3">
+              <Badge variant="outline" className="bg-black/40 backdrop-blur-sm border-white/20 text-white/80 text-xs">
+                {style.category}
+              </Badge>
+              {style.tags.map((tag) => (
+                <Badge
+                  key={tag}
+                  variant="outline"
+                  className="bg-black/40 backdrop-blur-sm border-white/20 text-white/80 text-xs"
+                >
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+            <h1 className="text-4xl md:text-5xl font-extrabold text-white leading-tight mb-2">{style.name}</h1>
+            <p className="text-white/75 text-base md:text-lg max-w-xl">{style.description}</p>
+          </div>
+        </div>
+
+        {/* ── Sticky CTA bar ───────────────────────────────────────────────── */}
+        <div className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur-md shadow-sm">
+          <div className="container mx-auto px-4 py-3 flex items-center justify-between gap-4">
+            <p className="text-sm text-muted-foreground hidden sm:block">
+              Ready to get your <span className="font-semibold text-foreground">{style.name}</span> tattoo?
+            </p>
+            <div className="flex items-center gap-2 ml-auto">
+              <Button asChild size="sm" variant="outline" className="gap-1.5">
+                <Link href={`/shops?styles=${encodeURIComponent(style.name)}`}>
+                  <MapPin className="w-3.5 h-3.5" />
+                  Find a Shop
+                </Link>
+              </Button>
+              <Button asChild size="sm" className="gap-1.5">
+                <Link href={`/artists?styles=${encodeURIComponent(style.name)}`}>
+                  <User className="w-3.5 h-3.5" />
+                  Find an Artist
+                </Link>
+              </Button>
             </div>
           </div>
         </div>
 
-        {/* ─── Section 2: Shops ───────────────────────────────────────────── */}
-        <section className="container mx-auto px-4 py-12">
-          <div className="flex items-baseline justify-between mb-6">
-            <h2 className="text-2xl font-bold">Shops specialising in {displayName}</h2>
-            <Link
-              href={`/shops?styles=${encodeURIComponent(displayName)}`}
-              className="text-sm text-accent hover:underline underline-offset-4"
-            >
-              Browse all {displayName} shops
-            </Link>
-          </div>
-
-          {shops.length === 0 ? (
-            <div className="flex flex-col items-center gap-4 py-12 text-center text-muted-foreground">
-              <p>No shops listed for this style yet.</p>
-              <Button asChild variant="outline">
-                <Link href="/shops">Browse all shops</Link>
-              </Button>
-            </div>
-          ) : (
-            <Suspense
-              fallback={
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {Array.from({ length: 6 }).map((_, i) => (
-                    <ShopCardSkeleton key={i} />
-                  ))}
-                </div>
-              }
-            >
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {shops.map((shop) => (
-                  <ShopCard key={shop.id} shop={shop} />
-                ))}
-              </div>
-            </Suspense>
-          )}
-        </section>
-
-        {/* ─── Section 3: Artists ─────────────────────────────────────────── */}
-        <section className="container mx-auto px-4 pb-12">
-          <div className="flex items-baseline justify-between mb-6">
-            <h2 className="text-2xl font-bold">Artists specialising in {displayName}</h2>
-            <Link
-              href={`/artists?styles=${encodeURIComponent(displayName)}`}
-              className="text-sm text-accent hover:underline underline-offset-4"
-            >
-              Browse all {displayName} artists
-            </Link>
-          </div>
-
-          {topArtists.length === 0 ? (
-            <div className="flex flex-col items-center gap-4 py-12 text-center text-muted-foreground">
-              <p>No artists listed for this style yet.</p>
-              <Button asChild variant="outline">
-                <Link href="/artists">Browse all artists</Link>
-              </Button>
-            </div>
-          ) : (
-            <Suspense
-              fallback={
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {Array.from({ length: 6 }).map((_, i) => (
-                    <ArtistCardSkeleton key={i} />
-                  ))}
-                </div>
-              }
-            >
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {topArtists.map((artist) => (
-                  <ArtistCard key={artist.id} artist={artist} />
-                ))}
-              </div>
-            </Suspense>
-          )}
-        </section>
-
-        {/* ─── Section 4: Bottom CTA ──────────────────────────────────────── */}
-        <section className="container mx-auto px-4 pb-16">
-          <div className="rounded-xl bg-muted/50 px-8 py-12 text-center">
-            <h2 className="text-2xl font-bold mb-2">
-              Looking for a {displayName} artist near you?
-            </h2>
-            <p className="text-muted-foreground mb-6">
-              Browse our full directory of shops and artists.
+        {/* ── Gallery ──────────────────────────────────────────────────────── */}
+        <section className="container mx-auto px-4 py-10">
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold mb-1">{style.name} Examples</h2>
+            <p className="text-muted-foreground text-sm">
+              {style.exampleImages.length} curated examples of {style.name.toLowerCase()} tattoo work
             </p>
-            <div className="flex items-center justify-center gap-4 flex-wrap">
-              <Button asChild>
-                <Link href={`/shops?styles=${encodeURIComponent(displayName)}`}>Find Shops</Link>
-              </Button>
-              <Button asChild variant="outline">
-                <Link href={`/artists?styles=${encodeURIComponent(displayName)}`}>Find Artists</Link>
-              </Button>
+          </div>
+          <StyleGallery images={style.exampleImages} styleName={style.name} />
+        </section>
+
+        {/* ── What makes this style ─────────────────────────────────────────── */}
+        <section className="container mx-auto px-4 py-6 pb-10">
+          <div className="rounded-2xl bg-muted/40 border border-border p-6 md:p-8">
+            <h2 className="text-xl font-bold mb-4">About {style.name}</h2>
+            <p className="text-muted-foreground leading-relaxed mb-5">{style.description}</p>
+            <div className="flex flex-wrap gap-2">
+              {style.tags.map((tag) => (
+                <Badge key={tag} variant="secondary" className="text-xs">
+                  {tag}
+                </Badge>
+              ))}
             </div>
           </div>
         </section>
+
+        {/* ── Primary CTA: Find Shop or Artist ─────────────────────────────── */}
+        <section className="container mx-auto px-4 pb-10">
+          <div className="rounded-2xl overflow-hidden border border-border">
+            <div className="grid md:grid-cols-2">
+
+              {/* Find a Shop card */}
+              <Link
+                href={`/shops?styles=${encodeURIComponent(style.name)}`}
+                className="group relative flex flex-col gap-4 p-7 md:p-10 bg-card hover:bg-muted/30 transition-colors border-b md:border-b-0 md:border-r border-border"
+              >
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                  <MapPin className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold mb-1 group-hover:text-primary transition-colors">
+                    Find a Shop
+                  </h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed">
+                    Browse tattoo shops that specialise in {style.name.toLowerCase()} work. Filter by location
+                    and see shop portfolios.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 text-sm font-semibold text-primary mt-auto">
+                  Browse {style.name} shops
+                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                </div>
+              </Link>
+
+              {/* Find an Artist card */}
+              <Link
+                href={`/artists?styles=${encodeURIComponent(style.name)}`}
+                className="group relative flex flex-col gap-4 p-7 md:p-10 bg-card hover:bg-muted/30 transition-colors"
+              >
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                  <User className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold mb-1 group-hover:text-primary transition-colors">
+                    Find an Artist
+                  </h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed">
+                    Connect directly with tattoo artists who specialise in {style.name.toLowerCase()}. View
+                    portfolios and book a consultation.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 text-sm font-semibold text-primary mt-auto">
+                  Browse {style.name} artists
+                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                </div>
+              </Link>
+
+            </div>
+          </div>
+        </section>
+
+        {/* ── Related styles ────────────────────────────────────────────────── */}
+        {related.length > 0 && (
+          <section className="container mx-auto px-4 pb-14">
+            <div className="flex items-center gap-3 mb-5">
+              <h2 className="text-xl font-bold">Related Styles</h2>
+              <div className="flex-1 h-px bg-border" />
+            </div>
+            <StyleRelated styles={related} />
+          </section>
+        )}
+
       </main>
 
       <Footer />
