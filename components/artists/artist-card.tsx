@@ -4,10 +4,17 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Star } from "lucide-react"
+import { Star, MapPin } from "lucide-react"
 import type { Artist } from "@/types/artist"
 
-export function ArtistCard({ artist }: { artist: Artist }) {
+const priceLabel: Record<string, string> = { low: "$", medium: "$$", high: "$$$" }
+
+interface ArtistCardProps {
+  artist: Artist
+  distance?: number
+}
+
+export function ArtistCard({ artist, distance }: ArtistCardProps) {
   return (
     <Card className="overflow-hidden transition-all hover:border-accent/50 hover:-translate-y-1 flex flex-col">
       <CardHeader className="flex flex-row items-start gap-4 p-4">
@@ -16,9 +23,16 @@ export function ArtistCard({ artist }: { artist: Artist }) {
           <AvatarFallback>{artist.name.charAt(0)}</AvatarFallback>
         </Avatar>
         <div className="flex-1">
-          <h3 className="font-bold text-xl">{artist.name}</h3>
+          <div className="flex items-start justify-between gap-2">
+            <h3 className="font-bold text-xl">{artist.name}</h3>
+            {distance != null && (
+              <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30 whitespace-nowrap">
+                {distance.toFixed(1)} mi
+              </span>
+            )}
+          </div>
           <p className="text-sm text-muted-foreground">{artist.shopName}</p>
-          <div className="flex items-center gap-2 mt-1">
+          <div className="flex items-center gap-2 mt-1 flex-wrap">
             <div className="flex items-center gap-1">
               <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
               <span className="text-sm font-medium">{artist.rating}</span>
@@ -29,16 +43,28 @@ export function ArtistCard({ artist }: { artist: Artist }) {
                 Available
               </Badge>
             )}
+            <Badge variant="secondary" className="text-xs">
+              {priceLabel[artist.priceRange] ?? artist.priceRange}
+            </Badge>
           </div>
+          {artist.location.city && (
+            <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
+              <MapPin className="w-3 h-3" />
+              <span>{artist.location.city}</span>
+            </div>
+          )}
         </div>
       </CardHeader>
       <CardContent className="p-4 pt-0 flex-1">
         <div className="flex flex-wrap gap-2 mb-4">
-          {artist.specialties.map((spec) => (
+          {artist.specialties.slice(0, 4).map((spec) => (
             <Badge key={spec} variant="secondary">
               {spec}
             </Badge>
           ))}
+          {artist.specialties.length > 4 && (
+            <Badge variant="secondary">+{artist.specialties.length - 4}</Badge>
+          )}
         </div>
         <div className="grid grid-cols-2 gap-2">
           <img

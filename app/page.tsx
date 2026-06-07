@@ -9,7 +9,7 @@ import { Footer } from "@/components/layout/footer"
 import { getArtists } from "@/lib/supabase/artists"
 
 async function FeaturedArtistsSection() {
-  const artists = await getArtists()
+  const { data: artists } = await getArtists()
   return <FeaturedArtists artists={artists} />
 }
 

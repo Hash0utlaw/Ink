@@ -4,9 +4,10 @@ import type { Artist } from "@/types/artist"
 interface ResultsListProps {
   artists: Artist[]
   isLoading: boolean
+  distancesById?: Record<string, number>
 }
 
-export function ResultsList({ artists, isLoading }: ResultsListProps) {
+export function ResultsList({ artists, isLoading, distancesById }: ResultsListProps) {
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -29,7 +30,7 @@ export function ResultsList({ artists, isLoading }: ResultsListProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {artists.map((artist) => (
-        <ArtistCard key={artist.id} artist={artist} />
+        <ArtistCard key={artist.id} artist={artist} distance={distancesById?.[artist.id]} />
       ))}
     </div>
   )

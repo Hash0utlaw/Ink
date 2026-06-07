@@ -14,6 +14,12 @@ type Filters = {
   price: string[]
   rating: number
   availableNow: boolean
+  query: string
+  city: string
+  state: string
+  zip: string
+  sortBy: "rating" | "review_count" | "name"
+  radiusMiles: number
 }
 
 function filtersFromParams(params: URLSearchParams): Filters {
@@ -22,6 +28,12 @@ function filtersFromParams(params: URLSearchParams): Filters {
     price: params.get("price")?.split(",").filter(Boolean) ?? [],
     rating: Number(params.get("rating")) || 0,
     availableNow: params.get("availableNow") === "true",
+    query: params.get("query") ?? "",
+    city: "",
+    state: "",
+    zip: "",
+    sortBy: "rating",
+    radiusMiles: 25,
   }
 }
 
@@ -74,7 +86,8 @@ export function SearchInterface() {
           fetch(`/api/artists?${artistParams.toString()}`),
           fetch(`/api/shops?${shopParams.toString()}`),
         ])
-        setArtists(artistsRes.ok ? await artistsRes.json() : [])
+        const artistsJson = artistsRes.ok ? await artistsRes.json() : { data: [] }
+        setArtists(Array.isArray(artistsJson) ? artistsJson : (artistsJson.data ?? []))
         const shopsJson = shopsRes.ok ? await shopsRes.json() : []
         setShops(Array.isArray(shopsJson) ? shopsJson : (shopsJson.data ?? []))
       } catch {
