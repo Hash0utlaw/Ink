@@ -6,13 +6,19 @@ export type ArtistFilters = {
   price?: string[]
   rating?: number
   availableNow?: boolean
+  query?: string
+  city?: string
+  state?: string
+  zip?: string
+  sortBy?: "rating" | "review_count" | "name"
+  page?: number
+  pageSize?: number
 }
 
-// Maps a raw Supabase row (snake_case columns) to the Artist shape the UI expects.
 // Assumed table columns: id, name, shop_name, specialties (text[]),
 // rating, review_count, location_address, location_city, location_lat, location_lng,
 // avatar_url, portfolio_images (text[]), is_available, price_range,
-// bio, reviews (jsonb), hours (jsonb)
+// bio, reviews (jsonb), hours (jsonb), slug, state, zip, city
 export function rowToArtist(row: Record<string, unknown>): Artist {
   return {
     id: String(row.id ?? ""),
@@ -23,7 +29,7 @@ export function rowToArtist(row: Record<string, unknown>): Artist {
     reviewCount: Number(row.review_count ?? 0),
     location: {
       address: String(row.location_address ?? ""),
-      city: String(row.location_city ?? ""),
+      city: String(row.location_city ?? row.city ?? ""),
       lat: Number(row.location_lat ?? 0),
       lng: Number(row.location_lng ?? 0),
     },
@@ -37,10 +43,12 @@ export function rowToArtist(row: Record<string, unknown>): Artist {
   }
 }
 
-export async function getArtists(filters: ArtistFilters = {}): Promise<Artist[]> {
+export async function getArtists(
+  filters: ArtistFilters = {}
+): Promise<{ data: Artist[]; count: number; error: string | null }> {
   try {
     const supabase = createClient()
-    let query = supabase.from("artists").select("*")
+    let query = supabase.from("artists").select("*", { count: "exact", head: false })
 
     if (filters.styles && filters.styles.length > 0) {
       query = query.contains("specialties", filters.styles)
@@ -54,12 +62,64 @@ export async function getArtists(filters: ArtistFilters = {}): Promise<Artist[]>
     if (filters.availableNow) {
       query = query.eq("is_available", true)
     }
+    if (filters.query) {
+      query = query.ilike("name", `%${filters.query.trim()}%`)
+    }
+    if (filters.city) {
+      query = query.ilike("city", `%${filters.city.trim()}%`)
+    }
+    if (filters.state) {
+      query = query.eq("state", filters.state.toUpperCase())
+    }
+    if (filters.zip) {
+      query = query.eq("zip", filters.zip.trim())
+    }
 
-    const { data, error } = await query
-    if (error || !data) return []
-    return data.map((row) => rowToArtist(row as Record<string, unknown>))
-  } catch {
-    return []
+    const sortCol = filters.sortBy ?? "rating"
+    const sortMap: Record<string, string> = { rating: "rating", review_count: "review_count", name: "name" }
+    query = query.order(sortMap[sortCol], { ascending: sortCol === "name" })
+
+    if (filters.page !== undefined) {
+      const page = filters.page
+      const size = filters.pageSize ?? 24
+      query = query.range(page * size, (page + 1) * size - 1)
+    }
+
+    const { data, count, error } = await query
+    if (error) return { data: [], count: 0, error: error.message }
+    return {
+      data: (data ?? []).map((row: Record<string, unknown>) => rowToArtist(row)),
+      count: count ?? 0,
+      error: null,
+    }
+  } catch (e: unknown) {
+    return { data: [], count: 0, error: (e as Error).message }
+  }
+}
+
+export async function getArtistsNearMe(
+  lat: number,
+  lng: number,
+  radiusMiles: number,
+  filters: Pick<ArtistFilters, "rating" | "availableNow"> = {}
+): Promise<{ data: (Artist & { distance_mi: number })[]; error: string | null }> {
+  try {
+    const supabase = createClient()
+    const { data, error } = await supabase.rpc("search_artists_near", {
+      p_lat: lat,
+      p_lng: lng,
+      p_radius_mi: radiusMiles,
+      p_min_rating: filters.rating ?? 0,
+      p_available: filters.availableNow ?? null,
+    })
+    if (error) return { data: [], error: error.message }
+    const artists = (data ?? []).map((row: Record<string, unknown>) => {
+      const r = row as Record<string, unknown>
+      return { ...rowToArtist(r), distance_mi: Number(r.distance_mi ?? 0) }
+    })
+    return { data: artists, error: null }
+  } catch (e: unknown) {
+    return { data: [], error: (e as Error).message }
   }
 }
 
@@ -80,13 +140,12 @@ export async function getArtistsByIds(ids: string[]): Promise<Artist[]> {
     const supabase = createClient()
     const { data, error } = await supabase.from("artists").select("*").in("id", ids)
     if (error || !data) return []
-    return data.map((row) => rowToArtist(row as Record<string, unknown>))
+    return data.map((row: Record<string, unknown>) => rowToArtist(row))
   } catch {
     return []
   }
 }
 
-// Looks up by the slug column (add a slug text column to the artists table).
 export async function getArtistBySlug(slug: string): Promise<Artist | null> {
   try {
     const supabase = createClient()
