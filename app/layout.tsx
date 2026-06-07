@@ -28,6 +28,16 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/",
   },
+  icons: {
+    icon: [
+      { url: "/app-icon.png", type: "image/png", sizes: "512x512" },
+      { url: "/icon-dark-32x32.png", type: "image/png", sizes: "32x32" },
+    ],
+    apple: [
+      { url: "/app-icon.png", type: "image/png", sizes: "512x512" },
+    ],
+    shortcut: "/app-icon.png",
+  },
   openGraph: {
     title: "TattooMaps - Discover Artists & Shops Worldwide",
     description:
@@ -63,7 +73,7 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
-  generator: "v0.dev",
+    generator: 'v0.app'
 }
 
 export default function RootLayout({
