@@ -88,22 +88,22 @@ export function Footer() {
             <h3 className="font-semibold text-foreground">Support</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="#" className="text-muted-foreground hover:text-accent transition-colors">
+                <Link href="/support/help-center" className="text-muted-foreground hover:text-accent transition-colors">
                   Help Center
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-muted-foreground hover:text-accent transition-colors">
+                <Link href="/support/contact" className="text-muted-foreground hover:text-accent transition-colors">
                   Contact Us
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-muted-foreground hover:text-accent transition-colors">
+                <Link href="/support/privacy" className="text-muted-foreground hover:text-accent transition-colors">
                   Privacy Policy
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-muted-foreground hover:text-accent transition-colors">
+                <Link href="/support/terms" className="text-muted-foreground hover:text-accent transition-colors">
                   Terms of Service
                 </Link>
               </li>
