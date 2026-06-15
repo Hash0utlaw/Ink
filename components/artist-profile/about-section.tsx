@@ -7,7 +7,17 @@ export function AboutSection({ bio }: { bio: string }) {
         <CardTitle>About the Artist</CardTitle>
       </CardHeader>
       <CardContent>
-        <p className="text-muted-foreground whitespace-pre-line">{bio}</p>
+        {bio ? (
+          <p className="text-muted-foreground whitespace-pre-line">{bio}</p>
+        ) : (
+          <p className="text-muted-foreground italic text-sm">
+            This artist hasn&apos;t added a bio yet. If this is you,{" "}
+            <a href="/claim" className="underline hover:text-foreground transition-colors">
+              claim your profile
+            </a>{" "}
+            to tell your story.
+          </p>
+        )}
       </CardContent>
     </Card>
   )

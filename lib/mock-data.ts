@@ -39,7 +39,8 @@ const artists: Artist[] = [
     reviewCount: 124,
     location: {
       address: "123 Art St",
-      city: "San Francisco, CA",
+      city: "San Francisco",
+      state: "CA",
       lat: 37.7749,
       lng: -122.4194,
     },
@@ -92,7 +93,7 @@ const artists: Artist[] = [
     specialties: ["Watercolor", "Abstract"],
     rating: 4.8,
     reviewCount: 88,
-    location: { address: "San Francisco, CA", city: "San Francisco, CA", lat: 37.7749, lng: -122.4194 },
+    location: { address: "San Francisco", city: "San Francisco", state: "CA", lat: 37.7749, lng: -122.4194 },
     avatarUrl: "/placeholder.svg?height=100&width=100",
     portfolioImages: ["/placeholder.svg?height=300&width=300", "/placeholder.svg?height=300&width=300"],
     isAvailable: true,
@@ -110,7 +111,8 @@ const artists: Artist[] = [
     reviewCount: 150,
     location: {
       address: "456 Dragon Ave",
-      city: "Los Angeles, CA",
+      city: "Los Angeles",
+      state: "CA",
       lat: 34.0522,
       lng: -118.2437,
     },

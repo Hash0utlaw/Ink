@@ -163,34 +163,44 @@ export function InfoSidebar({
         </div>
       </div>
 
-      <Card className="bg-muted/50 border-border/50">
-        <CardHeader>
-          <CardTitle>Shop Info</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4 text-sm">
-          <div className="flex gap-3">
-            <MapPin className="w-4 h-4 mt-1 text-accent" />
-            <div>
-              <p className="font-semibold">{artist.shopName}</p>
-              <p className="text-muted-foreground">{artist.location.address}</p>
-              <p className="text-muted-foreground">{artist.location.city}</p>
+      {(artist.shopName || artist.location.address || artist.location.city) && (
+        <Card className="bg-muted/50 border-border/50">
+          <CardHeader>
+            <CardTitle>Shop Info</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4 text-sm">
+            <div className="flex gap-3">
+              <MapPin className="w-4 h-4 mt-1 text-accent shrink-0" />
+              <div>
+                {artist.shopName && <p className="font-semibold">{artist.shopName}</p>}
+                {artist.location.address && (
+                  <p className="text-muted-foreground">{artist.location.address}</p>
+                )}
+                {(artist.location.city || artist.location.state) && (
+                  <p className="text-muted-foreground">
+                    {[artist.location.city, artist.location.state].filter(Boolean).join(", ")}
+                  </p>
+                )}
+              </div>
             </div>
-          </div>
-          <div className="flex gap-3">
-            <Clock className="w-4 h-4 mt-1 text-accent" />
-            <div>
-              <p className="font-semibold">Hours</p>
-              <ul className="text-muted-foreground">
-                {Object.entries(artist.hours).map(([day, hours]) => (
-                  <li key={day}>
-                    <span className="font-medium text-foreground">{day}:</span> {hours}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+            {Object.keys(artist.hours).length > 0 && (
+              <div className="flex gap-3">
+                <Clock className="w-4 h-4 mt-1 text-accent shrink-0" />
+                <div>
+                  <p className="font-semibold">Hours</p>
+                  <ul className="text-muted-foreground">
+                    {Object.entries(artist.hours).map(([day, hours]) => (
+                      <li key={day}>
+                        <span className="font-medium text-foreground">{day}:</span> {hours}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }

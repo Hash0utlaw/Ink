@@ -24,7 +24,7 @@ function initials(name: string) {
 export function ArtistCard({ artist, distance }: ArtistCardProps) {
   const hasRating = artist.rating > 0
   const city = artist.location.city
-  const state = (artist as unknown as Record<string, unknown>).state as string | undefined
+  const state = artist.location.state
   const locationLine = [city, state].filter(Boolean).join(", ")
 
   return (

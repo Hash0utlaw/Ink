@@ -259,6 +259,7 @@ function buildArtistRecord(row: ShopArtistRow): Record<string, unknown> | null {
     display_name: displayName,
     handle,
     bio: null,
+    avatar_url: row.image_url ?? null,
     city: shop.city ?? null,
     state: shop.state ?? null,
     specialties,

@@ -17,21 +17,28 @@ export type ArtistFilters = {
 
 // Real artists table columns: id, user_id, shop_id, display_name, handle, bio,
 // specialties (text[]), city, state, hourly_rate, years_experience,
-// instagram_handle, website_url, is_available, is_verified, is_active,
+// instagram_handle, website_url, avatar_url, is_available, is_verified, is_active,
 // rating, review_count, created_at, updated_at, is_claimed, source
 export function rowToArtist(row: Record<string, unknown>): Artist {
+  const shop = row.shops
+    ? (Array.isArray(row.shops)
+        ? (row.shops[0] as Record<string, unknown> | undefined)
+        : (row.shops as Record<string, unknown>))
+    : null
+
   return {
     id: String(row.id ?? ""),
     name: String(row.display_name ?? ""),
-    shopName: "",
+    shopName: String(shop?.name ?? ""),
     specialties: Array.isArray(row.specialties) ? (row.specialties as string[]) : [],
     rating: Number(row.rating ?? 0),
     reviewCount: Number(row.review_count ?? 0),
     location: {
-      address: "",
-      city: String(row.city ?? ""),
-      lat: 0,
-      lng: 0,
+      address: String(shop?.address ?? ""),
+      city: String(row.city ?? shop?.city ?? ""),
+      state: String(row.state ?? shop?.state ?? ""),
+      lat: Number(row.latitude ?? shop?.latitude ?? 0),
+      lng: Number(row.longitude ?? shop?.longitude ?? 0),
     },
     avatarUrl: String(row.avatar_url ?? ""),
     portfolioImages: Array.isArray(row.portfolio_images) ? (row.portfolio_images as string[]) : [],
@@ -39,7 +46,9 @@ export function rowToArtist(row: Record<string, unknown>): Artist {
     priceRange: (row.price_range as "low" | "medium" | "high") ?? "medium",
     bio: String(row.bio ?? ""),
     reviews: Array.isArray(row.reviews) ? (row.reviews as Review[]) : [],
-    hours: (row.hours as Record<string, string>) ?? {},
+    hours: ((shop?.hours ?? row.hours) as Record<string, string>) ?? {},
+    instagramHandle: String(row.instagram_handle ?? ""),
+    websiteUrl: String(row.website_url ?? ""),
   }
 }
 
@@ -126,7 +135,11 @@ export async function getArtistsNearMe(
 export async function getArtistById(id: string): Promise<Artist | null> {
   try {
     const supabase = createClient()
-    const { data, error } = await supabase.from("artists").select("*").eq("id", id).single()
+    const { data, error } = await supabase
+      .from("artists")
+      .select("*, shops(name, address, city, state, phone, hours, website)")
+      .eq("id", id)
+      .single()
     if (error || !data) return null
     return rowToArtist(data as Record<string, unknown>)
   } catch {
