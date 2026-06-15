@@ -19,9 +19,10 @@ export type ShopFilters = {
   pageSize?: number    // default 24
 }
 
-// Assumed table columns: id, name, logo_url, cover_image_url, rating, review_count,
-// location_address, location_city, location_lat, location_lng, resident_artist_ids (text[]),
-// about, reviews (jsonb), hours (jsonb), specialties (text[]), accepts_walk_ins
+// Real shops table columns: id, name, slug, address, city, state, zip, phone,
+// website, email, description, cover_image_url, logo_url, rating, review_count,
+// latitude, longitude, place_id, google_maps_url, hours, accepts_walk_ins,
+// is_verified, is_active, owner_user_id, created_at, updated_at
 function rowToShop(row: Record<string, unknown>): Shop {
   return {
     id: String(row.id ?? ""),
@@ -31,13 +32,13 @@ function rowToShop(row: Record<string, unknown>): Shop {
     rating: Number(row.rating ?? 0),
     reviewCount: Number(row.review_count ?? 0),
     location: {
-      address: String(row.location_address ?? ""),
-      city: String(row.location_city ?? ""),
-      lat: Number(row.location_lat ?? 0),
-      lng: Number(row.location_lng ?? 0),
+      address: String(row.address ?? ""),
+      city: String(row.city ?? ""),
+      lat: Number(row.latitude ?? 0),
+      lng: Number(row.longitude ?? 0),
     },
-    residentArtistIds: Array.isArray(row.resident_artist_ids) ? (row.resident_artist_ids as string[]) : [],
-    about: String(row.about ?? ""),
+    residentArtistIds: [],
+    about: String(row.description ?? ""),
     reviews: Array.isArray(row.reviews) ? (row.reviews as Review[]) : [],
     hours: (row.hours as Record<string, string>) ?? {},
     specialties: Array.isArray(row.specialties) ? (row.specialties as string[]) : [],
@@ -89,7 +90,7 @@ export async function getShops(
     const { data, count, error } = await query
     if (error) return { data: [], count: 0, error: error.message }
     return {
-      data: (data ?? []).map((row) => rowToShop(row as Record<string, unknown>)),
+      data: (data ?? []).map((row: unknown) => rowToShop(row as Record<string, unknown>)),
       count: count ?? 0,
       error: null,
     }
@@ -148,25 +149,53 @@ export async function getShopBySlug(slug: string): Promise<Shop | null> {
 }
 
 // Looks up resident artists via the shop_artists join table.
-// Assumed table: shop_artists (shop_id, artist_id)
+// shop_artists columns: id, shop_id, name, image_url, specialty, artist_profile_id
 export async function getShopArtists(shopId: string): Promise<Artist[]> {
   try {
     const supabase = createClient()
+
+    // First try: artists linked via artist_profile_id → artists.id
     const { data: links, error: linksError } = await supabase
       .from("shop_artists")
-      .select("artist_id")
+      .select("artist_profile_id")
+      .eq("shop_id", shopId)
+      .not("artist_profile_id", "is", null)
+
+    if (!linksError && links && links.length > 0) {
+      const artistIds = (links as { artist_profile_id: string }[]).map((l) => l.artist_profile_id)
+      const { data: artists, error: artistsError } = await supabase
+        .from("artists")
+        .select("*")
+        .in("id", artistIds)
+
+      if (!artistsError && artists && artists.length > 0) {
+        return artists.map((row: unknown) => rowToArtist(row as Record<string, unknown>))
+      }
+    }
+
+    // Fallback: return stub artists from shop_artists rows directly
+    const { data: stubs, error: stubsError } = await supabase
+      .from("shop_artists")
+      .select("id, shop_id, name, image_url, specialty")
       .eq("shop_id", shopId)
 
-    if (linksError || !links || links.length === 0) return []
-
-    const artistIds = (links as { artist_id: string }[]).map((l) => l.artist_id)
-    const { data: artists, error: artistsError } = await supabase
-      .from("artists")
-      .select("*")
-      .in("id", artistIds)
-
-    if (artistsError || !artists) return []
-    return artists.map((row) => rowToArtist(row as Record<string, unknown>))
+    if (stubsError || !stubs) return []
+    return stubs.map((row: Record<string, unknown>) => ({
+      id: String(row.id ?? ""),
+      name: String(row.name ?? ""),
+      shopName: "",
+      specialties: row.specialty ? [String(row.specialty)] : [],
+      rating: 0,
+      reviewCount: 0,
+      location: { address: "", city: "", lat: 0, lng: 0 },
+      avatarUrl: String(row.image_url ?? ""),
+      portfolioImages: [],
+      isAvailable: false,
+      priceRange: "medium" as const,
+      bio: "",
+      reviews: [],
+      hours: {},
+    }))
   } catch {
     return []
   }

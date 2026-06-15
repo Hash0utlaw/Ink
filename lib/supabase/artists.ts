@@ -15,23 +15,23 @@ export type ArtistFilters = {
   pageSize?: number
 }
 
-// Assumed table columns: id, name, shop_name, specialties (text[]),
-// rating, review_count, location_address, location_city, location_lat, location_lng,
-// avatar_url, portfolio_images (text[]), is_available, price_range,
-// bio, reviews (jsonb), hours (jsonb), slug, state, zip, city
+// Real artists table columns: id, user_id, shop_id, display_name, handle, bio,
+// specialties (text[]), city, state, hourly_rate, years_experience,
+// instagram_handle, website_url, is_available, is_verified, is_active,
+// rating, review_count, created_at, updated_at, is_claimed, source
 export function rowToArtist(row: Record<string, unknown>): Artist {
   return {
     id: String(row.id ?? ""),
-    name: String(row.name ?? ""),
-    shopName: String(row.shop_name ?? ""),
+    name: String(row.display_name ?? ""),
+    shopName: "",
     specialties: Array.isArray(row.specialties) ? (row.specialties as string[]) : [],
     rating: Number(row.rating ?? 0),
     reviewCount: Number(row.review_count ?? 0),
     location: {
-      address: String(row.location_address ?? ""),
-      city: String(row.location_city ?? row.city ?? ""),
-      lat: Number(row.location_lat ?? 0),
-      lng: Number(row.location_lng ?? 0),
+      address: "",
+      city: String(row.city ?? ""),
+      lat: 0,
+      lng: 0,
     },
     avatarUrl: String(row.avatar_url ?? ""),
     portfolioImages: Array.isArray(row.portfolio_images) ? (row.portfolio_images as string[]) : [],
@@ -51,7 +51,8 @@ export async function getArtists(
     let query = supabase.from("artists").select("*", { count: "exact", head: false })
 
     if (filters.styles && filters.styles.length > 0) {
-      query = query.contains("specialties", filters.styles)
+      // overlaps (&&) matches artists who have ANY of the selected styles
+      query = query.overlaps("specialties", filters.styles)
     }
     if (filters.price && filters.price.length > 0) {
       query = query.in("price_range", filters.price)
@@ -63,7 +64,7 @@ export async function getArtists(
       query = query.eq("is_available", true)
     }
     if (filters.query) {
-      query = query.ilike("name", `%${filters.query.trim()}%`)
+      query = query.ilike("display_name", `%${filters.query.trim()}%`)
     }
     if (filters.city) {
       query = query.ilike("city", `%${filters.city.trim()}%`)
@@ -75,15 +76,14 @@ export async function getArtists(
       query = query.eq("zip", filters.zip.trim())
     }
 
-    const sortCol = filters.sortBy ?? "rating"
-    const sortMap: Record<string, string> = { rating: "rating", review_count: "review_count", name: "name" }
-    query = query.order(sortMap[sortCol], { ascending: sortCol === "name" })
+    const sortCol = filters.sortBy ?? "display_name"
+    const sortMap: Record<string, string> = { rating: "rating", review_count: "review_count", name: "display_name" }
+    query = query.order(sortMap[sortCol] ?? "display_name", { ascending: sortCol !== "review_count" })
 
-    if (filters.page !== undefined) {
-      const page = filters.page
-      const size = filters.pageSize ?? 24
-      query = query.range(page * size, (page + 1) * size - 1)
-    }
+    // Always paginate — default page 0, 24 per page
+    const page = filters.page ?? 0
+    const size = filters.pageSize ?? 24
+    query = query.range(page * size, (page + 1) * size - 1)
 
     const { data, count, error } = await query
     if (error) return { data: [], count: 0, error: error.message }
@@ -149,7 +149,7 @@ export async function getArtistsByIds(ids: string[]): Promise<Artist[]> {
 export async function getArtistBySlug(slug: string): Promise<Artist | null> {
   try {
     const supabase = createClient()
-    const { data, error } = await supabase.from("artists").select("*").eq("slug", slug).single()
+    const { data, error } = await supabase.from("artists").select("*").eq("handle", slug).single()
     if (error || !data) return null
     return rowToArtist(data as Record<string, unknown>)
   } catch {

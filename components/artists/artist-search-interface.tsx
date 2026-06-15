@@ -42,6 +42,7 @@ export function ArtistSearchInterface() {
   const searchParams = useSearchParams()
 
   const [filters, setFilters] = useState<ArtistFilterValues>(() => filtersFromParams(searchParams))
+  const [page, setPage] = useState(0)
   const [filteredArtists, setFilteredArtists] = useState<Artist[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [totalCount, setTotalCount] = useState(0)
@@ -51,6 +52,7 @@ export function ArtistSearchInterface() {
   const handleFilterChange = useCallback(
     (newFilters: ArtistFilterValues) => {
       setFilters(newFilters)
+      setPage(0)
       const params = new URLSearchParams()
       if (newFilters.styles.length > 0) params.set("styles", newFilters.styles.join(","))
       if (newFilters.price.length > 0) params.set("price", newFilters.price.join(","))
@@ -101,6 +103,7 @@ export function ArtistSearchInterface() {
       if (filters.state) params.set("state", filters.state)
       if (filters.zip) params.set("zip", filters.zip)
       if (filters.sortBy !== "rating") params.set("sortBy", filters.sortBy)
+      params.set("page", String(page))
 
       try {
         const response = await fetch(`/api/artists?${params.toString()}`)
@@ -120,7 +123,7 @@ export function ArtistSearchInterface() {
     }
 
     fetchArtists()
-  }, [filters])
+  }, [filters, page])
 
   const hasActiveFilters =
     filters.query !== "" ||
@@ -243,6 +246,10 @@ export function ArtistSearchInterface() {
           artists={filteredArtists}
           isLoading={isLoading}
           distancesById={nearMeCoords ? distancesById : undefined}
+          page={page}
+          totalCount={totalCount}
+          pageSize={24}
+          onPageChange={setPage}
         />
       </div>
     </div>
