@@ -17,6 +17,7 @@ export interface Artist {
   location: {
     address: string
     city: string
+    state: string
     lat: number
     lng: number
   }
@@ -29,4 +30,6 @@ export interface Artist {
   hours: {
     [key: string]: string
   }
+  instagramHandle?: string
+  websiteUrl?: string
 }

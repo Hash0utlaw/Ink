@@ -23,7 +23,7 @@ export async function GET(request: Request) {
     const sortBy = validSortBy.includes(sortByRaw as (typeof validSortBy)[number])
       ? (sortByRaw as ArtistFilters["sortBy"])
       : undefined
-    const page = searchParams.has("page") ? (Number(searchParams.get("page")) || 0) : undefined
+    const page = Number(searchParams.get("page") ?? "0")
 
     const { data, count, error } = await getArtists({
       styles: styles.length > 0 ? styles : undefined,

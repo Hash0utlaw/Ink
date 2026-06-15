@@ -125,7 +125,14 @@ export function SearchInterface() {
           </TabsList>
 
           <TabsContent value="artists" className="mt-6">
-            <ResultsList artists={artists} isLoading={isLoading} />
+            <ResultsList
+              artists={artists}
+              isLoading={isLoading}
+              page={0}
+              totalCount={artists.length}
+              pageSize={artists.length || 24}
+              onPageChange={() => {}}
+            />
           </TabsContent>
 
           <TabsContent value="shops" className="mt-6">

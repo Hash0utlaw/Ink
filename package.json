@@ -67,14 +67,20 @@
     "zod": "latest"
   },
   "devDependencies": {
+    "@anthropic-ai/sdk": "^0.104.1",
     "@types/node": "^22",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "autoprefixer": "^10.0.1",
+    "cheerio": "^1.2.0",
+    "dotenv": "^17.4.2",
     "eslint": "^8",
     "eslint-config-next": "14.1.0",
+    "p-limit": "^7.3.0",
     "postcss": "^8.5",
     "tailwindcss": "^3.4.17",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.22.4",
     "typescript": "^5"
   }
 }
