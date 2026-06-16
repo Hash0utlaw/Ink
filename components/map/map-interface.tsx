@@ -1,10 +1,9 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { MapboxMap } from "./mapbox-map"
 import { MapSidebar } from "./map-sidebar"
 import { LocationDetails } from "./location-details"
-import { mockLocations, getMapLocations } from "@/lib/mock-data"
 import type { MapboxLocation } from "@/lib/mapbox"
 import { calculateDistance, getCurrentLocation, geocodeAddress, mapboxConfig } from "@/lib/mapbox"
 
@@ -23,11 +22,12 @@ export function MapInterface() {
   const [filteredLocations, setFilteredLocations] = useState<MapboxLocation[]>([])
   const [selectedLocation, setSelectedLocation] = useState<MapboxLocation | null>(null)
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null)
-  const [mapCenter, setMapCenter] = useState<[number, number]>([-122.4194, 37.7749])
-  const [mapZoom, setMapZoom] = useState(12)
+  const [mapCenter, setMapCenter] = useState<[number, number]>([-98.5795, 39.8283])
+  const [mapZoom, setMapZoom] = useState(4)
   const [mapStyle, setMapStyle] = useState("streets")
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [loading, setLoading] = useState(true)
+  const geoFetched = useRef(false)
   const [filters, setFilters] = useState<MapFilters>({
     locationType: "all",
     styles: [],
@@ -43,13 +43,15 @@ export function MapInterface() {
     const loadLocations = async () => {
       try {
         setLoading(true)
-        const data = await getMapLocations()
+        const res = await fetch("/api/map?type=all")
+        const json = await res.json()
+        const data: MapboxLocation[] = json.data ?? []
         setLocations(data)
         setFilteredLocations(data)
       } catch (error) {
         console.error("Failed to load locations:", error)
-        setLocations(mockLocations)
-        setFilteredLocations(mockLocations)
+        setLocations([])
+        setFilteredLocations([])
       } finally {
         setLoading(false)
       }
@@ -58,28 +60,35 @@ export function MapInterface() {
     loadLocations()
   }, [])
 
-  // Get user location
+  // Get user location once after initial data loads, re-fetch geo-sorted results
   useEffect(() => {
+    if (locations.length === 0 || geoFetched.current) return
+    geoFetched.current = true
+
     const getUserLocation = async () => {
       try {
         const coords = await getCurrentLocation()
         setUserLocation(coords)
+        setMapCenter(coords)
+        setMapZoom(12)
 
-        // Update distances for all locations
-        const updatedLocations = locations.map((location) => ({
-          ...location,
-          distance: calculateDistance(coords, location.coordinates),
+        const [lng, lat] = coords
+        const res = await fetch(
+          `/api/map?lat=${lat}&lng=${lng}&radius=${filters.radius}&type=${filters.locationType}`
+        )
+        const json = await res.json()
+        const data: MapboxLocation[] = (json.data ?? []).map((loc: MapboxLocation) => ({
+          ...loc,
+          distance: calculateDistance(coords, loc.coordinates),
         }))
-        setLocations(updatedLocations)
+        setLocations(data)
       } catch (error) {
         console.warn("Could not get user location:", error)
       }
     }
 
-    if (locations.length > 0) {
-      getUserLocation()
-    }
-  }, [locations.length])
+    getUserLocation()
+  }, [locations.length, filters.radius, filters.locationType])
 
   // Filter locations based on current filters
   useEffect(() => {

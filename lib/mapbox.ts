@@ -11,6 +11,12 @@ export interface MapboxLocation {
   specialties: string[]
   priceRange: "low" | "medium" | "high"
   distance?: number // in miles
+  // Optional enrichment fields
+  description?: string
+  website?: string
+  hours?: Record<string, string>
+  phone?: string
+  instagram?: string
 }
 
 export interface MapboxConfig {
@@ -21,10 +27,10 @@ export interface MapboxConfig {
 }
 
 export const mapboxConfig: MapboxConfig = {
-  accessToken: "pk.eyJ1IjoiaGFzaG91dGxhdyIsImEiOiJjbWcycjNudG0xMXFkMnJxMmtlc2E4aDUxIn0.l5XDuDhexleDLffaG2czKg",
+  accessToken: process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? "",
   style: "mapbox://styles/mapbox/streets-v12",
-  center: [-122.4194, 37.7749], // San Francisco
-  zoom: 12,
+  center: [-98.5795, 39.8283], // Continental US center
+  zoom: 4,
 }
 
 // Utility functions for map operations

@@ -131,42 +131,77 @@ export function MapboxMap({
     }
   }, [center, zoom, mapLoaded])
 
+  // Color-code markers by tattoo style
+  const getStyleColor = (specialties: string[]): string => {
+    const STYLE_COLORS: Record<string, string> = {
+      traditional:       "#e85d04",
+      japanese:          "#7b2d8b",
+      "fine line":       "#0ea5e9",
+      realism:           "#16a34a",
+      blackwork:         "#1c1917",
+      watercolor:        "#ec4899",
+      geometric:         "#6366f1",
+      "neo-traditional": "#f59e0b",
+      portrait:          "#0891b2",
+      tribal:            "#92400e",
+      minimalist:        "#64748b",
+      abstract:          "#d97706",
+    }
+    const primary = (specialties[0] ?? "").toLowerCase()
+    for (const [key, color] of Object.entries(STYLE_COLORS)) {
+      if (primary.includes(key)) return color
+    }
+    return "#8B1538" // app accent fallback
+  }
+
   // Create marker element
   const createMarkerElement = useCallback(
     (location: MapboxLocation) => {
+      const isSelected = selectedLocation?.id === location.id
+      const color = getStyleColor(location.specialties)
+      const isShop = location.type === "shop"
+
       const el = document.createElement("div")
-      el.className = `marker marker-${location.type} ${selectedLocation?.id === location.id ? "marker-selected" : ""}`
+      el.className = `ink-marker ink-marker--${location.type}`
 
-      // Add custom marker styling
+      const size = isShop ? "32px" : "26px"
+      const radius = isShop ? "6px" : "50%"
+      const label = isShop
+        ? "●"
+        : (location.name.trim().split(/\s+/).slice(0, 2).map((w) => w[0]?.toUpperCase() ?? "").join("") || "✦")
+
       el.style.cssText = `
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-      font-weight: bold;
-      color: white;
-      border: 3px solid white;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-      transition: all 0.2s ease;
-      background: ${location.type === "artist" ? "#8B1538" : "#1E40AF"};
-    `
+        width: ${size};
+        height: ${size};
+        border-radius: ${radius};
+        background: ${color};
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: ${isShop ? "14px" : "9px"};
+        font-weight: 700;
+        color: white;
+        border: 2px solid white;
+        box-shadow: ${isSelected ? `0 0 0 3px ${color}, 0 4px 16px rgba(0,0,0,0.4)` : "0 2px 8px rgba(0,0,0,0.3)"};
+        transition: all 0.15s ease;
+        letter-spacing: -0.5px;
+        transform: ${isSelected ? "scale(1.25)" : "scale(1)"};
+        z-index: ${isSelected ? "1001" : "1"};
+      `
+      el.textContent = label
 
-      // Add icon
-      el.innerHTML = location.type === "artist" ? "🎨" : "🏪"
-
-      // Hover effects
       el.addEventListener("mouseenter", () => {
-        el.style.transform = "scale(1.1)"
-        el.style.zIndex = "1000"
+        if (selectedLocation?.id !== location.id) {
+          el.style.transform = "scale(1.15)"
+          el.style.zIndex = "999"
+        }
       })
-
       el.addEventListener("mouseleave", () => {
-        el.style.transform = "scale(1)"
-        el.style.zIndex = "1"
+        if (selectedLocation?.id !== location.id) {
+          el.style.transform = "scale(1)"
+          el.style.zIndex = "1"
+        }
       })
 
       return el
@@ -222,16 +257,15 @@ export function MapboxMap({
   useEffect(() => {
     Object.entries(markers.current).forEach(([id, marker]) => {
       const el = marker.getElement()
+      const bg = el.style.background || "#8B1538"
       if (selectedLocation?.id === id) {
-        el.classList.add("marker-selected")
-        el.style.transform = "scale(1.2)"
+        el.style.transform = "scale(1.25)"
         el.style.zIndex = "1001"
-        el.style.boxShadow = "0 4px 20px rgba(0,0,0,0.4)"
+        el.style.boxShadow = `0 0 0 3px ${bg}, 0 4px 16px rgba(0,0,0,0.4)`
       } else {
-        el.classList.remove("marker-selected")
         el.style.transform = "scale(1)"
         el.style.zIndex = "1"
-        el.style.boxShadow = "0 2px 10px rgba(0,0,0,0.3)"
+        el.style.boxShadow = "0 2px 8px rgba(0,0,0,0.3)"
       }
     })
   }, [selectedLocation])

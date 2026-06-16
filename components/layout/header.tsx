@@ -12,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { MapPin, User, Settings, LogOut } from "lucide-react"
+import { MapPin, Map, User, Settings, LogOut } from "lucide-react"
 import { useState, useEffect } from "react"
 import { getClient } from "@/utils/supabase/client"
 import type { User as SupabaseUser } from "@supabase/supabase-js"
@@ -91,6 +91,10 @@ export function Header() {
 
         {/* Navigation */}
         <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
+          <Link href="/map" className="flex items-center gap-1.5 text-accent font-semibold hover:text-accent/80 transition-colors">
+            <Map className="w-4 h-4" />
+            Map
+          </Link>
           <Link href="/artists" className="text-foreground/80 hover:text-foreground transition-colors">
             Artists
           </Link>
