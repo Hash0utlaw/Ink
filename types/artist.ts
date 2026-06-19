@@ -7,8 +7,12 @@ export interface Review {
   date: string
 }
 
+export type AvailabilityStatus = "available" | "next_week" | "one_to_two_months" | "not_taking_clients"
+export type PriceTier = "budget" | "mid" | "premium" | "luxury"
+
 export interface Artist {
   id: string
+  handle: string
   name: string
   shopName: string
   specialties: string[]
@@ -23,8 +27,13 @@ export interface Artist {
   }
   avatarUrl: string
   portfolioImages: string[]
+  previewImages: string[]
   isAvailable: boolean
   priceRange: "low" | "medium" | "high"
+  priceTier: PriceTier
+  availabilityStatus: AvailabilityStatus
+  avgResponseHours: number | null
+  firstBookingDiscount: number | null
   bio: string
   reviews: Review[]
   hours: {

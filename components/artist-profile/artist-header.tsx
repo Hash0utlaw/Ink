@@ -1,3 +1,4 @@
+import Link from "next/link"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -95,7 +96,9 @@ export function ArtistHeader({ artist }: { artist: Artist }) {
         <Button variant="outline" size="icon">
           <Share2 className="h-4 w-4" />
         </Button>
-        <Button className="bg-accent text-accent-foreground hover:bg-accent/90">Book Now</Button>
+        <Button className="bg-accent text-accent-foreground hover:bg-accent/90" asChild>
+          <Link href={`/book/${artist.handle || artist.id}`}>Book Now</Link>
+        </Button>
       </div>
     </div>
   )

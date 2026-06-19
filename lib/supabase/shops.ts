@@ -26,6 +26,7 @@ export type ShopFilters = {
 function rowToShop(row: Record<string, unknown>): Shop {
   return {
     id: String(row.id ?? ""),
+    slug: String(row.slug ?? ""),
     name: String(row.name ?? ""),
     logoUrl: String(row.logo_url ?? ""),
     coverImageUrl: String(row.cover_image_url ?? ""),
@@ -34,9 +35,12 @@ function rowToShop(row: Record<string, unknown>): Shop {
     location: {
       address: String(row.address ?? ""),
       city: String(row.city ?? ""),
+      state: String(row.state ?? ""),
       lat: Number(row.latitude ?? 0),
       lng: Number(row.longitude ?? 0),
     },
+    phone: String(row.phone ?? ""),
+    website: String(row.website ?? ""),
     residentArtistIds: [],
     about: String(row.description ?? ""),
     reviews: Array.isArray(row.reviews) ? (row.reviews as Review[]) : [],

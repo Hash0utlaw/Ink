@@ -1,5 +1,5 @@
 import { createClient } from "@/utils/supabase/server"
-import type { Artist, Review } from "@/types/artist"
+import type { Artist, Review, AvailabilityStatus, PriceTier } from "@/types/artist"
 
 export type ArtistFilters = {
   styles?: string[]
@@ -28,6 +28,7 @@ export function rowToArtist(row: Record<string, unknown>): Artist {
 
   return {
     id: String(row.id ?? ""),
+    handle: String(row.handle ?? ""),
     name: String(row.display_name ?? ""),
     shopName: String(shop?.name ?? ""),
     specialties: Array.isArray(row.specialties) ? (row.specialties as string[]) : [],
@@ -42,8 +43,13 @@ export function rowToArtist(row: Record<string, unknown>): Artist {
     },
     avatarUrl: String(row.avatar_url ?? ""),
     portfolioImages: Array.isArray(row.portfolio_images) ? (row.portfolio_images as string[]) : [],
+    previewImages: Array.isArray(row.preview_images) ? (row.preview_images as string[]) : [],
     isAvailable: Boolean(row.is_available ?? false),
     priceRange: (row.price_range as "low" | "medium" | "high") ?? "medium",
+    priceTier: (row.price_tier as PriceTier) ?? "mid",
+    availabilityStatus: (row.availability_status as AvailabilityStatus) ?? "available",
+    avgResponseHours: row.avg_response_hours != null ? Number(row.avg_response_hours) : null,
+    firstBookingDiscount: row.first_booking_discount != null ? Number(row.first_booking_discount) : null,
     bio: String(row.bio ?? ""),
     reviews: Array.isArray(row.reviews) ? (row.reviews as Review[]) : [],
     hours: ((shop?.hours ?? row.hours) as Record<string, string>) ?? {},
@@ -167,5 +173,23 @@ export async function getArtistBySlug(slug: string): Promise<Artist | null> {
     return rowToArtist(data as Record<string, unknown>)
   } catch {
     return null
+  }
+}
+
+export async function getWorthTheDriveArtists(limit = 6): Promise<Artist[]> {
+  try {
+    const supabase = createClient()
+    const { data, error } = await supabase
+      .from("artists")
+      .select("*")
+      .gte("rating", 4.8)
+      .gt("review_count", 0)
+      .neq("availability_status", "not_taking_clients")
+      .order("review_count", { ascending: false })
+      .limit(limit)
+    if (error || !data) return []
+    return data.map((row: Record<string, unknown>) => rowToArtist(row))
+  } catch {
+    return []
   }
 }

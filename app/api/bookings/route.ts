@@ -17,6 +17,8 @@ export async function POST(request: Request) {
       description,
       size,
       placement,
+      style,
+      budget,
     } = body
 
     const supabase = createClient()
@@ -30,6 +32,8 @@ export async function POST(request: Request) {
       description: description ?? null,
       size: size ?? null,
       placement: placement ?? null,
+      style: style ?? null,
+      budget: budget ?? null,
       created_at: new Date().toISOString(),
     })
 

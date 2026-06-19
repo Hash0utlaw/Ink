@@ -3,6 +3,7 @@ import { Header } from "@/components/layout/header"
 import { HeaderSkeleton } from "@/components/layout/header-skeleton"
 import { Footer } from "@/components/layout/footer"
 import { SearchInterface } from "@/components/search/search-interface"
+import { FinderCta } from "@/components/layout/finder-cta"
 import { Skeleton } from "@/components/ui/skeleton"
 
 function SearchSkeleton() {
@@ -36,6 +37,9 @@ export default function SearchPage() {
             <p className="mt-4 mx-auto max-w-2xl text-lg text-muted-foreground">
               Search artists and shops by style, price, and availability.
             </p>
+          </div>
+          <div className="max-w-2xl mx-auto mb-10">
+            <FinderCta />
           </div>
           <Suspense fallback={<SearchSkeleton />}>
             <SearchInterface />

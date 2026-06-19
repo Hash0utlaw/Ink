@@ -32,6 +32,7 @@ export interface MockLocation {
 const artists: Artist[] = [
   {
     id: "1",
+    handle: "valerie",
     name: "Valerie",
     shopName: "Black Oak Tattoo",
     specialties: ["Fine Line", "Botanical", "Blackwork", "Micro-Realism"],
@@ -53,8 +54,13 @@ const artists: Artist[] = [
       "/japanese-dragon-tattoo.png",
       "/placeholder-kafzv.png",
     ],
+    previewImages: ["/fine-line-tattoo-1.png", "/botanical-tattoo-1.png", "/placeholder-g6gvv.png"],
     isAvailable: true,
     priceRange: "medium",
+    priceTier: "mid",
+    availabilityStatus: "available",
+    avgResponseHours: 4,
+    firstBookingDiscount: null,
     bio: "Valerie is a San Francisco-based artist specializing in delicate fine line and botanical tattoos. With over 8 years of experience, she brings a unique and elegant touch to every piece, creating timeless art that flows with the body's natural form. Her studio, Black Oak, is a serene space designed to make every client feel comfortable and inspired.",
     reviews: [
       {
@@ -88,6 +94,7 @@ const artists: Artist[] = [
   },
   {
     id: "3",
+    handle: "chloe",
     name: "Chloe",
     shopName: "Black Oak Tattoo",
     specialties: ["Watercolor", "Abstract"],
@@ -96,14 +103,20 @@ const artists: Artist[] = [
     location: { address: "San Francisco", city: "San Francisco", state: "CA", lat: 37.7749, lng: -122.4194 },
     avatarUrl: "/placeholder.svg?height=100&width=100",
     portfolioImages: ["/placeholder.svg?height=300&width=300", "/placeholder.svg?height=300&width=300"],
+    previewImages: [],
     isAvailable: true,
     priceRange: "medium",
+    priceTier: "mid",
+    availabilityStatus: "available",
+    avgResponseHours: null,
+    firstBookingDiscount: null,
     bio: "Chloe's work is a vibrant explosion of color and form. She pushes the boundaries of watercolor tattoos, creating fluid, dreamlike pieces that are both bold and beautiful.",
     reviews: [],
     hours: {},
   },
   {
     id: "2",
+    handle: "kenji",
     name: "Kenji",
     shopName: "Oni Tattoo",
     specialties: ["Japanese", "Irezumi", "Dragons", "Large Scale"],
@@ -118,8 +131,13 @@ const artists: Artist[] = [
     },
     avatarUrl: "/placeholder-lpicf.png",
     portfolioImages: ["/japanese-dragon-tattoo.png", "/placeholder-kafzv.png"],
+    previewImages: ["/japanese-dragon-tattoo.png", "/placeholder-kafzv.png"],
     isAvailable: true,
     priceRange: "high",
+    priceTier: "premium",
+    availabilityStatus: "next_week",
+    avgResponseHours: 24,
+    firstBookingDiscount: null,
     bio: "Kenji is a master artist specializing in Japanese and Irezumi tattoos. With a deep understanding of tradition and history, he brings authenticity and excellence to every piece.",
     reviews: [
       {

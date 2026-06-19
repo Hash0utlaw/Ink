@@ -4,7 +4,8 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Search, MapPin, Sparkles, Users, Star } from "lucide-react"
+import Link from "next/link"
+import { Search, MapPin, Sparkles, Users, Star, Wand2 } from "lucide-react"
 
 export function HeroSection() {
   const router = useRouter()
@@ -69,6 +70,15 @@ export function HeroSection() {
                   </Button>
                 </div>
               </form>
+              <div className="mt-4 text-center">
+                <Link
+                  href="/find-artist"
+                  className="inline-flex items-center gap-2 text-sm text-white/60 hover:text-white/90 transition-colors"
+                >
+                  <Wand2 className="w-4 h-4" />
+                  Not sure what style you want? Try the Artist Finder →
+                </Link>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mt-16">

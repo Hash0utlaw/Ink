@@ -2,6 +2,7 @@ import type { Review } from "./artist"
 
 export interface Shop {
   id: string
+  slug: string
   name: string
   logoUrl: string
   coverImageUrl: string
@@ -10,9 +11,12 @@ export interface Shop {
   location: {
     address: string
     city: string
+    state: string
     lat: number
     lng: number
   }
+  phone: string
+  website: string
   residentArtistIds: string[]
   about: string
   reviews: Review[]
