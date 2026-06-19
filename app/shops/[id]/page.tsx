@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation"
 import { Suspense } from "react"
 import type { Metadata } from "next"
+import Link from "next/link"
+import { ChevronRight } from "lucide-react"
 import { Header } from "@/components/layout/header"
 import { HeaderSkeleton } from "@/components/layout/header-skeleton"
 import { Footer } from "@/components/layout/footer"
@@ -8,6 +10,7 @@ import { getShopById, getShopArtists } from "@/lib/supabase/shops"
 import { ShopHeader } from "@/components/shop-profile/shop-header"
 import { ShopTabs } from "@/components/shop-profile/shop-tabs"
 import { ShopInfoSidebar } from "@/components/shop-profile/shop-info-sidebar"
+import { cityToSlug, stateAbbrToSlug } from "@/lib/utils/states"
 
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
   const shop = await getShopById(params.id)
@@ -26,6 +29,10 @@ export default async function ShopProfilePage({ params }: { params: { id: string
   if (!shop) notFound()
 
   const residentArtists = await getShopArtists(params.id)
+
+  const stateSlug = stateAbbrToSlug(shop.location.state)
+  const citySlug = cityToSlug(shop.location.city)
+  const cityPageHref = stateSlug && citySlug ? `/tattoo-shops/${stateSlug}/${citySlug}` : null
 
   // JSON-LD LocalBusiness schema
   const jsonLd = {
@@ -71,6 +78,23 @@ export default async function ShopProfilePage({ params }: { params: { id: string
         <Header />
       </Suspense>
       <main className="flex-1 bg-background">
+        {cityPageHref && (
+          <div className="container mx-auto px-4 pt-4">
+            <nav className="flex items-center gap-1 text-xs text-muted-foreground">
+              <Link href="/tattoo-shops" className="hover:text-foreground transition-colors">Tattoo Shops</Link>
+              <ChevronRight className="w-3 h-3" />
+              <Link href={`/tattoo-shops/${stateSlug}`} className="hover:text-foreground transition-colors capitalize">
+                {shop.location.state}
+              </Link>
+              <ChevronRight className="w-3 h-3" />
+              <Link href={cityPageHref} className="hover:text-foreground transition-colors">
+                {shop.location.city}
+              </Link>
+              <ChevronRight className="w-3 h-3" />
+              <span className="text-foreground">{shop.name}</span>
+            </nav>
+          </div>
+        )}
         <ShopHeader shop={shop} />
         <div className="container mx-auto px-4 py-8 md:py-12">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

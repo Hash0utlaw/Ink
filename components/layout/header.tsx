@@ -12,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { MapPin, Map, User, Settings, LogOut } from "lucide-react"
+import { MapPin, Map, User, Settings, LogOut, Zap, Compass } from "lucide-react"
 import { useState, useEffect } from "react"
 import { getClient } from "@/utils/supabase/client"
 import type { User as SupabaseUser } from "@supabase/supabase-js"
@@ -95,10 +95,18 @@ export function Header() {
             <Map className="w-4 h-4" />
             Map
           </Link>
+          <Link href="/find-artist" className="flex items-center gap-1.5 text-foreground/80 hover:text-foreground transition-colors">
+            <Compass className="w-4 h-4" />
+            Find Artist
+          </Link>
+          <Link href="/flash" className="flex items-center gap-1.5 text-foreground/80 hover:text-foreground transition-colors">
+            <Zap className="w-4 h-4" />
+            Flash
+          </Link>
           <Link href="/artists" className="text-foreground/80 hover:text-foreground transition-colors">
             Artists
           </Link>
-          <Link href="/shops" className="text-foreground/80 hover:text-foreground transition-colors">
+          <Link href="/tattoo-shops" className="text-foreground/80 hover:text-foreground transition-colors">
             Shops
           </Link>
           <Link href="/styles" className="text-foreground/80 hover:text-foreground transition-colors">

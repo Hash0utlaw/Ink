@@ -4,12 +4,12 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { User, Calendar, Users, LogOut, Crown } from "lucide-react"
+import { User, Calendar, LogOut, Crown, Zap } from "lucide-react"
 
 const navItems = [
   { href: "/artist-dashboard/appointments", label: "Appointments", icon: Calendar },
+  { href: "/artist-dashboard/flash", label: "Flash", icon: Zap },
   { href: "/artist-dashboard/profile", label: "Edit Profile", icon: User },
-  { href: "/artist-dashboard/clients", label: "Clients", icon: Users },
 ]
 
 export function ArtistDashboardSidebar({ isPro = false }: { isPro?: boolean }) {
