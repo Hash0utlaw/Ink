@@ -33,9 +33,29 @@ async function LiveReviewsSection() {
   return <LiveReviews initialReviews={reviews} />
 }
 
+const websiteJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "TattooMaps",
+  "url": "https://tattoo-maps.com",
+  "description": "Discover tattoo artists and shops worldwide. Explore portfolios, book appointments, and find your perfect ink.",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": {
+      "@type": "EntryPoint",
+      "urlTemplate": "https://tattoo-maps.com/search?q={search_term_string}",
+    },
+    "query-input": "required name=search_term_string",
+  },
+}
+
 export default function HomePage() {
   return (
     <div className="flex min-h-screen flex-col">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+      />
       <Suspense fallback={<HeaderSkeleton />}>
         <Header />
       </Suspense>

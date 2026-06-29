@@ -9,9 +9,9 @@ import { ArrowRight } from "lucide-react"
 import { StyleCard } from "@/components/styles/style-card"
 
 export const metadata = {
-  title: "Tattoo Styles | Ink",
+  title: "Tattoo Styles Guide — Every Style Explained | TattooMaps",
   description:
-    "Explore the full spectrum of tattoo styles — from fine line and realism to Japanese, blackwork, watercolor, and beyond. Find artists and shops for every style.",
+    "Explore the full spectrum of tattoo styles — from fine line and realism to Japanese, blackwork, watercolor, and beyond. Find artists and shops for every style on TattooMaps.",
 }
 
 // ─── All tattoo styles ────────────────────────────────────────────────────────

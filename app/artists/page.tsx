@@ -1,9 +1,16 @@
 import { Suspense } from "react"
+import type { Metadata } from "next"
 import { HeaderSkeleton } from "@/components/layout/header-skeleton"
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
 import { ArtistSearchInterface } from "@/components/artists/artist-search-interface"
 import { FinderCta } from "@/components/layout/finder-cta"
+
+export const metadata: Metadata = {
+  title: "Browse Tattoo Artists by Style & Location | TattooMaps",
+  description: "Search thousands of tattoo artists by style, location, price, and availability. Find fine line, Japanese, realism, traditional, and more on TattooMaps.",
+  alternates: { canonical: "/artists" },
+}
 
 export default function ArtistsPage() {
   return (

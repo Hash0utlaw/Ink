@@ -1,9 +1,16 @@
 import { Suspense } from "react"
+import type { Metadata } from "next"
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
 import { ShopSearchInterface } from "@/components/shops/shop-search-interface"
 import { HeaderSkeleton } from "@/components/layout/header-skeleton"
 import { FinderCta } from "@/components/layout/finder-cta"
+
+export const metadata: Metadata = {
+  title: "Find Tattoo Shops Near You | TattooMaps",
+  description: "Browse top-rated tattoo studios across the US. Compare artist portfolios, read reviews, check walk-in availability, and book your appointment on TattooMaps.",
+  alternates: { canonical: "/shops" },
+}
 
 export default function ShopsPage() {
   return (

@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next"
 import { getAllCityStatePairs, getAllShopIds, getAllArtistIds } from "@/lib/supabase/seo"
 import { STATE_ABBR_TO_NAME, stateAbbrToSlug, cityToSlug } from "@/lib/utils/states"
+import { ALL_STYLES } from "@/app/styles/page"
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://tattoo-maps.com"
 
@@ -22,7 +23,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/find-artist`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
     { url: `${BASE_URL}/tattoo-shops`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
     { url: `${BASE_URL}/map`, lastModified: now, changeFrequency: "daily", priority: 0.7 },
+    { url: `${BASE_URL}/styles`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${BASE_URL}/pricing`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
+    { url: `${BASE_URL}/help`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
+    { url: `${BASE_URL}/contact`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
   ]
+
+  // Style pages
+  const styleRoutes: MetadataRoute.Sitemap = ALL_STYLES.map((style) => ({
+    url: `${BASE_URL}/styles/${style.slug}`,
+    lastModified: now,
+    changeFrequency: "monthly" as const,
+    priority: 0.6,
+  }))
 
   // State pages — one per state
   const stateRoutes: MetadataRoute.Sitemap = Object.keys(STATE_ABBR_TO_NAME).map((abbr) => ({
@@ -58,6 +71,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return [
     ...staticRoutes,
+    ...styleRoutes,
     ...stateRoutes,
     ...cityRoutes,
     ...shopRoutes,

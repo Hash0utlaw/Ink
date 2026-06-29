@@ -49,7 +49,6 @@ export function ArtistCard({ artist, distance }: ArtistCardProps) {
                 alt={`${artist.name} portfolio ${i + 1}`}
                 fill
                 className="object-cover"
-                unoptimized
               />
             </div>
           ))}

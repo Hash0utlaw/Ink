@@ -1,10 +1,17 @@
 import { Suspense } from "react"
+import type { Metadata } from "next"
 import { Header } from "@/components/layout/header"
 import { HeaderSkeleton } from "@/components/layout/header-skeleton"
 import { Footer } from "@/components/layout/footer"
 import { SearchInterface } from "@/components/search/search-interface"
 import { FinderCta } from "@/components/layout/finder-cta"
 import { Skeleton } from "@/components/ui/skeleton"
+
+export const metadata: Metadata = {
+  title: "Search Tattoo Artists & Shops | TattooMaps",
+  description: "Search TattooMaps to find tattoo artists and studios by style, location, price range, and availability. Discover the perfect artist for your next tattoo.",
+  alternates: { canonical: "/search" },
+}
 
 function SearchSkeleton() {
   return (

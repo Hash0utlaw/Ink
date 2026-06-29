@@ -47,7 +47,6 @@ export function NewestFlash({ listings }: NewestFlashProps) {
                     alt={listing.title}
                     fill
                     className="object-cover group-hover:scale-105 transition-transform duration-300"
-                    unoptimized
                   />
                   {listing.isExclusive && (
                     <div className="absolute top-2 right-2">
