@@ -4,8 +4,9 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Star, ArrowRight, Zap } from "lucide-react"
-import { createClient } from "@/utils/supabase/client"
+import { getClient } from "@/utils/supabase/client"
 import type { Review } from "@/lib/supabase/reviews"
+import type { RealtimePostgresInsertPayload } from "@supabase/supabase-js"
 
 function initials(name: string) {
   return name.split(" ").filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join("")
@@ -29,19 +30,20 @@ export function LiveReviews({ initialReviews }: LiveReviewsProps) {
   const [reviews, setReviews] = useState<Review[]>(initialReviews)
 
   useEffect(() => {
-    const supabase = createClient()
+    const supabase = getClient()
+    if (!supabase) return
 
     const channel = supabase
       .channel("reviews-feed")
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "reviews" },
-        async (payload) => {
+        async (payload: RealtimePostgresInsertPayload<{ id: string }>) => {
           // Fetch full row with artist join
           const { data } = await supabase
             .from("reviews")
             .select("*, artists(display_name, handle, avatar_url)")
-            .eq("id", (payload.new as { id: string }).id)
+            .eq("id", payload.new.id)
             .maybeSingle()
 
           if (!data) return

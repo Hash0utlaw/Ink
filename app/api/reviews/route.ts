@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/utils/supabase/server"
 import { Resend } from "resend"
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+export const dynamic = "force-dynamic"
 
 export async function POST(req: NextRequest) {
   try {
@@ -99,6 +99,7 @@ export async function POST(req: NextRequest) {
       const stars = "★".repeat(rating) + "☆".repeat(5 - rating)
 
       if (artistEmail) {
+        const resend = new Resend(process.env.RESEND_API_KEY)
         await resend.emails.send({
           from: "TattooMaps <no-reply@tattoo-maps.com>",
           to: artistEmail,
