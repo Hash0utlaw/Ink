@@ -55,6 +55,7 @@ export function rowToArtist(row: Record<string, unknown>): Artist {
     hours: ((shop?.hours ?? row.hours) as Record<string, string>) ?? {},
     instagramHandle: String(row.instagram_handle ?? ""),
     websiteUrl: String(row.website_url ?? ""),
+    isClaimed: Boolean(row.is_claimed ?? false),
   }
 }
 

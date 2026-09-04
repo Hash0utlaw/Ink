@@ -1,0 +1,28 @@
+import type { Metadata } from "next"
+import { Header } from "@/components/layout/header"
+import { Footer } from "@/components/layout/footer"
+import { CreativeGenerator } from "@/components/generator/creative-generator"
+
+export const metadata: Metadata = {
+  title: "AI Tattoo Generator | TattooMaps",
+  description: "Describe your idea and generate custom tattoo design concepts with AI — then find an artist near you to bring it to life.",
+  alternates: { canonical: "/generator" },
+}
+
+export default function GeneratorPage() {
+  return (
+    <>
+      <Header />
+      <main className="container mx-auto px-4 py-12 md:py-16">
+        <div className="text-center mb-10">
+          <h1 className="text-3xl md:text-4xl font-bold">AI Tattoo Generator</h1>
+          <p className="text-muted-foreground mt-2 max-w-xl mx-auto">
+            Describe your idea, pick a style, and let AI sketch a few concepts to bring to your artist.
+          </p>
+        </div>
+        <CreativeGenerator />
+      </main>
+      <Footer />
+    </>
+  )
+}

@@ -1,11 +1,19 @@
 import type React from "react"
 import { Suspense } from "react"
+import { redirect } from "next/navigation"
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
 import { ArtistDashboardSidebar } from "@/components/artist-dashboard/sidebar"
 import { HeaderSkeleton } from "@/components/layout/header-skeleton"
+import { getCurrentUserId, getUserProfile } from "@/lib/supabase/users"
 
-export default function ArtistDashboardLayout({ children }: { children: React.ReactNode }) {
+export default async function ArtistDashboardLayout({ children }: { children: React.ReactNode }) {
+  const userId = await getCurrentUserId()
+  const profile = userId ? await getUserProfile(userId) : null
+  if (profile?.role !== "artist") {
+    redirect("/dashboard")
+  }
+
   return (
     <div className="flex min-h-screen flex-col">
       <Suspense fallback={<HeaderSkeleton />}>

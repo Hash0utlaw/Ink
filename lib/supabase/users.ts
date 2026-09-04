@@ -48,3 +48,19 @@ export async function getUserProfile(userId: string): Promise<UserProfile | null
     return null
   }
 }
+
+export async function updateUserProfile(
+  userId: string,
+  updates: { name?: string; email?: string; location?: string }
+): Promise<{ error: string | null }> {
+  try {
+    const supabase = createClient()
+    const { error } = await supabase
+      .from("user_profiles")
+      .update(updates)
+      .eq("user_id", userId)
+    return { error: error?.message ?? null }
+  } catch (e) {
+    return { error: (e as Error).message }
+  }
+}

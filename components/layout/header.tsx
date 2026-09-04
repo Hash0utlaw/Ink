@@ -15,7 +15,7 @@ import {
 import { MapPin, Map, User, Settings, LogOut, Zap, Compass } from "lucide-react"
 import { useState, useEffect } from "react"
 import { getClient } from "@/utils/supabase/client"
-import type { User as SupabaseUser } from "@supabase/supabase-js"
+import type { AuthChangeEvent, Session, User as SupabaseUser } from "@supabase/supabase-js"
 
 export function Header() {
   const router = useRouter()
@@ -58,7 +58,7 @@ export function Header() {
     })
 
     // Keep state reactive
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: AuthChangeEvent, session: Session | null) => {
       fetchUserAndRole(session?.user ?? null)
     })
 
@@ -91,7 +91,7 @@ export function Header() {
 
         {/* Navigation */}
         <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
-          <Link href="/map" className="flex items-center gap-1.5 text-accent font-semibold hover:text-accent/80 transition-colors">
+          <Link href="/map" className="flex items-center gap-1.5 text-foreground/80 hover:text-foreground transition-colors">
             <Map className="w-4 h-4" />
             Map
           </Link>

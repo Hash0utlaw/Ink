@@ -96,9 +96,15 @@ export function ArtistHeader({ artist }: { artist: Artist }) {
         <Button variant="outline" size="icon">
           <Share2 className="h-4 w-4" />
         </Button>
-        <Button className="bg-accent text-accent-foreground hover:bg-accent/90" asChild>
-          <Link href={`/book/${artist.handle || artist.id}`}>Book Now</Link>
-        </Button>
+        {artist.isClaimed ? (
+          <Button className="bg-accent text-accent-foreground hover:bg-accent/90" asChild>
+            <Link href={`/book/${artist.handle || artist.id}`}>Book Now</Link>
+          </Button>
+        ) : (
+          <Button variant="outline" asChild>
+            <Link href={`/book/${artist.handle || artist.id}?unclaimed=1`}>Request an intro</Link>
+          </Button>
+        )}
       </div>
     </div>
   )

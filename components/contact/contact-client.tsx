@@ -71,19 +71,30 @@ export function ContactClient() {
   })
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(false)
 
   function handleChange(field: string, value: string) {
     setFormData((prev) => ({ ...prev, [field]: value }))
+    setError(false)
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!formData.name || !formData.email || !formData.reason || !formData.message) return
     setLoading(true)
-    // Simulate submission delay
-    await new Promise((res) => setTimeout(res, 1000))
-    setLoading(false)
-    setSubmitted(true)
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      })
+      if (!response.ok) throw new Error("Failed to send message")
+      setSubmitted(true)
+    } catch {
+      setError(true)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -225,6 +236,12 @@ export function ContactClient() {
                         className="bg-card border-border focus:border-accent/60 resize-none"
                       />
                     </div>
+
+                    {error && (
+                      <p className="text-sm text-destructive">
+                        Something went wrong sending your message. Please try again.
+                      </p>
+                    )}
 
                     <Button
                       type="submit"

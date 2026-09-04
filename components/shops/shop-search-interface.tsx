@@ -163,7 +163,7 @@ export function ShopSearchInterface() {
       <div className="lg:col-span-1">
         <ShopFilterSidebar
           filters={filters}
-          onFilterChange={handleFilterChange}
+          onFilterChange={(f) => handleFilterChange(f as Filters)}
           onNearMe={handleNearMe}
         />
       </div>

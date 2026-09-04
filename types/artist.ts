@@ -41,4 +41,5 @@ export interface Artist {
   }
   instagramHandle?: string
   websiteUrl?: string
+  isClaimed: boolean
 }

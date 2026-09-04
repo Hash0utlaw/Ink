@@ -9,8 +9,9 @@ export async function login(prevState: any, formData: FormData) {
 
   const email = formData.get("email") as string
   const password = formData.get("password") as string
+  const next = formData.get("next") as string | null
 
-  const { error } = await supabase.auth.signInWithPassword({
+  const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
   })
@@ -23,6 +24,22 @@ export async function login(prevState: any, formData: FormData) {
   }
 
   revalidatePath("/", "layout")
+
+  if (next) {
+    redirect(next)
+  }
+
+  if (data.user) {
+    const { data: profile } = await supabase
+      .from("user_profiles")
+      .select("role")
+      .eq("user_id", data.user.id)
+      .maybeSingle()
+    if ((profile as { role?: string } | null)?.role === "artist") {
+      redirect("/artist-dashboard")
+    }
+  }
+
   redirect("/dashboard")
 }
 

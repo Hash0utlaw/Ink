@@ -62,6 +62,7 @@ export function AuthForm({ mode }: AuthFormProps) {
 
       {/* Form */}
       <form action={handleSubmit} className="space-y-5">
+        <input type="hidden" name="next" value={searchParams.get("next") ?? ""} />
         {/* Full name (signup only) */}
         {!isLogin && (
           <div className="space-y-1.5">

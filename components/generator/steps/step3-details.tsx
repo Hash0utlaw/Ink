@@ -47,7 +47,7 @@ export function Step3Details({ formData, updateFormData }: StepProps) {
               max={100}
               step={10}
               value={[formData.size]}
-              onValueValueChange={(value) => updateFormData({ size: value[0] })}
+              onValueChange={(value: number[]) => updateFormData({ size: value[0] })}
             />
             <div className="text-xs text-muted-foreground text-right mt-1">{formData.size}% of placement area</div>
           </div>

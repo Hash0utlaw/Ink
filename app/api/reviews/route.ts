@@ -64,21 +64,21 @@ export async function POST(req: NextRequest) {
     }
 
     // Roll up rating on the artist row
-    await supabase.rpc("update_artist_rating", { p_artist_id: b.artist_id }).catch(() => {
+    const { error: rpcError } = await supabase.rpc("update_artist_rating", { p_artist_id: b.artist_id })
+    if (rpcError) {
       // Fallback: manual calculation if RPC doesn't exist yet
-      return supabase
+      const { data: ratings } = await supabase
         .from("reviews")
         .select("rating")
         .eq("artist_id", b.artist_id)
-        .then(({ data: ratings }) => {
-          if (!ratings || ratings.length === 0) return
-          const avg = ratings.reduce((sum: number, r: { rating: number }) => sum + r.rating, 0) / ratings.length
-          return supabase
-            .from("artists")
-            .update({ rating: Math.round(avg * 10) / 10, review_count: ratings.length })
-            .eq("id", b.artist_id)
-        })
-    })
+      if (ratings && ratings.length > 0) {
+        const avg = ratings.reduce((sum: number, r: { rating: number }) => sum + r.rating, 0) / ratings.length
+        await supabase
+          .from("artists")
+          .update({ rating: Math.round(avg * 10) / 10, review_count: ratings.length })
+          .eq("id", b.artist_id)
+      }
+    }
 
     // Notify artist of the new review
     try {

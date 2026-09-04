@@ -32,6 +32,7 @@ export interface MockLocation {
 const artists: Artist[] = [
   {
     id: "1",
+    isClaimed: true,
     handle: "valerie",
     name: "Valerie",
     shopName: "Black Oak Tattoo",
@@ -94,6 +95,7 @@ const artists: Artist[] = [
   },
   {
     id: "3",
+    isClaimed: true,
     handle: "chloe",
     name: "Chloe",
     shopName: "Black Oak Tattoo",
@@ -116,6 +118,7 @@ const artists: Artist[] = [
   },
   {
     id: "2",
+    isClaimed: true,
     handle: "kenji",
     name: "Kenji",
     shopName: "Oni Tattoo",
@@ -164,6 +167,7 @@ const artists: Artist[] = [
 const shops: Shop[] = [
   {
     id: "s1",
+    slug: "black-oak-tattoo",
     name: "Black Oak Tattoo",
     logoUrl: "/black-oak-logo.png",
     coverImageUrl: "/tattoo-shop-interior.png",
@@ -172,9 +176,12 @@ const shops: Shop[] = [
     location: {
       address: "123 Art St",
       city: "San Francisco, CA",
+      state: "CA",
       lat: 37.7749,
       lng: -122.4194,
     },
+    phone: "",
+    website: "",
     residentArtistIds: ["1", "3"],
     about:
       "Black Oak Tattoo is a premier, custom tattoo studio located in the heart of San Francisco. We provide a clean, comfortable, and inspiring environment for both our artists and clients. Our diverse team of world-class artists specializes in a wide range of styles, ensuring we can bring any vision to life. We are committed to artistic excellence and providing a memorable, professional experience for every person who walks through our doors.",
@@ -212,12 +219,15 @@ const shops: Shop[] = [
   },
   {
     id: "s2",
+    slug: "oni-tattoo",
     name: "Oni Tattoo",
     logoUrl: "/placeholder.svg?height=100&width=100",
     coverImageUrl: "/placeholder.svg?height=400&width=1200",
     rating: 5.0,
     reviewCount: 210,
-    location: { address: "456 Dragon Ave", city: "Los Angeles, CA", lat: 34.0522, lng: -118.2437 },
+    location: { address: "456 Dragon Ave", city: "Los Angeles, CA", state: "CA", lat: 34.0522, lng: -118.2437 },
+    phone: "",
+    website: "",
     residentArtistIds: ["2"],
     about:
       "Authentic Japanese and Irezumi tattoos by master artists. We honor the tradition and history of this timeless art form.",
@@ -291,7 +301,7 @@ const userData: UserData = {
       id: "s1",
       name: "Black Oak Tattoo",
       logoUrl: "/black-oak-logo.png",
-      location: { city: "San Francisco, CA", address: "", lat: 0, lng: 0 },
+      location: { city: "San Francisco, CA", address: "", state: "CA", lat: 0, lng: 0 },
     },
   ],
 }

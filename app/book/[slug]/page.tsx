@@ -176,6 +176,11 @@ export default async function BookArtistPage({
                   </p>
                 </CardHeader>
                 <CardContent>
+                  {!artist.isClaimed && (
+                    <p className="text-xs text-muted-foreground bg-muted/50 border border-border/50 rounded-md px-3 py-2 mb-4">
+                      This artist hasn&apos;t claimed their profile yet. Send your brief and we&apos;ll invite them to respond.
+                    </p>
+                  )}
                   <PublicBookingForm
                     artistId={artist.id}
                     artistName={artist.name}

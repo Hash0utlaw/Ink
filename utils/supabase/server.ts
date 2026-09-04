@@ -1,15 +1,17 @@
 import { cookies } from "next/headers"
-import { createServerClient, type CookieOptions, type SupabaseClient } from "@supabase/ssr"
-
-let cached: SupabaseClient | undefined
+import { createServerClient } from "@supabase/ssr"
+import type { SupabaseClient } from "@supabase/supabase-js"
 
 /**
- * Returns a singleton Supabase client that works in Server Components,
- * preserving the user's auth cookies automatically.
+ * Returns a Supabase client scoped to the current request, for use in
+ * Server Components, Server Actions, and Route Handlers.
+ *
+ * IMPORTANT: this must create a fresh client per call rather than caching
+ * one at module scope — a cached client would bind the first request's
+ * cookies to every subsequent request on a reused server instance (Fluid
+ * Compute), leaking one user's session into another user's request.
  */
 export function createClient(): SupabaseClient {
-  if (cached) return cached
-
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
@@ -21,27 +23,18 @@ export function createClient(): SupabaseClient {
 
   const cookieStore = cookies()
 
-  // Helper to read / write cookies for Supabase's auth helpers
-  const cookieOptions: CookieOptions = {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-  }
-
-  cached = createServerClient(supabaseUrl, supabaseAnonKey, {
+  return createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {
-      get(name) {
-        return cookieStore.get(name)?.value
+      getAll() {
+        return cookieStore.getAll()
       },
-      set(name, value, options) {
-        cookieStore.set({ name, value, ...cookieOptions, ...options })
-      },
-      remove(name, options) {
-        cookieStore.delete({ name, ...cookieOptions, ...options })
+      setAll(cookiesToSet) {
+        try {
+          cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options))
+        } catch {
+          // Called from a Server Component — cookies are refreshed by middleware instead.
+        }
       },
     },
   })
-
-  return cached
 }

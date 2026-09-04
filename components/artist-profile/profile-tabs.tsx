@@ -16,7 +16,7 @@ export function ProfileTabs({ artist }: { artist: Artist }) {
         <PortfolioGallery images={artist.portfolioImages} />
       </TabsContent>
       <TabsContent value="about" className="mt-6">
-        <AboutSection bio={artist.bio} />
+        <AboutSection bio={artist.bio} handle={artist.handle} isClaimed={artist.isClaimed} />
       </TabsContent>
       <TabsContent value="reviews" className="mt-6">
         <ReviewsSection reviews={artist.reviews} />

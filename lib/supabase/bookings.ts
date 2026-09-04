@@ -72,6 +72,21 @@ export async function getBookingsForArtist(userId: string): Promise<BookingReque
   }
 }
 
+export async function getBookingsForClient(email: string): Promise<BookingRequest[]> {
+  try {
+    const supabase = createClient()
+    const { data, error } = await supabase
+      .from("booking_requests")
+      .select("*")
+      .eq("client_email", email)
+      .order("created_at", { ascending: false })
+    if (error || !data) return []
+    return data.map((row: Record<string, unknown>) => rowToBooking(row))
+  } catch {
+    return []
+  }
+}
+
 export async function getBookingById(bookingId: string): Promise<BookingRequest | null> {
   try {
     const supabase = createClient()

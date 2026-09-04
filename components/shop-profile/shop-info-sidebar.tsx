@@ -42,7 +42,7 @@ export function ShopInfoSidebar({ shop, isOwned = false }: { shop: Shop; isOwned
           {!isOwned && (
             <p className="text-xs text-muted-foreground pt-2 border-t border-border/40">
               Is this your shop?{" "}
-              <a href={`/claim?shop=${shop.id}`} className="underline hover:text-foreground transition-colors">
+              <a href={`/claim?shop=${shop.slug}`} className="underline hover:text-foreground transition-colors">
                 Claim this listing
               </a>
             </p>
