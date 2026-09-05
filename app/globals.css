@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: 40 8% 97%;
     --foreground: 240 10% 3.9%;
     --card: 0 0% 100%;
     --card-foreground: 240 10% 3.9%;
@@ -18,6 +18,9 @@
     --muted-foreground: 240 3.8% 46.1%;
     --accent: 262 83% 58%;
     --accent-foreground: 0 0% 98%;
+    --accent-text: 262 83% 48%;
+    --highlight: 38 74% 48%;
+    --highlight-foreground: 240 10% 4%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
     --border: 240 5.9% 90%;
@@ -33,12 +36,12 @@
     --pricing-accent: 139 92% 58%;
     --pricing-secondary: 217 91% 60%;
     --pricing-muted: 240 3.7% 15.9%;
-    /* Updated color palette inspired by design inspiration */
-    --hero-accent: 280 100% 70%;
-    --hero-secondary: 45 100% 60%;
-    --hero-tertiary: 160 100% 50%;
+    /* Hero palette, unified with brand purple + highlight gold */
+    --hero-accent: 262 83% 58%;
+    --hero-secondary: 38 74% 48%;
+    --hero-tertiary: 262 60% 40%;
     --hero-grid: 240 5% 96%;
-    /* Modern sidebar design tokens inspired by Closet Creations and Casa Portufornia */
+    /* Modern sidebar design tokens */
     --sidebar-background: 0 0% 99%;
     --sidebar-card: 0 0% 100%;
     --sidebar-border: 240 5.9% 92%;
@@ -52,22 +55,25 @@
   .dark {
     --background: 240 10% 3.9%;
     --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
+    --card: 240 6% 9%;
     --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
+    --popover: 240 6% 11%;
     --popover-foreground: 0 0% 98%;
     --primary: 262 83% 58%;
     --primary-foreground: 0 0% 98%;
-    --secondary: 240 3.7% 15.9%;
+    --secondary: 240 5% 14%;
     --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
+    --muted: 240 5% 14%;
     --muted-foreground: 240 5% 64.9%;
     --accent: 262 83% 58%;
     --accent-foreground: 0 0% 98%;
+    --accent-text: 262 90% 72%;
+    --highlight: 38 74% 48%;
+    --highlight-foreground: 240 10% 4%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
+    --border: 240 5% 20%;
+    --input: 240 5% 20%;
     --ring: 262 83% 58%;
     --radius: 0.5rem;
     --chart-1: 220 70% 50%;
@@ -79,10 +85,10 @@
     --pricing-accent: 139 92% 58%;
     --pricing-secondary: 217 91% 60%;
     --pricing-muted: 240 3.7% 15.9%;
-    /* Dark theme hero colors */
-    --hero-accent: 280 100% 70%;
-    --hero-secondary: 45 100% 60%;
-    --hero-tertiary: 160 100% 50%;
+    /* Dark theme hero colors, unified with brand purple + highlight gold */
+    --hero-accent: 262 83% 58%;
+    --hero-secondary: 38 74% 48%;
+    --hero-tertiary: 262 60% 40%;
     --hero-grid: 240 5% 8%;
     /* Dark theme sidebar tokens */
     --sidebar-background: 240 10% 3.9%;
@@ -123,40 +129,6 @@
     @apply bg-card border border-border rounded-lg p-6 space-y-4;
   }
 
-  /* Ink-themed button styles */
-  .btn-ink-primary {
-    @apply bg-ink-purple-600 hover:bg-ink-purple-700 text-white font-medium px-6 py-2 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl;
-  }
-
-  .btn-ink-secondary {
-    @apply bg-ink-blue-600 hover:bg-ink-blue-700 text-white font-medium px-6 py-2 rounded-lg transition-all duration-200;
-  }
-
-  .btn-ink-accent {
-    @apply bg-ink-gold-500 hover:bg-ink-gold-600 text-ink-dark-900 font-medium px-6 py-2 rounded-lg transition-all duration-200;
-  }
-
-  /* Ink-themed card styles */
-  .card-ink {
-    @apply bg-card border border-ink-gray-200 dark:border-ink-dark-700 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200;
-  }
-
-  /* Ink-themed input styles */
-  .input-ink {
-    @apply bg-background border border-ink-gray-300 dark:border-ink-dark-600 rounded-lg px-4 py-2 focus:ring-2 focus:ring-ink-purple-500 focus:border-transparent transition-all duration-200;
-  }
-
-  /* Ink flow animation for loading states */
-  .ink-flow {
-    @apply relative overflow-hidden;
-  }
-
-  .ink-flow::before {
-    content: "";
-    @apply absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-ink-purple-500/20 to-transparent;
-    animation: ink-flow 2s ease-in-out infinite;
-  }
-
   /* Custom scrollbar */
   .scrollbar-ink {
     scrollbar-width: thin;
@@ -179,20 +151,6 @@
     @apply bg-ink-purple-500;
   }
 
-  /* Gradient text */
-  .text-ink-gradient {
-    @apply bg-gradient-to-r from-ink-purple-600 to-ink-blue-600 bg-clip-text text-transparent;
-  }
-
-  /* Ink-themed shadows */
-  .shadow-ink {
-    box-shadow: 0 4px 6px -1px rgba(139, 92, 246, 0.1), 0 2px 4px -1px rgba(139, 92, 246, 0.06);
-  }
-
-  .shadow-ink-lg {
-    box-shadow: 0 10px 15px -3px rgba(139, 92, 246, 0.1), 0 4px 6px -2px rgba(139, 92, 246, 0.05);
-  }
-
   /* Hero-specific components inspired by design inspiration */
   .hero-grid {
     background-image: linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
@@ -209,7 +167,7 @@
   }
 
   .hero-button-primary {
-    @apply bg-white text-black hover:bg-gray-100 font-medium px-8 py-4 rounded-full transition-all duration-300 hover:scale-105;
+    @apply bg-primary text-primary-foreground hover:bg-primary/90 font-medium px-8 py-4 rounded-lg transition-all duration-300 hover:scale-105;
   }
 
   .hero-button-secondary {
@@ -254,7 +212,7 @@
   }
 
   .filter-badge {
-    @apply bg-accent/10 text-accent border-accent/20 hover:bg-accent/20 transition-colors duration-200;
+    @apply bg-accent/10 text-accent-text border-accent/20 hover:bg-accent/20 transition-colors duration-200;
   }
 }
 
@@ -266,12 +224,6 @@
 
   .animate-slide-up {
     animation: slide-up 0.3s ease-out;
-  }
-
-  /* Ink-themed background patterns */
-  .bg-ink-pattern {
-    background-image: radial-gradient(circle at 1px 1px, rgba(139, 92, 246, 0.15) 1px, transparent 0);
-    background-size: 20px 20px;
   }
 
   /* Hero animation utilities */

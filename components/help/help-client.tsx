@@ -144,7 +144,7 @@ export function HelpClient() {
                 <p className="text-muted-foreground text-lg">No articles found for that search.</p>
                 <p className="text-sm text-muted-foreground mt-2">
                   Try different keywords or{" "}
-                  <Link href="/contact" className="text-accent hover:underline">contact our support team</Link>.
+                  <Link href="/contact" className="text-accent-text hover:underline">contact our support team</Link>.
                 </p>
               </div>
             ) : (
@@ -187,7 +187,7 @@ export function HelpClient() {
                       <BookOpen className="w-4 h-4 text-accent" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-foreground group-hover:text-accent transition-colors leading-relaxed">{article.title}</p>
+                      <p className="text-sm font-medium text-foreground group-hover:text-accent-text transition-colors leading-relaxed">{article.title}</p>
                       <span className="text-xs text-muted-foreground mt-1 block">{article.category}</span>
                     </div>
                   </div>

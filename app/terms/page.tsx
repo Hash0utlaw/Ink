@@ -61,7 +61,7 @@ export default function TermsOfServicePage() {
                   <a
                     key={s.id}
                     href={`#${s.id}`}
-                    className="flex items-center gap-2 text-sm text-muted-foreground hover:text-accent transition-colors py-1 group"
+                    className="flex items-center gap-2 text-sm text-muted-foreground hover:text-accent-text transition-colors py-1 group"
                   >
                     <ChevronRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity text-accent" />
                     {s.title}
@@ -79,7 +79,7 @@ export default function TermsOfServicePage() {
               <Section id="acceptance" title="1. Acceptance of Terms">
                 <Prose>
                   These Terms constitute a legally binding agreement between you and TattooMaps, Inc. (&quot;TattooMaps&quot;, &quot;we&quot;, &quot;our&quot;, or &quot;us&quot;). They govern your access to and use of tattoomaps.com, our mobile applications, and any related services (collectively, the &quot;Platform&quot;). By creating an account or using any feature of the Platform you confirm that you have read, understood, and agree to these Terms, as well as our{" "}
-                  <Link href="/privacy" className="text-accent hover:underline">
+                  <Link href="/privacy" className="text-accent-text hover:underline">
                     Privacy Policy
                   </Link>
                   .
@@ -206,14 +206,14 @@ export default function TermsOfServicePage() {
                   <Mail className="w-5 h-5 text-accent shrink-0" />
                   <div>
                     <p className="text-sm font-medium">Legal Team</p>
-                    <a href="mailto:legal@tattoomaps.com" className="text-sm text-accent hover:underline">
+                    <a href="mailto:legal@tattoomaps.com" className="text-sm text-accent-text hover:underline">
                       legal@tattoomaps.com
                     </a>
                   </div>
                 </div>
                 <Prose>
                   You can also use our{" "}
-                  <Link href="/contact" className="text-accent hover:underline">
+                  <Link href="/contact" className="text-accent-text hover:underline">
                     Contact Us
                   </Link>{" "}
                   form and select &quot;General inquiry&quot; as the topic.

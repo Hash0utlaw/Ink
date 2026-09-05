@@ -453,11 +453,11 @@ export function PricingClient() {
                 <div className="space-y-2 text-xs">
                   <div className="flex justify-between">
                     <span>Fine Line:</span>
-                    <span className="text-accent">+20%</span>
+                    <span className="text-accent-text">+20%</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Realism:</span>
-                    <span className="text-accent">+80%</span>
+                    <span className="text-accent-text">+80%</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Traditional:</span>
@@ -531,15 +531,15 @@ export function PricingClient() {
                 <div className="space-y-2 text-xs">
                   <div className="flex justify-between">
                     <span>Minimum:</span>
-                    <span className="text-accent">2-3 hours</span>
+                    <span className="text-accent-text">2-3 hours</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Average Session:</span>
-                    <span className="text-accent">4-6 hours</span>
+                    <span className="text-accent-text">4-6 hours</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Large Pieces:</span>
-                    <span className="text-accent">Multiple sessions</span>
+                    <span className="text-accent-text">Multiple sessions</span>
                   </div>
                 </div>
               </Card>
@@ -583,11 +583,11 @@ export function PricingClient() {
                 <div className="space-y-2 text-xs">
                   <div className="flex justify-between">
                     <span>Consultation:</span>
-                    <span className="text-accent">$50-150</span>
+                    <span className="text-accent-text">$50-150</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Design Fee:</span>
-                    <span className="text-accent">$100-500</span>
+                    <span className="text-accent-text">$100-500</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Touch-ups:</span>

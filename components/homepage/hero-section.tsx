@@ -74,12 +74,7 @@ export function HeroSection({ stats }: HeroSectionProps = {}) {
     <section className="relative min-h-screen w-full flex items-center justify-center overflow-hidden">
       <div className="absolute inset-0 hero-grid opacity-50" />
 
-      <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-br from-hero-accent/20 to-hero-secondary/20 rounded-full blur-xl animate-float" />
-      <div
-        className="absolute bottom-20 right-10 w-48 h-48 bg-gradient-to-br from-hero-tertiary/20 to-hero-accent/20 rounded-full blur-xl animate-float"
-        style={{ animationDelay: "2s" }}
-      />
-      <div className="absolute top-1/2 left-1/4 w-24 h-24 bg-gradient-to-br from-hero-secondary/20 to-hero-tertiary/20 rounded-full blur-xl animate-pulse-slow" />
+      <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-br from-hero-accent/10 to-hero-secondary/10 rounded-full blur-xl animate-float" />
 
       <div className="relative z-20 container mx-auto px-4 py-20">
         <div className="max-w-6xl mx-auto">

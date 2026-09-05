@@ -22,7 +22,7 @@ export function FeaturedArtists({ artists }: FeaturedArtistsProps) {
         {realArtists.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-muted-foreground">No featured artists yet.</p>
-            <Link href="/artists" className="text-accent hover:underline text-sm mt-2 inline-block">
+            <Link href="/artists" className="text-accent-text hover:underline text-sm mt-2 inline-block">
               Browse all artists →
             </Link>
           </div>
@@ -38,7 +38,7 @@ export function FeaturedArtists({ artists }: FeaturedArtistsProps) {
                       <AvatarFallback>{artist.name.charAt(0)}</AvatarFallback>
                     </Avatar>
                     <h3 className="font-bold text-xl">{artist.name}</h3>
-                    <p className="text-accent text-sm">{artist.specialties.slice(0, 2).join(", ")}</p>
+                    <p className="text-accent-text text-sm">{artist.specialties.slice(0, 2).join(", ")}</p>
                     <div className="flex items-center gap-1 mt-2">
                       <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
                       <span className="text-muted-foreground">{artist.rating}</span>

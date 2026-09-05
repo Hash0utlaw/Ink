@@ -70,7 +70,7 @@ export function FlashCard({ listing, initialSaved }: FlashCardProps) {
           >
             <Avatar className="w-5 h-5 shrink-0">
               <AvatarImage src={listing.artistAvatar} alt={listing.artistName} />
-              <AvatarFallback className="text-[8px] bg-accent/20 text-accent">{initials(listing.artistName)}</AvatarFallback>
+              <AvatarFallback className="text-[8px] bg-accent/20 text-accent-text">{initials(listing.artistName)}</AvatarFallback>
             </Avatar>
             <span className="text-xs text-muted-foreground truncate">{listing.artistName}</span>
           </Link>

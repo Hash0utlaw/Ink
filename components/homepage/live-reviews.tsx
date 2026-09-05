@@ -105,7 +105,7 @@ export function LiveReviews({ initialReviews }: LiveReviewsProps) {
             >
               <Avatar className="w-10 h-10 shrink-0 border border-accent/30">
                 <AvatarImage src={review.artistAvatar} alt={review.artistName} />
-                <AvatarFallback className="text-xs font-bold bg-accent/10 text-accent">
+                <AvatarFallback className="text-xs font-bold bg-accent/10 text-accent-text">
                   {initials(review.artistName)}
                 </AvatarFallback>
               </Avatar>

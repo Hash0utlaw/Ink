@@ -39,22 +39,22 @@ export function Footer() {
             <h3 className="font-semibold text-foreground">Discover</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/artists" className="text-muted-foreground hover:text-accent transition-colors">
+                <Link href="/artists" className="text-muted-foreground hover:text-accent-text transition-colors">
                   Find Artists
                 </Link>
               </li>
               <li>
-                <Link href="/tattoo-shops" className="text-muted-foreground hover:text-accent transition-colors">
+                <Link href="/tattoo-shops" className="text-muted-foreground hover:text-accent-text transition-colors">
                   Browse Shops
                 </Link>
               </li>
               <li>
-                <Link href="/styles" className="text-muted-foreground hover:text-accent transition-colors">
+                <Link href="/styles" className="text-muted-foreground hover:text-accent-text transition-colors">
                   Tattoo Styles
                 </Link>
               </li>
               <li>
-                <Link href="/map" className="text-muted-foreground hover:text-accent transition-colors">
+                <Link href="/map" className="text-muted-foreground hover:text-accent-text transition-colors">
                   Map View
                 </Link>
               </li>
@@ -66,22 +66,22 @@ export function Footer() {
             <h3 className="font-semibold text-foreground">For Artists</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/artist-dashboard" className="text-muted-foreground hover:text-accent transition-colors">
+                <Link href="/artist-dashboard" className="text-muted-foreground hover:text-accent-text transition-colors">
                   Artist Dashboard
                 </Link>
               </li>
               <li>
-                <Link href="/signup" className="text-muted-foreground hover:text-accent transition-colors">
+                <Link href="/signup" className="text-muted-foreground hover:text-accent-text transition-colors">
                   Join as Artist
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-muted-foreground hover:text-accent transition-colors">
+                <Link href="#" className="text-muted-foreground hover:text-accent-text transition-colors">
                   Portfolio Tips
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-muted-foreground hover:text-accent transition-colors">
+                <Link href="#" className="text-muted-foreground hover:text-accent-text transition-colors">
                   Pricing Guide
                 </Link>
               </li>
@@ -93,22 +93,22 @@ export function Footer() {
             <h3 className="font-semibold text-foreground">Support</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/help" className="text-muted-foreground hover:text-accent transition-colors">
+                <Link href="/help" className="text-muted-foreground hover:text-accent-text transition-colors">
                   Help Center
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="text-muted-foreground hover:text-accent transition-colors">
+                <Link href="/contact" className="text-muted-foreground hover:text-accent-text transition-colors">
                   Contact Us
                 </Link>
               </li>
               <li>
-                <Link href="/privacy" className="text-muted-foreground hover:text-accent transition-colors">
+                <Link href="/privacy" className="text-muted-foreground hover:text-accent-text transition-colors">
                   Privacy Policy
                 </Link>
               </li>
               <li>
-                <Link href="/terms" className="text-muted-foreground hover:text-accent transition-colors">
+                <Link href="/terms" className="text-muted-foreground hover:text-accent-text transition-colors">
                   Terms of Service
                 </Link>
               </li>

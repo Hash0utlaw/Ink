@@ -142,7 +142,7 @@ export function Header() {
                         className={cn(
                           "group flex items-center gap-3 rounded-xl px-3 py-3 text-[15px] font-medium transition-colors",
                           active
-                            ? "bg-accent/10 text-accent"
+                            ? "bg-accent/10 text-accent-text"
                             : "text-foreground/80 hover:bg-muted hover:text-foreground"
                         )}
                       >

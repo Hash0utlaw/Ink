@@ -72,7 +72,7 @@ export default function ForgotPasswordPage() {
                   setIsSuccess(false)
                   setMessage("")
                 }}
-                className="text-accent hover:text-accent/80 font-medium transition-colors"
+                className="text-accent-text hover:text-accent-text/80 font-medium transition-colors"
               >
                 try again
               </button>
@@ -80,7 +80,7 @@ export default function ForgotPasswordPage() {
             </p>
             <Link
               href="/login"
-              className="inline-flex items-center gap-1.5 text-sm font-semibold text-accent hover:text-accent/80 transition-colors"
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-accent-text hover:text-accent-text/80 transition-colors"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               Return to sign in
@@ -151,7 +151,7 @@ export default function ForgotPasswordPage() {
             Remember your password?{" "}
             <Link
               href="/login"
-              className="font-semibold text-accent hover:text-accent/80 transition-colors"
+              className="font-semibold text-accent-text hover:text-accent-text/80 transition-colors"
             >
               Sign in instead
             </Link>
@@ -161,7 +161,7 @@ export default function ForgotPasswordPage() {
             Don&apos;t have an account?{" "}
             <Link
               href="/signup"
-              className="font-semibold text-accent hover:text-accent/80 transition-colors"
+              className="font-semibold text-accent-text hover:text-accent-text/80 transition-colors"
             >
               Create one for free
             </Link>

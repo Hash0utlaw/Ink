@@ -175,7 +175,7 @@ export function ContactClient() {
                         setSubmitted(false)
                         setFormData({ name: "", email: "", reason: "", message: "" })
                       }}
-                      className="mt-6 text-sm text-accent hover:underline"
+                      className="mt-6 text-sm text-accent-text hover:underline"
                     >
                       Send another message
                     </button>
@@ -327,7 +327,7 @@ export function ContactClient() {
                   </div>
                   <p className="text-xs text-muted-foreground leading-relaxed">
                     Information you share here is used solely to respond to your inquiry. See our{" "}
-                    <Link href="/privacy" className="text-accent hover:underline">
+                    <Link href="/privacy" className="text-accent-text hover:underline">
                       Privacy Policy
                     </Link>
                     .
