@@ -9,18 +9,12 @@ import { Footer } from "@/components/layout/footer"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Star, MapPin, Phone, Globe, ChevronRight } from "lucide-react"
-import { getShopsForCity, getTopCities } from "@/lib/supabase/seo"
-import { STATE_ABBR_TO_NAME, stateAbbrToSlug, cityToSlug } from "@/lib/utils/states"
+import { getShopsForCity } from "@/lib/supabase/seo"
+import { STATE_ABBR_TO_NAME, stateAbbrToSlug } from "@/lib/utils/states"
 import { FinderCta } from "@/components/layout/finder-cta"
 import type { Shop } from "@/types/shop"
 
-export async function generateStaticParams() {
-  const top = await getTopCities(50)
-  return top.map(({ city, state }) => ({
-    state: stateAbbrToSlug(state),
-    city: cityToSlug(city),
-  }))
-}
+export const dynamic = "force-dynamic"
 
 export async function generateMetadata({
   params,
