@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
@@ -12,10 +12,23 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { MapPin, User, Settings, LogOut, Zap, Compass, Menu } from "lucide-react"
+import {
+  MapPin,
+  User,
+  Settings,
+  LogOut,
+  Zap,
+  Compass,
+  Menu,
+  Users,
+  Store,
+  Palette,
+  ChevronRight,
+} from "lucide-react"
 import { useState, useEffect } from "react"
 import { getClient } from "@/utils/supabase/client"
 import type { AuthChangeEvent, Session, User as SupabaseUser } from "@supabase/supabase-js"
+import { cn } from "@/lib/utils"
 import {
   Sheet,
   SheetContent,
@@ -24,8 +37,17 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet"
 
+const MOBILE_NAV_ITEMS = [
+  { href: "/artists", label: "Artists", icon: Users },
+  { href: "/tattoo-shops", label: "Shops", icon: Store },
+  { href: "/flash", label: "Flash", icon: Zap },
+  { href: "/styles", label: "Styles", icon: Palette },
+  { href: "/find-artist", label: "Find Artist", icon: Compass },
+]
+
 export function Header() {
   const router = useRouter()
+  const pathname = usePathname()
   const [user, setUser] = useState<SupabaseUser | null>(null)
   const [role, setRole] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -96,67 +118,104 @@ export function Header() {
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="flex flex-col">
+            <SheetContent side="left" className="flex w-[300px] flex-col gap-0 p-0 sm:w-80">
               <SheetTitle className="sr-only">Navigation</SheetTitle>
-              <nav className="flex flex-col gap-4 text-base font-medium mt-6">
-                <SheetClose asChild>
-                  <Link href="/artists" className="text-foreground/80 hover:text-foreground transition-colors">
-                    Artists
-                  </Link>
-                </SheetClose>
-                <SheetClose asChild>
-                  <Link href="/tattoo-shops" className="text-foreground/80 hover:text-foreground transition-colors">
-                    Shops
-                  </Link>
-                </SheetClose>
-                <SheetClose asChild>
-                  <Link href="/flash" className="flex items-center gap-1.5 text-foreground/80 hover:text-foreground transition-colors">
-                    <Zap className="w-4 h-4" />
-                    Flash
-                  </Link>
-                </SheetClose>
-                <SheetClose asChild>
-                  <Link href="/styles" className="text-foreground/80 hover:text-foreground transition-colors">
-                    Styles
-                  </Link>
-                </SheetClose>
-                <SheetClose asChild>
-                  <Link href="/find-artist" className="flex items-center gap-1.5 text-foreground/80 hover:text-foreground transition-colors">
-                    <Compass className="w-4 h-4" />
-                    Find Artist
-                  </Link>
-                </SheetClose>
+
+              {/* Brand header */}
+              <div className="flex items-center gap-2 border-b border-border/40 px-6 py-5">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent">
+                  <MapPin className="h-5 w-5 text-accent-foreground" />
+                </div>
+                <span className="bg-gradient-to-r from-accent to-accent/80 bg-clip-text text-lg font-bold text-transparent">
+                  TattooMaps
+                </span>
+              </div>
+
+              {/* Nav links */}
+              <nav className="flex flex-col gap-1 px-3 py-4">
+                {MOBILE_NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+                  const active = pathname === href || pathname?.startsWith(`${href}/`)
+                  return (
+                    <SheetClose asChild key={href}>
+                      <Link
+                        href={href}
+                        className={cn(
+                          "group flex items-center gap-3 rounded-xl px-3 py-3 text-[15px] font-medium transition-colors",
+                          active
+                            ? "bg-accent/10 text-accent"
+                            : "text-foreground/80 hover:bg-muted hover:text-foreground"
+                        )}
+                      >
+                        <span
+                          className={cn(
+                            "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors",
+                            active
+                              ? "bg-accent text-accent-foreground"
+                              : "bg-muted text-foreground/70 group-hover:bg-accent/10 group-hover:text-accent"
+                          )}
+                        >
+                          <Icon className="h-4 w-4" />
+                        </span>
+                        {label}
+                        <ChevronRight className="ml-auto h-4 w-4 -translate-x-1 text-muted-foreground/40 opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100" />
+                      </Link>
+                    </SheetClose>
+                  )
+                })}
               </nav>
 
-              <div className="mt-auto pt-6 border-t border-border/40 flex flex-col gap-3">
-                {isLoading ? null : user ? (
-                  <>
+              {/* Auth section */}
+              <div className="mt-auto border-t border-border/40 p-4">
+                {isLoading ? (
+                  <div className="h-14 animate-pulse rounded-xl bg-muted" />
+                ) : user ? (
+                  <div className="space-y-1">
+                    <div className="mb-2 flex items-center gap-3 rounded-xl bg-muted/50 px-3 py-3">
+                      <Avatar className="h-9 w-9">
+                        <AvatarImage
+                          src={user.user_metadata?.avatar_url || "/placeholder-user.jpg"}
+                          alt={user.email ?? "User avatar"}
+                        />
+                        <AvatarFallback>
+                          {user.email?.charAt(0).toUpperCase() ?? "U"}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium leading-tight">
+                          {user.user_metadata?.full_name || "User"}
+                        </p>
+                        <p className="truncate text-xs text-muted-foreground">{user.email}</p>
+                      </div>
+                    </div>
                     <SheetClose asChild>
-                      <Link href={dashboardLink} className="flex items-center gap-1.5 text-sm font-medium text-foreground/80 hover:text-foreground transition-colors">
-                        <User className="w-4 h-4" />
+                      <Link
+                        href={dashboardLink}
+                        className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-foreground/80 transition-colors hover:bg-muted hover:text-foreground"
+                      >
+                        <User className="h-4 w-4" />
                         {dashboardLabel}
                       </Link>
                     </SheetClose>
                     <SheetClose asChild>
                       <Link
                         href={role === "artist" ? "/artist-dashboard/profile" : "/dashboard/profile"}
-                        className="flex items-center gap-1.5 text-sm font-medium text-foreground/80 hover:text-foreground transition-colors"
+                        className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-foreground/80 transition-colors hover:bg-muted hover:text-foreground"
                       >
-                        <Settings className="w-4 h-4" />
+                        <Settings className="h-4 w-4" />
                         Settings
                       </Link>
                     </SheetClose>
                     <button
                       onClick={handleSignOut}
-                      className="flex items-center gap-1.5 text-sm font-medium text-destructive"
+                      className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10"
                     >
-                      <LogOut className="w-4 h-4" />
+                      <LogOut className="h-4 w-4" />
                       Log out
                     </button>
-                  </>
+                  </div>
                 ) : (
                   <SheetClose asChild>
-                    <Button asChild>
+                    <Button asChild className="w-full">
                       <Link href="/login">Sign in</Link>
                     </Button>
                   </SheetClose>
