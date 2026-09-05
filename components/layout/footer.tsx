@@ -44,13 +44,18 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/shops" className="text-muted-foreground hover:text-accent transition-colors">
+                <Link href="/tattoo-shops" className="text-muted-foreground hover:text-accent transition-colors">
                   Browse Shops
                 </Link>
               </li>
               <li>
                 <Link href="/styles" className="text-muted-foreground hover:text-accent transition-colors">
                   Tattoo Styles
+                </Link>
+              </li>
+              <li>
+                <Link href="/map" className="text-muted-foreground hover:text-accent transition-colors">
+                  Map View
                 </Link>
               </li>
             </ul>

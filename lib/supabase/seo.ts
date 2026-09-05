@@ -196,3 +196,35 @@ export async function getAllArtistIds(): Promise<string[]> {
     return []
   }
 }
+
+// Real platform-wide counts for the homepage hero stats
+export async function getPlatformStats(): Promise<{
+  shopCount: number
+  artistCount: number
+  cityCount: number
+}> {
+  try {
+    const supabase = createClient()
+
+    const [shopsRes, artistsRes, citiesRes] = await Promise.all([
+      supabase.from("shops").select("id", { count: "exact", head: true }).eq("is_active", true),
+      supabase.from("artists").select("id", { count: "exact", head: true }).eq("is_active", true),
+      supabase
+        .from("shops")
+        .select("city")
+        .eq("is_active", true)
+        .not("city", "is", null)
+        .neq("city", ""),
+    ])
+
+    const shopCount = shopsRes.count ?? 0
+    const artistCount = artistsRes.count ?? 0
+
+    const cityValues = (citiesRes.data as { city: string }[] | null) ?? []
+    const cityCount = new Set(cityValues.map((row) => row.city.trim().toLowerCase())).size
+
+    return { shopCount, artistCount, cityCount }
+  } catch {
+    return { shopCount: 0, artistCount: 0, cityCount: 0 }
+  }
+}

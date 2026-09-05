@@ -6,15 +6,31 @@ import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Star, MapPin } from "lucide-react"
 import type { Shop } from "@/types/shop"
+import { SaveButton } from "@/components/saved/save-button"
 
-export function ShopCard({ shop, distanceMi }: { shop: Shop; distanceMi?: number }) {
+export function ShopCard({
+  shop,
+  distanceMi,
+  initialSaved,
+}: {
+  shop: Shop
+  distanceMi?: number
+  initialSaved?: boolean
+}) {
   return (
     <Card className="overflow-hidden transition-all hover:border-accent/50 hover:-translate-y-1 flex flex-col">
-      <div className="h-32 w-full overflow-hidden">
+      <div className="relative h-32 w-full overflow-hidden">
         <img
           src={shop.coverImageUrl || "/placeholder.svg"}
           alt={`${shop.name} interior`}
           className="h-full w-full object-cover"
+        />
+        <SaveButton
+          itemType="shop"
+          itemId={shop.id}
+          variant="icon"
+          initialSaved={initialSaved}
+          className="absolute top-2 right-2 z-10"
         />
       </div>
       <CardHeader className="flex flex-row items-start gap-4 p-4 -mt-12">

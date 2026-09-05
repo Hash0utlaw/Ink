@@ -2,8 +2,9 @@ import Link from "next/link"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Star, Heart, Share2, Instagram, Globe } from "lucide-react"
+import { Star, Share2, Instagram, Globe } from "lucide-react"
 import type { Artist } from "@/types/artist"
+import { SaveButton } from "@/components/saved/save-button"
 
 function initials(name: string) {
   return name
@@ -14,7 +15,7 @@ function initials(name: string) {
     .join("")
 }
 
-export function ArtistHeader({ artist }: { artist: Artist }) {
+export function ArtistHeader({ artist, initialSaved }: { artist: Artist; initialSaved?: boolean }) {
   const igHandle = artist.instagramHandle?.replace(/^@/, "").trim()
   const websiteUrl = artist.websiteUrl?.trim()
 
@@ -90,9 +91,7 @@ export function ArtistHeader({ artist }: { artist: Artist }) {
       </div>
 
       <div className="flex gap-2 shrink-0">
-        <Button variant="outline" size="icon">
-          <Heart className="h-4 w-4" />
-        </Button>
+        <SaveButton itemType="artist" itemId={artist.id} variant="full" initialSaved={initialSaved} />
         <Button variant="outline" size="icon">
           <Share2 className="h-4 w-4" />
         </Button>

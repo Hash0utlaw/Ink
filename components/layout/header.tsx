@@ -12,16 +12,24 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { MapPin, Map, User, Settings, LogOut, Zap, Compass } from "lucide-react"
+import { MapPin, User, Settings, LogOut, Zap, Compass, Menu } from "lucide-react"
 import { useState, useEffect } from "react"
 import { getClient } from "@/utils/supabase/client"
 import type { AuthChangeEvent, Session, User as SupabaseUser } from "@supabase/supabase-js"
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+  SheetClose,
+  SheetTitle,
+} from "@/components/ui/sheet"
 
 export function Header() {
   const router = useRouter()
   const [user, setUser] = useState<SupabaseUser | null>(null)
   const [role, setRole] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [mobileOpen, setMobileOpen] = useState(false)
 
   useEffect(() => {
     const supabase = getClient()
@@ -66,6 +74,7 @@ export function Header() {
   }, [])
 
   const handleSignOut = async () => {
+    setMobileOpen(false)
     const supabase = getClient()
     if (supabase) {
       await supabase.auth.signOut()
@@ -79,38 +88,112 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
-        {/* Logo */}
-        <Link href="/" className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
-            <MapPin className="w-5 h-5 text-accent-foreground" />
-          </div>
-          <span className="text-xl font-bold bg-gradient-to-r from-accent to-accent/80 bg-clip-text text-transparent">
-            TattooMaps
-          </span>
-        </Link>
+        <div className="flex items-center gap-2">
+          {/* Mobile nav trigger */}
+          <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="md:hidden" aria-label="Open menu">
+                <Menu className="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="flex flex-col">
+              <SheetTitle className="sr-only">Navigation</SheetTitle>
+              <nav className="flex flex-col gap-4 text-base font-medium mt-6">
+                <SheetClose asChild>
+                  <Link href="/artists" className="text-foreground/80 hover:text-foreground transition-colors">
+                    Artists
+                  </Link>
+                </SheetClose>
+                <SheetClose asChild>
+                  <Link href="/tattoo-shops" className="text-foreground/80 hover:text-foreground transition-colors">
+                    Shops
+                  </Link>
+                </SheetClose>
+                <SheetClose asChild>
+                  <Link href="/flash" className="flex items-center gap-1.5 text-foreground/80 hover:text-foreground transition-colors">
+                    <Zap className="w-4 h-4" />
+                    Flash
+                  </Link>
+                </SheetClose>
+                <SheetClose asChild>
+                  <Link href="/styles" className="text-foreground/80 hover:text-foreground transition-colors">
+                    Styles
+                  </Link>
+                </SheetClose>
+                <SheetClose asChild>
+                  <Link href="/find-artist" className="flex items-center gap-1.5 text-foreground/80 hover:text-foreground transition-colors">
+                    <Compass className="w-4 h-4" />
+                    Find Artist
+                  </Link>
+                </SheetClose>
+              </nav>
+
+              <div className="mt-auto pt-6 border-t border-border/40 flex flex-col gap-3">
+                {isLoading ? null : user ? (
+                  <>
+                    <SheetClose asChild>
+                      <Link href={dashboardLink} className="flex items-center gap-1.5 text-sm font-medium text-foreground/80 hover:text-foreground transition-colors">
+                        <User className="w-4 h-4" />
+                        {dashboardLabel}
+                      </Link>
+                    </SheetClose>
+                    <SheetClose asChild>
+                      <Link
+                        href={role === "artist" ? "/artist-dashboard/profile" : "/dashboard/profile"}
+                        className="flex items-center gap-1.5 text-sm font-medium text-foreground/80 hover:text-foreground transition-colors"
+                      >
+                        <Settings className="w-4 h-4" />
+                        Settings
+                      </Link>
+                    </SheetClose>
+                    <button
+                      onClick={handleSignOut}
+                      className="flex items-center gap-1.5 text-sm font-medium text-destructive"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Log out
+                    </button>
+                  </>
+                ) : (
+                  <SheetClose asChild>
+                    <Button asChild>
+                      <Link href="/login">Sign in</Link>
+                    </Button>
+                  </SheetClose>
+                )}
+              </div>
+            </SheetContent>
+          </Sheet>
+
+          {/* Logo */}
+          <Link href="/" className="flex items-center space-x-2">
+            <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
+              <MapPin className="w-5 h-5 text-accent-foreground" />
+            </div>
+            <span className="text-xl font-bold bg-gradient-to-r from-accent to-accent/80 bg-clip-text text-transparent">
+              TattooMaps
+            </span>
+          </Link>
+        </div>
 
         {/* Navigation */}
         <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
-          <Link href="/map" className="flex items-center gap-1.5 text-foreground/80 hover:text-foreground transition-colors">
-            <Map className="w-4 h-4" />
-            Map
-          </Link>
-          <Link href="/find-artist" className="flex items-center gap-1.5 text-foreground/80 hover:text-foreground transition-colors">
-            <Compass className="w-4 h-4" />
-            Find Artist
-          </Link>
-          <Link href="/flash" className="flex items-center gap-1.5 text-foreground/80 hover:text-foreground transition-colors">
-            <Zap className="w-4 h-4" />
-            Flash
-          </Link>
           <Link href="/artists" className="text-foreground/80 hover:text-foreground transition-colors">
             Artists
           </Link>
           <Link href="/tattoo-shops" className="text-foreground/80 hover:text-foreground transition-colors">
             Shops
           </Link>
+          <Link href="/flash" className="flex items-center gap-1.5 text-foreground/80 hover:text-foreground transition-colors">
+            <Zap className="w-4 h-4" />
+            Flash
+          </Link>
           <Link href="/styles" className="text-foreground/80 hover:text-foreground transition-colors">
             Styles
+          </Link>
+          <Link href="/find-artist" className="flex items-center gap-1.5 text-foreground/80 hover:text-foreground transition-colors">
+            <Compass className="w-4 h-4" />
+            Find Artist
           </Link>
         </nav>
 

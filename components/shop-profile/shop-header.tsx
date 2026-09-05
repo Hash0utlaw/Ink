@@ -2,8 +2,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Star, Phone, MapPin } from "lucide-react"
 import type { Shop } from "@/types/shop"
+import { SaveButton } from "@/components/saved/save-button"
 
-export function ShopHeader({ shop }: { shop: Shop }) {
+export function ShopHeader({ shop, initialSaved }: { shop: Shop; initialSaved?: boolean }) {
   return (
     <div className="relative">
       <div className="h-48 md:h-64 w-full">
@@ -31,6 +32,7 @@ export function ShopHeader({ shop }: { shop: Shop }) {
             </div>
           </div>
           <div className="flex gap-2">
+            <SaveButton itemType="shop" itemId={shop.id} variant="full" initialSaved={initialSaved} />
             <Button variant="outline">
               <Phone className="mr-2 h-4 w-4" /> Contact
             </Button>

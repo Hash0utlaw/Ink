@@ -7,10 +7,12 @@ import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Star, MapPin, Clock, Tag } from "lucide-react"
 import type { Artist, AvailabilityStatus, PriceTier } from "@/types/artist"
+import { SaveButton } from "@/components/saved/save-button"
 
 interface ArtistCardProps {
   artist: Artist
   distance?: number
+  initialSaved?: boolean
 }
 
 function initials(name: string) {
@@ -31,14 +33,21 @@ const PRICE_TIER_LABEL: Record<PriceTier, string> = {
   luxury:  "$$$$",
 }
 
-export function ArtistCard({ artist, distance }: ArtistCardProps) {
+export function ArtistCard({ artist, distance, initialSaved }: ArtistCardProps) {
   const hasRating = artist.rating > 0
   const locationLine = [artist.location.city, artist.location.state].filter(Boolean).join(", ")
   const avail = AVAILABILITY_CONFIG[artist.availabilityStatus] ?? AVAILABILITY_CONFIG.available
   const hasPreview = artist.previewImages.length > 0
 
   return (
-    <Card className="overflow-hidden transition-all hover:border-accent/50 hover:-translate-y-1 flex flex-col">
+    <Card className="relative overflow-hidden transition-all hover:border-accent/50 hover:-translate-y-1 flex flex-col">
+      <SaveButton
+        itemType="artist"
+        itemId={artist.id}
+        variant="icon"
+        initialSaved={initialSaved}
+        className="absolute top-3 right-3 z-10"
+      />
       {/* Portfolio strip */}
       {hasPreview && (
         <div className="grid grid-cols-3 h-24 overflow-hidden">

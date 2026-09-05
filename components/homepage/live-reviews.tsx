@@ -75,8 +75,6 @@ export function LiveReviews({ initialReviews }: LiveReviewsProps) {
     return () => { supabase.removeChannel(channel) }
   }, [])
 
-  if (reviews.length === 0) return null
-
   return (
     <section className="py-12 border-t border-border/50">
       <div className="container mx-auto px-4">
@@ -93,6 +91,11 @@ export function LiveReviews({ initialReviews }: LiveReviewsProps) {
           </Link>
         </div>
 
+        {reviews.length === 0 ? (
+          <p className="text-sm text-muted-foreground py-8 text-center">
+            Reviews from real bookings will appear here.
+          </p>
+        ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {reviews.map((review) => (
             <Link
@@ -135,6 +138,7 @@ export function LiveReviews({ initialReviews }: LiveReviewsProps) {
             </Link>
           ))}
         </div>
+        )}
       </div>
     </section>
   )

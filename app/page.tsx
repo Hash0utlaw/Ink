@@ -9,12 +9,17 @@ import { NewestFlash, NewestFlashSkeleton } from "@/components/homepage/newest-f
 import { WorthTheDrive, WorthTheDriveSkeleton } from "@/components/homepage/worth-the-drive"
 import { LiveReviews, LiveReviewsSkeleton } from "@/components/homepage/live-reviews"
 import { Footer } from "@/components/layout/footer"
+import { RecentlyViewed } from "@/components/homepage/recently-viewed"
 import { getArtists, getWorthTheDriveArtists } from "@/lib/supabase/artists"
 import { getNewestFlash } from "@/lib/supabase/flash"
 import { getRecentReviews } from "@/lib/supabase/reviews"
+import { getPlatformStats } from "@/lib/supabase/seo"
 
 async function FeaturedArtistsSection() {
   const { data: artists } = await getArtists()
+  if (artists.length === 0) {
+    console.warn("[homepage] FeaturedArtists: no artists returned")
+  }
   return <FeaturedArtists artists={artists} />
 }
 
@@ -49,7 +54,9 @@ const websiteJsonLd = {
   },
 }
 
-export default function HomePage() {
+export default async function HomePage() {
+  const stats = await getPlatformStats()
+
   return (
     <div className="flex min-h-screen flex-col">
       <script
@@ -60,7 +67,8 @@ export default function HomePage() {
         <Header />
       </Suspense>
       <main className="flex-1">
-        <HeroSection />
+        <HeroSection stats={stats} />
+        <RecentlyViewed />
         <FeatureHighlights />
         <PopularCategories />
         <Suspense fallback={<FeaturedArtistsSkeleton />}>

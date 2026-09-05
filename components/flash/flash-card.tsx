@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Sparkles } from "lucide-react"
 import type { FlashListing } from "@/lib/supabase/flash"
+import { SaveButton } from "@/components/saved/save-button"
 
 function priceLabel(listing: FlashListing) {
   if (listing.priceMax) return `$${listing.price}–$${listing.priceMax}`
@@ -17,9 +18,10 @@ function initials(name: string) {
 
 interface FlashCardProps {
   listing: FlashListing
+  initialSaved?: boolean
 }
 
-export function FlashCard({ listing }: FlashCardProps) {
+export function FlashCard({ listing, initialSaved }: FlashCardProps) {
   const bookHref = `/book/${listing.artistHandle || listing.artistId}?flash=${listing.id}`
 
   return (
@@ -32,14 +34,15 @@ export function FlashCard({ listing }: FlashCardProps) {
           fill
           className="object-cover group-hover:scale-105 transition-transform duration-300"
         />
-        {listing.isExclusive && (
-          <div className="absolute top-2 right-2">
+        <div className="absolute top-2 right-2 z-10 flex flex-col items-end gap-1">
+          {listing.isExclusive && (
             <Badge className="bg-[#7C3AED] text-white border-0 gap-1 text-xs shadow-md">
               <Sparkles className="w-3 h-3" />
               Exclusive
             </Badge>
-          </div>
-        )}
+          )}
+          <SaveButton itemType="artist" itemId={listing.artistId} variant="icon" initialSaved={initialSaved} />
+        </div>
         <div className="absolute bottom-2 left-2">
           <span className="bg-black/70 text-white text-sm font-bold px-2 py-0.5 rounded-md backdrop-blur-sm">
             {priceLabel(listing)}

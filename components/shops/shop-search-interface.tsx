@@ -97,6 +97,18 @@ export function ShopSearchInterface() {
   }
 
   useEffect(() => {
+    if (searchParams.get("nearme") !== "1") return
+    const lat = sessionStorage.getItem("tm_lat")
+    const lng = sessionStorage.getItem("tm_lng")
+    if (lat && lng) {
+      handleNearMe(Number(lat), Number(lng))
+      sessionStorage.removeItem("tm_lat")
+      sessionStorage.removeItem("tm_lng")
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
     const fetchShops = async () => {
       setIsLoading(true)
 

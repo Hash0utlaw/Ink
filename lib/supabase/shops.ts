@@ -140,6 +140,18 @@ export async function getShopById(id: string): Promise<Shop | null> {
   }
 }
 
+export async function getShopsByIds(ids: string[]): Promise<Shop[]> {
+  if (ids.length === 0) return []
+  try {
+    const supabase = createClient()
+    const { data, error } = await supabase.from("shops").select("*").in("id", ids)
+    if (error || !data) return []
+    return data.map((row: Record<string, unknown>) => rowToShop(row))
+  } catch {
+    return []
+  }
+}
+
 // Looks up by the slug column (add a slug text column to the shops table).
 export async function getShopBySlug(slug: string): Promise<Shop | null> {
   try {

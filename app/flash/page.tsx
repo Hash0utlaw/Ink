@@ -7,6 +7,8 @@ import { Footer } from "@/components/layout/footer"
 import { FlashCard } from "@/components/flash/flash-card"
 import { FlashFiltersBar } from "@/components/flash/flash-filters-bar"
 import { getFlashListings } from "@/lib/supabase/flash"
+import { getCurrentUserId } from "@/lib/supabase/users"
+import { getSavedIdsForUser } from "@/lib/supabase/saved"
 import { Zap } from "lucide-react"
 
 export const metadata: Metadata = {
@@ -33,6 +35,9 @@ export default async function FlashPage({
   })
 
   const hasFilters = !!(searchParams.style || searchParams.state || searchParams.city || searchParams.minPrice || searchParams.maxPrice)
+
+  const userId = await getCurrentUserId()
+  const savedArtistIds = new Set(userId ? await getSavedIdsForUser(userId, "artist") : [])
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -112,7 +117,11 @@ export default async function FlashPage({
             <>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
                 {listings.map((listing) => (
-                  <FlashCard key={listing.id} listing={listing} />
+                  <FlashCard
+                    key={listing.id}
+                    listing={listing}
+                    initialSaved={savedArtistIds.has(listing.artistId)}
+                  />
                 ))}
               </div>
 

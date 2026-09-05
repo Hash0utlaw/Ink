@@ -7,6 +7,8 @@ import { Header } from "@/components/layout/header"
 import { HeaderSkeleton } from "@/components/layout/header-skeleton"
 import { Footer } from "@/components/layout/footer"
 import { getShopById, getShopArtists } from "@/lib/supabase/shops"
+import { getCurrentUserId } from "@/lib/supabase/users"
+import { getSavedIdsForUser } from "@/lib/supabase/saved"
 import { ShopHeader } from "@/components/shop-profile/shop-header"
 import { ShopTabs } from "@/components/shop-profile/shop-tabs"
 import { ShopInfoSidebar } from "@/components/shop-profile/shop-info-sidebar"
@@ -29,6 +31,9 @@ export default async function ShopProfilePage({ params }: { params: { id: string
   if (!shop) notFound()
 
   const residentArtists = await getShopArtists(params.id)
+  const userId = await getCurrentUserId()
+  const savedIds = userId ? await getSavedIdsForUser(userId, "shop") : []
+  const isSaved = savedIds.includes(shop.id)
 
   const stateSlug = stateAbbrToSlug(shop.location.state)
   const citySlug = cityToSlug(shop.location.city)
@@ -95,7 +100,7 @@ export default async function ShopProfilePage({ params }: { params: { id: string
             </nav>
           </div>
         )}
-        <ShopHeader shop={shop} />
+        <ShopHeader shop={shop} initialSaved={isSaved} />
         <div className="container mx-auto px-4 py-8 md:py-12">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">

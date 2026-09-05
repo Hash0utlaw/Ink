@@ -5,9 +5,12 @@ import { HeaderSkeleton } from "@/components/layout/header-skeleton"
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
 import { getArtistById } from "@/lib/supabase/artists"
+import { getCurrentUserId } from "@/lib/supabase/users"
+import { getSavedIdsForUser } from "@/lib/supabase/saved"
 import { ArtistHeader } from "@/components/artist-profile/artist-header"
 import { ProfileTabs } from "@/components/artist-profile/profile-tabs"
 import { BookingSection } from "@/components/artist-profile/booking-section"
+import { RecordVisit } from "@/components/artist-profile/record-visit"
 
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
   const artist = await getArtistById(params.id)
@@ -35,6 +38,10 @@ export default async function ArtistProfilePage({ params }: { params: { id: stri
   if (!artist) {
     notFound()
   }
+
+  const userId = await getCurrentUserId()
+  const savedIds = userId ? await getSavedIdsForUser(userId, "artist") : []
+  const isSaved = savedIds.includes(artist.id)
 
   const loc = [artist.location.city, artist.location.state].filter(Boolean).join(", ")
   const jsonLd = {
@@ -78,7 +85,14 @@ export default async function ArtistProfilePage({ params }: { params: { id: stri
       </Suspense>
       <main className="flex-1 bg-background">
         <div className="container mx-auto px-4 py-8 md:py-12">
-          <ArtistHeader artist={artist} />
+          <RecordVisit
+            id={artist.id}
+            name={artist.name}
+            handle={artist.handle}
+            avatarUrl={artist.avatarUrl}
+            city={artist.location.city}
+          />
+          <ArtistHeader artist={artist} initialSaved={isSaved} />
           <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
               <ProfileTabs artist={artist} />
