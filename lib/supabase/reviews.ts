@@ -66,6 +66,29 @@ export async function getReviewsForArtist(artistId: string): Promise<Review[]> {
   }
 }
 
+export async function getReviewsForShop(shopId: string): Promise<Review[]> {
+  try {
+    const supabase = createClient()
+    const { data: artists } = await supabase
+      .from("artists")
+      .select("id")
+      .eq("shop_id", shopId)
+    const artistIds = ((artists ?? []) as { id: string }[]).map((a) => a.id)
+    if (artistIds.length === 0) return []
+
+    const { data, error } = await supabase
+      .from("reviews")
+      .select("*, artists(display_name, handle, avatar_url)")
+      .in("artist_id", artistIds)
+      .eq("is_verified", true)
+      .order("created_at", { ascending: false })
+    if (error || !data) return []
+    return data.map((row: Record<string, unknown>) => rowToReview(row))
+  } catch {
+    return []
+  }
+}
+
 export async function getReviewByBookingId(bookingId: string): Promise<Review | null> {
   try {
     const supabase = createClient()

@@ -4,10 +4,25 @@ import { Star, Phone, MapPin } from "lucide-react"
 import type { Shop } from "@/types/shop"
 import { SaveButton } from "@/components/saved/save-button"
 
+function directionsHref(shop: Shop) {
+  const { lat, lng, address, city, state } = shop.location
+  if (lat && lng) {
+    return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`
+  }
+  const query = [address, city, state].filter(Boolean).join(", ")
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`
+}
+
 export function ShopHeader({ shop, initialSaved }: { shop: Shop; initialSaved?: boolean }) {
+  const contactHref = shop.phone
+    ? `tel:${shop.phone}`
+    : shop.website
+      ? (shop.website.startsWith("http") ? shop.website : `https://${shop.website}`)
+      : null
+
   return (
     <div className="relative">
-      <div className="h-48 md:h-64 w-full">
+      <div className="relative h-48 md:h-64 w-full">
         <img
           src={shop.coverImageUrl || "/placeholder.svg"}
           alt={`${shop.name} interior`}
@@ -33,11 +48,17 @@ export function ShopHeader({ shop, initialSaved }: { shop: Shop; initialSaved?: 
           </div>
           <div className="flex gap-2">
             <SaveButton itemType="shop" itemId={shop.id} variant="full" initialSaved={initialSaved} />
-            <Button variant="outline">
-              <Phone className="mr-2 h-4 w-4" /> Contact
-            </Button>
-            <Button>
-              <MapPin className="mr-2 h-4 w-4" /> Get Directions
+            {contactHref && (
+              <Button variant="outline" asChild>
+                <a href={contactHref} target={shop.phone ? undefined : "_blank"} rel={shop.phone ? undefined : "noopener noreferrer"}>
+                  <Phone className="mr-2 h-4 w-4" /> Contact
+                </a>
+              </Button>
+            )}
+            <Button asChild>
+              <a href={directionsHref(shop)} target="_blank" rel="noopener noreferrer">
+                <MapPin className="mr-2 h-4 w-4" /> Get Directions
+              </a>
             </Button>
           </div>
         </div>

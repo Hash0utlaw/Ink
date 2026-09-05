@@ -7,6 +7,7 @@ import { Footer } from "@/components/layout/footer"
 import { getArtistById } from "@/lib/supabase/artists"
 import { getCurrentUserId } from "@/lib/supabase/users"
 import { getSavedIdsForUser } from "@/lib/supabase/saved"
+import { getReviewsForArtist } from "@/lib/supabase/reviews"
 import { ArtistHeader } from "@/components/artist-profile/artist-header"
 import { ProfileTabs } from "@/components/artist-profile/profile-tabs"
 import { BookingSection } from "@/components/artist-profile/booking-section"
@@ -42,6 +43,7 @@ export default async function ArtistProfilePage({ params }: { params: { id: stri
   const userId = await getCurrentUserId()
   const savedIds = userId ? await getSavedIdsForUser(userId, "artist") : []
   const isSaved = savedIds.includes(artist.id)
+  const reviews = await getReviewsForArtist(artist.id)
 
   const loc = [artist.location.city, artist.location.state].filter(Boolean).join(", ")
   const jsonLd = {
@@ -95,7 +97,7 @@ export default async function ArtistProfilePage({ params }: { params: { id: stri
           <ArtistHeader artist={artist} initialSaved={isSaved} />
           <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
-              <ProfileTabs artist={artist} />
+              <ProfileTabs artist={artist} reviews={reviews} />
             </div>
             <div className="lg:col-span-1">
               <BookingSection artist={artist} />
