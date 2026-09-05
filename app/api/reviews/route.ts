@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/utils/supabase/server"
+import { getUserProfile } from "@/lib/supabase/users"
 import { Resend } from "resend"
 
 export const dynamic = "force-dynamic"
@@ -84,18 +85,17 @@ export async function POST(req: NextRequest) {
     try {
       const { data: artist } = await supabase
         .from("artists")
-        .select("display_name")
+        .select("display_name, user_id")
         .eq("id", b.artist_id)
         .maybeSingle()
 
-      const { data: userRow } = await supabase
-        .from("user_profiles")
-        .select("email")
-        .eq("artist_id", b.artist_id)
-        .maybeSingle()
-
-      const artistEmail = (userRow as { email?: string } | null)?.email
-      const artistName = (artist as { display_name?: string } | null)?.display_name ?? "Artist"
+      const artistRow = artist as { display_name?: string; user_id?: string } | null
+      const artistName = artistRow?.display_name ?? "Artist"
+      let artistEmail: string | undefined
+      if (artistRow?.user_id) {
+        const profile = await getUserProfile(artistRow.user_id)
+        artistEmail = profile?.email ?? undefined
+      }
       const stars = "★".repeat(rating) + "☆".repeat(5 - rating)
 
       if (artistEmail) {
