@@ -23,7 +23,7 @@ export default async function ArtistDashboardLayout({ children }: { children: Re
         <div className="container mx-auto px-4 py-8 md:py-12">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="md:col-span-1">
-              <ArtistDashboardSidebar />
+              <ArtistDashboardSidebar isPro={profile?.subscriptionTier === "pro"} />
             </div>
             <div className="md:col-span-3">{children}</div>
           </div>
