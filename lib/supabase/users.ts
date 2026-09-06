@@ -7,7 +7,7 @@ import { createClient } from "@/utils/supabase/server"
 export interface UserProfile {
   userId: string
   role: "artist" | "client"
-  subscriptionTier: "free" | "pro"
+  subscriptionTier: "free" | "pro" | "shop"
   email?: string
   name?: string
   avatarUrl?: string
@@ -42,7 +42,7 @@ export async function getUserProfile(userId: string): Promise<UserProfile | null
     return {
       userId: String(row.id ?? ""),
       role: (row.role as "artist" | "client") ?? "client",
-      subscriptionTier: (row.subscription_tier as "free" | "pro") ?? "free",
+      subscriptionTier: (row.subscription_tier as "free" | "pro" | "shop") ?? "free",
       email: row.email != null ? String(row.email) : undefined,
       name: row.display_name != null ? String(row.display_name) : undefined,
       avatarUrl: row.avatar_url != null ? String(row.avatar_url) : undefined,

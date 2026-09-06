@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { Trash2, Loader2, Sparkles } from "lucide-react"
 import type { FlashListing } from "@/lib/supabase/flash"
+import { safeImageSrc } from "@/lib/utils/safe-image"
 
 interface FlashManageCardProps {
   listing: FlashListing
@@ -48,7 +49,7 @@ export function FlashManageCard({ listing }: FlashManageCardProps) {
   return (
     <div className="flex gap-3 p-3 border rounded-lg bg-card">
       <div className="relative w-16 h-16 rounded-md overflow-hidden bg-muted shrink-0">
-        <Image src={listing.imageUrl} alt={listing.title} fill className="object-cover" />
+        <Image src={safeImageSrc(listing.imageUrl)} alt={listing.title} fill className="object-cover" />
       </div>
 
       <div className="flex-1 min-w-0 space-y-1">

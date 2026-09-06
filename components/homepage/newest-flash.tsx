@@ -4,6 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Sparkles, Zap, ArrowRight } from "lucide-react"
 import type { FlashListing } from "@/lib/supabase/flash"
+import { safeImageSrc } from "@/lib/utils/safe-image"
 
 function initials(name: string) {
   return name.split(" ").filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join("")
@@ -43,7 +44,7 @@ export function NewestFlash({ listings }: NewestFlashProps) {
               >
                 <div className="relative aspect-square overflow-hidden bg-muted">
                   <Image
-                    src={listing.imageUrl}
+                    src={safeImageSrc(listing.imageUrl)}
                     alt={listing.title}
                     fill
                     className="object-cover group-hover:scale-105 transition-transform duration-300"

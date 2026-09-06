@@ -6,6 +6,7 @@ import { MapSidebar } from "./map-sidebar"
 import { LocationDetails } from "./location-details"
 import type { MapboxLocation } from "@/lib/mapbox"
 import { calculateDistance, getCurrentLocation, geocodeAddress, mapboxConfig } from "@/lib/mapbox"
+import { useToast } from "@/components/ui/use-toast"
 
 interface MapFilters {
   locationType: "all" | "artist" | "shop"
@@ -18,13 +19,14 @@ interface MapFilters {
 }
 
 export function MapInterface() {
+  const { toast } = useToast()
   const [locations, setLocations] = useState<MapboxLocation[]>([])
   const [filteredLocations, setFilteredLocations] = useState<MapboxLocation[]>([])
   const [selectedLocation, setSelectedLocation] = useState<MapboxLocation | null>(null)
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null)
   const [mapCenter, setMapCenter] = useState<[number, number]>([-98.5795, 39.8283])
   const [mapZoom, setMapZoom] = useState(4)
-  const [mapStyle, setMapStyle] = useState("streets")
+  const [mapStyle, setMapStyle] = useState("dark")
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [loading, setLoading] = useState(true)
   const geoFetched = useRef(false)
@@ -68,6 +70,10 @@ export function MapInterface() {
     const getUserLocation = async () => {
       try {
         const coords = await getCurrentLocation()
+        if (!coords) {
+          toast({ description: "Location not available" })
+          return
+        }
         setUserLocation(coords)
         setMapCenter(coords)
         setMapZoom(12)
@@ -166,13 +172,18 @@ export function MapInterface() {
   const handleCurrentLocation = useCallback(async () => {
     try {
       const coords = await getCurrentLocation()
+      if (!coords) {
+        toast({ description: "Location not available" })
+        return
+      }
       setUserLocation(coords)
       setMapCenter(coords)
       setMapZoom(14)
     } catch (error) {
       console.error("Failed to get current location:", error)
+      toast({ description: "Location not available" })
     }
-  }, [])
+  }, [toast])
 
   // Handle filter changes
   const handleFilterChange = useCallback((newFilters: Partial<MapFilters>) => {

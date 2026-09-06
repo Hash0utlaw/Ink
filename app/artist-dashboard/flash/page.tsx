@@ -3,12 +3,16 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Plus, Zap } from "lucide-react"
 import { createClient } from "@/utils/supabase/server"
-import { getCurrentUserId } from "@/lib/supabase/users"
+import { getCurrentUserId, getUserProfile } from "@/lib/supabase/users"
 import { getArtistFlashListings } from "@/lib/supabase/flash"
 import { FlashUploadForm } from "@/components/artist-dashboard/flash-upload-form"
 import { FlashManageCard } from "@/components/artist-dashboard/flash-manage-card"
 
-const FREE_LIMIT = 2
+const FLASH_LIMITS: Record<string, number | null> = {
+  free: 3,
+  pro: 30,
+  shop: null, // unlimited
+}
 
 async function getArtistIdForUser(userId: string): Promise<string | null> {
   try {
@@ -28,9 +32,13 @@ export default async function ArtistFlashPage() {
   const userId = await getCurrentUserId()
   const artistId = userId ? await getArtistIdForUser(userId) : null
   const listings = artistId ? await getArtistFlashListings(artistId) : []
+  const profile = userId ? await getUserProfile(userId) : null
 
-  const atLimit = listings.length >= FREE_LIMIT
-  // TODO: check Pro status to lift limit
+  const tier = profile?.subscriptionTier ?? "free"
+  const limit = FLASH_LIMITS[tier] ?? FLASH_LIMITS.free
+  const activeCount = listings.filter((l) => l.isAvailable).length
+  const atLimit = limit !== null && activeCount >= limit
+  const usageLabel = limit === null ? `${activeCount} listings (unlimited)` : `${activeCount}/${limit} listings used`
 
   return (
     <div className="space-y-8">
@@ -41,9 +49,7 @@ export default async function ArtistFlashPage() {
           </div>
           <div>
             <h1 className="text-2xl font-bold">Flash Listings</h1>
-            <p className="text-sm text-muted-foreground">
-              {listings.length}/{FREE_LIMIT} free listings used
-            </p>
+            <p className="text-sm text-muted-foreground">{usageLabel}</p>
           </div>
         </div>
         {atLimit && (
@@ -67,7 +73,7 @@ export default async function ArtistFlashPage() {
               {atLimit ? (
                 <div className="py-6 text-center space-y-3">
                   <p className="text-sm text-muted-foreground">
-                    You&apos;ve reached the free tier limit of {FREE_LIMIT} listings.
+                    You&apos;ve reached the {tier} tier limit of {limit} listings.
                   </p>
                   <Button className="bg-[#7C3AED] hover:bg-[#6D28D9]" asChild>
                     <a href="/pricing">Upgrade to Pro</a>

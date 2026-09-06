@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
+import Link from "next/link"
 import { ShopFilterSidebar } from "./shop-filter-sidebar"
 import { ShopResultsList } from "./shop-results-list"
-import { MapView } from "@/components/artists/map-view"
 import { X } from "lucide-react"
 import type { Shop } from "@/types/shop"
 
@@ -180,7 +180,12 @@ export function ShopSearchInterface() {
         />
       </div>
       <div className="lg:col-span-3 space-y-8">
-        <MapView artists={filteredShops as any} />
+        <Link
+          href="/map"
+          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors"
+        >
+          View shops on the map →
+        </Link>
 
         {/* Active filter pills */}
         {hasActiveFilters && (

@@ -14,6 +14,7 @@ import { getArtistBySlug } from "@/lib/supabase/artists"
 import { getFlashById } from "@/lib/supabase/flash"
 import { PublicBookingForm } from "@/components/booking/public-booking-form"
 import { createClient } from "@/utils/supabase/server"
+import { safeImageSrc } from "@/lib/utils/safe-image"
 
 async function getPortfolioImages(artistId: string): Promise<string[]> {
   try {
@@ -143,7 +144,7 @@ export default async function BookArtistPage({
                     {portfolioImages.map((url, i) => (
                       <div key={i} className="aspect-square rounded-lg overflow-hidden bg-muted">
                         <Image
-                          src={url}
+                          src={safeImageSrc(url)}
                           alt={`${artist.name} portfolio ${i + 1}`}
                           width={160}
                           height={160}

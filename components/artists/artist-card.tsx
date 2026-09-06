@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Star, MapPin, Clock, Tag } from "lucide-react"
 import type { Artist, AvailabilityStatus, PriceTier } from "@/types/artist"
 import { SaveButton } from "@/components/saved/save-button"
+import { safeImageSrc } from "@/lib/utils/safe-image"
 
 interface ArtistCardProps {
   artist: Artist
@@ -54,7 +55,7 @@ export function ArtistCard({ artist, distance, initialSaved }: ArtistCardProps) 
           {artist.previewImages.slice(0, 3).map((url, i) => (
             <div key={i} className="relative overflow-hidden bg-muted">
               <Image
-                src={url}
+                src={safeImageSrc(url)}
                 alt={`${artist.name} portfolio ${i + 1}`}
                 fill
                 className="object-cover"

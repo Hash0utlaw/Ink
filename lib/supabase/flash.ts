@@ -140,6 +140,7 @@ export async function countArtistFlashListings(artistId: string): Promise<number
       .from("flash_listings")
       .select("id", { count: "exact", head: true })
       .eq("artist_id", artistId)
+      .eq("is_available", true)
     return count ?? 0
   } catch {
     return 0

@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/utils/supabase/server"
 
+const FLASH_LIMITS: Record<string, number | null> = {
+  free: 3,
+  pro: 30,
+  shop: null, // unlimited
+}
+
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url)
@@ -50,25 +56,26 @@ export async function POST(req: NextRequest) {
       .maybeSingle()
     if (!artist) return NextResponse.json({ error: "Artist profile not found" }, { status: 403 })
 
-    // Enforce free tier limit (2 listings)
-    const { count } = await supabase
-      .from("flash_listings")
-      .select("id", { count: "exact", head: true })
-      .eq("artist_id", artist.id)
+    // Enforce per-tier flash listing limits (server-side — the client-side
+    // check on the dashboard page is UX only, not security)
+    const { data: profile } = await supabase
+      .from("user_profiles")
+      .select("subscription_tier")
+      .eq("id", user.id)
+      .maybeSingle()
+    const tier = (profile as { subscription_tier?: string } | null)?.subscription_tier ?? "free"
+    const limit = FLASH_LIMITS[tier] ?? FLASH_LIMITS.free
 
-    // TODO: check subscription tier for Pro gating
-    const FREE_LIMIT = 2
-    if ((count ?? 0) >= FREE_LIMIT) {
-      // Check if user is Pro (allow unlimited)
-      const { data: profile } = await supabase
-        .from("user_profiles")
-        .select("subscription_tier")
-        .eq("id", user.id)
-        .maybeSingle()
-      const isPro = (profile as { subscription_tier?: string } | null)?.subscription_tier === "pro"
-      if (!isPro) {
+    if (limit !== null) {
+      const { count } = await supabase
+        .from("flash_listings")
+        .select("id", { count: "exact", head: true })
+        .eq("artist_id", artist.id)
+        .eq("is_available", true)
+
+      if ((count ?? 0) >= limit) {
         return NextResponse.json(
-          { error: "Free plan is limited to 2 flash listings. Upgrade to Pro for unlimited." },
+          { error: "limit_reached", limit, tier },
           { status: 403 }
         )
       }

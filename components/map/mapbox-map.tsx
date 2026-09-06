@@ -5,6 +5,26 @@ import { type MapboxLocation, defaultMapConfig, mapStyles } from "@/lib/mapbox"
 import { createRoot } from "react-dom/client"
 import { MapMarkerPopup } from "./map-marker-popup"
 
+// Some scraped locations have missing/malformed coordinates. Mapbox's
+// LngLatBounds.extend() accepts them silently but throws later inside
+// fitBounds()/cameraForBounds(), which can leave the map stuck on its
+// loading state — filter these out before they ever reach Mapbox.
+function isValidCoordinate(coords: unknown): coords is [number, number] {
+  return (
+    Array.isArray(coords) &&
+    coords.length === 2 &&
+    Number.isFinite(coords[0]) &&
+    Number.isFinite(coords[1]) &&
+    Math.abs(coords[0]) <= 180 &&
+    Math.abs(coords[1]) <= 90
+  )
+}
+
+// Mapbox GL JS is loaded from the CDN at runtime rather than the npm
+// package (see package.json) — pin the version here so the JS and CSS
+// URLs below can't drift out of sync with each other.
+const MAPBOX_GL_VERSION = "3.0.1"
+
 interface MapboxMapProps {
   accessToken: string
   locations: MapboxLocation[]
@@ -24,15 +44,21 @@ export function MapboxMap({
   onLocationSelect,
   center = defaultMapConfig.center,
   zoom = defaultMapConfig.zoom,
-  style = "streets",
+  style = "dark",
   onMapLoad,
   className = "",
 }: MapboxMapProps) {
   const mapContainer = useRef<HTMLDivElement>(null)
   const map = useRef<any>(null)
   const markers = useRef<{ [key: string]: any }>({})
+  const popupRoots = useRef<{ [key: string]: ReturnType<typeof createRoot> }>({})
+  const onMapLoadRef = useRef(onMapLoad)
   const [mapLoaded, setMapLoaded] = useState(false)
   const [mapboxLoaded, setMapboxLoaded] = useState(false)
+
+  useEffect(() => {
+    onMapLoadRef.current = onMapLoad
+  }, [onMapLoad])
 
   useEffect(() => {
     const loadMapbox = () => {
@@ -45,12 +71,12 @@ export function MapboxMap({
       // Load CSS
       const cssLink = document.createElement("link")
       cssLink.rel = "stylesheet"
-      cssLink.href = "https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.css"
+      cssLink.href = `https://api.mapbox.com/mapbox-gl-js/v${MAPBOX_GL_VERSION}/mapbox-gl.css`
       document.head.appendChild(cssLink)
 
       // Load JS
       const script = document.createElement("script")
-      script.src = "https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.js"
+      script.src = `https://api.mapbox.com/mapbox-gl-js/v${MAPBOX_GL_VERSION}/mapbox-gl.js`
       script.onload = () => {
         setMapboxLoaded(true)
       }
@@ -63,7 +89,10 @@ export function MapboxMap({
     loadMapbox()
   }, [])
 
-  // Initialize map
+  // Initialize map — must run exactly once per mount. style/center/zoom are
+  // intentionally read only as initial values here; later changes are
+  // handled by the dedicated style and flyTo effects below instead of
+  // tearing down and recreating the whole map.
   useEffect(() => {
     if (!mapContainer.current || map.current || !accessToken || !mapboxLoaded || !window.mapboxgl) return
 
@@ -74,7 +103,6 @@ export function MapboxMap({
       style: mapStyles[style],
       center,
       zoom,
-      attributionControl: false,
     })
 
     // Add navigation controls
@@ -92,17 +120,9 @@ export function MapboxMap({
       "top-right",
     )
 
-    // Add attribution
-    map.current.addControl(
-      new window.mapboxgl.AttributionControl({
-        customAttribution: "© TattooMaps 2024",
-      }),
-      "bottom-right",
-    )
-
     map.current.on("load", () => {
       setMapLoaded(true)
-      onMapLoad?.(map.current!)
+      onMapLoadRef.current?.(map.current!)
     })
 
     return () => {
@@ -111,7 +131,16 @@ export function MapboxMap({
         map.current = null
       }
     }
-  }, [accessToken, style, center, zoom, onMapLoad, mapboxLoaded])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [accessToken, mapboxLoaded])
+
+  // Unmount any remaining popup React roots when the map itself unmounts
+  useEffect(() => {
+    return () => {
+      Object.values(popupRoots.current).forEach((root) => root.unmount())
+      popupRoots.current = {}
+    }
+  }, [])
 
   // Update map style
   useEffect(() => {
@@ -120,15 +149,22 @@ export function MapboxMap({
     }
   }, [style, mapLoaded])
 
-  // Update map center and zoom
+  // Fly to updated center/zoom without tearing down the map. Guarded against
+  // re-flying on every render by comparing against the map's actual current
+  // center/zoom with a small epsilon.
   useEffect(() => {
-    if (map.current && mapLoaded) {
-      map.current.flyTo({
-        center,
-        zoom,
-        duration: 1000,
-      })
-    }
+    if (!map.current || !mapLoaded) return
+    const current = map.current.getCenter()
+    const epsilon = 0.0001
+    const centerChanged =
+      Math.abs(current.lng - center[0]) > epsilon || Math.abs(current.lat - center[1]) > epsilon
+    const zoomChanged = Math.abs(map.current.getZoom() - zoom) > epsilon
+    if (!centerChanged && !zoomChanged) return
+    map.current.flyTo({
+      center,
+      zoom,
+      duration: 800,
+    })
   }, [center, zoom, mapLoaded])
 
   // Color-code markers by tattoo style
@@ -213,12 +249,15 @@ export function MapboxMap({
   useEffect(() => {
     if (!map.current || !mapLoaded || !window.mapboxgl) return
 
-    // Clear existing markers
+    // Clear existing markers and unmount their popup React roots
     Object.values(markers.current).forEach((marker) => marker.remove())
     markers.current = {}
+    Object.values(popupRoots.current).forEach((root) => root.unmount())
+    popupRoots.current = {}
 
     // Add new markers
     locations.forEach((location) => {
+      if (!isValidCoordinate(location.coordinates)) return
       const el = createMarkerElement(location)
 
       const marker = new window.mapboxgl.Marker(el).setLngLat(location.coordinates).addTo(map.current!)
@@ -227,6 +266,7 @@ export function MapboxMap({
       const popupContainer = document.createElement("div")
       const root = createRoot(popupContainer)
       root.render(<MapMarkerPopup location={location} />)
+      popupRoots.current[location.id] = root
 
       const popup = new window.mapboxgl.Popup({
         offset: 25,
@@ -274,8 +314,11 @@ export function MapboxMap({
   const fitBounds = useCallback(() => {
     if (!map.current || !mapLoaded || locations.length === 0 || !window.mapboxgl) return
 
+    const validLocations = locations.filter((location) => isValidCoordinate(location.coordinates))
+    if (validLocations.length === 0) return
+
     const bounds = new window.mapboxgl.LngLatBounds()
-    locations.forEach((location) => {
+    validLocations.forEach((location) => {
       bounds.extend(location.coordinates)
     })
 

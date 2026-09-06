@@ -13,6 +13,7 @@ import { getShopsForCity } from "@/lib/supabase/seo"
 import { STATE_ABBR_TO_NAME, stateAbbrToSlug } from "@/lib/utils/states"
 import { FinderCta } from "@/components/layout/finder-cta"
 import type { Shop } from "@/types/shop"
+import { safeImageSrc } from "@/lib/utils/safe-image"
 
 export const dynamic = "force-dynamic"
 
@@ -43,7 +44,7 @@ function ShopCard({ shop, priority = false }: { shop: Shop; priority?: boolean }
       {shop.coverImageUrl ? (
         <div className="relative h-36 overflow-hidden bg-muted">
           <Image
-            src={shop.coverImageUrl}
+            src={safeImageSrc(shop.coverImageUrl)}
             alt={shop.name}
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-300"

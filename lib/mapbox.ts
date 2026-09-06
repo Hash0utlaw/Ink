@@ -70,30 +70,11 @@ export async function geocodeAddress(address: string): Promise<[number, number] 
     return null
   } catch (error) {
     console.warn("Geocoding error:", error)
-    // Fallback to mock coordinates for common cities
-    const mockCoordinates: Record<string, [number, number]> = {
-      "san francisco": [-122.4194, 37.7749],
-      "los angeles": [-118.2437, 34.0522],
-      "new york": [-74.006, 40.7128],
-      chicago: [-87.6298, 41.8781],
-      miami: [-80.1918, 25.7617],
-      seattle: [-122.3321, 47.6062],
-      austin: [-97.7431, 30.2672],
-      denver: [-104.9903, 39.7392],
-    }
-
-    const normalizedAddress = address.toLowerCase()
-    for (const [city, coords] of Object.entries(mockCoordinates)) {
-      if (normalizedAddress.includes(city)) {
-        return coords
-      }
-    }
-
-    return [-122.4194, 37.7749] // Default to San Francisco
+    return null
   }
 }
 
-export async function reverseGeocode(coordinates: [number, number]): Promise<string> {
+export async function reverseGeocode(coordinates: [number, number]): Promise<string | null> {
   try {
     const [lng, lat] = coordinates
     const response = await fetch(
@@ -110,27 +91,17 @@ export async function reverseGeocode(coordinates: [number, number]): Promise<str
       return data.features[0].place_name
     }
 
-    return "Unknown Location"
+    return null
   } catch (error) {
     console.warn("Reverse geocoding error:", error)
-    // Fallback to simple mock based on coordinates
-    const [lng, lat] = coordinates
-    if (Math.abs(lng + 122.4194) < 0.1 && Math.abs(lat - 37.7749) < 0.1) {
-      return "San Francisco, CA"
-    } else if (Math.abs(lng + 118.2437) < 0.1 && Math.abs(lat - 34.0522) < 0.1) {
-      return "Los Angeles, CA"
-    } else if (Math.abs(lng + 74.006) < 0.1 && Math.abs(lat - 40.7128) < 0.1) {
-      return "New York, NY"
-    } else {
-      return "Unknown Location"
-    }
+    return null
   }
 }
 
-export function getCurrentLocation(): Promise<[number, number]> {
-  return new Promise((resolve, reject) => {
+export function getCurrentLocation(): Promise<[number, number] | null> {
+  return new Promise((resolve) => {
     if (!navigator.geolocation) {
-      reject(new Error("Geolocation is not supported"))
+      resolve(null)
       return
     }
 
@@ -139,9 +110,8 @@ export function getCurrentLocation(): Promise<[number, number]> {
         resolve([position.coords.longitude, position.coords.latitude])
       },
       (error) => {
-        // Fallback to San Francisco
         console.warn("Geolocation error:", error)
-        resolve([-122.4194, 37.7749])
+        resolve(null)
       },
       {
         enableHighAccuracy: true,
@@ -153,8 +123,8 @@ export function getCurrentLocation(): Promise<[number, number]> {
 }
 
 export const defaultMapConfig = {
-  center: [-122.4194, 37.7749] as [number, number], // San Francisco
-  zoom: 12,
+  center: [-98.5795, 39.8283] as [number, number], // Continental US center
+  zoom: 4,
 }
 
 export const mapStyles = {

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Sparkles } from "lucide-react"
 import type { FlashListing } from "@/lib/supabase/flash"
 import { SaveButton } from "@/components/saved/save-button"
+import { safeImageSrc } from "@/lib/utils/safe-image"
 
 function priceLabel(listing: FlashListing) {
   if (listing.priceMax) return `$${listing.price}–$${listing.priceMax}`
@@ -29,7 +30,7 @@ export function FlashCard({ listing, initialSaved }: FlashCardProps) {
       {/* Image */}
       <div className="relative aspect-square overflow-hidden bg-muted">
         <Image
-          src={listing.imageUrl}
+          src={safeImageSrc(listing.imageUrl)}
           alt={listing.title}
           fill
           className="object-cover group-hover:scale-105 transition-transform duration-300"

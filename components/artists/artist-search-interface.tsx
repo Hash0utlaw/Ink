@@ -2,10 +2,10 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
+import Link from "next/link"
 import { FilterSidebar } from "./filter-sidebar"
 import type { ArtistFilterValues } from "./filter-sidebar"
 import { ResultsList } from "./results-list"
-import { MapView } from "@/components/artists/map-view"
 import { X } from "lucide-react"
 import type { Artist } from "@/types/artist"
 
@@ -165,7 +165,12 @@ export function ArtistSearchInterface() {
         <FilterSidebar filters={filters} onFilterChange={handleFilterChange} onNearMe={handleNearMe} />
       </div>
       <div className="lg:col-span-3 space-y-8">
-        <MapView artists={filteredArtists} />
+        <Link
+          href="/map"
+          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors"
+        >
+          View artists on the map →
+        </Link>
 
         {hasActiveFilters && (
           <div className="flex flex-wrap items-center gap-2">
