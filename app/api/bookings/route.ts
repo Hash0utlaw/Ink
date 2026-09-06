@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { Resend } from "resend"
 import { createClient } from "@/utils/supabase/server"
 import { getArtistById } from "@/lib/supabase/artists"
+import { getUserProfile } from "@/lib/supabase/users"
 
 export const dynamic = "force-dynamic"
 
@@ -17,6 +18,8 @@ export async function POST(request: Request) {
       description,
       size,
       placement,
+      style,
+      budget,
     } = body
 
     const supabase = createClient()
@@ -30,6 +33,8 @@ export async function POST(request: Request) {
       description: description ?? null,
       size: size ?? null,
       placement: placement ?? null,
+      style: style ?? null,
+      budget: budget ?? null,
       created_at: new Date().toISOString(),
     })
 
@@ -38,53 +43,71 @@ export async function POST(request: Request) {
     }
 
     const resend = new Resend(process.env.RESEND_API_KEY)
-    const fromAddress = "Inkfinder <onboarding@resend.dev>"
+    const fromAddress = process.env.RESEND_FROM_EMAIL ?? "TattooMaps <bookings@tattoo-maps.com>"
 
     const artist = await getArtistById(artistId)
     const artistName = artist?.name ?? "the artist"
 
-    // Look up artist email from user_profiles
-    const { data: profile } = await supabase
-      .from("user_profiles")
-      .select("email")
-      .eq("user_id", artistId)
+    // Look up artist email: artists.id -> artists.user_id -> user_profiles.email
+    const { data: artistRow } = await supabase
+      .from("artists")
+      .select("user_id")
+      .eq("id", artistId)
       .maybeSingle()
 
-    const artistEmail: string | null = (profile as { email?: string } | null)?.email ?? null
-
-    const emailPromises: Promise<unknown>[] = []
-
-    if (artistEmail) {
-      emailPromises.push(
-        resend.emails.send({
-          from: fromAddress,
-          to: artistEmail,
-          subject: `New booking request from ${clientName}`,
-          html: `<p>You have a new booking request from <strong>${clientName}</strong>.</p>
-                 <p><strong>Email:</strong> ${clientEmail}</p>
-                 ${clientPhone ? `<p><strong>Phone:</strong> ${clientPhone}</p>` : ""}
-                 ${preferredDate ? `<p><strong>Preferred date:</strong> ${preferredDate}</p>` : ""}
-                 ${description ? `<p><strong>Description:</strong> ${description}</p>` : ""}
-                 ${size ? `<p><strong>Size:</strong> ${size}</p>` : ""}
-                 ${placement ? `<p><strong>Placement:</strong> ${placement}</p>` : ""}`,
-        })
-      )
+    let artistEmail: string | null = null
+    const artistUserId = (artistRow as { user_id?: string } | null)?.user_id
+    if (artistUserId) {
+      const profile = await getUserProfile(artistUserId)
+      artistEmail = profile?.email ?? null
     }
 
-    emailPromises.push(
-      resend.emails.send({
+    let artistNotified = false
+
+    if (artistEmail) {
+      const { error: artistEmailError } = await resend.emails.send({
         from: fromAddress,
-        to: clientEmail,
-        subject: `Your request was sent to ${artistName}`,
-        html: `<p>Hi ${clientName},</p>
-               <p>Your booking request has been sent to <strong>${artistName}</strong>.</p>
-               <p>They will review your request and get back to you within 24 hours.</p>`,
+        to: artistEmail,
+        subject: `New booking request from ${clientName}`,
+        html: `<p>You have a new booking request from <strong>${clientName}</strong>.</p>
+               <p><strong>Email:</strong> ${clientEmail}</p>
+               ${clientPhone ? `<p><strong>Phone:</strong> ${clientPhone}</p>` : ""}
+               ${preferredDate ? `<p><strong>Preferred date:</strong> ${preferredDate}</p>` : ""}
+               ${description ? `<p><strong>Description:</strong> ${description}</p>` : ""}
+               ${size ? `<p><strong>Size:</strong> ${size}</p>` : ""}
+               ${placement ? `<p><strong>Placement:</strong> ${placement}</p>` : ""}`,
       })
-    )
+      artistNotified = !artistEmailError
+    }
 
-    await Promise.allSettled(emailPromises)
+    if (!artistNotified) {
+      console.warn(`Booking ${clientEmail} -> artist ${artistId}: artist was not notified (no verified email on file)`)
+    }
 
-    return NextResponse.json({ success: true })
+    const clientEmailContent = artistNotified
+      ? {
+          subject: `Your request was sent to ${artistName}`,
+          html: `<p>Hi ${clientName},</p>
+                 <p>Your booking request has been sent to <strong>${artistName}</strong>.</p>
+                 <p>They will review your request and get back to you within 24 hours.</p>`,
+        }
+      : {
+          subject: `We received your request for ${artistName}`,
+          html: `<p>Hi ${clientName},</p>
+                 <p>Thanks for your interest in <strong>${artistName}</strong> — we've saved your request.</p>
+                 <p>${artistName} hasn't claimed their TattooMaps profile yet, so we're reaching out to
+                 personally invite them to respond. We'll email you the moment they do.</p>
+                 <p>Thanks for your patience!</p>`,
+        }
+
+    await resend.emails.send({
+      from: fromAddress,
+      to: clientEmail,
+      subject: clientEmailContent.subject,
+      html: clientEmailContent.html,
+    })
+
+    return NextResponse.json({ success: true, artistNotified })
   } catch (error) {
     console.error("Booking error:", error)
     return NextResponse.json({ success: false, message: "Failed to create booking" }, { status: 500 })

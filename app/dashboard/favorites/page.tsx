@@ -1,61 +1,74 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-import { getUserData } from "@/lib/mock-data"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { ArtistCard } from "@/components/artists/artist-card"
+import { ShopCard } from "@/components/shops/shop-card"
 import Link from "next/link"
+import { getCurrentUserId } from "@/lib/supabase/users"
+import { getSavedItems } from "@/lib/supabase/saved"
 
 export default async function FavoritesPage() {
-  const { favoriteArtists, favoriteShops } = await getUserData()
+  const userId = await getCurrentUserId()
+  const { artists, shops } = userId ? await getSavedItems(userId) : { artists: [], shops: [] }
 
   return (
     <div className="space-y-8">
-      <Card>
-        <CardHeader>
-          <CardTitle>Favorite Artists</CardTitle>
-          <CardDescription>Your saved list of talented artists.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {favoriteArtists.map((artist) => (
-            <div key={artist.id} className="flex items-center gap-4 p-4 border rounded-lg">
-              <Avatar className="w-12 h-12">
-                <AvatarImage src={artist.avatarUrl || "/placeholder.svg"} />
-                <AvatarFallback>{artist.name.charAt(0)}</AvatarFallback>
-              </Avatar>
-              <div className="flex-1">
-                <p className="font-semibold">{artist.name}</p>
-                <p className="text-sm text-muted-foreground">{artist.specialties.join(", ")}</p>
-              </div>
-              <Button asChild variant="secondary">
-                <Link href={`/artists/${artist.id}`}>View</Link>
-              </Button>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
+      <Tabs defaultValue="artists">
+        <TabsList>
+          <TabsTrigger value="artists">Artists</TabsTrigger>
+          <TabsTrigger value="shops">Shops</TabsTrigger>
+        </TabsList>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Favorite Shops</CardTitle>
-          <CardDescription>Your go-to list of top-rated shops.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {favoriteShops.map((shop) => (
-            <div key={shop.id} className="flex items-center gap-4 p-4 border rounded-lg">
-              <Avatar className="w-12 h-12">
-                <AvatarImage src={shop.logoUrl || "/placeholder.svg"} />
-                <AvatarFallback>{shop.name.charAt(0)}</AvatarFallback>
-              </Avatar>
-              <div className="flex-1">
-                <p className="font-semibold">{shop.name}</p>
-                <p className="text-sm text-muted-foreground">{shop.location.city}</p>
-              </div>
-              <Button asChild variant="secondary">
-                <Link href={`/shops/${shop.id}`}>View</Link>
-              </Button>
+        <TabsContent value="artists" className="mt-6">
+          {artists.length === 0 ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>Favorite Artists</CardTitle>
+                <CardDescription>Your saved list of talented artists.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8 space-y-3">
+                  <p className="text-sm text-muted-foreground">You haven&apos;t saved anyone yet.</p>
+                  <Button asChild variant="secondary">
+                    <Link href="/artists">Browse Artists</Link>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {artists.map((artist) => (
+                <ArtistCard key={artist.id} artist={artist} initialSaved />
+              ))}
             </div>
-          ))}
-        </CardContent>
-      </Card>
+          )}
+        </TabsContent>
+
+        <TabsContent value="shops" className="mt-6">
+          {shops.length === 0 ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>Favorite Shops</CardTitle>
+                <CardDescription>Your go-to list of top-rated shops.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8 space-y-3">
+                  <p className="text-sm text-muted-foreground">You haven&apos;t saved anyone yet.</p>
+                  <Button asChild variant="secondary">
+                    <Link href="/tattoo-shops">Browse Shops</Link>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {shops.map((shop) => (
+                <ShopCard key={shop.id} shop={shop} initialSaved />
+              ))}
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }

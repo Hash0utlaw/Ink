@@ -2,10 +2,10 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
+import Link from "next/link"
 import { FilterSidebar } from "./filter-sidebar"
 import type { ArtistFilterValues } from "./filter-sidebar"
 import { ResultsList } from "./results-list"
-import { MapView } from "@/components/artists/map-view"
 import { X } from "lucide-react"
 import type { Artist } from "@/types/artist"
 
@@ -165,60 +165,65 @@ export function ArtistSearchInterface() {
         <FilterSidebar filters={filters} onFilterChange={handleFilterChange} onNearMe={handleNearMe} />
       </div>
       <div className="lg:col-span-3 space-y-8">
-        <MapView artists={filteredArtists} />
+        <Link
+          href="/map"
+          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors"
+        >
+          View artists on the map →
+        </Link>
 
         {hasActiveFilters && (
           <div className="flex flex-wrap items-center gap-2">
             {filters.query && (
-              <span className="bg-accent/10 text-accent border border-accent/20 text-xs px-2.5 py-1 rounded-full flex items-center gap-1">
+              <span className="bg-accent/10 text-accent-text border border-accent/20 text-xs px-2.5 py-1 rounded-full flex items-center gap-1">
                 {filters.query}
                 <button onClick={() => clearFilter("query")} aria-label="Remove query filter"><X className="w-3 h-3" /></button>
               </span>
             )}
             {filters.zip && (
-              <span className="bg-accent/10 text-accent border border-accent/20 text-xs px-2.5 py-1 rounded-full flex items-center gap-1">
+              <span className="bg-accent/10 text-accent-text border border-accent/20 text-xs px-2.5 py-1 rounded-full flex items-center gap-1">
                 ZIP: {filters.zip}
                 <button onClick={() => clearFilter("zip")} aria-label="Remove ZIP filter"><X className="w-3 h-3" /></button>
               </span>
             )}
             {filters.state && (
-              <span className="bg-accent/10 text-accent border border-accent/20 text-xs px-2.5 py-1 rounded-full flex items-center gap-1">
+              <span className="bg-accent/10 text-accent-text border border-accent/20 text-xs px-2.5 py-1 rounded-full flex items-center gap-1">
                 {filters.state}
                 <button onClick={() => clearFilter("state")} aria-label="Remove state filter"><X className="w-3 h-3" /></button>
               </span>
             )}
             {filters.city && (
-              <span className="bg-accent/10 text-accent border border-accent/20 text-xs px-2.5 py-1 rounded-full flex items-center gap-1">
+              <span className="bg-accent/10 text-accent-text border border-accent/20 text-xs px-2.5 py-1 rounded-full flex items-center gap-1">
                 {filters.city}
                 <button onClick={() => clearFilter("city")} aria-label="Remove city filter"><X className="w-3 h-3" /></button>
               </span>
             )}
             {filters.rating > 0 && (
-              <span className="bg-accent/10 text-accent border border-accent/20 text-xs px-2.5 py-1 rounded-full flex items-center gap-1">
+              <span className="bg-accent/10 text-accent-text border border-accent/20 text-xs px-2.5 py-1 rounded-full flex items-center gap-1">
                 {filters.rating}+ stars
                 <button onClick={() => clearFilter("rating")} aria-label="Remove rating filter"><X className="w-3 h-3" /></button>
               </span>
             )}
             {filters.availableNow && (
-              <span className="bg-accent/10 text-accent border border-accent/20 text-xs px-2.5 py-1 rounded-full flex items-center gap-1">
+              <span className="bg-accent/10 text-accent-text border border-accent/20 text-xs px-2.5 py-1 rounded-full flex items-center gap-1">
                 Available now
                 <button onClick={() => clearFilter("availableNow")} aria-label="Remove availability filter"><X className="w-3 h-3" /></button>
               </span>
             )}
             {nearMeCoords && (
-              <span className="bg-accent/10 text-accent border border-accent/20 text-xs px-2.5 py-1 rounded-full flex items-center gap-1">
+              <span className="bg-accent/10 text-accent-text border border-accent/20 text-xs px-2.5 py-1 rounded-full flex items-center gap-1">
                 {filters.radiusMiles} mi radius
                 <button onClick={() => clearFilter("nearMe")} aria-label="Remove near me filter"><X className="w-3 h-3" /></button>
               </span>
             )}
             {filters.price.map((tier) => (
-              <span key={tier} className="bg-accent/10 text-accent border border-accent/20 text-xs px-2.5 py-1 rounded-full flex items-center gap-1">
+              <span key={tier} className="bg-accent/10 text-accent-text border border-accent/20 text-xs px-2.5 py-1 rounded-full flex items-center gap-1">
                 {priceLabel[tier] ?? tier}
                 <button onClick={() => clearFilter(`price:${tier}` as any)} aria-label={`Remove ${tier} price filter`}><X className="w-3 h-3" /></button>
               </span>
             ))}
             {filters.styles.map((style) => (
-              <span key={style} className="bg-accent/10 text-accent border border-accent/20 text-xs px-2.5 py-1 rounded-full flex items-center gap-1">
+              <span key={style} className="bg-accent/10 text-accent-text border border-accent/20 text-xs px-2.5 py-1 rounded-full flex items-center gap-1">
                 {style}
                 <button onClick={() => clearFilter(`style:${style}` as any)} aria-label={`Remove ${style} filter`}><X className="w-3 h-3" /></button>
               </span>

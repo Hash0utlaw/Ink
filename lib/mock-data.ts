@@ -32,6 +32,8 @@ export interface MockLocation {
 const artists: Artist[] = [
   {
     id: "1",
+    isClaimed: true,
+    handle: "valerie",
     name: "Valerie",
     shopName: "Black Oak Tattoo",
     specialties: ["Fine Line", "Botanical", "Blackwork", "Micro-Realism"],
@@ -53,8 +55,13 @@ const artists: Artist[] = [
       "/japanese-dragon-tattoo.png",
       "/placeholder-kafzv.png",
     ],
+    previewImages: ["/fine-line-tattoo-1.png", "/botanical-tattoo-1.png", "/placeholder-g6gvv.png"],
     isAvailable: true,
     priceRange: "medium",
+    priceTier: "mid",
+    availabilityStatus: "available",
+    avgResponseHours: 4,
+    firstBookingDiscount: null,
     bio: "Valerie is a San Francisco-based artist specializing in delicate fine line and botanical tattoos. With over 8 years of experience, she brings a unique and elegant touch to every piece, creating timeless art that flows with the body's natural form. Her studio, Black Oak, is a serene space designed to make every client feel comfortable and inspired.",
     reviews: [
       {
@@ -88,6 +95,8 @@ const artists: Artist[] = [
   },
   {
     id: "3",
+    isClaimed: true,
+    handle: "chloe",
     name: "Chloe",
     shopName: "Black Oak Tattoo",
     specialties: ["Watercolor", "Abstract"],
@@ -96,14 +105,21 @@ const artists: Artist[] = [
     location: { address: "San Francisco", city: "San Francisco", state: "CA", lat: 37.7749, lng: -122.4194 },
     avatarUrl: "/placeholder.svg?height=100&width=100",
     portfolioImages: ["/placeholder.svg?height=300&width=300", "/placeholder.svg?height=300&width=300"],
+    previewImages: [],
     isAvailable: true,
     priceRange: "medium",
+    priceTier: "mid",
+    availabilityStatus: "available",
+    avgResponseHours: null,
+    firstBookingDiscount: null,
     bio: "Chloe's work is a vibrant explosion of color and form. She pushes the boundaries of watercolor tattoos, creating fluid, dreamlike pieces that are both bold and beautiful.",
     reviews: [],
     hours: {},
   },
   {
     id: "2",
+    isClaimed: true,
+    handle: "kenji",
     name: "Kenji",
     shopName: "Oni Tattoo",
     specialties: ["Japanese", "Irezumi", "Dragons", "Large Scale"],
@@ -118,8 +134,13 @@ const artists: Artist[] = [
     },
     avatarUrl: "/placeholder-lpicf.png",
     portfolioImages: ["/japanese-dragon-tattoo.png", "/placeholder-kafzv.png"],
+    previewImages: ["/japanese-dragon-tattoo.png", "/placeholder-kafzv.png"],
     isAvailable: true,
     priceRange: "high",
+    priceTier: "premium",
+    availabilityStatus: "next_week",
+    avgResponseHours: 24,
+    firstBookingDiscount: null,
     bio: "Kenji is a master artist specializing in Japanese and Irezumi tattoos. With a deep understanding of tradition and history, he brings authenticity and excellence to every piece.",
     reviews: [
       {
@@ -146,6 +167,7 @@ const artists: Artist[] = [
 const shops: Shop[] = [
   {
     id: "s1",
+    slug: "black-oak-tattoo",
     name: "Black Oak Tattoo",
     logoUrl: "/black-oak-logo.png",
     coverImageUrl: "/tattoo-shop-interior.png",
@@ -154,9 +176,12 @@ const shops: Shop[] = [
     location: {
       address: "123 Art St",
       city: "San Francisco, CA",
+      state: "CA",
       lat: 37.7749,
       lng: -122.4194,
     },
+    phone: "",
+    website: "",
     residentArtistIds: ["1", "3"],
     about:
       "Black Oak Tattoo is a premier, custom tattoo studio located in the heart of San Francisco. We provide a clean, comfortable, and inspiring environment for both our artists and clients. Our diverse team of world-class artists specializes in a wide range of styles, ensuring we can bring any vision to life. We are committed to artistic excellence and providing a memorable, professional experience for every person who walks through our doors.",
@@ -194,12 +219,15 @@ const shops: Shop[] = [
   },
   {
     id: "s2",
+    slug: "oni-tattoo",
     name: "Oni Tattoo",
     logoUrl: "/placeholder.svg?height=100&width=100",
     coverImageUrl: "/placeholder.svg?height=400&width=1200",
     rating: 5.0,
     reviewCount: 210,
-    location: { address: "456 Dragon Ave", city: "Los Angeles, CA", lat: 34.0522, lng: -118.2437 },
+    location: { address: "456 Dragon Ave", city: "Los Angeles, CA", state: "CA", lat: 34.0522, lng: -118.2437 },
+    phone: "",
+    website: "",
     residentArtistIds: ["2"],
     about:
       "Authentic Japanese and Irezumi tattoos by master artists. We honor the tradition and history of this timeless art form.",
@@ -273,7 +301,7 @@ const userData: UserData = {
       id: "s1",
       name: "Black Oak Tattoo",
       logoUrl: "/black-oak-logo.png",
-      location: { city: "San Francisco, CA", address: "", lat: 0, lng: 0 },
+      location: { city: "San Francisco, CA", address: "", state: "CA", lat: 0, lng: 0 },
     },
   ],
 }

@@ -120,7 +120,7 @@ export function MapFilters({ filters, onFilterChange }: MapFiltersProps) {
 
       {/* Location Type */}
       <Collapsible open={openSections.type} onOpenChange={() => toggleSection("type")}>
-        <CollapsibleTrigger className="flex items-center justify-between w-full text-sm font-semibold text-sidebar-text-primary hover:text-accent transition-colors py-2">
+        <CollapsibleTrigger className="flex items-center justify-between w-full text-sm font-semibold text-sidebar-text-primary hover:text-accent-text transition-colors py-2">
           Location Type
           {openSections.type ? (
             <Minus className="w-4 h-4 text-sidebar-text-secondary" />
@@ -147,7 +147,7 @@ export function MapFilters({ filters, onFilterChange }: MapFiltersProps) {
 
       {/* Tattoo Styles */}
       <Collapsible open={openSections.styles} onOpenChange={() => toggleSection("styles")}>
-        <CollapsibleTrigger className="flex items-center justify-between w-full text-sm font-semibold text-sidebar-text-primary hover:text-accent transition-colors py-2">
+        <CollapsibleTrigger className="flex items-center justify-between w-full text-sm font-semibold text-sidebar-text-primary hover:text-accent-text transition-colors py-2">
           <div className="flex items-center gap-2">
             Tattoo Styles
             {filters.styles.length > 0 && (
@@ -183,7 +183,7 @@ export function MapFilters({ filters, onFilterChange }: MapFiltersProps) {
 
       {/* Price Range */}
       <Collapsible open={openSections.price} onOpenChange={() => toggleSection("price")}>
-        <CollapsibleTrigger className="flex items-center justify-between w-full text-sm font-semibold text-sidebar-text-primary hover:text-accent transition-colors py-2">
+        <CollapsibleTrigger className="flex items-center justify-between w-full text-sm font-semibold text-sidebar-text-primary hover:text-accent-text transition-colors py-2">
           <div className="flex items-center gap-2">
             Price Range
             {filters.priceRange.length > 0 && (
@@ -220,7 +220,7 @@ export function MapFilters({ filters, onFilterChange }: MapFiltersProps) {
 
       {/* Rating */}
       <Collapsible open={openSections.rating} onOpenChange={() => toggleSection("rating")}>
-        <CollapsibleTrigger className="flex items-center justify-between w-full text-sm font-semibold text-sidebar-text-primary hover:text-accent transition-colors py-2">
+        <CollapsibleTrigger className="flex items-center justify-between w-full text-sm font-semibold text-sidebar-text-primary hover:text-accent-text transition-colors py-2">
           <div className="flex items-center gap-2">
             Minimum Rating
             {filters.rating > 0 && (
@@ -255,7 +255,7 @@ export function MapFilters({ filters, onFilterChange }: MapFiltersProps) {
 
       {/* Distance */}
       <Collapsible open={openSections.distance} onOpenChange={() => toggleSection("distance")}>
-        <CollapsibleTrigger className="flex items-center justify-between w-full text-sm font-semibold text-sidebar-text-primary hover:text-accent transition-colors py-2">
+        <CollapsibleTrigger className="flex items-center justify-between w-full text-sm font-semibold text-sidebar-text-primary hover:text-accent-text transition-colors py-2">
           <div className="flex items-center gap-2">
             Distance
             <Badge variant="secondary" className="text-xs h-5 px-2">
@@ -288,7 +288,7 @@ export function MapFilters({ filters, onFilterChange }: MapFiltersProps) {
 
       {/* Availability */}
       <Collapsible open={openSections.availability} onOpenChange={() => toggleSection("availability")}>
-        <CollapsibleTrigger className="flex items-center justify-between w-full text-sm font-semibold text-sidebar-text-primary hover:text-accent transition-colors py-2">
+        <CollapsibleTrigger className="flex items-center justify-between w-full text-sm font-semibold text-sidebar-text-primary hover:text-accent-text transition-colors py-2">
           <div className="flex items-center gap-2">
             Availability
             {filters.availableNow && (

@@ -57,7 +57,7 @@ export default function PrivacyPolicyPage() {
                   <a
                     key={s.id}
                     href={`#${s.id}`}
-                    className="flex items-center gap-2 text-sm text-muted-foreground hover:text-accent transition-colors py-1 group"
+                    className="flex items-center gap-2 text-sm text-muted-foreground hover:text-accent-text transition-colors py-1 group"
                   >
                     <ChevronRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity text-accent" />
                     {s.title}
@@ -164,7 +164,7 @@ export default function PrivacyPolicyPage() {
                 />
                 <Prose>
                   To exercise any of these rights, email us at{" "}
-                  <a href="mailto:privacy@tattoomaps.com" className="text-accent hover:underline">
+                  <a href="mailto:privacy@tattoomaps.com" className="text-accent-text hover:underline">
                     privacy@tattoomaps.com
                   </a>
                   . We will respond within 30 days.
@@ -197,14 +197,14 @@ export default function PrivacyPolicyPage() {
                   <Mail className="w-5 h-5 text-accent shrink-0" />
                   <div>
                     <p className="text-sm font-medium">Privacy Team</p>
-                    <a href="mailto:privacy@tattoomaps.com" className="text-sm text-accent hover:underline">
+                    <a href="mailto:privacy@tattoomaps.com" className="text-sm text-accent-text hover:underline">
                       privacy@tattoomaps.com
                     </a>
                   </div>
                 </div>
                 <Prose>
                   You can also use our{" "}
-                  <Link href="/contact" className="text-accent hover:underline">
+                  <Link href="/contact" className="text-accent-text hover:underline">
                     Contact Us
                   </Link>{" "}
                   form and select &quot;Privacy inquiry&quot; as the topic.

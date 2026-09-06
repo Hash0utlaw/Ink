@@ -1,40 +1,52 @@
-import { generateText } from "ai"
-import { replicate } from "@ai-sdk/replicate"
 import { NextResponse } from "next/server"
 
-// IMPORTANT! Set the REPLICATE_API_TOKEN environment variable
-
-export const maxDuration = 30 // Set a higher timeout for image generation
-
-export async function POST(req: Request) {
-  try {
-    const { prompt, style, placement, color } = await req.json()
-
-    if (!prompt) {
-      return NextResponse.json({ message: "Prompt is required" }, { status: 400 })
-    }
-
-    // Construct a more detailed prompt for better results
-    const fullPrompt = `A professional, clean, high-resolution tattoo design of ${prompt}.
-Style: ${style}.
-Color: ${color === "full_color" ? "vibrant full color" : "black and gray"}.
-Placement suggestion: ${placement}.
-The design should be on a clean, white background, studio quality, ready for a tattoo artist.`
-
-    // We will generate 4 images in parallel
-    const imagePromises = Array.from({ length: 4 }).map(() =>
-      generateText({
-        model: replicate("stability-ai/sdxl:39ed52f2a78e934b3ba6e2a89f5b1c712de7dfea535525255b1aa35c5565e08b"),
-        prompt: fullPrompt,
-      }),
-    )
-
-    const imageResults = await Promise.all(imagePromises)
-    const imageUrls = imageResults.map((result) => result.text)
-
-    return NextResponse.json({ images: imageUrls })
-  } catch (error) {
-    console.error("Image generation failed:", error)
-    return NextResponse.json({ message: "Failed to generate images" }, { status: 500 })
-  }
+// The AI generator is disabled pending launch (cost-risk: no auth, no rate
+// limit, no plan gate — see launch-blocker plan). The working Replicate
+// integration below is preserved so it can be restored later.
+export async function POST() {
+  return new NextResponse(null, { status: 404 })
 }
+
+// --- Disabled implementation (restore when the generator relaunches) ---
+//
+// import { experimental_generateImage as generateImage } from "ai"
+// import { replicate } from "@ai-sdk/replicate"
+//
+// export const maxDuration = 60 // Image generation can take a while
+//
+// export async function POST(req: Request) {
+//   try {
+//     if (!process.env.REPLICATE_API_TOKEN) {
+//       return NextResponse.json(
+//         { message: "The AI generator is not configured yet. Missing REPLICATE_API_TOKEN." },
+//         { status: 503 },
+//       )
+//     }
+//
+//     const { prompt, style, placement, color } = await req.json()
+//
+//     if (!prompt) {
+//       return NextResponse.json({ message: "Prompt is required" }, { status: 400 })
+//     }
+//
+//     // Construct a more detailed prompt for better results
+//     const fullPrompt = `A professional, clean, high-resolution tattoo design of ${prompt}.
+// Style: ${style}.
+// Color: ${color === "full_color" ? "vibrant full color" : "black and gray"}.
+// Placement suggestion: ${placement}.
+// The design should be on a clean, white background, studio quality, ready for a tattoo artist.`
+//
+//     const { images } = await generateImage({
+//       model: replicate.image("black-forest-labs/flux-schnell"),
+//       prompt: fullPrompt,
+//       n: 4,
+//     })
+//
+//     const imageUrls = images.map((image) => `data:${image.mediaType};base64,${image.base64}`)
+//
+//     return NextResponse.json({ images: imageUrls })
+//   } catch (error) {
+//     console.error("Image generation failed:", error)
+//     return NextResponse.json({ message: "Failed to generate images" }, { status: 500 })
+//   }
+// }

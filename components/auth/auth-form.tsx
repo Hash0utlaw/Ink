@@ -62,6 +62,7 @@ export function AuthForm({ mode }: AuthFormProps) {
 
       {/* Form */}
       <form action={handleSubmit} className="space-y-5">
+        <input type="hidden" name="next" value={searchParams.get("next") ?? ""} />
         {/* Full name (signup only) */}
         {!isLogin && (
           <div className="space-y-1.5">
@@ -105,7 +106,7 @@ export function AuthForm({ mode }: AuthFormProps) {
             {isLogin && (
               <Link
                 href="/forgot-password"
-                className="text-xs text-muted-foreground hover:text-accent transition-colors"
+                className="text-xs text-muted-foreground hover:text-accent-text transition-colors"
               >
                 Forgot password?
               </Link>
@@ -181,7 +182,7 @@ export function AuthForm({ mode }: AuthFormProps) {
                       <div
                         className={cn(
                           "text-sm font-semibold leading-tight",
-                          active ? "text-accent" : "text-foreground",
+                          active ? "text-accent-text" : "text-foreground",
                         )}
                       >
                         {title}
@@ -271,7 +272,7 @@ export function AuthForm({ mode }: AuthFormProps) {
         {isLogin ? "New to TattooMaps?" : "Already have an account?"}{" "}
         <Link
           href={isLogin ? "/signup" : "/login"}
-          className="font-semibold text-accent hover:text-accent/80 transition-colors"
+          className="font-semibold text-accent-text hover:text-accent-text/80 transition-colors"
         >
           {isLogin ? "Create a free account" : "Sign in instead"}
         </Link>

@@ -177,7 +177,7 @@ export function LocationDetails({ location, isOpen, onClose }: LocationDetailsPr
               <CardContent className="p-6">
                 <h3 className="text-xl font-semibold mb-4">Hours</h3>
                 <div className="space-y-2">
-                  {Object.entries(location.hours).map(([day, hours]) => (
+                  {Object.entries(location.hours ?? {}).map(([day, hours]) => (
                     <div key={day} className="flex justify-between">
                       <span className="capitalize font-medium">{day}</span>
                       <span className="text-gray-600">{hours}</span>

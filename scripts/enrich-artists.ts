@@ -271,8 +271,19 @@ async function main() {
   const tasks = shopList.map(([shopId, { website, artists: shopArtists }]) =>
     limit(async () => {
       const names = shopArtists.map((a) => a.display_name)
-      // Use first artist's shop name from join (or fallback)
-      const enriched = await enrichShopArtists(website, `shop ${shopId.slice(0, 8)}`, names)
+      let enriched: EnrichedArtist[]
+      try {
+        enriched = await enrichShopArtists(website, `shop ${shopId.slice(0, 8)}`, names)
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : String(err)
+        if (msg.includes("credit balance")) {
+          console.error("\nAnthropic API credits exhausted — stopping.")
+          process.exit(1)
+        }
+        console.error(`  API error for shop ${shopId.slice(0, 8)}: ${msg}`)
+        failed += shopArtists.length
+        return
+      }
 
       if (enriched.length === 0) { failed += shopArtists.length; return }
 

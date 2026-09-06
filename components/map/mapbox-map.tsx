@@ -5,6 +5,26 @@ import { type MapboxLocation, defaultMapConfig, mapStyles } from "@/lib/mapbox"
 import { createRoot } from "react-dom/client"
 import { MapMarkerPopup } from "./map-marker-popup"
 
+// Some scraped locations have missing/malformed coordinates. Mapbox's
+// LngLatBounds.extend() accepts them silently but throws later inside
+// fitBounds()/cameraForBounds(), which can leave the map stuck on its
+// loading state — filter these out before they ever reach Mapbox.
+function isValidCoordinate(coords: unknown): coords is [number, number] {
+  return (
+    Array.isArray(coords) &&
+    coords.length === 2 &&
+    Number.isFinite(coords[0]) &&
+    Number.isFinite(coords[1]) &&
+    Math.abs(coords[0]) <= 180 &&
+    Math.abs(coords[1]) <= 90
+  )
+}
+
+// Mapbox GL JS is loaded from the CDN at runtime rather than the npm
+// package (see package.json) — pin the version here so the JS and CSS
+// URLs below can't drift out of sync with each other.
+const MAPBOX_GL_VERSION = "3.0.1"
+
 interface MapboxMapProps {
   accessToken: string
   locations: MapboxLocation[]
@@ -24,15 +44,21 @@ export function MapboxMap({
   onLocationSelect,
   center = defaultMapConfig.center,
   zoom = defaultMapConfig.zoom,
-  style = "streets",
+  style = "dark",
   onMapLoad,
   className = "",
 }: MapboxMapProps) {
   const mapContainer = useRef<HTMLDivElement>(null)
   const map = useRef<any>(null)
   const markers = useRef<{ [key: string]: any }>({})
+  const popupRoots = useRef<{ [key: string]: ReturnType<typeof createRoot> }>({})
+  const onMapLoadRef = useRef(onMapLoad)
   const [mapLoaded, setMapLoaded] = useState(false)
   const [mapboxLoaded, setMapboxLoaded] = useState(false)
+
+  useEffect(() => {
+    onMapLoadRef.current = onMapLoad
+  }, [onMapLoad])
 
   useEffect(() => {
     const loadMapbox = () => {
@@ -45,12 +71,12 @@ export function MapboxMap({
       // Load CSS
       const cssLink = document.createElement("link")
       cssLink.rel = "stylesheet"
-      cssLink.href = "https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.css"
+      cssLink.href = `https://api.mapbox.com/mapbox-gl-js/v${MAPBOX_GL_VERSION}/mapbox-gl.css`
       document.head.appendChild(cssLink)
 
       // Load JS
       const script = document.createElement("script")
-      script.src = "https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.js"
+      script.src = `https://api.mapbox.com/mapbox-gl-js/v${MAPBOX_GL_VERSION}/mapbox-gl.js`
       script.onload = () => {
         setMapboxLoaded(true)
       }
@@ -63,7 +89,10 @@ export function MapboxMap({
     loadMapbox()
   }, [])
 
-  // Initialize map
+  // Initialize map — must run exactly once per mount. style/center/zoom are
+  // intentionally read only as initial values here; later changes are
+  // handled by the dedicated style and flyTo effects below instead of
+  // tearing down and recreating the whole map.
   useEffect(() => {
     if (!mapContainer.current || map.current || !accessToken || !mapboxLoaded || !window.mapboxgl) return
 
@@ -74,7 +103,6 @@ export function MapboxMap({
       style: mapStyles[style],
       center,
       zoom,
-      attributionControl: false,
     })
 
     // Add navigation controls
@@ -92,17 +120,9 @@ export function MapboxMap({
       "top-right",
     )
 
-    // Add attribution
-    map.current.addControl(
-      new window.mapboxgl.AttributionControl({
-        customAttribution: "© TattooMaps 2024",
-      }),
-      "bottom-right",
-    )
-
     map.current.on("load", () => {
       setMapLoaded(true)
-      onMapLoad?.(map.current!)
+      onMapLoadRef.current?.(map.current!)
     })
 
     return () => {
@@ -111,7 +131,16 @@ export function MapboxMap({
         map.current = null
       }
     }
-  }, [accessToken, style, center, zoom, onMapLoad, mapboxLoaded])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [accessToken, mapboxLoaded])
+
+  // Unmount any remaining popup React roots when the map itself unmounts
+  useEffect(() => {
+    return () => {
+      Object.values(popupRoots.current).forEach((root) => root.unmount())
+      popupRoots.current = {}
+    }
+  }, [])
 
   // Update map style
   useEffect(() => {
@@ -120,53 +149,95 @@ export function MapboxMap({
     }
   }, [style, mapLoaded])
 
-  // Update map center and zoom
+  // Fly to updated center/zoom without tearing down the map. Guarded against
+  // re-flying on every render by comparing against the map's actual current
+  // center/zoom with a small epsilon.
   useEffect(() => {
-    if (map.current && mapLoaded) {
-      map.current.flyTo({
-        center,
-        zoom,
-        duration: 1000,
-      })
-    }
+    if (!map.current || !mapLoaded) return
+    const current = map.current.getCenter()
+    const epsilon = 0.0001
+    const centerChanged =
+      Math.abs(current.lng - center[0]) > epsilon || Math.abs(current.lat - center[1]) > epsilon
+    const zoomChanged = Math.abs(map.current.getZoom() - zoom) > epsilon
+    if (!centerChanged && !zoomChanged) return
+    map.current.flyTo({
+      center,
+      zoom,
+      duration: 800,
+    })
   }, [center, zoom, mapLoaded])
+
+  // Color-code markers by tattoo style
+  const getStyleColor = (specialties: string[]): string => {
+    const STYLE_COLORS: Record<string, string> = {
+      traditional:       "#e85d04",
+      japanese:          "#7b2d8b",
+      "fine line":       "#0ea5e9",
+      realism:           "#16a34a",
+      blackwork:         "#1c1917",
+      watercolor:        "#ec4899",
+      geometric:         "#6366f1",
+      "neo-traditional": "#f59e0b",
+      portrait:          "#0891b2",
+      tribal:            "#92400e",
+      minimalist:        "#64748b",
+      abstract:          "#d97706",
+    }
+    const primary = (specialties[0] ?? "").toLowerCase()
+    for (const [key, color] of Object.entries(STYLE_COLORS)) {
+      if (primary.includes(key)) return color
+    }
+    return "#8B1538" // app accent fallback
+  }
 
   // Create marker element
   const createMarkerElement = useCallback(
     (location: MapboxLocation) => {
+      const isSelected = selectedLocation?.id === location.id
+      const color = getStyleColor(location.specialties)
+      const isShop = location.type === "shop"
+
       const el = document.createElement("div")
-      el.className = `marker marker-${location.type} ${selectedLocation?.id === location.id ? "marker-selected" : ""}`
+      el.className = `ink-marker ink-marker--${location.type}`
 
-      // Add custom marker styling
+      const size = isShop ? "32px" : "26px"
+      const radius = isShop ? "6px" : "50%"
+      const label = isShop
+        ? "●"
+        : (location.name.trim().split(/\s+/).slice(0, 2).map((w) => w[0]?.toUpperCase() ?? "").join("") || "✦")
+
       el.style.cssText = `
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-      font-weight: bold;
-      color: white;
-      border: 3px solid white;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-      transition: all 0.2s ease;
-      background: ${location.type === "artist" ? "#8B1538" : "#1E40AF"};
-    `
+        width: ${size};
+        height: ${size};
+        border-radius: ${radius};
+        background: ${color};
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: ${isShop ? "14px" : "9px"};
+        font-weight: 700;
+        color: white;
+        border: 2px solid white;
+        box-shadow: ${isSelected ? `0 0 0 3px ${color}, 0 4px 16px rgba(0,0,0,0.4)` : "0 2px 8px rgba(0,0,0,0.3)"};
+        transition: all 0.15s ease;
+        letter-spacing: -0.5px;
+        transform: ${isSelected ? "scale(1.25)" : "scale(1)"};
+        z-index: ${isSelected ? "1001" : "1"};
+      `
+      el.textContent = label
 
-      // Add icon
-      el.innerHTML = location.type === "artist" ? "🎨" : "🏪"
-
-      // Hover effects
       el.addEventListener("mouseenter", () => {
-        el.style.transform = "scale(1.1)"
-        el.style.zIndex = "1000"
+        if (selectedLocation?.id !== location.id) {
+          el.style.transform = "scale(1.15)"
+          el.style.zIndex = "999"
+        }
       })
-
       el.addEventListener("mouseleave", () => {
-        el.style.transform = "scale(1)"
-        el.style.zIndex = "1"
+        if (selectedLocation?.id !== location.id) {
+          el.style.transform = "scale(1)"
+          el.style.zIndex = "1"
+        }
       })
 
       return el
@@ -178,12 +249,15 @@ export function MapboxMap({
   useEffect(() => {
     if (!map.current || !mapLoaded || !window.mapboxgl) return
 
-    // Clear existing markers
+    // Clear existing markers and unmount their popup React roots
     Object.values(markers.current).forEach((marker) => marker.remove())
     markers.current = {}
+    Object.values(popupRoots.current).forEach((root) => root.unmount())
+    popupRoots.current = {}
 
     // Add new markers
     locations.forEach((location) => {
+      if (!isValidCoordinate(location.coordinates)) return
       const el = createMarkerElement(location)
 
       const marker = new window.mapboxgl.Marker(el).setLngLat(location.coordinates).addTo(map.current!)
@@ -192,6 +266,7 @@ export function MapboxMap({
       const popupContainer = document.createElement("div")
       const root = createRoot(popupContainer)
       root.render(<MapMarkerPopup location={location} />)
+      popupRoots.current[location.id] = root
 
       const popup = new window.mapboxgl.Popup({
         offset: 25,
@@ -222,16 +297,15 @@ export function MapboxMap({
   useEffect(() => {
     Object.entries(markers.current).forEach(([id, marker]) => {
       const el = marker.getElement()
+      const bg = el.style.background || "#8B1538"
       if (selectedLocation?.id === id) {
-        el.classList.add("marker-selected")
-        el.style.transform = "scale(1.2)"
+        el.style.transform = "scale(1.25)"
         el.style.zIndex = "1001"
-        el.style.boxShadow = "0 4px 20px rgba(0,0,0,0.4)"
+        el.style.boxShadow = `0 0 0 3px ${bg}, 0 4px 16px rgba(0,0,0,0.4)`
       } else {
-        el.classList.remove("marker-selected")
         el.style.transform = "scale(1)"
         el.style.zIndex = "1"
-        el.style.boxShadow = "0 2px 10px rgba(0,0,0,0.3)"
+        el.style.boxShadow = "0 2px 8px rgba(0,0,0,0.3)"
       }
     })
   }, [selectedLocation])
@@ -240,8 +314,11 @@ export function MapboxMap({
   const fitBounds = useCallback(() => {
     if (!map.current || !mapLoaded || locations.length === 0 || !window.mapboxgl) return
 
+    const validLocations = locations.filter((location) => isValidCoordinate(location.coordinates))
+    if (validLocations.length === 0) return
+
     const bounds = new window.mapboxgl.LngLatBounds()
-    locations.forEach((location) => {
+    validLocations.forEach((location) => {
       bounds.extend(location.coordinates)
     })
 

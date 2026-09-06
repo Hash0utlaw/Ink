@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL("https://tattoomaps.com"),
+  metadataBase: new URL("https://tattoo-maps.com"),
   alternates: {
     canonical: "/",
   },
@@ -73,7 +73,6 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
-    generator: 'v0.app'
 }
 
 export default function RootLayout({

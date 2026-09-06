@@ -1,17 +1,20 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Skeleton } from "@/components/ui/skeleton"
-import { CalendarDays, Clock, Crown, Users } from "lucide-react"
+import { CalendarDays, Clock, Crown, Users, Link2 } from "lucide-react"
 import Link from "next/link"
 import { getBookingsForArtist } from "@/lib/supabase/bookings"
 import { getCurrentUserId, getUserProfile } from "@/lib/supabase/users"
+import { createClient } from "@/utils/supabase/server"
 import type { BookingRequest } from "@/lib/supabase/bookings"
+import { ShareBookingLink } from "@/components/artist-dashboard/share-booking-link"
 
-const STATUS_STYLES: Record<BookingRequest["status"], string> = {
+const STATUS_STYLES: Record<string, string> = {
   pending: "bg-blue-500/20 text-blue-500 border-blue-500/30",
   confirmed: "bg-green-500/20 text-green-500 border-green-500/30",
-  cancelled: "bg-red-500/20 text-red-500 border-red-500/30",
+  declined: "bg-red-500/20 text-red-500 border-red-500/30",
+  cancelled: "bg-zinc-500/20 text-zinc-400 border-zinc-500/30",
+  completed: "bg-purple-500/20 text-purple-400 border-purple-500/30",
 }
 
 function formatDate(dateStr: string | null): string {
@@ -23,11 +26,26 @@ function formatDate(dateStr: string | null): string {
   }
 }
 
+async function getArtistHandle(userId: string): Promise<string | null> {
+  try {
+    const supabase = createClient()
+    const { data } = await supabase
+      .from("artists")
+      .select("handle")
+      .eq("user_id", userId)
+      .maybeSingle()
+    return (data as { handle: string } | null)?.handle ?? null
+  } catch {
+    return null
+  }
+}
+
 export default async function ArtistDashboardPage() {
   const userId = await getCurrentUserId()
-  const [bookings, profile] = await Promise.all([
+  const [bookings, profile, handle] = await Promise.all([
     userId ? getBookingsForArtist(userId) : Promise.resolve([]),
     userId ? getUserProfile(userId) : Promise.resolve(null),
+    userId ? getArtistHandle(userId) : Promise.resolve(null),
   ])
 
   const isPro = profile?.subscriptionTier === "pro"
@@ -46,6 +64,8 @@ export default async function ArtistDashboardPage() {
           </Badge>
         )}
       </div>
+
+      {handle && <ShareBookingLink handle={handle} />}
 
       <div className="grid gap-4 md:grid-cols-3">
         <Card>

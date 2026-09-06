@@ -5,26 +5,83 @@ import { HeroSection } from "@/components/homepage/hero-section"
 import { FeatureHighlights } from "@/components/homepage/feature-highlights"
 import { PopularCategories } from "@/components/homepage/popular-categories"
 import { FeaturedArtists, FeaturedArtistsSkeleton } from "@/components/homepage/featured-artists"
+import { NewestFlash, NewestFlashSkeleton } from "@/components/homepage/newest-flash"
+import { WorthTheDrive, WorthTheDriveSkeleton } from "@/components/homepage/worth-the-drive"
+import { LiveReviews, LiveReviewsSkeleton } from "@/components/homepage/live-reviews"
 import { Footer } from "@/components/layout/footer"
-import { getArtists } from "@/lib/supabase/artists"
+import { RecentlyViewed } from "@/components/homepage/recently-viewed"
+import { getArtists, getWorthTheDriveArtists } from "@/lib/supabase/artists"
+import { getNewestFlash } from "@/lib/supabase/flash"
+import { getRecentReviews } from "@/lib/supabase/reviews"
+import { getPlatformStats } from "@/lib/supabase/seo"
 
 async function FeaturedArtistsSection() {
   const { data: artists } = await getArtists()
+  if (artists.length === 0) {
+    console.warn("[homepage] FeaturedArtists: no artists returned")
+  }
   return <FeaturedArtists artists={artists} />
 }
 
-export default function HomePage() {
+async function NewestFlashSection() {
+  const listings = await getNewestFlash(6)
+  return <NewestFlash listings={listings} />
+}
+
+async function WorthTheDriveSection() {
+  const artists = await getWorthTheDriveArtists(6)
+  return <WorthTheDrive artists={artists} />
+}
+
+async function LiveReviewsSection() {
+  const reviews = await getRecentReviews(8)
+  return <LiveReviews initialReviews={reviews} />
+}
+
+const websiteJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "TattooMaps",
+  "url": "https://tattoo-maps.com",
+  "description": "Discover tattoo artists and shops worldwide. Explore portfolios, book appointments, and find your perfect ink.",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": {
+      "@type": "EntryPoint",
+      "urlTemplate": "https://tattoo-maps.com/search?q={search_term_string}",
+    },
+    "query-input": "required name=search_term_string",
+  },
+}
+
+export default async function HomePage() {
+  const stats = await getPlatformStats()
+
   return (
     <div className="flex min-h-screen flex-col">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+      />
       <Suspense fallback={<HeaderSkeleton />}>
         <Header />
       </Suspense>
       <main className="flex-1">
-        <HeroSection />
+        <HeroSection stats={stats} />
+        <RecentlyViewed />
         <FeatureHighlights />
         <PopularCategories />
         <Suspense fallback={<FeaturedArtistsSkeleton />}>
           <FeaturedArtistsSection />
+        </Suspense>
+        <Suspense fallback={<NewestFlashSkeleton />}>
+          <NewestFlashSection />
+        </Suspense>
+        <Suspense fallback={<WorthTheDriveSkeleton />}>
+          <WorthTheDriveSection />
+        </Suspense>
+        <Suspense fallback={<LiveReviewsSkeleton />}>
+          <LiveReviewsSection />
         </Suspense>
       </main>
       <Footer />

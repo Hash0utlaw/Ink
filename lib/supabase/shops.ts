@@ -26,6 +26,7 @@ export type ShopFilters = {
 function rowToShop(row: Record<string, unknown>): Shop {
   return {
     id: String(row.id ?? ""),
+    slug: String(row.slug ?? ""),
     name: String(row.name ?? ""),
     logoUrl: String(row.logo_url ?? ""),
     coverImageUrl: String(row.cover_image_url ?? ""),
@@ -34,9 +35,12 @@ function rowToShop(row: Record<string, unknown>): Shop {
     location: {
       address: String(row.address ?? ""),
       city: String(row.city ?? ""),
+      state: String(row.state ?? ""),
       lat: Number(row.latitude ?? 0),
       lng: Number(row.longitude ?? 0),
     },
+    phone: String(row.phone ?? ""),
+    website: String(row.website ?? ""),
     residentArtistIds: [],
     about: String(row.description ?? ""),
     reviews: Array.isArray(row.reviews) ? (row.reviews as Review[]) : [],
@@ -136,6 +140,18 @@ export async function getShopById(id: string): Promise<Shop | null> {
   }
 }
 
+export async function getShopsByIds(ids: string[]): Promise<Shop[]> {
+  if (ids.length === 0) return []
+  try {
+    const supabase = createClient()
+    const { data, error } = await supabase.from("shops").select("*").in("id", ids)
+    if (error || !data) return []
+    return data.map((row: Record<string, unknown>) => rowToShop(row))
+  } catch {
+    return []
+  }
+}
+
 // Looks up by the slug column (add a slug text column to the shops table).
 export async function getShopBySlug(slug: string): Promise<Shop | null> {
   try {
@@ -182,16 +198,23 @@ export async function getShopArtists(shopId: string): Promise<Artist[]> {
     if (stubsError || !stubs) return []
     return stubs.map((row: Record<string, unknown>) => ({
       id: String(row.id ?? ""),
+      handle: String(row.id ?? ""),
       name: String(row.name ?? ""),
       shopName: "",
       specialties: row.specialty ? [String(row.specialty)] : [],
       rating: 0,
       reviewCount: 0,
-      location: { address: "", city: "", lat: 0, lng: 0 },
+      location: { address: "", city: "", state: "", lat: 0, lng: 0 },
       avatarUrl: String(row.image_url ?? ""),
       portfolioImages: [],
+      previewImages: [],
       isAvailable: false,
       priceRange: "medium" as const,
+      priceTier: "mid" as const,
+      availabilityStatus: "not_taking_clients" as const,
+      avgResponseHours: null,
+      firstBookingDiscount: null,
+      isClaimed: false,
       bio: "",
       reviews: [],
       hours: {},

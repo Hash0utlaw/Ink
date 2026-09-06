@@ -4,13 +4,15 @@ import { AboutSection } from "@/components/artist-profile/about-section"
 import { ReviewsSection } from "@/components/artist-profile/reviews-section"
 import type { Shop } from "@/types/shop"
 import type { Artist } from "@/types/artist"
+import type { Review } from "@/lib/supabase/reviews"
 
 interface ShopTabsProps {
   shop: Shop
   residentArtists: Artist[]
+  reviews: Review[]
 }
 
-export function ShopTabs({ shop, residentArtists }: ShopTabsProps) {
+export function ShopTabs({ shop, residentArtists, reviews }: ShopTabsProps) {
   return (
     <Tabs defaultValue="artists" className="w-full">
       <TabsList className="grid w-full grid-cols-3">
@@ -25,7 +27,7 @@ export function ShopTabs({ shop, residentArtists }: ShopTabsProps) {
         <AboutSection bio={shop.about} />
       </TabsContent>
       <TabsContent value="reviews" className="mt-6">
-        <ReviewsSection reviews={shop.reviews} />
+        <ReviewsSection reviews={reviews} />
       </TabsContent>
     </Tabs>
   )
