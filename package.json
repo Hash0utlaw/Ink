@@ -6,7 +6,16 @@
     "build": "next build",
     "dev": "next dev",
     "lint": "eslint .",
-    "start": "next start"
+    "start": "next start",
+    "audit:coverage": "tsx scripts/audit-coverage.ts",
+    "geocode:census": "tsx scripts/geocode-census.ts",
+    "geocode:retry": "tsx scripts/geocode-census-retry.ts",
+    "geocode:recover-state": "tsx scripts/geocode-recover-state.ts",
+    "validate:import": "tsx scripts/validate-import.ts",
+    "verify:import": "tsx scripts/verify-import.ts",
+    "import:booksy-shops": "tsx scripts/import-booksy-shops.ts",
+    "import:booksy-artists": "tsx scripts/import-booksy-artists.ts",
+    "import:tattoodo-artists": "tsx scripts/import-tattoodo-artists.ts"
   },
   "dependencies": {
     "@ai-sdk/replicate": "latest",

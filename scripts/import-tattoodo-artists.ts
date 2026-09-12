@@ -1,29 +1,30 @@
 // import-tattoodo-artists.ts
 // Imports Tattoodo artist records from CSV into the artists table.
 // Run: npx tsx scripts/import-tattoodo-artists.ts [--dry-run]
+//   --input=path/to/file.csv   override the default CSV path
+//   --state=XX                 only import rows for this state
+//   --limit=N                  only import the first N matching rows
+//   --validated                required (unless --dry-run) — see validate-import.ts
 
 import { config } from "dotenv"
 config({ path: ".env.local" })
 
 import fs from "fs"
 import path from "path"
-import { createClient } from "@supabase/supabase-js"
+import { parseScriptArgs } from "./lib/args"
+import { getSupabaseAdmin } from "./lib/supabase-admin"
+import { checkSidecar } from "./lib/validation-sidecar"
+import { printImportSummary } from "./lib/summary"
+import { writeRunLogStart, finishRunLog } from "./lib/run-log"
 
-const CSV_PATH = path.resolve("/Users/hashoutlaw/Desktop/us_artists_import.csv")
-const DRY_RUN = process.argv.includes("--dry-run")
+const ARGS = parseScriptArgs()
+const CSV_PATH = path.resolve(ARGS.input ?? "/Users/hashoutlaw/Desktop/us_artists_import.csv")
+const DRY_RUN = ARGS.dryRun
 const BATCH_SIZE = 200
 
 if (DRY_RUN) console.log("DRY RUN — no data will be written.\n")
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
-const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-if (!SUPABASE_URL || !SERVICE_ROLE_KEY) {
-  console.error("Missing env vars. Ensure NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are in .env.local")
-  process.exit(1)
-}
-
-const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY.trim())
+const supabase = getSupabaseAdmin()
 
 // ── Parsers ───────────────────────────────────────────────────────────────────
 
@@ -142,12 +143,24 @@ async function main() {
     process.exit(1)
   }
 
+  if (!DRY_RUN) {
+    if (!ARGS.validated) {
+      console.error("Refusing to run: pass --validated (after scripts/validate-import.ts has passed for this CSV) or --dry-run.")
+      process.exit(1)
+    }
+    const sidecar = checkSidecar(CSV_PATH)
+    if (!sidecar.valid) {
+      console.error(`Refusing to run: ${sidecar.reason}`)
+      process.exit(1)
+    }
+  }
+
   console.log(`Reading ${CSV_PATH}...`)
   const text = fs.readFileSync(CSV_PATH, "utf-8")
   const rows = parseCSV(text)
   console.log(`  ${rows.length} rows parsed.\n`)
 
-  const records: ArtistRecord[] = []
+  let records: ArtistRecord[] = []
   let skipped = 0
 
   for (const row of rows) {
@@ -156,6 +169,16 @@ async function main() {
   }
 
   console.log(`  ${records.length} valid records, ${skipped} skipped.\n`)
+
+  if (ARGS.state) {
+    records = records.filter((r) => (r.insert.state as string | null) === ARGS.state)
+    console.log(`  ${records.length} match --state ${ARGS.state}`)
+  }
+  if (ARGS.limit != null) {
+    records = records.slice(0, ARGS.limit)
+    console.log(`  Limited to ${records.length} via --limit`)
+  }
+
   if (records.length === 0) { console.log("Nothing to insert."); process.exit(0) }
 
   // State breakdown
@@ -177,22 +200,28 @@ async function main() {
     return
   }
 
+  const runLogFile = writeRunLogStart("import-tattoodo-artists", CSV_PATH, ARGS as unknown as Record<string, unknown>)
+
   // ── Step 1: Upsert artists ──────────────────────────────────────────────────
   console.log(`\nUpserting artists in batches of ${BATCH_SIZE}...`)
   const inserts = records.map((r) => r.insert)
   const totalBatches = Math.ceil(inserts.length / BATCH_SIZE)
   let artistsQueued = 0
+  let artistsIgnoredDuplicates = 0
 
   for (let i = 0; i < totalBatches; i++) {
     const batch = inserts.slice(i * BATCH_SIZE, (i + 1) * BATCH_SIZE)
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from("artists")
       .upsert(batch, { onConflict: "handle", ignoreDuplicates: true })
+      .select("id")
     if (error) {
       console.error(`  Batch ${i + 1}/${totalBatches} ERROR:`, error.message)
     } else {
-      artistsQueued += batch.length
-      console.log(`  Batch ${i + 1}/${totalBatches} — ${batch.length} queued`)
+      const insertedThisBatch = data?.length ?? 0
+      artistsQueued += insertedThisBatch
+      artistsIgnoredDuplicates += batch.length - insertedThisBatch
+      console.log(`  Batch ${i + 1}/${totalBatches} — ${insertedThisBatch} inserted, ${batch.length - insertedThisBatch} duplicate`)
     }
   }
 
@@ -207,7 +236,14 @@ async function main() {
 
   if (fetchErr || !artistRows) {
     console.error("  Could not fetch artist IDs:", fetchErr?.message)
-    console.log(`\n✓ Done. ${artistsQueued} artists upserted (portfolio images skipped).`)
+    printImportSummary({
+      rowsRead: rows.length,
+      skipped: [{ reason: "missing/invalid slug or name", count: skipped }],
+      inserted: artistsQueued,
+      ignoredDuplicates: artistsIgnoredDuplicates,
+    })
+    finishRunLog(runLogFile, { rowsRead: rows.length, inserted: artistsQueued, ignoredDuplicates: artistsIgnoredDuplicates, skipped })
+    console.log(`✓ Done. ${artistsQueued} artists upserted (portfolio images skipped).`)
     return
   }
 
@@ -243,7 +279,15 @@ async function main() {
     }
   }
 
-  console.log(`\n✓ Done. ${artistsQueued} artists upserted, ${imagesInserted} portfolio images inserted.`)
+  printImportSummary({
+    rowsRead: rows.length,
+    skipped: [{ reason: "missing/invalid slug or name", count: skipped }],
+    inserted: artistsQueued,
+    ignoredDuplicates: artistsIgnoredDuplicates,
+  })
+  finishRunLog(runLogFile, { rowsRead: rows.length, inserted: artistsQueued, ignoredDuplicates: artistsIgnoredDuplicates, skipped })
+
+  console.log(`✓ Done. ${artistsQueued} artists upserted, ${imagesInserted} portfolio images inserted.`)
 }
 
 main().catch((err) => {
