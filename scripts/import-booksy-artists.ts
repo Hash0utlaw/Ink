@@ -2,31 +2,32 @@
 // Imports Booksy artist rows as shop_artists entries.
 // Requires import-booksy-shops.ts to have run first (needs place_id = booksy:{id}).
 // Run: npx tsx scripts/import-booksy-artists.ts [--dry-run]
+//   --input=path/to/file.csv   override the default CSV path
+//   --state=XX                 only import rows whose resolved shop is in this state
+//   --limit=N                  only import the first N matching rows
+//   --validated                required (unless --dry-run) — see validate-import.ts
 
 import { config } from "dotenv"
 config({ path: ".env.local" })
 
 import fs from "fs"
 import path from "path"
-import { createClient } from "@supabase/supabase-js"
+import { parseScriptArgs } from "./lib/args"
+import { getSupabaseAdmin } from "./lib/supabase-admin"
+import { checkSidecar } from "./lib/validation-sidecar"
+import { printImportSummary } from "./lib/summary"
+import { writeRunLogStart, finishRunLog } from "./lib/run-log"
 
+const ARGS = parseScriptArgs()
 const ARTISTS_CSV = path.resolve(
-  "/Users/hashoutlaw/Desktop/Claude/Claude/scraper/data/booksy_artists.csv"
+  ARGS.input ?? "/Users/hashoutlaw/Desktop/Claude/Claude/scraper/data/booksy_artists.csv"
 )
-const DRY_RUN = process.argv.includes("--dry-run")
+const DRY_RUN = ARGS.dryRun
 const BATCH_SIZE = 200
 
 if (DRY_RUN) console.log("DRY RUN — no data will be written.\n")
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
-const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-if (!SUPABASE_URL || !SERVICE_ROLE_KEY) {
-  console.error("Missing env vars. Ensure NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are in .env.local")
-  process.exit(1)
-}
-
-const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY.trim())
+const supabase = getSupabaseAdmin()
 
 // ── CSV parser ────────────────────────────────────────────────────────────────
 
@@ -77,9 +78,18 @@ function shouldSkip(name: string | null | undefined): boolean {
 }
 
 // ── Step 1: Build booksy_business_id → shop UUID map ─────────────────────────
+// Also resolves each shop's state, so --state can filter artist rows by the
+// state of the shop they belong to (shop_artists has no state column of its
+// own — this is metadata resolved for filtering, not a change to the
+// shop_artists insert shape).
 
-async function buildShopMap(booksyBusinessIds: string[]): Promise<Map<string, string>> {
-  const map = new Map<string, string>()
+interface ShopInfo {
+  id: string
+  state: string | null
+}
+
+async function buildShopMap(booksyBusinessIds: string[]): Promise<Map<string, ShopInfo>> {
+  const map = new Map<string, ShopInfo>()
   if (booksyBusinessIds.length === 0) return map
 
   // Query in pages to avoid URL length limits
@@ -90,7 +100,7 @@ async function buildShopMap(booksyBusinessIds: string[]): Promise<Map<string, st
     const batch = unique.slice(i, i + PAGE).map((id) => `booksy:${id}`)
     const { data, error } = await supabase
       .from("shops")
-      .select("id, place_id")
+      .select("id, place_id, state")
       .in("place_id", batch)
 
     if (error) {
@@ -100,7 +110,7 @@ async function buildShopMap(booksyBusinessIds: string[]): Promise<Map<string, st
 
     for (const shop of data ?? []) {
       const booksyId = (shop.place_id as string).replace("booksy:", "")
-      map.set(booksyId, shop.id as string)
+      map.set(booksyId, { id: shop.id as string, state: (shop.state as string | null) ?? null })
     }
   }
 
@@ -113,6 +123,18 @@ async function main() {
   if (!fs.existsSync(ARTISTS_CSV)) {
     console.error(`CSV not found: ${ARTISTS_CSV}`)
     process.exit(1)
+  }
+
+  if (!DRY_RUN) {
+    if (!ARGS.validated) {
+      console.error("Refusing to run: pass --validated (after scripts/validate-import.ts has passed for this CSV) or --dry-run.")
+      process.exit(1)
+    }
+    const sidecar = checkSidecar(ARTISTS_CSV)
+    if (!sidecar.valid) {
+      console.error(`Refusing to run: ${sidecar.reason}`)
+      process.exit(1)
+    }
   }
 
   console.log(`Reading ${ARTISTS_CSV}...`)
@@ -140,23 +162,25 @@ async function main() {
     process.exit(1)
   }
 
-  const records: Record<string, unknown>[] = []
+  let records: Record<string, unknown>[] = []
   let skippedName = 0
   let skippedNoShop = 0
+  let skippedState = 0
 
   for (const row of rows) {
     const name = row.name?.trim()
     if (shouldSkip(name)) { skippedName++; continue }
 
     const booksyBusinessId = row.booksy_business_id?.trim()
-    const shopId = shopMap.get(booksyBusinessId)
-    if (!shopId) { skippedNoShop++; continue }
+    const shopInfo = shopMap.get(booksyBusinessId)
+    if (!shopInfo) { skippedNoShop++; continue }
+    if (ARGS.state && shopInfo.state !== ARGS.state) { skippedState++; continue }
 
     // specialty: take first entry from comma-separated styles
     const specialty = row.styles?.trim().split(",")[0]?.trim() || null
 
     records.push({
-      shop_id: shopId,
+      shop_id: shopInfo.id,
       name,
       image_url: row.photo_url?.trim() || null,
       specialty,
@@ -167,6 +191,12 @@ async function main() {
   console.log(`  ${records.length} valid records`)
   console.log(`  ${skippedName} skipped (bad name)`)
   console.log(`  ${skippedNoShop} skipped (shop not found in DB)`)
+  if (ARGS.state) console.log(`  ${skippedState} skipped (shop not in --state ${ARGS.state})`)
+
+  if (ARGS.limit != null) {
+    records = records.slice(0, ARGS.limit)
+    console.log(`  Limited to ${records.length} via --limit`)
+  }
 
   if (DRY_RUN) {
     console.log(`\n[DRY RUN] Would insert ${records.length} shop_artists rows. Sample:`)
@@ -179,24 +209,43 @@ async function main() {
     process.exit(0)
   }
 
+  const runLogFile = writeRunLogStart("import-booksy-artists", ARTISTS_CSV, ARGS as unknown as Record<string, unknown>)
+
   console.log(`\nInserting in batches of ${BATCH_SIZE}...`)
   const totalBatches = Math.ceil(records.length / BATCH_SIZE)
   let inserted = 0
 
   for (let i = 0; i < totalBatches; i++) {
     const batch = records.slice(i * BATCH_SIZE, (i + 1) * BATCH_SIZE)
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from("shop_artists")
       .insert(batch)
+      .select("id")
     if (error) {
       console.error(`  Batch ${i + 1}/${totalBatches} ERROR:`, error.message)
     } else {
-      inserted += batch.length
-      console.log(`  Batch ${i + 1}/${totalBatches} — ${batch.length} inserted`)
+      const insertedThisBatch = data?.length ?? batch.length
+      inserted += insertedThisBatch
+      console.log(`  Batch ${i + 1}/${totalBatches} — ${insertedThisBatch} inserted`)
     }
   }
 
-  console.log(`\n✓ Done. ${inserted} Booksy artists inserted into shop_artists.`)
+  // shop_artists has no unique constraint to conflict against (plain insert,
+  // not upsert — see docs/source-plan.md / plan notes), so there is no
+  // "ignored as duplicate" count here: every valid row either inserts or errors.
+  printImportSummary({
+    rowsRead: rows.length,
+    skipped: [
+      { reason: "bad name", count: skippedName },
+      { reason: "shop not found in DB", count: skippedNoShop },
+      ...(ARGS.state ? [{ reason: `shop not in --state ${ARGS.state}`, count: skippedState }] : []),
+    ],
+    inserted,
+    ignoredDuplicates: 0,
+  })
+  finishRunLog(runLogFile, { rowsRead: rows.length, inserted, ignoredDuplicates: 0, skipped: skippedName + skippedNoShop + skippedState })
+
+  console.log(`✓ Done. ${inserted} Booksy artists inserted into shop_artists.`)
 }
 
 main().catch((err) => {
