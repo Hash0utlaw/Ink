@@ -29,6 +29,7 @@ export function MapInterface() {
   const [mapStyle, setMapStyle] = useState("dark")
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [loading, setLoading] = useState(true)
+  const [dataError, setDataError] = useState<string | null>(null)
   const geoFetched = useRef(false)
   const [filters, setFilters] = useState<MapFilters>({
     locationType: "all",
@@ -45,13 +46,21 @@ export function MapInterface() {
     const loadLocations = async () => {
       try {
         setLoading(true)
+        setDataError(null)
         const res = await fetch("/api/map?type=all")
+        if (!res.ok) {
+          setDataError(`Couldn't load shops (error ${res.status})`)
+          setLocations([])
+          setFilteredLocations([])
+          return
+        }
         const json = await res.json()
         const data: MapboxLocation[] = json.data ?? []
         setLocations(data)
         setFilteredLocations(data)
       } catch (error) {
         console.error("Failed to load locations:", error)
+        setDataError("Couldn't load shops — check your connection")
         setLocations([])
         setFilteredLocations([])
       } finally {
@@ -218,6 +227,7 @@ export function MapInterface() {
         onSearch={handleSearch}
         onCurrentLocation={handleCurrentLocation}
         loading={loading}
+        dataError={dataError}
       />
 
       {/* Map */}
@@ -238,7 +248,7 @@ export function MapInterface() {
           <select
             value={mapStyle}
             onChange={(e) => handleMapStyleChange(e.target.value)}
-            className="px-3 py-2 bg-white border border-gray-300 rounded-lg shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-burgundy-500 focus:border-burgundy-500"
+            className="px-3 py-2 bg-card border border-border rounded-lg shadow-sm text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"
           >
             <option value="streets">Streets</option>
             <option value="satellite">Satellite</option>

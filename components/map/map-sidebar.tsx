@@ -22,6 +22,7 @@ interface MapSidebarProps {
   onSearch: (query: string) => void
   onCurrentLocation: () => void
   loading: boolean
+  dataError?: string | null
 }
 
 export function MapSidebar({
@@ -35,6 +36,7 @@ export function MapSidebar({
   onSearch,
   onCurrentLocation,
   loading,
+  dataError,
 }: MapSidebarProps) {
   const [searchQuery, setSearchQuery] = useState("")
   const [showFilters, setShowFilters] = useState(false)
@@ -146,6 +148,7 @@ export function MapSidebar({
                 </Button>
               )}
             </div>
+            {dataError && <p className="text-sm text-muted-foreground mt-2">{dataError}</p>}
           </div>
 
           <ScrollArea className="flex-1 scrollbar-ink">
@@ -164,15 +167,17 @@ export function MapSidebar({
                   </div>
                 ))
               ) : locations.length === 0 ? (
-                <div className="text-center py-16">
-                  <div className="text-muted-foreground mb-6">
-                    <MapPin className="w-16 h-16 mx-auto opacity-40" />
+                !dataError && (
+                  <div className="text-center py-16">
+                    <div className="text-muted-foreground mb-6">
+                      <MapPin className="w-16 h-16 mx-auto opacity-40" />
+                    </div>
+                    <h3 className="text-xl font-semibold text-foreground mb-3">No shops found in this area</h3>
+                    <p className="text-muted-foreground leading-relaxed">
+                      Try adjusting your filters or search terms to discover more artists and shops
+                    </p>
                   </div>
-                  <h3 className="text-xl font-semibold text-foreground mb-3">No locations found</h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    Try adjusting your filters or search terms to discover more artists and shops
-                  </p>
-                </div>
+                )
               ) : (
                 locations.map((location) => (
                   <div

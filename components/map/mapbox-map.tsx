@@ -55,46 +55,63 @@ export function MapboxMap({
   const onMapLoadRef = useRef(onMapLoad)
   const [mapLoaded, setMapLoaded] = useState(false)
   const [mapboxLoaded, setMapboxLoaded] = useState(false)
+  const [loadError, setLoadError] = useState<string | null>(null)
+  // Bumped on every manual Retry so the watchdog effect below gets a fresh
+  // 15s window instead of relying on a timer left over from a prior attempt.
+  const [loadAttempt, setLoadAttempt] = useState(0)
 
   useEffect(() => {
     onMapLoadRef.current = onMapLoad
   }, [onMapLoad])
 
-  useEffect(() => {
-    const loadMapbox = () => {
-      // Check if already loaded
-      if (window.mapboxgl) {
-        setMapboxLoaded(true)
-        return
-      }
-
-      // Load CSS
-      const cssLink = document.createElement("link")
-      cssLink.rel = "stylesheet"
-      cssLink.href = `https://api.mapbox.com/mapbox-gl-js/v${MAPBOX_GL_VERSION}/mapbox-gl.css`
-      document.head.appendChild(cssLink)
-
-      // Load JS
-      const script = document.createElement("script")
-      script.src = `https://api.mapbox.com/mapbox-gl-js/v${MAPBOX_GL_VERSION}/mapbox-gl.js`
-      script.onload = () => {
-        setMapboxLoaded(true)
-      }
-      script.onerror = (error) => {
-        console.error("Failed to load Mapbox GL:", error)
-      }
-      document.head.appendChild(script)
+  // Extracted out of the effect so handleRetry (below) can re-invoke the exact
+  // same loading logic instead of duplicating it.
+  const loadMapbox = useCallback(() => {
+    // Check if already loaded
+    if (window.mapboxgl) {
+      setMapboxLoaded(true)
+      return
     }
 
-    loadMapbox()
+    // Load CSS
+    const cssLink = document.createElement("link")
+    cssLink.rel = "stylesheet"
+    cssLink.href = `https://api.mapbox.com/mapbox-gl-js/v${MAPBOX_GL_VERSION}/mapbox-gl.css`
+    document.head.appendChild(cssLink)
+
+    // Load JS
+    const script = document.createElement("script")
+    script.src = `https://api.mapbox.com/mapbox-gl-js/v${MAPBOX_GL_VERSION}/mapbox-gl.js`
+    script.onload = () => {
+      setMapboxLoaded(true)
+    }
+    script.onerror = (error) => {
+      console.error("Failed to load Mapbox GL:", error)
+      setLoadError("Map unavailable — could not reach Mapbox")
+    }
+    document.head.appendChild(script)
   }, [])
+
+  useEffect(() => {
+    loadMapbox()
+  }, [loadMapbox])
 
   // Initialize map — must run exactly once per mount. style/center/zoom are
   // intentionally read only as initial values here; later changes are
   // handled by the dedicated style and flyTo effects below instead of
   // tearing down and recreating the whole map.
   useEffect(() => {
-    if (!mapContainer.current || map.current || !accessToken || !mapboxLoaded || !window.mapboxgl) return
+    if (map.current || !mapContainer.current || !mapboxLoaded || !window.mapboxgl) return
+
+    if (!accessToken) {
+      console.error(
+        "Mapbox initialization aborted: NEXT_PUBLIC_MAPBOX_TOKEN is missing or empty. " +
+          "Set it in the environment — and rebuild/redeploy if this is production, since " +
+          "NEXT_PUBLIC_* variables are inlined at build time — before the map can load."
+      )
+      setLoadError("Map unavailable — missing configuration")
+      return
+    }
 
     window.mapboxgl.accessToken = accessToken
 
@@ -120,6 +137,15 @@ export function MapboxMap({
       "top-right",
     )
 
+    map.current.on("error", (e: any) => {
+      console.error("Mapbox runtime error:", e?.error ?? e)
+      const status = e?.error?.status
+      const message: string = e?.error?.message ?? ""
+      if (status === 401 || status === 403 || /unauthorized|forbidden/i.test(message)) {
+        setLoadError("Map unavailable — invalid configuration")
+      }
+    })
+
     map.current.on("load", () => {
       setMapLoaded(true)
       onMapLoadRef.current?.(map.current!)
@@ -133,6 +159,30 @@ export function MapboxMap({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accessToken, mapboxLoaded])
+
+  // Watchdog: surface a "taking too long" error rather than spinning forever
+  // if something stalls the load in a way that produces neither mapLoaded
+  // nor its own error. Depends on loadAttempt too so a manual Retry gets its
+  // own fresh 15s window rather than relying on a timer from a prior attempt.
+  useEffect(() => {
+    if (mapLoaded) return
+    const timer = setTimeout(() => {
+      setLoadError((prev) => prev ?? "Map is taking too long to load")
+    }, 15000)
+    return () => clearTimeout(timer)
+  }, [mapLoaded, loadAttempt])
+
+  const handleRetry = useCallback(() => {
+    if (map.current) {
+      map.current.remove()
+      map.current = null
+    }
+    setLoadError(null)
+    setMapLoaded(false)
+    setMapboxLoaded(false)
+    setLoadAttempt((n) => n + 1)
+    loadMapbox()
+  }, [loadMapbox])
 
   // Unmount any remaining popup React roots when the map itself unmounts
   useEffect(() => {
@@ -342,14 +392,29 @@ export function MapboxMap({
     <div className={`relative w-full h-full ${className}`}>
       <div ref={mapContainer} className="w-full h-full" />
 
-      {/* Loading overlay */}
-      {(!mapLoaded || !mapboxLoaded) && (
+      {/* Error and loading overlays are mutually exclusive — error takes priority */}
+      {loadError ? (
         <div className="absolute inset-0 bg-gray-100 flex items-center justify-center">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-burgundy-500 mx-auto mb-2"></div>
-            <p className="text-sm text-gray-600">{!mapboxLoaded ? "Loading Mapbox..." : "Loading map..."}</p>
+            <p className="text-sm text-gray-600">{loadError}</p>
+            <p className="text-xs text-gray-500 mt-1">Try refreshing, or check back shortly</p>
+            <button
+              onClick={handleRetry}
+              className="mt-3 bg-white hover:bg-gray-50 border border-gray-300 rounded-md px-3 py-2 text-sm font-medium text-gray-700 shadow-sm transition-colors"
+            >
+              Retry
+            </button>
           </div>
         </div>
+      ) : (
+        (!mapLoaded || !mapboxLoaded) && (
+          <div className="absolute inset-0 bg-gray-100 flex items-center justify-center">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-burgundy-500 mx-auto mb-2"></div>
+              <p className="text-sm text-gray-600">{!mapboxLoaded ? "Loading Mapbox..." : "Loading map..."}</p>
+            </div>
+          </div>
+        )
       )}
 
       {/* Map controls overlay */}
