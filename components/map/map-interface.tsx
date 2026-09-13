@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
-import { MapboxMap } from "./mapbox-map"
+import { useState, useEffect, useCallback, useRef } from "react"
+import { MapboxMap, type MapBounds } from "./mapbox-map"
 import { MapSidebar } from "./map-sidebar"
 import { LocationDetails } from "./location-details"
 import type { MapboxLocation } from "@/lib/mapbox"
@@ -68,6 +68,42 @@ export function MapInterface() {
     }
 
     loadLocations()
+  }, [])
+
+  // Viewport-driven refetch, debounced on the map's moveend. Replaces the old
+  // flat MAP_LIMIT-for-everything behavior: as the map pans/zooms, `locations`
+  // is replaced with whatever's actually in the new bounding box (up to the
+  // API's own backstop cap), rather than a fixed nationwide top-500 cut. This
+  // deliberately does NOT toggle `loading` — that's reserved for the initial
+  // load, since flashing the sidebar's skeleton on every pan/zoom would be
+  // jarring for what's meant to be a quiet background refresh.
+  const moveEndTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const handleMoveEnd = useCallback((bounds: MapBounds) => {
+    if (moveEndTimerRef.current) clearTimeout(moveEndTimerRef.current)
+    moveEndTimerRef.current = setTimeout(async () => {
+      try {
+        const { west, south, east, north } = bounds
+        const res = await fetch(`/api/map?type=all&bbox=${west},${south},${east},${north}`)
+        if (!res.ok) {
+          setDataError(`Couldn't load shops (error ${res.status})`)
+          return
+        }
+        const json = await res.json()
+        const data: MapboxLocation[] = json.data ?? []
+        setDataError(null)
+        setLocations(data)
+      } catch (error) {
+        console.error("Failed to load locations for viewport:", error)
+        setDataError("Couldn't load shops — check your connection")
+      }
+    }, 300)
+  }, [])
+
+  useEffect(() => {
+    return () => {
+      if (moveEndTimerRef.current) clearTimeout(moveEndTimerRef.current)
+    }
   }, [])
 
   // Filter locations based on current filters
@@ -205,6 +241,7 @@ export function MapInterface() {
           center={mapCenter}
           zoom={mapZoom}
           style={mapStyle as keyof typeof import("@/lib/mapbox").mapStyles}
+          onMoveEnd={handleMoveEnd}
           className="w-full h-full"
         />
 

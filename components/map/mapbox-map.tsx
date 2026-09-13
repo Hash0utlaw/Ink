@@ -25,6 +25,26 @@ function isValidCoordinate(coords: unknown): coords is [number, number] {
 // URLs below can't drift out of sync with each other.
 const MAPBOX_GL_VERSION = "3.0.1"
 
+const LOCATIONS_SOURCE_ID = "locations"
+
+interface LocationFeature {
+  type: "Feature"
+  id: string
+  geometry: { type: "Point"; coordinates: [number, number] }
+  properties: { color: string; locType: "shop" | "artist" }
+}
+interface LocationFeatureCollection {
+  type: "FeatureCollection"
+  features: LocationFeature[]
+}
+
+export interface MapBounds {
+  west: number
+  south: number
+  east: number
+  north: number
+}
+
 interface MapboxMapProps {
   accessToken: string
   locations: MapboxLocation[]
@@ -34,6 +54,7 @@ interface MapboxMapProps {
   zoom?: number
   style?: keyof typeof mapStyles
   onMapLoad?: (map: any) => void
+  onMoveEnd?: (bounds: MapBounds) => void
   className?: string
 }
 
@@ -46,13 +67,14 @@ export function MapboxMap({
   zoom = defaultMapConfig.zoom,
   style = "dark",
   onMapLoad,
+  onMoveEnd,
   className = "",
 }: MapboxMapProps) {
   const mapContainer = useRef<HTMLDivElement>(null)
   const map = useRef<any>(null)
-  const markers = useRef<{ [key: string]: any }>({})
-  const popupRoots = useRef<{ [key: string]: ReturnType<typeof createRoot> }>({})
   const onMapLoadRef = useRef(onMapLoad)
+  const onMoveEndRef = useRef(onMoveEnd)
+  const onLocationSelectRef = useRef(onLocationSelect)
   const [mapLoaded, setMapLoaded] = useState(false)
   const [mapboxLoaded, setMapboxLoaded] = useState(false)
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -60,9 +82,26 @@ export function MapboxMap({
   // 15s window instead of relying on a timer left over from a prior attempt.
   const [loadAttempt, setLoadAttempt] = useState(0)
 
+  // Data + selection plumbing for the clustered source (see "Sync locations"
+  // effect below). Kept in refs, not state, because they're read from inside
+  // Mapbox event callbacks that must never close over stale props.
+  const geojsonRef = useRef<LocationFeatureCollection>({ type: "FeatureCollection", features: [] })
+  const locationsByIdRef = useRef<Map<string, MapboxLocation>>(new Map())
+  const previousSelectedIdRef = useRef<string | null>(null)
+  const clusterHandlersAttachedRef = useRef(false)
+  const popupRef = useRef<any>(null)
+  const popupRootRef = useRef<ReturnType<typeof createRoot> | null>(null)
+  const popupContainerRef = useRef<HTMLDivElement | null>(null)
+
   useEffect(() => {
     onMapLoadRef.current = onMapLoad
   }, [onMapLoad])
+  useEffect(() => {
+    onMoveEndRef.current = onMoveEnd
+  }, [onMoveEnd])
+  useEffect(() => {
+    onLocationSelectRef.current = onLocationSelect
+  }, [onLocationSelect])
 
   // Extracted out of the effect so handleRetry (below) can re-invoke the exact
   // same loading logic instead of duplicating it.
@@ -95,6 +134,141 @@ export function MapboxMap({
   useEffect(() => {
     loadMapbox()
   }, [loadMapbox])
+
+  // Colors a location by its primary specialty — used as a GeoJSON feature
+  // property so the "unclustered-point" layer's paint expression can read it,
+  // instead of setting inline DOM styles per marker.
+  const getStyleColor = useCallback((specialties: string[]): string => {
+    const STYLE_COLORS: Record<string, string> = {
+      traditional:       "#e85d04",
+      japanese:          "#7b2d8b",
+      "fine line":       "#0ea5e9",
+      realism:           "#16a34a",
+      blackwork:         "#1c1917",
+      watercolor:        "#ec4899",
+      geometric:         "#6366f1",
+      "neo-traditional": "#f59e0b",
+      portrait:          "#0891b2",
+      tribal:            "#92400e",
+      minimalist:        "#64748b",
+      abstract:          "#d97706",
+    }
+    const primary = (specialties[0] ?? "").toLowerCase()
+    for (const [key, color] of Object.entries(STYLE_COLORS)) {
+      if (primary.includes(key)) return color
+    }
+    return "#8B1538" // app accent fallback
+  }, [])
+
+  // Ensures the clustered source + layers exist, (re-)attaches to it after a
+  // style swap (setStyle removes every custom source/layer, since it's not
+  // part of the new style's own JSON), and repopulates it with the latest
+  // data. Click/hover handlers are layer-id-scoped and survive style swaps on
+  // their own, so they're attached exactly once, guarded by a ref.
+  const ensureClusterLayers = useCallback(() => {
+    const m = map.current
+    if (!m) return
+
+    if (!m.getSource(LOCATIONS_SOURCE_ID)) {
+      m.addSource(LOCATIONS_SOURCE_ID, {
+        type: "geojson",
+        data: geojsonRef.current,
+        cluster: true,
+        clusterMaxZoom: 14,
+        clusterRadius: 50,
+      })
+
+      m.addLayer({
+        id: "clusters",
+        type: "circle",
+        source: LOCATIONS_SOURCE_ID,
+        filter: ["has", "point_count"],
+        paint: {
+          "circle-color": ["step", ["get", "point_count"], "#8B1538", 25, "#6b1029", 100, "#4a0b1d"],
+          "circle-radius": ["step", ["get", "point_count"], 16, 25, 22, 100, 28],
+          "circle-stroke-width": 2,
+          "circle-stroke-color": "#ffffff",
+        },
+      })
+
+      m.addLayer({
+        id: "cluster-count",
+        type: "symbol",
+        source: LOCATIONS_SOURCE_ID,
+        filter: ["has", "point_count"],
+        layout: {
+          "text-field": ["get", "point_count_abbreviated"],
+          "text-size": 12,
+        },
+        paint: { "text-color": "#ffffff" },
+      })
+
+      m.addLayer({
+        id: "unclustered-point",
+        type: "circle",
+        source: LOCATIONS_SOURCE_ID,
+        filter: ["!", ["has", "point_count"]],
+        paint: {
+          "circle-color": ["get", "color"],
+          "circle-radius": [
+            "case",
+            ["boolean", ["feature-state", "selected"], false], 12,
+            ["==", ["get", "locType"], "shop"], 8,
+            6,
+          ],
+          "circle-stroke-width": ["case", ["boolean", ["feature-state", "selected"], false], 3, 1.5],
+          "circle-stroke-color": "#ffffff",
+        },
+      })
+    } else {
+      m.getSource(LOCATIONS_SOURCE_ID).setData(geojsonRef.current)
+    }
+
+    if (!clusterHandlersAttachedRef.current) {
+      clusterHandlersAttachedRef.current = true
+
+      m.on("click", "clusters", (e: any) => {
+        const feature = e.features?.[0]
+        if (!feature) return
+        const clusterId = feature.properties?.cluster_id
+        const source = m.getSource(LOCATIONS_SOURCE_ID)
+        source.getClusterExpansionZoom(clusterId, (err: any, expansionZoom: number) => {
+          if (err) return
+          m.easeTo({ center: feature.geometry.coordinates, zoom: expansionZoom })
+        })
+      })
+
+      m.on("click", "unclustered-point", (e: any) => {
+        const feature = e.features?.[0]
+        if (!feature) return
+        const location = locationsByIdRef.current.get(String(feature.id))
+        if (!location) return
+
+        onLocationSelectRef.current(location)
+        m.flyTo({
+          center: location.coordinates,
+          zoom: Math.max(m.getZoom(), 14),
+          duration: 1000,
+        })
+
+        if (!popupContainerRef.current) {
+          popupContainerRef.current = document.createElement("div")
+          popupRootRef.current = createRoot(popupContainerRef.current)
+        }
+        popupRootRef.current!.render(<MapMarkerPopup location={location} />)
+
+        if (!popupRef.current) {
+          popupRef.current = new window.mapboxgl.Popup({ offset: 15, closeButton: true, closeOnClick: false })
+        }
+        popupRef.current.setLngLat(location.coordinates).setDOMContent(popupContainerRef.current).addTo(m)
+      })
+
+      m.on("mouseenter", "clusters", () => { m.getCanvas().style.cursor = "pointer" })
+      m.on("mouseleave", "clusters", () => { m.getCanvas().style.cursor = "" })
+      m.on("mouseenter", "unclustered-point", () => { m.getCanvas().style.cursor = "pointer" })
+      m.on("mouseleave", "unclustered-point", () => { m.getCanvas().style.cursor = "" })
+    }
+  }, [])
 
   // Initialize map — must run exactly once per mount. style/center/zoom are
   // intentionally read only as initial values here; later changes are
@@ -146,6 +320,17 @@ export function MapboxMap({
       }
     })
 
+    // Fires after the initial style loads AND after every subsequent
+    // setStyle() call (see the "Update map style" effect below) — setStyle
+    // wipes any source/layer that isn't part of the new style's own JSON, so
+    // this is where the clustered source gets (re-)established either way.
+    map.current.on("style.load", ensureClusterLayers)
+
+    map.current.on("moveend", () => {
+      const b = map.current.getBounds()
+      onMoveEndRef.current?.({ west: b.getWest(), south: b.getSouth(), east: b.getEast(), north: b.getNorth() })
+    })
+
     map.current.on("load", () => {
       setMapLoaded(true)
       onMapLoadRef.current?.(map.current!)
@@ -177,6 +362,7 @@ export function MapboxMap({
       map.current.remove()
       map.current = null
     }
+    clusterHandlersAttachedRef.current = false
     setLoadError(null)
     setMapLoaded(false)
     setMapboxLoaded(false)
@@ -184,11 +370,11 @@ export function MapboxMap({
     loadMapbox()
   }, [loadMapbox])
 
-  // Unmount any remaining popup React roots when the map itself unmounts
+  // Unmount the shared popup's React root when the map itself unmounts
   useEffect(() => {
     return () => {
-      Object.values(popupRoots.current).forEach((root) => root.unmount())
-      popupRoots.current = {}
+      popupRootRef.current?.unmount()
+      popupRootRef.current = null
     }
   }, [])
 
@@ -217,176 +403,68 @@ export function MapboxMap({
     })
   }, [center, zoom, mapLoaded])
 
-  // Color-code markers by tattoo style
-  const getStyleColor = (specialties: string[]): string => {
-    const STYLE_COLORS: Record<string, string> = {
-      traditional:       "#e85d04",
-      japanese:          "#7b2d8b",
-      "fine line":       "#0ea5e9",
-      realism:           "#16a34a",
-      blackwork:         "#1c1917",
-      watercolor:        "#ec4899",
-      geometric:         "#6366f1",
-      "neo-traditional": "#f59e0b",
-      portrait:          "#0891b2",
-      tribal:            "#92400e",
-      minimalist:        "#64748b",
-      abstract:          "#d97706",
-    }
-    const primary = (specialties[0] ?? "").toLowerCase()
-    for (const [key, color] of Object.entries(STYLE_COLORS)) {
-      if (primary.includes(key)) return color
-    }
-    return "#8B1538" // app accent fallback
-  }
-
-  // Create marker element
-  const createMarkerElement = useCallback(
-    (location: MapboxLocation) => {
-      const isSelected = selectedLocation?.id === location.id
-      const color = getStyleColor(location.specialties)
-      const isShop = location.type === "shop"
-
-      const el = document.createElement("div")
-      el.className = `ink-marker ink-marker--${location.type}`
-
-      const size = isShop ? "32px" : "26px"
-      const radius = isShop ? "6px" : "50%"
-      const label = isShop
-        ? "●"
-        : (location.name.trim().split(/\s+/).slice(0, 2).map((w) => w[0]?.toUpperCase() ?? "").join("") || "✦")
-
-      el.style.cssText = `
-        width: ${size};
-        height: ${size};
-        border-radius: ${radius};
-        background: ${color};
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: ${isShop ? "14px" : "9px"};
-        font-weight: 700;
-        color: white;
-        border: 2px solid white;
-        box-shadow: ${isSelected ? `0 0 0 3px ${color}, 0 4px 16px rgba(0,0,0,0.4)` : "0 2px 8px rgba(0,0,0,0.3)"};
-        transition: all 0.15s ease;
-        letter-spacing: -0.5px;
-        transform: ${isSelected ? "scale(1.25)" : "scale(1)"};
-        z-index: ${isSelected ? "1001" : "1"};
-      `
-      el.textContent = label
-
-      el.addEventListener("mouseenter", () => {
-        if (selectedLocation?.id !== location.id) {
-          el.style.transform = "scale(1.15)"
-          el.style.zIndex = "999"
-        }
-      })
-      el.addEventListener("mouseleave", () => {
-        if (selectedLocation?.id !== location.id) {
-          el.style.transform = "scale(1)"
-          el.style.zIndex = "1"
-        }
-      })
-
-      return el
-    },
-    [selectedLocation],
-  )
-
-  // Update markers
+  // Sync locations -> GeoJSON source. Cheap even at thousands of points,
+  // since it's one setData() call rather than tearing down/rebuilding a DOM
+  // marker per location.
   useEffect(() => {
-    if (!map.current || !mapLoaded || !window.mapboxgl) return
-
-    // Clear existing markers and unmount their popup React roots
-    Object.values(markers.current).forEach((marker) => marker.remove())
-    markers.current = {}
-    Object.values(popupRoots.current).forEach((root) => root.unmount())
-    popupRoots.current = {}
-
-    // Add new markers
-    locations.forEach((location) => {
-      if (!isValidCoordinate(location.coordinates)) return
-      const el = createMarkerElement(location)
-
-      const marker = new window.mapboxgl.Marker(el).setLngLat(location.coordinates).addTo(map.current!)
-
-      // Create popup
-      const popupContainer = document.createElement("div")
-      const root = createRoot(popupContainer)
-      root.render(<MapMarkerPopup location={location} />)
-      popupRoots.current[location.id] = root
-
-      const popup = new window.mapboxgl.Popup({
-        offset: 25,
-        closeButton: false,
-        closeOnClick: false,
-      }).setDOMContent(popupContainer)
-
-      marker.setPopup(popup)
-
-      // Click handler
-      el.addEventListener("click", (e) => {
-        e.stopPropagation()
-        onLocationSelect(location)
-
-        // Center map on selected location
-        map.current?.flyTo({
-          center: location.coordinates,
-          zoom: Math.max(map.current.getZoom(), 14),
-          duration: 1000,
-        })
+    const byId = new Map<string, MapboxLocation>()
+    const features: LocationFeature[] = []
+    for (const location of locations) {
+      if (!isValidCoordinate(location.coordinates)) continue
+      byId.set(location.id, location)
+      features.push({
+        type: "Feature",
+        id: location.id,
+        geometry: { type: "Point", coordinates: location.coordinates },
+        properties: { color: getStyleColor(location.specialties), locType: location.type },
       })
+    }
+    locationsByIdRef.current = byId
+    geojsonRef.current = { type: "FeatureCollection", features }
 
-      markers.current[location.id] = marker
-    })
-  }, [locations, mapLoaded, createMarkerElement, onLocationSelect])
+    if (map.current && mapLoaded) {
+      map.current.getSource(LOCATIONS_SOURCE_ID)?.setData(geojsonRef.current)
+    }
+  }, [locations, mapLoaded, getStyleColor])
 
-  // Update selected marker styling
+  // Highlight the selected point via Mapbox feature-state instead of
+  // mutating a per-marker DOM element (there are no more per-marker elements).
   useEffect(() => {
-    Object.entries(markers.current).forEach(([id, marker]) => {
-      const el = marker.getElement()
-      const bg = el.style.background || "#8B1538"
-      if (selectedLocation?.id === id) {
-        el.style.transform = "scale(1.25)"
-        el.style.zIndex = "1001"
-        el.style.boxShadow = `0 0 0 3px ${bg}, 0 4px 16px rgba(0,0,0,0.4)`
-      } else {
-        el.style.transform = "scale(1)"
-        el.style.zIndex = "1"
-        el.style.boxShadow = "0 2px 8px rgba(0,0,0,0.3)"
+    const m = map.current
+    if (!m || !mapLoaded) return
+
+    const prevId = previousSelectedIdRef.current
+    if (prevId && prevId !== selectedLocation?.id) {
+      try {
+        m.setFeatureState({ source: LOCATIONS_SOURCE_ID, id: prevId }, { selected: false })
+      } catch {
+        // feature may no longer be in the currently-loaded viewport slice
       }
-    })
-  }, [selectedLocation])
+    }
 
-  // Fit bounds to show all locations
+    if (selectedLocation) {
+      try {
+        m.setFeatureState({ source: LOCATIONS_SOURCE_ID, id: selectedLocation.id }, { selected: true })
+        previousSelectedIdRef.current = selectedLocation.id
+      } catch {
+        previousSelectedIdRef.current = null
+      }
+    } else {
+      previousSelectedIdRef.current = null
+    }
+  }, [selectedLocation, mapLoaded])
+
+  // "Show All" now zooms out to the fixed continental-US default view rather
+  // than fitting to `locations`, since locations only ever holds whatever's
+  // already in the current viewport-scoped fetch (see map-interface.tsx).
   const fitBounds = useCallback(() => {
-    if (!map.current || !mapLoaded || locations.length === 0 || !window.mapboxgl) return
-
-    const validLocations = locations.filter((location) => isValidCoordinate(location.coordinates))
-    if (validLocations.length === 0) return
-
-    const bounds = new window.mapboxgl.LngLatBounds()
-    validLocations.forEach((location) => {
-      bounds.extend(location.coordinates)
-    })
-
-    map.current.fitBounds(bounds, {
-      padding: 50,
-      maxZoom: 15,
+    if (!map.current) return
+    map.current.flyTo({
+      center: defaultMapConfig.center,
+      zoom: defaultMapConfig.zoom,
       duration: 1000,
     })
-  }, [locations, mapLoaded])
-
-  // Expose fitBounds method
-  useEffect(() => {
-    if (mapLoaded && locations.length > 0) {
-      // Auto-fit bounds when locations change
-      const timer = setTimeout(fitBounds, 500)
-      return () => clearTimeout(timer)
-    }
-  }, [locations, mapLoaded, fitBounds])
+  }, [])
 
   return (
     <div className={`relative w-full h-full ${className}`}>
