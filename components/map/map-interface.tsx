@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback, useRef } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { MapboxMap } from "./mapbox-map"
 import { MapSidebar } from "./map-sidebar"
 import { LocationDetails } from "./location-details"
@@ -30,7 +30,6 @@ export function MapInterface() {
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [loading, setLoading] = useState(true)
   const [dataError, setDataError] = useState<string | null>(null)
-  const geoFetched = useRef(false)
   const [filters, setFilters] = useState<MapFilters>({
     locationType: "all",
     styles: [],
@@ -70,40 +69,6 @@ export function MapInterface() {
 
     loadLocations()
   }, [])
-
-  // Get user location once after initial data loads, re-fetch geo-sorted results
-  useEffect(() => {
-    if (locations.length === 0 || geoFetched.current) return
-    geoFetched.current = true
-
-    const getUserLocation = async () => {
-      try {
-        const coords = await getCurrentLocation()
-        if (!coords) {
-          toast({ description: "Location not available" })
-          return
-        }
-        setUserLocation(coords)
-        setMapCenter(coords)
-        setMapZoom(12)
-
-        const [lng, lat] = coords
-        const res = await fetch(
-          `/api/map?lat=${lat}&lng=${lng}&radius=${filters.radius}&type=${filters.locationType}`
-        )
-        const json = await res.json()
-        const data: MapboxLocation[] = (json.data ?? []).map((loc: MapboxLocation) => ({
-          ...loc,
-          distance: calculateDistance(coords, loc.coordinates),
-        }))
-        setLocations(data)
-      } catch (error) {
-        console.warn("Could not get user location:", error)
-      }
-    }
-
-    getUserLocation()
-  }, [locations.length, filters.radius, filters.locationType])
 
   // Filter locations based on current filters
   useEffect(() => {
