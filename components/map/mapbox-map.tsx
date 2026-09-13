@@ -378,11 +378,19 @@ export function MapboxMap({
     }
   }, [])
 
-  // Update map style
+  // Update map style. Guarded against firing on the *first* mapLoaded change
+  // (this effect depends on mapLoaded so it can wait until the map exists,
+  // not so it re-applies the style the map was already constructed with) —
+  // setStyle() unconditionally wipes every custom source/layer, and an
+  // unnecessary call right as the map finishes loading can race the
+  // clustered source being (re-)populated with real data, leaving it
+  // recreated-but-empty with nothing left to repopulate it.
+  const appliedStyleRef = useRef(style)
   useEffect(() => {
-    if (map.current && mapLoaded && window.mapboxgl) {
-      map.current.setStyle(mapStyles[style])
-    }
+    if (!map.current || !mapLoaded || !window.mapboxgl) return
+    if (style === appliedStyleRef.current) return
+    appliedStyleRef.current = style
+    map.current.setStyle(mapStyles[style])
   }, [style, mapLoaded])
 
   // Fly to updated center/zoom without tearing down the map. Guarded against
