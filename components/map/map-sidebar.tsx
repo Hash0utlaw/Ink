@@ -56,15 +56,22 @@ export function MapSidebar({
         variant="outline"
         size="sm"
         onClick={onToggle}
-        className="absolute top-6 left-6 z-40 sidebar-toggle rounded-full w-10 h-10 p-0 bg-transparent"
+        className="absolute top-6 left-6 z-50 sidebar-toggle rounded-full w-10 h-10 p-0 bg-transparent"
       >
         {isOpen ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
       </Button>
 
+      {/*
+        Mobile: an overlay that floats on top of the map (fixed, taken out of
+        flex flow entirely) so the map is always full-width underneath it.
+        md+: rejoins the flex row as a fixed 420px side panel, unchanged from
+        the original desktop layout.
+      */}
       <div
         className={`
-        sidebar-modern flex flex-col transition-all duration-500 ease-out z-30 shadow-2xl
-        ${isOpen ? "w-[420px]" : "w-0"}
+        sidebar-modern flex flex-col transition-all duration-500 ease-out shadow-2xl
+        fixed inset-y-0 left-0 z-40 md:relative md:inset-auto md:z-30
+        ${isOpen ? "w-full max-w-[420px] md:w-[420px]" : "w-0"}
         ${isOpen ? "opacity-100" : "opacity-0 pointer-events-none"}
       `}
       >

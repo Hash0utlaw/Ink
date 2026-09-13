@@ -70,6 +70,17 @@ export function MapInterface() {
     loadLocations()
   }, [])
 
+  // On mobile the sidebar is a full-width overlay (see map-sidebar.tsx), so
+  // default it closed there — otherwise the map itself would be completely
+  // hidden behind it on first load. Desktop keeps its existing default-open
+  // side panel. A one-time check at mount, not a live media query: the user
+  // can always toggle afterward regardless of width.
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.innerWidth < 768) {
+      setSidebarOpen(false)
+    }
+  }, [])
+
   // Viewport-driven refetch, debounced on the map's moveend. Replaces the old
   // flat MAP_LIMIT-for-everything behavior: as the map pans/zooms, `locations`
   // is replaced with whatever's actually in the new bounding box (up to the

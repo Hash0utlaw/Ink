@@ -10,7 +10,7 @@ interface MapMarkerPopupProps {
 
 export function MapMarkerPopup({ location }: MapMarkerPopupProps) {
   return (
-    <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-4 min-w-[280px] max-w-[320px]">
+    <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-4 w-[85vw] max-w-[320px]">
       <div className="flex items-start gap-3">
         <img
           src={location.image || "/placeholder.svg"}
