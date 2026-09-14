@@ -2,8 +2,6 @@
 
 import { useEffect, useRef, useState, useCallback } from "react"
 import { type MapboxLocation, defaultMapConfig, mapStyles } from "@/lib/mapbox"
-import { createRoot } from "react-dom/client"
-import { MapMarkerPopup } from "./map-marker-popup"
 
 // Some scraped locations have missing/malformed coordinates. Mapbox's
 // LngLatBounds.extend() accepts them silently but throws later inside
@@ -89,9 +87,6 @@ export function MapboxMap({
   const locationsByIdRef = useRef<Map<string, MapboxLocation>>(new Map())
   const previousSelectedIdRef = useRef<string | null>(null)
   const clusterHandlersAttachedRef = useRef(false)
-  const popupRef = useRef<any>(null)
-  const popupRootRef = useRef<ReturnType<typeof createRoot> | null>(null)
-  const popupContainerRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     onMapLoadRef.current = onMapLoad
@@ -212,12 +207,30 @@ export function MapboxMap({
           "circle-color": ["get", "color"],
           "circle-radius": [
             "case",
-            ["boolean", ["feature-state", "selected"], false], 12,
-            ["==", ["get", "locType"], "shop"], 8,
-            6,
+            ["boolean", ["feature-state", "selected"], false], 14,
+            ["==", ["get", "locType"], "shop"], 10,
+            8,
           ],
           "circle-stroke-width": ["case", ["boolean", ["feature-state", "selected"], false], 3, 1.5],
           "circle-stroke-color": "#ffffff",
+        },
+      })
+
+      // Invisible, larger-radius layer purely for hit-testing. The visible
+      // dot above is deliberately small/readable; without this, its actual
+      // tap target is well under the ~44px minimum touch target, so on a
+      // real finger tap (less precise than a mouse, prone to a few px of
+      // jitter) the tap misses the geometry or reads as a micro-drag and
+      // the click handler never fires. Click/hover handlers are attached to
+      // this layer, not the visible one.
+      m.addLayer({
+        id: "unclustered-point-hitbox",
+        type: "circle",
+        source: LOCATIONS_SOURCE_ID,
+        filter: ["!", ["has", "point_count"]],
+        paint: {
+          "circle-radius": 22,
+          "circle-opacity": 0,
         },
       })
     } else {
@@ -238,35 +251,22 @@ export function MapboxMap({
         })
       })
 
-      m.on("click", "unclustered-point", (e: any) => {
+      m.on("click", "unclustered-point-hitbox", (e: any) => {
         const feature = e.features?.[0]
         if (!feature) return
         const location = locationsByIdRef.current.get(String(feature.id))
         if (!location) return
 
+        // Centering/zooming happens via the center/zoom-prop-driven flyTo
+        // effect below, triggered by onLocationSelect updating parent state
+        // — calling flyTo here too would race that effect's own animation.
         onLocationSelectRef.current(location)
-        m.flyTo({
-          center: location.coordinates,
-          zoom: Math.max(m.getZoom(), 14),
-          duration: 1000,
-        })
-
-        if (!popupContainerRef.current) {
-          popupContainerRef.current = document.createElement("div")
-          popupRootRef.current = createRoot(popupContainerRef.current)
-        }
-        popupRootRef.current!.render(<MapMarkerPopup location={location} />)
-
-        if (!popupRef.current) {
-          popupRef.current = new window.mapboxgl.Popup({ offset: 15, closeButton: true, closeOnClick: false })
-        }
-        popupRef.current.setLngLat(location.coordinates).setDOMContent(popupContainerRef.current).addTo(m)
       })
 
       m.on("mouseenter", "clusters", () => { m.getCanvas().style.cursor = "pointer" })
       m.on("mouseleave", "clusters", () => { m.getCanvas().style.cursor = "" })
-      m.on("mouseenter", "unclustered-point", () => { m.getCanvas().style.cursor = "pointer" })
-      m.on("mouseleave", "unclustered-point", () => { m.getCanvas().style.cursor = "" })
+      m.on("mouseenter", "unclustered-point-hitbox", () => { m.getCanvas().style.cursor = "pointer" })
+      m.on("mouseleave", "unclustered-point-hitbox", () => { m.getCanvas().style.cursor = "" })
     }
   }, [])
 
@@ -369,14 +369,6 @@ export function MapboxMap({
     setLoadAttempt((n) => n + 1)
     loadMapbox()
   }, [loadMapbox])
-
-  // Unmount the shared popup's React root when the map itself unmounts
-  useEffect(() => {
-    return () => {
-      popupRootRef.current?.unmount()
-      popupRootRef.current = null
-    }
-  }, [])
 
   // Update map style. Guarded against firing on the *first* mapLoaded change
   // (this effect depends on mapLoaded so it can wait until the map exists,
