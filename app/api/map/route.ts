@@ -8,7 +8,28 @@ import type { Artist } from "@/types/artist"
 
 export const dynamic = "force-dynamic"
 
+// Nationwide fallback (no viewport known yet — first paint before the map's
+// first moveend) is still flat-capped, top-rated-first.
 const MAP_LIMIT = 500
+// A bbox query is inherently scoped to what's on screen, so this is a
+// backstop for an extremely zoomed-out view over a dense metro, not the
+// primary limiting mechanism the way MAP_LIMIT is above.
+const BBOX_LIMIT = 3000
+
+interface Bounds {
+  west: number
+  south: number
+  east: number
+  north: number
+}
+
+function parseBbox(raw: string | null): Bounds | null {
+  if (!raw) return null
+  const parts = raw.split(",").map(Number)
+  if (parts.length !== 4 || parts.some((n) => !Number.isFinite(n))) return null
+  const [west, south, east, north] = parts
+  return { west, south, east, north }
+}
 
 function shopToMapLocation(row: Record<string, unknown>, distanceMi?: number): MapboxLocation | null {
   const lat = Number(row.latitude ?? 0)
@@ -54,11 +75,39 @@ function artistToMapLocation(artist: Artist & { distance_mi?: number }): MapboxL
   }
 }
 
+// Raw-row mapper for the two directly-queried (non-RPC) artist paths below —
+// both the unscoped nationwide fallback and the bbox path join straight
+// against `shops` for coordinates rather than going through
+// getArtistsNearMe/rowToArtist, so they share this instead of the
+// Artist-shaped mapper above.
+function artistRowToMapLocation(row: Record<string, unknown>): MapboxLocation | null {
+  const shopJoin = Array.isArray(row.shops) ? row.shops[0] : (row.shops as Record<string, unknown> | null)
+  const lat = Number(shopJoin?.latitude ?? 0)
+  const lng = Number(shopJoin?.longitude ?? 0)
+  if (!lat || !lng) return null
+  return {
+    id: `artist-${row.id}`,
+    name: String(row.display_name ?? ""),
+    type: "artist",
+    coordinates: [lng, lat],
+    address: [String(row.city ?? ""), String(row.state ?? "")].filter(Boolean).join(", "),
+    rating: Number(row.rating ?? 0),
+    reviewCount: Number(row.review_count ?? 0),
+    image: String(row.avatar_url ?? "") || undefined,
+    isOpen: Boolean(row.is_available ?? false),
+    specialties: Array.isArray(row.specialties) ? (row.specialties as string[]) : [],
+    priceRange: "medium",
+    description: String(row.bio ?? "") || undefined,
+    website: String(row.website_url ?? "") || undefined,
+    instagram: String(row.instagram_handle ?? "") || undefined,
+  }
+}
+
+const ARTIST_JOIN_COLUMNS =
+  "id, display_name, city, state, rating, review_count, avatar_url, specialties, is_available, bio, instagram_handle, website_url, shops!inner(latitude, longitude, name)"
+
 // Fetches shops that have valid coordinates directly from Supabase
-async function getShopsWithCoords(
-  rating: number,
-  limit: number
-): Promise<Record<string, unknown>[]> {
+async function getShopsWithCoords(rating: number, limit: number): Promise<Record<string, unknown>[]> {
   const supabase = createClient()
   let q = supabase
     .from("shops")
@@ -75,6 +124,58 @@ async function getShopsWithCoords(
   return (data ?? []) as Record<string, unknown>[]
 }
 
+async function getShopsInBounds(
+  bounds: Bounds,
+  rating: number,
+  limit: number
+): Promise<Record<string, unknown>[]> {
+  const supabase = createClient()
+  let q = supabase
+    .from("shops")
+    .select("id, name, address, city, state, latitude, longitude, rating, review_count, logo_url, cover_image_url, accepts_walk_ins, hours, description")
+    .not("latitude", "is", null)
+    .not("longitude", "is", null)
+    .neq("latitude", 0)
+    .neq("longitude", 0)
+    .gte("latitude", bounds.south)
+    .lte("latitude", bounds.north)
+    .gte("longitude", bounds.west)
+    .lte("longitude", bounds.east)
+
+  if (rating > 0) q = q.gte("rating", rating)
+
+  const { data, error } = await q.order("rating", { ascending: false }).limit(limit)
+  if (error) console.error("[api/map] shops bbox query error:", error.message)
+  return (data ?? []) as Record<string, unknown>[]
+}
+
+async function getArtistsInBounds(
+  bounds: Bounds,
+  styles: string[],
+  rating: number,
+  limit: number
+): Promise<Record<string, unknown>[]> {
+  const supabase = createClient()
+  let q = supabase
+    .from("artists")
+    .select(ARTIST_JOIN_COLUMNS)
+    .not("shops.latitude", "is", null)
+    .not("shops.longitude", "is", null)
+    .neq("shops.latitude", 0)
+    .neq("shops.longitude", 0)
+    .gte("shops.latitude", bounds.south)
+    .lte("shops.latitude", bounds.north)
+    .gte("shops.longitude", bounds.west)
+    .lte("shops.longitude", bounds.east)
+
+  if (styles.length > 0) q = q.overlaps("specialties", styles)
+  if (rating > 0) q = q.gte("rating", rating)
+
+  const { data, error } = await q.order("rating", { ascending: false }).limit(limit)
+  if (error) console.error("[api/map] artists bbox query error:", error.message)
+  return (data ?? []) as Record<string, unknown>[]
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl
 
@@ -84,6 +185,7 @@ export async function GET(request: NextRequest) {
   const type = searchParams.get("type") ?? "all"
   const stylesParam = searchParams.get("styles")
   const ratingParam = searchParams.get("rating")
+  const bounds = parseBbox(searchParams.get("bbox"))
 
   const styles = stylesParam ? stylesParam.split(",").filter(Boolean) : []
   const rating = ratingParam ? Number(ratingParam) : 0
@@ -94,7 +196,24 @@ export async function GET(request: NextRequest) {
 
   const locations: MapboxLocation[] = []
 
-  if (hasGeo) {
+  if (bounds) {
+    // Viewport-driven query — the map's own moveend handler supplies this,
+    // replacing the old flat MAP_LIMIT-for-everything behavior.
+    if (type === "all" || type === "shops") {
+      const rows = await getShopsInBounds(bounds, rating, BBOX_LIMIT)
+      rows.forEach((row) => {
+        const loc = shopToMapLocation(row)
+        if (loc) locations.push(loc)
+      })
+    }
+    if (type === "all" || type === "artists") {
+      const rows = await getArtistsInBounds(bounds, styles, rating, BBOX_LIMIT)
+      rows.forEach((row) => {
+        const loc = artistRowToMapLocation(row)
+        if (loc) locations.push(loc)
+      })
+    }
+  } else if (hasGeo) {
     if (type === "all" || type === "shops") {
       const { data } = await getShopsNearMe(lat, lng, radius, { rating: rating || undefined })
       data.forEach((s) => {
@@ -110,6 +229,8 @@ export async function GET(request: NextRequest) {
       })
     }
   } else {
+    // No viewport and no geo — nationwide fallback for first paint, before
+    // the map has told us what's actually visible.
     if (type === "all" || type === "shops") {
       const rows = await getShopsWithCoords(rating, MAP_LIMIT)
       rows.forEach((row) => {
@@ -118,11 +239,10 @@ export async function GET(request: NextRequest) {
       })
     }
     if (type === "all" || type === "artists") {
-      // Artists don't have lat/lng — join with shops to get coordinates
       const supabase = createClient()
       let aq = supabase
         .from("artists")
-        .select("id, display_name, city, state, rating, review_count, avatar_url, specialties, is_available, bio, instagram_handle, website_url, shops!inner(latitude, longitude, name)")
+        .select(ARTIST_JOIN_COLUMNS)
         .not("shops.latitude", "is", null)
         .not("shops.longitude", "is", null)
         .neq("shops.latitude", 0)
@@ -134,27 +254,8 @@ export async function GET(request: NextRequest) {
       const { data: aRows, error: aErr } = await aq.order("rating", { ascending: false }).limit(MAP_LIMIT)
       if (aErr) console.error("[api/map] artists query error:", aErr.message)
       ;(aRows ?? []).forEach((row: Record<string, unknown>) => {
-        const shopJoin = Array.isArray(row.shops) ? row.shops[0] : row.shops as Record<string, unknown> | null
-        const lat = Number(shopJoin?.latitude ?? 0)
-        const lng = Number(shopJoin?.longitude ?? 0)
-        if (!lat || !lng) return
-        const loc: MapboxLocation = {
-          id: `artist-${row.id}`,
-          name: String(row.display_name ?? ""),
-          type: "artist",
-          coordinates: [lng, lat],
-          address: [String(row.city ?? ""), String(row.state ?? "")].filter(Boolean).join(", "),
-          rating: Number(row.rating ?? 0),
-          reviewCount: Number(row.review_count ?? 0),
-          image: String(row.avatar_url ?? "") || undefined,
-          isOpen: Boolean(row.is_available ?? false),
-          specialties: Array.isArray(row.specialties) ? (row.specialties as string[]) : [],
-          priceRange: "medium",
-          description: String(row.bio ?? "") || undefined,
-          website: String(row.website_url ?? "") || undefined,
-          instagram: String(row.instagram_handle ?? "") || undefined,
-        }
-        locations.push(loc)
+        const loc = artistRowToMapLocation(row)
+        if (loc) locations.push(loc)
       })
     }
   }

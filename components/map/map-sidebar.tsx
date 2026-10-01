@@ -22,6 +22,7 @@ interface MapSidebarProps {
   onSearch: (query: string) => void
   onCurrentLocation: () => void
   loading: boolean
+  dataError?: string | null
 }
 
 export function MapSidebar({
@@ -35,6 +36,7 @@ export function MapSidebar({
   onSearch,
   onCurrentLocation,
   loading,
+  dataError,
 }: MapSidebarProps) {
   const [searchQuery, setSearchQuery] = useState("")
   const [showFilters, setShowFilters] = useState(false)
@@ -54,15 +56,22 @@ export function MapSidebar({
         variant="outline"
         size="sm"
         onClick={onToggle}
-        className="absolute top-6 left-6 z-40 sidebar-toggle rounded-full w-10 h-10 p-0 bg-transparent"
+        className="absolute top-6 left-6 z-50 sidebar-toggle rounded-full w-10 h-10 p-0 bg-transparent"
       >
         {isOpen ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
       </Button>
 
+      {/*
+        Mobile: an overlay that floats on top of the map (fixed, taken out of
+        flex flow entirely) so the map is always full-width underneath it.
+        md+: rejoins the flex row as a fixed 420px side panel, unchanged from
+        the original desktop layout.
+      */}
       <div
         className={`
-        sidebar-modern flex flex-col transition-all duration-500 ease-out z-30 shadow-2xl
-        ${isOpen ? "w-[420px]" : "w-0"}
+        sidebar-modern flex flex-col transition-all duration-500 ease-out shadow-2xl
+        fixed inset-y-0 left-0 z-40 md:relative md:inset-auto md:z-30
+        ${isOpen ? "w-full max-w-[420px] md:w-[420px]" : "w-0"}
         ${isOpen ? "opacity-100" : "opacity-0 pointer-events-none"}
       `}
       >
@@ -146,6 +155,7 @@ export function MapSidebar({
                 </Button>
               )}
             </div>
+            {dataError && <p className="text-sm text-muted-foreground mt-2">{dataError}</p>}
           </div>
 
           <ScrollArea className="flex-1 scrollbar-ink">
@@ -164,15 +174,17 @@ export function MapSidebar({
                   </div>
                 ))
               ) : locations.length === 0 ? (
-                <div className="text-center py-16">
-                  <div className="text-muted-foreground mb-6">
-                    <MapPin className="w-16 h-16 mx-auto opacity-40" />
+                !dataError && (
+                  <div className="text-center py-16">
+                    <div className="text-muted-foreground mb-6">
+                      <MapPin className="w-16 h-16 mx-auto opacity-40" />
+                    </div>
+                    <h3 className="text-xl font-semibold text-foreground mb-3">No shops found in this area</h3>
+                    <p className="text-muted-foreground leading-relaxed">
+                      Try adjusting your filters or search terms to discover more artists and shops
+                    </p>
                   </div>
-                  <h3 className="text-xl font-semibold text-foreground mb-3">No locations found</h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    Try adjusting your filters or search terms to discover more artists and shops
-                  </p>
-                </div>
+                )
               ) : (
                 locations.map((location) => (
                   <div

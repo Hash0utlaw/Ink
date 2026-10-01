@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback, useRef } from "react"
-import { MapboxMap } from "./mapbox-map"
+import { MapboxMap, type MapBounds } from "./mapbox-map"
 import { MapSidebar } from "./map-sidebar"
 import { LocationDetails } from "./location-details"
 import type { MapboxLocation } from "@/lib/mapbox"
@@ -29,7 +29,7 @@ export function MapInterface() {
   const [mapStyle, setMapStyle] = useState("dark")
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [loading, setLoading] = useState(true)
-  const geoFetched = useRef(false)
+  const [dataError, setDataError] = useState<string | null>(null)
   const [filters, setFilters] = useState<MapFilters>({
     locationType: "all",
     styles: [],
@@ -45,13 +45,21 @@ export function MapInterface() {
     const loadLocations = async () => {
       try {
         setLoading(true)
+        setDataError(null)
         const res = await fetch("/api/map?type=all")
+        if (!res.ok) {
+          setDataError(`Couldn't load shops (error ${res.status})`)
+          setLocations([])
+          setFilteredLocations([])
+          return
+        }
         const json = await res.json()
         const data: MapboxLocation[] = json.data ?? []
         setLocations(data)
         setFilteredLocations(data)
       } catch (error) {
         console.error("Failed to load locations:", error)
+        setDataError("Couldn't load shops — check your connection")
         setLocations([])
         setFilteredLocations([])
       } finally {
@@ -62,39 +70,52 @@ export function MapInterface() {
     loadLocations()
   }, [])
 
-  // Get user location once after initial data loads, re-fetch geo-sorted results
+  // On mobile the sidebar is a full-width overlay (see map-sidebar.tsx), so
+  // default it closed there — otherwise the map itself would be completely
+  // hidden behind it on first load. Desktop keeps its existing default-open
+  // side panel. A one-time check at mount, not a live media query: the user
+  // can always toggle afterward regardless of width.
   useEffect(() => {
-    if (locations.length === 0 || geoFetched.current) return
-    geoFetched.current = true
+    if (typeof window !== "undefined" && window.innerWidth < 768) {
+      setSidebarOpen(false)
+    }
+  }, [])
 
-    const getUserLocation = async () => {
+  // Viewport-driven refetch, debounced on the map's moveend. Replaces the old
+  // flat MAP_LIMIT-for-everything behavior: as the map pans/zooms, `locations`
+  // is replaced with whatever's actually in the new bounding box (up to the
+  // API's own backstop cap), rather than a fixed nationwide top-500 cut. This
+  // deliberately does NOT toggle `loading` — that's reserved for the initial
+  // load, since flashing the sidebar's skeleton on every pan/zoom would be
+  // jarring for what's meant to be a quiet background refresh.
+  const moveEndTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const handleMoveEnd = useCallback((bounds: MapBounds) => {
+    if (moveEndTimerRef.current) clearTimeout(moveEndTimerRef.current)
+    moveEndTimerRef.current = setTimeout(async () => {
       try {
-        const coords = await getCurrentLocation()
-        if (!coords) {
-          toast({ description: "Location not available" })
+        const { west, south, east, north } = bounds
+        const res = await fetch(`/api/map?type=all&bbox=${west},${south},${east},${north}`)
+        if (!res.ok) {
+          setDataError(`Couldn't load shops (error ${res.status})`)
           return
         }
-        setUserLocation(coords)
-        setMapCenter(coords)
-        setMapZoom(12)
-
-        const [lng, lat] = coords
-        const res = await fetch(
-          `/api/map?lat=${lat}&lng=${lng}&radius=${filters.radius}&type=${filters.locationType}`
-        )
         const json = await res.json()
-        const data: MapboxLocation[] = (json.data ?? []).map((loc: MapboxLocation) => ({
-          ...loc,
-          distance: calculateDistance(coords, loc.coordinates),
-        }))
+        const data: MapboxLocation[] = json.data ?? []
+        setDataError(null)
         setLocations(data)
       } catch (error) {
-        console.warn("Could not get user location:", error)
+        console.error("Failed to load locations for viewport:", error)
+        setDataError("Couldn't load shops — check your connection")
       }
-    }
+    }, 300)
+  }, [])
 
-    getUserLocation()
-  }, [locations.length, filters.radius, filters.locationType])
+  useEffect(() => {
+    return () => {
+      if (moveEndTimerRef.current) clearTimeout(moveEndTimerRef.current)
+    }
+  }, [])
 
   // Filter locations based on current filters
   useEffect(() => {
@@ -218,6 +239,7 @@ export function MapInterface() {
         onSearch={handleSearch}
         onCurrentLocation={handleCurrentLocation}
         loading={loading}
+        dataError={dataError}
       />
 
       {/* Map */}
@@ -230,6 +252,7 @@ export function MapInterface() {
           center={mapCenter}
           zoom={mapZoom}
           style={mapStyle as keyof typeof import("@/lib/mapbox").mapStyles}
+          onMoveEnd={handleMoveEnd}
           className="w-full h-full"
         />
 
@@ -238,7 +261,7 @@ export function MapInterface() {
           <select
             value={mapStyle}
             onChange={(e) => handleMapStyleChange(e.target.value)}
-            className="px-3 py-2 bg-white border border-gray-300 rounded-lg shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-burgundy-500 focus:border-burgundy-500"
+            className="px-3 py-2 bg-card border border-border rounded-lg shadow-sm text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"
           >
             <option value="streets">Streets</option>
             <option value="satellite">Satellite</option>
