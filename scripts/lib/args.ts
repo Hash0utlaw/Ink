@@ -12,6 +12,10 @@ export interface ScriptArgs {
   input: string | null
   state: string | null
   limit: number | null
+  // Open-data scripts (overture/fetch.ts, match-open-data.ts)
+  withFsq: boolean
+  refresh: boolean
+  minConfidence: number | null
 }
 
 // Accepts both "--flag value" and "--flag=value" — a bare argv.indexOf(flag)
@@ -32,6 +36,8 @@ export function parseScriptArgs(argv: string[] = process.argv.slice(2)): ScriptA
   const limitRaw = getArg("--limit", argv)
   const limit = limitRaw ? parseInt(limitRaw, 10) : null
   const state = getArg("--state", argv)
+  const minConfidenceRaw = getArg("--min-confidence", argv)
+  const minConfidence = minConfidenceRaw ? parseFloat(minConfidenceRaw) : null
 
   return {
     dryRun: argv.includes("--dry-run"),
@@ -40,5 +46,8 @@ export function parseScriptArgs(argv: string[] = process.argv.slice(2)): ScriptA
     input: getArg("--input", argv),
     state: state ? state.trim().toUpperCase() : null,
     limit: limit !== null && !isNaN(limit) ? limit : null,
+    withFsq: argv.includes("--with-fsq"),
+    refresh: argv.includes("--refresh"),
+    minConfidence: minConfidence !== null && !isNaN(minConfidence) ? minConfidence : null,
   }
 }

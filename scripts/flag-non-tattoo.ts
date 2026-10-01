@@ -9,13 +9,7 @@ config({ path: ".env.local" })
 
 import { getSupabaseAdmin } from "./lib/supabase-admin"
 import { fetchAll, writeCsv } from "./lib/cleanup-utils"
-
-// Flagged even when the name says "tattoo" (e.g. "Tattoo Supply Co").
-const ALWAYS = /\bsupply\b|\bsupplies\b/i
-// Flagged only when the name doesn't contain "tattoo". Short words use \b so
-// "Sacred Space Tattoo" doesn't match \bspa\b and "Brownstone" doesn't match \bbrows?\b.
-const UNLESS_TATTOO =
-  /microblad|permanent makeup|\bbrows?\b|\blash(es)?\b|cosmetic|\bsalon\b|\bnails?\b|\bvape\b|\bsmoke\b|\blaser\b|removal|\bbarber|med ?spa|\bspa\b/i
+import { nonTattooTerm } from "./lib/non-tattoo"
 
 async function main() {
   console.log("Report only — nothing is written to the database.\n")
@@ -27,9 +21,8 @@ async function main() {
   const byTerm: Record<string, number> = {}
   for (const s of shops) {
     const name = String(s.name ?? "")
-    const m = name.match(ALWAYS) ?? (/tattoo/i.test(name) ? null : name.match(UNLESS_TATTOO))
-    if (!m) continue
-    const term = m[0].toLowerCase()
+    const term = nonTattooTerm(name)
+    if (!term) continue
     byTerm[term] = (byTerm[term] ?? 0) + 1
     rows.push({ id: s.id, name, city: s.city, state: s.state, website: s.website, matched_term: term })
   }

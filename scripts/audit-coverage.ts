@@ -1,5 +1,5 @@
 // audit-coverage.ts
-// Read-only coverage audit for the `shops` table. Makes no writes to
+// Read-only coverage audit for ACTIVE rows (is_active = true) of the `shops` table. Makes no writes to
 // Supabase — every call below is a `.select()`. Reports shop count and
 // USABLE-definition pass rate per state, top-50-metro coverage, duplicate
 // (name+address) detection, and field completeness. Writes
@@ -32,11 +32,11 @@ const REPORT_JSON_PATH = path.join(DATA_DIR, "coverage-report.json")
 const REPORT_MD_PATH = path.join(DATA_DIR, "coverage-report.md")
 
 const SHOP_COLUMNS =
-  "id, name, slug, address, city, state, zip, phone, website, latitude, longitude, place_id, rating, review_count, hours, description, cover_image_url, created_at, updated_at"
+  "id, name, slug, address, city, state, zip, phone, website, latitude, longitude, place_id, rating, review_count, hours, description, cover_image_url, created_at, updated_at, is_active"
 
 async function main() {
   console.log("Fetching shops (read-only)...")
-  const shops = await fetchAllRows<ShopRow>(supabase, "shops", SHOP_COLUMNS)
+  const shops = await fetchAllRows<ShopRow>(supabase, "shops", SHOP_COLUMNS, 1000, (q) => q.eq("is_active", true))
   console.log(`  ${shops.length.toLocaleString()} rows fetched.\n`)
 
   console.log("Computing report...")
