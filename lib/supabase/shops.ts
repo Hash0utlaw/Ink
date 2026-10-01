@@ -55,11 +55,11 @@ export async function getShops(
 ): Promise<{ data: Shop[]; count: number; error: string | null }> {
   try {
     const supabase = createClient()
-    let query = supabase.from("shops").select("*", { count: "exact", head: false })
+    let query = supabase.from("shops").select("*", { count: "exact", head: false }).eq("is_active", true)
 
-    if (filters.styles && filters.styles.length > 0) {
-      query = query.contains("specialties", filters.styles)
-    }
+    // TODO: filters.styles is intentionally a no-op. shops has no specialties
+    // column, so filtering on it errors the whole query. Wire this up once
+    // shop styles have a real home (likely the shop_styles table).
     if (typeof filters.rating === "number" && filters.rating > 0) {
       query = query.gte("rating", filters.rating)
     }
@@ -132,7 +132,7 @@ export async function getShopsNearMe(
 export async function getShopById(id: string): Promise<Shop | null> {
   try {
     const supabase = createClient()
-    const { data, error } = await supabase.from("shops").select("*").eq("id", id).single()
+    const { data, error } = await supabase.from("shops").select("*").eq("id", id).eq("is_active", true).single()
     if (error || !data) return null
     return rowToShop(data as Record<string, unknown>)
   } catch {
@@ -144,7 +144,7 @@ export async function getShopsByIds(ids: string[]): Promise<Shop[]> {
   if (ids.length === 0) return []
   try {
     const supabase = createClient()
-    const { data, error } = await supabase.from("shops").select("*").in("id", ids)
+    const { data, error } = await supabase.from("shops").select("*").in("id", ids).eq("is_active", true)
     if (error || !data) return []
     return data.map((row: Record<string, unknown>) => rowToShop(row))
   } catch {
@@ -156,7 +156,7 @@ export async function getShopsByIds(ids: string[]): Promise<Shop[]> {
 export async function getShopBySlug(slug: string): Promise<Shop | null> {
   try {
     const supabase = createClient()
-    const { data, error } = await supabase.from("shops").select("*").eq("slug", slug).single()
+    const { data, error } = await supabase.from("shops").select("*").eq("slug", slug).eq("is_active", true).single()
     if (error || !data) return null
     return rowToShop(data as Record<string, unknown>)
   } catch {
@@ -183,6 +183,7 @@ export async function getShopArtists(shopId: string): Promise<Artist[]> {
         .from("artists")
         .select("*")
         .in("id", artistIds)
+        .eq("is_active", true)
 
       if (!artistsError && artists && artists.length > 0) {
         return artists.map((row: unknown) => rowToArtist(row as Record<string, unknown>))

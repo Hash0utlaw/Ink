@@ -5,6 +5,9 @@
 
 export interface ScriptArgs {
   dryRun: boolean
+  // True only when --apply is passed. Data-cleanup scripts are dry-run by
+  // default and write only with this flag (--dry-run is unrelated to it).
+  apply: boolean
   validated: boolean
   input: string | null
   state: string | null
@@ -32,6 +35,7 @@ export function parseScriptArgs(argv: string[] = process.argv.slice(2)): ScriptA
 
   return {
     dryRun: argv.includes("--dry-run"),
+    apply: argv.includes("--apply"),
     validated: argv.includes("--validated"),
     input: getArg("--input", argv),
     state: state ? state.trim().toUpperCase() : null,

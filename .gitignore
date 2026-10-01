@@ -26,3 +26,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+data/us_artists_import.csv
+data/*.csv
+data/undo/

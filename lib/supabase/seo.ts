@@ -10,6 +10,7 @@ export async function getStatesWithShopCounts(): Promise<{ state: string; count:
       ? await supabase
           .from("shops")
           .select("state")
+          .eq("is_active", true)
           .not("state", "is", null)
           .neq("state", "")
       : { data: null, error: new Error("no rpc") }
@@ -35,6 +36,7 @@ export async function getAllCityStatePairs(): Promise<{ city: string; state: str
     const { data, error } = await supabase
       .from("shops")
       .select("city, state")
+      .eq("is_active", true)
       .not("city", "is", null)
       .not("state", "is", null)
       .neq("city", "")
@@ -66,6 +68,7 @@ export async function getCitiesForState(
     const { data, error } = await supabase
       .from("shops")
       .select("city")
+      .eq("is_active", true)
       .eq("state", stateAbbr.toUpperCase())
       .not("city", "is", null)
       .neq("city", "")
@@ -91,6 +94,7 @@ export async function getTopCities(limit = 50): Promise<{ city: string; state: s
     const { data, error } = await supabase
       .from("shops")
       .select("city, state")
+      .eq("is_active", true)
       .not("city", "is", null)
       .not("state", "is", null)
       .neq("city", "")
@@ -129,6 +133,7 @@ export async function getShopsForCity(
     const { data, count, error } = await supabase
       .from("shops")
       .select("*", { count: "exact" })
+      .eq("is_active", true)
       .ilike("city", cityName)
       .eq("state", stateAbbr)
       .order("rating", { ascending: false })
@@ -174,7 +179,7 @@ function rowToShopMinimal(row: Record<string, unknown>): Shop {
 export async function getAllShopIds(): Promise<string[]> {
   try {
     const supabase = createClient()
-    const { data, error } = await supabase.from("shops").select("id")
+    const { data, error } = await supabase.from("shops").select("id").eq("is_active", true)
     if (error || !data) return []
     return (data as { id: string }[]).map((r) => r.id)
   } catch {

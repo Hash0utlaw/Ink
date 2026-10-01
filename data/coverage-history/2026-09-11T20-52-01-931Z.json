@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-10-01T01:37:41.224Z",
+  "generatedAt": "2026-09-11T20:52:01.931Z",
   "totals": {
     "totalShops": 25594,
-    "usableShops": 23907,
-    "usablePct": 93.4,
+    "usableShops": 3876,
+    "usablePct": 15.1,
     "distinctStateCodes": 53,
     "nonStandardStateCodeCount": 2
   },
@@ -12,308 +12,308 @@
       {
         "state": "CA",
         "total": 3205,
-        "usable": 3099,
-        "usablePct": 96.7
+        "usable": 858,
+        "usablePct": 26.8
       },
       {
         "state": "FL",
-        "total": 3015,
-        "usable": 2859,
-        "usablePct": 94.8
+        "total": 3014,
+        "usable": 831,
+        "usablePct": 27.6
       },
       {
         "state": "TX",
         "total": 2667,
-        "usable": 2499,
-        "usablePct": 93.7
+        "usable": 1048,
+        "usablePct": 39.3
       },
       {
         "state": "NY",
         "total": 1291,
-        "usable": 1227,
-        "usablePct": 95
+        "usable": 62,
+        "usablePct": 4.8
       },
       {
         "state": "NC",
         "total": 1073,
-        "usable": 1042,
-        "usablePct": 97.1
+        "usable": 433,
+        "usablePct": 40.4
       },
       {
         "state": "PA",
-        "total": 869,
-        "usable": 829,
-        "usablePct": 95.4
+        "total": 868,
+        "usable": 24,
+        "usablePct": 2.8
       },
       {
         "state": "OH",
         "total": 769,
-        "usable": 739,
-        "usablePct": 96.1
+        "usable": 12,
+        "usablePct": 1.6
       },
       {
         "state": "NV",
         "total": 738,
-        "usable": 696,
-        "usablePct": 94.3
+        "usable": 175,
+        "usablePct": 23.7
       },
       {
         "state": "WA",
         "total": 668,
-        "usable": 647,
-        "usablePct": 96.9
+        "usable": 9,
+        "usablePct": 1.3
       },
       {
         "state": "IL",
         "total": 615,
-        "usable": 588,
-        "usablePct": 95.6
+        "usable": 21,
+        "usablePct": 3.4
       },
       {
         "state": "CO",
         "total": 596,
-        "usable": 565,
-        "usablePct": 94.8
+        "usable": 13,
+        "usablePct": 2.2
       },
       {
         "state": "AZ",
         "total": 555,
-        "usable": 537,
-        "usablePct": 96.8
+        "usable": 5,
+        "usablePct": 0.9
       },
       {
         "state": "MI",
         "total": 546,
-        "usable": 518,
-        "usablePct": 94.9
+        "usable": 4,
+        "usablePct": 0.7
       },
       {
         "state": "GA",
         "total": 524,
-        "usable": 479,
-        "usablePct": 91.4
+        "usable": 19,
+        "usablePct": 3.6
       },
       {
         "state": "OR",
         "total": 504,
-        "usable": 491,
-        "usablePct": 97.4
+        "usable": 3,
+        "usablePct": 0.6
       },
       {
         "state": "MO",
         "total": 457,
-        "usable": 424,
-        "usablePct": 92.8
+        "usable": 6,
+        "usablePct": 1.3
       },
       {
         "state": "TN",
-        "total": 444,
-        "usable": 412,
-        "usablePct": 92.8
+        "total": 443,
+        "usable": 14,
+        "usablePct": 3.2
       },
       {
         "state": "IN",
         "total": 440,
-        "usable": 423,
-        "usablePct": 96.1
+        "usable": 5,
+        "usablePct": 1.1
       },
       {
         "state": "WI",
         "total": 435,
-        "usable": 421,
-        "usablePct": 96.8
+        "usable": 3,
+        "usablePct": 0.7
       },
       {
         "state": "LA",
         "total": 412,
-        "usable": 399,
-        "usablePct": 96.8
+        "usable": 207,
+        "usablePct": 50.2
       },
       {
         "state": "MD",
         "total": 384,
-        "usable": 360,
-        "usablePct": 93.8
+        "usable": 25,
+        "usablePct": 6.5
       },
       {
         "state": "NJ",
         "total": 380,
-        "usable": 328,
-        "usablePct": 86.3
+        "usable": 13,
+        "usablePct": 3.4
       },
       {
         "state": "VA",
         "total": 375,
-        "usable": 351,
-        "usablePct": 93.6
+        "usable": 27,
+        "usablePct": 7.2
       },
       {
         "state": "MA",
         "total": 352,
-        "usable": 342,
-        "usablePct": 97.2
+        "usable": 5,
+        "usablePct": 1.4
       },
       {
         "state": "KY",
         "total": 304,
-        "usable": 276,
-        "usablePct": 90.8
+        "usable": 5,
+        "usablePct": 1.6
       },
       {
         "state": "MN",
         "total": 290,
-        "usable": 281,
-        "usablePct": 96.9
+        "usable": 3,
+        "usablePct": 1
       },
       {
         "state": "CT",
         "total": 247,
-        "usable": 236,
-        "usablePct": 95.5
+        "usable": 7,
+        "usablePct": 2.8
       },
       {
         "state": "UT",
-        "total": 238,
-        "usable": 227,
-        "usablePct": 95.4
+        "total": 237,
+        "usable": 1,
+        "usablePct": 0.4
       },
       {
         "state": "IA",
         "total": 228,
-        "usable": 220,
-        "usablePct": 96.5
+        "usable": 0,
+        "usablePct": 0
       },
       {
         "state": "AL",
         "total": 222,
-        "usable": 198,
-        "usablePct": 89.2
+        "usable": 5,
+        "usablePct": 2.3
       },
       {
         "state": "OK",
         "total": 204,
-        "usable": 193,
-        "usablePct": 94.6
+        "usable": 2,
+        "usablePct": 1
       },
       {
         "state": "HI",
         "total": 179,
-        "usable": 174,
-        "usablePct": 97.2
+        "usable": 1,
+        "usablePct": 0.6
       },
       {
         "state": "AR",
         "total": 166,
-        "usable": 160,
-        "usablePct": 96.4
+        "usable": 4,
+        "usablePct": 2.4
       },
       {
         "state": "ID",
         "total": 156,
-        "usable": 152,
-        "usablePct": 97.4
+        "usable": 0,
+        "usablePct": 0
       },
       {
         "state": "SC",
         "total": 154,
-        "usable": 143,
-        "usablePct": 92.9
+        "usable": 1,
+        "usablePct": 0.6
       },
       {
         "state": "NE",
         "total": 148,
-        "usable": 141,
-        "usablePct": 95.3
+        "usable": 0,
+        "usablePct": 0
       },
       {
         "state": "NM",
         "total": 145,
-        "usable": 140,
-        "usablePct": 96.6
+        "usable": 0,
+        "usablePct": 0
       },
       {
         "state": "NH",
         "total": 135,
-        "usable": 121,
-        "usablePct": 89.6
+        "usable": 0,
+        "usablePct": 0
       },
       {
         "state": "WV",
         "total": 125,
-        "usable": 99,
-        "usablePct": 79.2
+        "usable": 0,
+        "usablePct": 0
       },
       {
         "state": "RI",
         "total": 109,
-        "usable": 104,
-        "usablePct": 95.4
+        "usable": 1,
+        "usablePct": 0.9
       },
       {
         "state": "ME",
         "total": 107,
-        "usable": 104,
-        "usablePct": 97.2
+        "usable": 0,
+        "usablePct": 0
       },
       {
         "state": "MS",
         "total": 91,
-        "usable": 81,
-        "usablePct": 89
+        "usable": 0,
+        "usablePct": 0
       },
       {
         "state": "MT",
         "total": 89,
-        "usable": 81,
-        "usablePct": 91
+        "usable": 0,
+        "usablePct": 0
       },
       {
         "state": "KS",
         "total": 85,
-        "usable": 81,
-        "usablePct": 95.3
+        "usable": 0,
+        "usablePct": 0
       },
       {
         "state": "AK",
         "total": 79,
-        "usable": 76,
-        "usablePct": 96.2
+        "usable": 0,
+        "usablePct": 0
       },
       {
         "state": "DE",
         "total": 75,
-        "usable": 68,
-        "usablePct": 90.7
+        "usable": 0,
+        "usablePct": 0
       },
       {
         "state": "SD",
         "total": 70,
-        "usable": 67,
-        "usablePct": 95.7
+        "usable": 0,
+        "usablePct": 0
       },
       {
         "state": "VT",
         "total": 62,
-        "usable": 60,
-        "usablePct": 96.8
+        "usable": 1,
+        "usablePct": 1.6
       },
       {
         "state": "WY",
         "total": 56,
-        "usable": 52,
-        "usablePct": 92.9
+        "usable": 0,
+        "usablePct": 0
       },
       {
         "state": "ND",
         "total": 51,
-        "usable": 51,
-        "usablePct": 100
+        "usable": 0,
+        "usablePct": 0
       },
       {
         "state": "DC",
         "total": 46,
-        "usable": 46,
-        "usablePct": 100
+        "usable": 23,
+        "usablePct": 50
       }
     ],
     "zeroCountStates": [],
@@ -327,7 +327,7 @@
         "count": 1
       }
     ],
-    "noStateCount": 417
+    "noStateCount": 421
   },
   "metros": {
     "buckets": [
@@ -335,355 +335,573 @@
         "rank": 1,
         "name": "New York–Newark–Jersey City, NY-NJ",
         "population": 20112448,
-        "usableShops": 881,
+        "usableShops": 69,
         "belowThreshold": false
       },
       {
         "rank": 2,
         "name": "Los Angeles–Long Beach–Anaheim, CA",
         "population": 12844441,
-        "usableShops": 892,
+        "usableShops": 219,
         "belowThreshold": false
       },
       {
         "rank": 3,
         "name": "Chicago–Naperville–Elgin, IL-IN",
         "population": 9434123,
-        "usableShops": 367,
+        "usableShops": 20,
         "belowThreshold": false
       },
       {
         "rank": 4,
         "name": "Dallas–Fort Worth–Arlington, TX",
         "population": 8477157,
-        "usableShops": 674,
+        "usableShops": 381,
         "belowThreshold": false
       },
       {
         "rank": 5,
         "name": "Houston–Pasadena–The Woodlands, TX",
         "population": 7904627,
-        "usableShops": 507,
+        "usableShops": 226,
         "belowThreshold": false
       },
       {
         "rank": 6,
         "name": "Atlanta–Sandy Springs–Roswell, GA",
         "population": 6482182,
-        "usableShops": 260,
-        "belowThreshold": false
+        "usableShops": 13,
+        "belowThreshold": true
       },
       {
         "rank": 7,
         "name": "Washington–Arlington–Alexandria, DC-VA-MD-WV",
         "population": 6465724,
-        "usableShops": 246,
+        "usableShops": 55,
         "belowThreshold": false
       },
       {
         "rank": 8,
         "name": "Miami–Fort Lauderdale–West Palm Beach, FL",
         "population": 6391072,
-        "usableShops": 707,
+        "usableShops": 207,
         "belowThreshold": false
       },
       {
         "rank": 9,
         "name": "Philadelphia–Camden–Wilmington, PA-NJ-DE-MD",
         "population": 6329118,
-        "usableShops": 296,
-        "belowThreshold": false
+        "usableShops": 6,
+        "belowThreshold": true
       },
       {
         "rank": 10,
         "name": "Phoenix–Mesa–Chandler, AZ",
         "population": 5228938,
-        "usableShops": 348,
-        "belowThreshold": false
+        "usableShops": 4,
+        "belowThreshold": true
       },
       {
         "rank": 11,
         "name": "Boston–Cambridge–Newton, MA-NH",
         "population": 5034221,
-        "usableShops": 160,
-        "belowThreshold": false
+        "usableShops": 3,
+        "belowThreshold": true
       },
       {
         "rank": 12,
         "name": "Riverside–San Bernardino–Ontario, CA",
         "population": 4769007,
-        "usableShops": 235,
+        "usableShops": 54,
         "belowThreshold": false
       },
       {
         "rank": 13,
         "name": "San Francisco–Oakland–Fremont, CA",
         "population": 4630041,
-        "usableShops": 242,
+        "usableShops": 21,
         "belowThreshold": false
       },
       {
         "rank": 14,
         "name": "Detroit–Warren–Dearborn, MI",
         "population": 4390913,
-        "usableShops": 187,
-        "belowThreshold": false
+        "usableShops": 2,
+        "belowThreshold": true
       },
       {
         "rank": 15,
         "name": "Seattle–Tacoma–Bellevue, WA",
         "population": 4161883,
-        "usableShops": 303,
-        "belowThreshold": false
+        "usableShops": 2,
+        "belowThreshold": true
       },
       {
         "rank": 16,
         "name": "Minneapolis–St. Paul–Bloomington, MN-WI",
         "population": 3790295,
-        "usableShops": 168,
-        "belowThreshold": false
+        "usableShops": 3,
+        "belowThreshold": true
       },
       {
         "rank": 17,
         "name": "Tampa–St. Petersburg–Clearwater, FL",
         "population": 3418895,
-        "usableShops": 589,
+        "usableShops": 65,
         "belowThreshold": false
       },
       {
         "rank": 18,
         "name": "San Diego–Chula Vista–Carlsbad, CA",
         "population": 3282248,
-        "usableShops": 330,
+        "usableShops": 111,
         "belowThreshold": false
       },
       {
         "rank": 19,
         "name": "Denver–Aurora–Centennial, CO",
         "population": 3092037,
-        "usableShops": 282,
-        "belowThreshold": false
+        "usableShops": 10,
+        "belowThreshold": true
       },
       {
         "rank": 20,
         "name": "Orlando–Kissimmee–Sanford, FL",
         "population": 2957672,
-        "usableShops": 387,
+        "usableShops": 168,
         "belowThreshold": false
       },
       {
         "rank": 21,
         "name": "Charlotte–Concord–Gastonia, NC-SC",
         "population": 2938830,
-        "usableShops": 191,
+        "usableShops": 53,
         "belowThreshold": false
       },
       {
         "rank": 22,
         "name": "Baltimore–Columbia–Towson, MD",
         "population": 2857781,
-        "usableShops": 171,
-        "belowThreshold": false
+        "usableShops": 14,
+        "belowThreshold": true
       },
       {
         "rank": 23,
         "name": "St. Louis, MO-IL",
         "population": 2814421,
-        "usableShops": 108,
-        "belowThreshold": false
+        "usableShops": 0,
+        "belowThreshold": true
       },
       {
         "rank": 24,
         "name": "San Antonio–New Braunfels, TX",
         "population": 2813140,
-        "usableShops": 166,
+        "usableShops": 27,
         "belowThreshold": false
       },
       {
         "rank": 25,
         "name": "Austin–Round Rock–San Marcos, TX",
         "population": 2620945,
-        "usableShops": 181,
-        "belowThreshold": false
+        "usableShops": 8,
+        "belowThreshold": true
       },
       {
         "rank": 26,
         "name": "Portland–Vancouver–Hillsboro, OR-WA",
         "population": 2542282,
-        "usableShops": 302,
-        "belowThreshold": false
+        "usableShops": 2,
+        "belowThreshold": true
       },
       {
         "rank": 27,
         "name": "Sacramento–Roseville–Folsom, CA",
         "population": 2477274,
-        "usableShops": 215,
+        "usableShops": 85,
         "belowThreshold": false
       },
       {
         "rank": 28,
         "name": "Pittsburgh, PA",
         "population": 2421992,
-        "usableShops": 136,
-        "belowThreshold": false
+        "usableShops": 1,
+        "belowThreshold": true
       },
       {
         "rank": 29,
         "name": "Las Vegas–Henderson–North Las Vegas, NV",
         "population": 2407226,
-        "usableShops": 570,
+        "usableShops": 144,
         "belowThreshold": false
       },
       {
         "rank": 30,
         "name": "Cincinnati, OH-KY-IN",
         "population": 2312858,
-        "usableShops": 108,
-        "belowThreshold": false
+        "usableShops": 3,
+        "belowThreshold": true
       },
       {
         "rank": 31,
         "name": "Kansas City, MO-KS",
         "population": 2270682,
-        "usableShops": 123,
-        "belowThreshold": false
+        "usableShops": 5,
+        "belowThreshold": true
       },
       {
         "rank": 32,
         "name": "Columbus, OH",
         "population": 2242028,
-        "usableShops": 95,
-        "belowThreshold": false
+        "usableShops": 2,
+        "belowThreshold": true
       },
       {
         "rank": 33,
         "name": "Indianapolis–Carmel–Greenwood, IN",
         "population": 2205695,
-        "usableShops": 94,
-        "belowThreshold": false
+        "usableShops": 6,
+        "belowThreshold": true
       },
       {
         "rank": 34,
         "name": "Nashville-Davidson–Murfreesboro–Franklin, TN",
         "population": 2197416,
-        "usableShops": 97,
-        "belowThreshold": false
+        "usableShops": 1,
+        "belowThreshold": true
       },
       {
         "rank": 35,
         "name": "Cleveland, OH",
         "population": 2165775,
-        "usableShops": 86,
-        "belowThreshold": false
+        "usableShops": 1,
+        "belowThreshold": true
       },
       {
         "rank": 36,
         "name": "San Jose–Sunnyvale–Santa Clara, CA",
         "population": 1984473,
-        "usableShops": 103,
+        "usableShops": 21,
         "belowThreshold": false
       },
       {
         "rank": 37,
         "name": "Virginia Beach–Norfolk–Newport News, VA-NC",
         "population": 1797213,
-        "usableShops": 55,
-        "belowThreshold": false
+        "usableShops": 1,
+        "belowThreshold": true
       },
       {
         "rank": 38,
         "name": "Jacksonville, FL",
         "population": 1785500,
-        "usableShops": 211,
+        "usableShops": 109,
         "belowThreshold": false
       },
       {
         "rank": 39,
         "name": "Providence–Warwick, RI-MA",
         "population": 1708161,
-        "usableShops": 122,
-        "belowThreshold": false
+        "usableShops": 1,
+        "belowThreshold": true
       },
       {
         "rank": 40,
         "name": "Raleigh–Cary, NC",
         "population": 1595720,
-        "usableShops": 169,
+        "usableShops": 90,
         "belowThreshold": false
       },
       {
         "rank": 41,
         "name": "Milwaukee–Waukesha, WI",
         "population": 1575010,
-        "usableShops": 106,
-        "belowThreshold": false
+        "usableShops": 1,
+        "belowThreshold": true
       },
       {
         "rank": 42,
         "name": "Oklahoma City, OK",
         "population": 1512813,
-        "usableShops": 88,
-        "belowThreshold": false
+        "usableShops": 2,
+        "belowThreshold": true
       },
       {
         "rank": 43,
         "name": "Louisville/Jefferson County, KY-IN",
         "population": 1402509,
-        "usableShops": 89,
-        "belowThreshold": false
+        "usableShops": 6,
+        "belowThreshold": true
       },
       {
         "rank": 44,
         "name": "Richmond, VA",
         "population": 1389338,
-        "usableShops": 68,
-        "belowThreshold": false
+        "usableShops": 3,
+        "belowThreshold": true
       },
       {
         "rank": 45,
         "name": "Memphis, TN-MS-AR",
         "population": 1341412,
-        "usableShops": 50,
-        "belowThreshold": false
+        "usableShops": 9,
+        "belowThreshold": true
       },
       {
         "rank": 46,
         "name": "Salt Lake City–Murray, UT",
         "population": 1308377,
-        "usableShops": 121,
-        "belowThreshold": false
+        "usableShops": 0,
+        "belowThreshold": true
       },
       {
         "rank": 47,
         "name": "Fresno, CA",
         "population": 1203383,
-        "usableShops": 72,
-        "belowThreshold": false
+        "usableShops": 4,
+        "belowThreshold": true
       },
       {
         "rank": 48,
         "name": "Birmingham, AL",
         "population": 1197766,
-        "usableShops": 31,
-        "belowThreshold": false
+        "usableShops": 0,
+        "belowThreshold": true
       },
       {
         "rank": 49,
         "name": "Grand Rapids–Wyoming–Kentwood, MI",
         "population": 1183645,
-        "usableShops": 59,
-        "belowThreshold": false
+        "usableShops": 0,
+        "belowThreshold": true
       },
       {
         "rank": 50,
         "name": "Hartford–West Hartford–East Hartford, CT",
         "population": 1171426,
-        "usableShops": 89,
-        "belowThreshold": false
+        "usableShops": 2,
+        "belowThreshold": true
       }
     ],
-    "belowThreshold": [],
-    "outsideTopMetrosOrNoCoords": 13457,
+    "belowThreshold": [
+      {
+        "rank": 6,
+        "name": "Atlanta–Sandy Springs–Roswell, GA",
+        "population": 6482182,
+        "usableShops": 13,
+        "belowThreshold": true
+      },
+      {
+        "rank": 9,
+        "name": "Philadelphia–Camden–Wilmington, PA-NJ-DE-MD",
+        "population": 6329118,
+        "usableShops": 6,
+        "belowThreshold": true
+      },
+      {
+        "rank": 10,
+        "name": "Phoenix–Mesa–Chandler, AZ",
+        "population": 5228938,
+        "usableShops": 4,
+        "belowThreshold": true
+      },
+      {
+        "rank": 11,
+        "name": "Boston–Cambridge–Newton, MA-NH",
+        "population": 5034221,
+        "usableShops": 3,
+        "belowThreshold": true
+      },
+      {
+        "rank": 14,
+        "name": "Detroit–Warren–Dearborn, MI",
+        "population": 4390913,
+        "usableShops": 2,
+        "belowThreshold": true
+      },
+      {
+        "rank": 15,
+        "name": "Seattle–Tacoma–Bellevue, WA",
+        "population": 4161883,
+        "usableShops": 2,
+        "belowThreshold": true
+      },
+      {
+        "rank": 16,
+        "name": "Minneapolis–St. Paul–Bloomington, MN-WI",
+        "population": 3790295,
+        "usableShops": 3,
+        "belowThreshold": true
+      },
+      {
+        "rank": 19,
+        "name": "Denver–Aurora–Centennial, CO",
+        "population": 3092037,
+        "usableShops": 10,
+        "belowThreshold": true
+      },
+      {
+        "rank": 22,
+        "name": "Baltimore–Columbia–Towson, MD",
+        "population": 2857781,
+        "usableShops": 14,
+        "belowThreshold": true
+      },
+      {
+        "rank": 23,
+        "name": "St. Louis, MO-IL",
+        "population": 2814421,
+        "usableShops": 0,
+        "belowThreshold": true
+      },
+      {
+        "rank": 25,
+        "name": "Austin–Round Rock–San Marcos, TX",
+        "population": 2620945,
+        "usableShops": 8,
+        "belowThreshold": true
+      },
+      {
+        "rank": 26,
+        "name": "Portland–Vancouver–Hillsboro, OR-WA",
+        "population": 2542282,
+        "usableShops": 2,
+        "belowThreshold": true
+      },
+      {
+        "rank": 28,
+        "name": "Pittsburgh, PA",
+        "population": 2421992,
+        "usableShops": 1,
+        "belowThreshold": true
+      },
+      {
+        "rank": 30,
+        "name": "Cincinnati, OH-KY-IN",
+        "population": 2312858,
+        "usableShops": 3,
+        "belowThreshold": true
+      },
+      {
+        "rank": 31,
+        "name": "Kansas City, MO-KS",
+        "population": 2270682,
+        "usableShops": 5,
+        "belowThreshold": true
+      },
+      {
+        "rank": 32,
+        "name": "Columbus, OH",
+        "population": 2242028,
+        "usableShops": 2,
+        "belowThreshold": true
+      },
+      {
+        "rank": 33,
+        "name": "Indianapolis–Carmel–Greenwood, IN",
+        "population": 2205695,
+        "usableShops": 6,
+        "belowThreshold": true
+      },
+      {
+        "rank": 34,
+        "name": "Nashville-Davidson–Murfreesboro–Franklin, TN",
+        "population": 2197416,
+        "usableShops": 1,
+        "belowThreshold": true
+      },
+      {
+        "rank": 35,
+        "name": "Cleveland, OH",
+        "population": 2165775,
+        "usableShops": 1,
+        "belowThreshold": true
+      },
+      {
+        "rank": 37,
+        "name": "Virginia Beach–Norfolk–Newport News, VA-NC",
+        "population": 1797213,
+        "usableShops": 1,
+        "belowThreshold": true
+      },
+      {
+        "rank": 39,
+        "name": "Providence–Warwick, RI-MA",
+        "population": 1708161,
+        "usableShops": 1,
+        "belowThreshold": true
+      },
+      {
+        "rank": 41,
+        "name": "Milwaukee–Waukesha, WI",
+        "population": 1575010,
+        "usableShops": 1,
+        "belowThreshold": true
+      },
+      {
+        "rank": 42,
+        "name": "Oklahoma City, OK",
+        "population": 1512813,
+        "usableShops": 2,
+        "belowThreshold": true
+      },
+      {
+        "rank": 43,
+        "name": "Louisville/Jefferson County, KY-IN",
+        "population": 1402509,
+        "usableShops": 6,
+        "belowThreshold": true
+      },
+      {
+        "rank": 44,
+        "name": "Richmond, VA",
+        "population": 1389338,
+        "usableShops": 3,
+        "belowThreshold": true
+      },
+      {
+        "rank": 45,
+        "name": "Memphis, TN-MS-AR",
+        "population": 1341412,
+        "usableShops": 9,
+        "belowThreshold": true
+      },
+      {
+        "rank": 46,
+        "name": "Salt Lake City–Murray, UT",
+        "population": 1308377,
+        "usableShops": 0,
+        "belowThreshold": true
+      },
+      {
+        "rank": 47,
+        "name": "Fresno, CA",
+        "population": 1203383,
+        "usableShops": 4,
+        "belowThreshold": true
+      },
+      {
+        "rank": 48,
+        "name": "Birmingham, AL",
+        "population": 1197766,
+        "usableShops": 0,
+        "belowThreshold": true
+      },
+      {
+        "rank": 49,
+        "name": "Grand Rapids–Wyoming–Kentwood, MI",
+        "population": 1183645,
+        "usableShops": 0,
+        "belowThreshold": true
+      },
+      {
+        "rank": 50,
+        "name": "Hartford–West Hartford–East Hartford, CT",
+        "population": 1171426,
+        "usableShops": 2,
+        "belowThreshold": true
+      }
+    ],
+    "outsideTopMetrosOrNoCoords": 23354,
     "metroThreshold": 15
   },
   "duplicates": {
@@ -825,15 +1043,15 @@
   "completeness": [
     {
       "field": "phone",
-      "populated": 22335,
+      "populated": 22313,
       "total": 25594,
-      "pct": 87.3
+      "pct": 87.2
     },
     {
       "field": "website",
-      "populated": 17219,
+      "populated": 17675,
       "total": 25594,
-      "pct": 67.3
+      "pct": 69.1
     },
     {
       "field": "hours",
