@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-10-01T01:55:26.332Z",
+  "generatedAt": "2026-10-01T01:37:41.224Z",
   "totals": {
-    "totalShops": 24320,
-    "usableShops": 22633,
-    "usablePct": 93.1,
+    "totalShops": 25594,
+    "usableShops": 23907,
+    "usablePct": 93.4,
     "distinctStateCodes": 53,
     "nonStandardStateCodeCount": 2
   },
@@ -11,62 +11,62 @@
     "buckets": [
       {
         "state": "CA",
-        "total": 2854,
-        "usable": 2748,
-        "usablePct": 96.3
+        "total": 3205,
+        "usable": 3099,
+        "usablePct": 96.7
       },
       {
         "state": "FL",
-        "total": 2728,
-        "usable": 2572,
-        "usablePct": 94.3
+        "total": 3015,
+        "usable": 2859,
+        "usablePct": 94.8
       },
       {
         "state": "TX",
-        "total": 2376,
-        "usable": 2208,
-        "usablePct": 92.9
+        "total": 2667,
+        "usable": 2499,
+        "usablePct": 93.7
       },
       {
         "state": "NY",
-        "total": 1278,
-        "usable": 1214,
+        "total": 1291,
+        "usable": 1227,
         "usablePct": 95
       },
       {
         "state": "NC",
-        "total": 959,
-        "usable": 928,
-        "usablePct": 96.8
+        "total": 1073,
+        "usable": 1042,
+        "usablePct": 97.1
       },
       {
         "state": "PA",
-        "total": 859,
-        "usable": 819,
-        "usablePct": 95.3
+        "total": 869,
+        "usable": 829,
+        "usablePct": 95.4
       },
       {
         "state": "OH",
-        "total": 768,
-        "usable": 738,
+        "total": 769,
+        "usable": 739,
         "usablePct": 96.1
       },
       {
-        "state": "WA",
-        "total": 666,
-        "usable": 645,
-        "usablePct": 96.8
+        "state": "NV",
+        "total": 738,
+        "usable": 696,
+        "usablePct": 94.3
       },
       {
-        "state": "NV",
-        "total": 654,
-        "usable": 612,
-        "usablePct": 93.6
+        "state": "WA",
+        "total": 668,
+        "usable": 647,
+        "usablePct": 96.9
       },
       {
         "state": "IL",
-        "total": 612,
-        "usable": 585,
+        "total": 615,
+        "usable": 588,
         "usablePct": 95.6
       },
       {
@@ -83,14 +83,14 @@
       },
       {
         "state": "MI",
-        "total": 544,
-        "usable": 516,
+        "total": 546,
+        "usable": 518,
         "usablePct": 94.9
       },
       {
         "state": "GA",
-        "total": 523,
-        "usable": 478,
+        "total": 524,
+        "usable": 479,
         "usablePct": 91.4
       },
       {
@@ -107,8 +107,8 @@
       },
       {
         "state": "TN",
-        "total": 443,
-        "usable": 411,
+        "total": 444,
+        "usable": 412,
         "usablePct": 92.8
       },
       {
@@ -119,39 +119,39 @@
       },
       {
         "state": "WI",
-        "total": 434,
-        "usable": 420,
+        "total": 435,
+        "usable": 421,
+        "usablePct": 96.8
+      },
+      {
+        "state": "LA",
+        "total": 412,
+        "usable": 399,
         "usablePct": 96.8
       },
       {
         "state": "MD",
+        "total": 384,
+        "usable": 360,
+        "usablePct": 93.8
+      },
+      {
+        "state": "NJ",
+        "total": 380,
+        "usable": 328,
+        "usablePct": 86.3
+      },
+      {
+        "state": "VA",
         "total": 375,
         "usable": 351,
         "usablePct": 93.6
       },
       {
-        "state": "NJ",
-        "total": 374,
-        "usable": 322,
-        "usablePct": 86.1
-      },
-      {
-        "state": "VA",
-        "total": 366,
-        "usable": 342,
-        "usablePct": 93.4
-      },
-      {
         "state": "MA",
-        "total": 350,
-        "usable": 340,
-        "usablePct": 97.1
-      },
-      {
-        "state": "LA",
-        "total": 345,
-        "usable": 332,
-        "usablePct": 96.2
+        "total": 352,
+        "usable": 342,
+        "usablePct": 97.2
       },
       {
         "state": "KY",
@@ -167,14 +167,14 @@
       },
       {
         "state": "CT",
-        "total": 245,
-        "usable": 234,
+        "total": 247,
+        "usable": 236,
         "usablePct": 95.5
       },
       {
         "state": "UT",
-        "total": 237,
-        "usable": 226,
+        "total": 238,
+        "usable": 227,
         "usablePct": 95.4
       },
       {
@@ -203,9 +203,9 @@
       },
       {
         "state": "AR",
-        "total": 164,
-        "usable": 158,
-        "usablePct": 96.3
+        "total": 166,
+        "usable": 160,
+        "usablePct": 96.4
       },
       {
         "state": "ID",
@@ -281,9 +281,9 @@
       },
       {
         "state": "DE",
-        "total": 74,
-        "usable": 67,
-        "usablePct": 90.5
+        "total": 75,
+        "usable": 68,
+        "usablePct": 90.7
       },
       {
         "state": "SD",
@@ -293,9 +293,9 @@
       },
       {
         "state": "VT",
-        "total": 61,
-        "usable": 59,
-        "usablePct": 96.7
+        "total": 62,
+        "usable": 60,
+        "usablePct": 96.8
       },
       {
         "state": "WY",
@@ -311,8 +311,8 @@
       },
       {
         "state": "DC",
-        "total": 33,
-        "usable": 33,
+        "total": 46,
+        "usable": 46,
         "usablePct": 100
       }
     ],
@@ -335,56 +335,56 @@
         "rank": 1,
         "name": "New York–Newark–Jersey City, NY-NJ",
         "population": 20112448,
-        "usableShops": 863,
+        "usableShops": 881,
         "belowThreshold": false
       },
       {
         "rank": 2,
         "name": "Los Angeles–Long Beach–Anaheim, CA",
         "population": 12844441,
-        "usableShops": 794,
+        "usableShops": 892,
         "belowThreshold": false
       },
       {
         "rank": 3,
         "name": "Chicago–Naperville–Elgin, IL-IN",
         "population": 9434123,
-        "usableShops": 364,
+        "usableShops": 367,
         "belowThreshold": false
       },
       {
         "rank": 4,
         "name": "Dallas–Fort Worth–Arlington, TX",
         "population": 8477157,
-        "usableShops": 570,
+        "usableShops": 674,
         "belowThreshold": false
       },
       {
         "rank": 5,
         "name": "Houston–Pasadena–The Woodlands, TX",
         "population": 7904627,
-        "usableShops": 455,
+        "usableShops": 507,
         "belowThreshold": false
       },
       {
         "rank": 6,
         "name": "Atlanta–Sandy Springs–Roswell, GA",
         "population": 6482182,
-        "usableShops": 259,
+        "usableShops": 260,
         "belowThreshold": false
       },
       {
         "rank": 7,
         "name": "Washington–Arlington–Alexandria, DC-VA-MD-WV",
         "population": 6465724,
-        "usableShops": 220,
+        "usableShops": 246,
         "belowThreshold": false
       },
       {
         "rank": 8,
         "name": "Miami–Fort Lauderdale–West Palm Beach, FL",
         "population": 6391072,
-        "usableShops": 623,
+        "usableShops": 707,
         "belowThreshold": false
       },
       {
@@ -405,28 +405,28 @@
         "rank": 11,
         "name": "Boston–Cambridge–Newton, MA-NH",
         "population": 5034221,
-        "usableShops": 158,
+        "usableShops": 160,
         "belowThreshold": false
       },
       {
         "rank": 12,
         "name": "Riverside–San Bernardino–Ontario, CA",
         "population": 4769007,
-        "usableShops": 222,
+        "usableShops": 235,
         "belowThreshold": false
       },
       {
         "rank": 13,
         "name": "San Francisco–Oakland–Fremont, CA",
         "population": 4630041,
-        "usableShops": 232,
+        "usableShops": 242,
         "belowThreshold": false
       },
       {
         "rank": 14,
         "name": "Detroit–Warren–Dearborn, MI",
         "population": 4390913,
-        "usableShops": 186,
+        "usableShops": 187,
         "belowThreshold": false
       },
       {
@@ -447,14 +447,14 @@
         "rank": 17,
         "name": "Tampa–St. Petersburg–Clearwater, FL",
         "population": 3418895,
-        "usableShops": 549,
+        "usableShops": 589,
         "belowThreshold": false
       },
       {
         "rank": 18,
         "name": "San Diego–Chula Vista–Carlsbad, CA",
         "population": 3282248,
-        "usableShops": 277,
+        "usableShops": 330,
         "belowThreshold": false
       },
       {
@@ -468,21 +468,21 @@
         "rank": 20,
         "name": "Orlando–Kissimmee–Sanford, FL",
         "population": 2957672,
-        "usableShops": 336,
+        "usableShops": 387,
         "belowThreshold": false
       },
       {
         "rank": 21,
         "name": "Charlotte–Concord–Gastonia, NC-SC",
         "population": 2938830,
-        "usableShops": 179,
+        "usableShops": 191,
         "belowThreshold": false
       },
       {
         "rank": 22,
         "name": "Baltimore–Columbia–Towson, MD",
         "population": 2857781,
-        "usableShops": 167,
+        "usableShops": 171,
         "belowThreshold": false
       },
       {
@@ -496,14 +496,14 @@
         "rank": 24,
         "name": "San Antonio–New Braunfels, TX",
         "population": 2813140,
-        "usableShops": 159,
+        "usableShops": 166,
         "belowThreshold": false
       },
       {
         "rank": 25,
         "name": "Austin–Round Rock–San Marcos, TX",
         "population": 2620945,
-        "usableShops": 180,
+        "usableShops": 181,
         "belowThreshold": false
       },
       {
@@ -517,7 +517,7 @@
         "rank": 27,
         "name": "Sacramento–Roseville–Folsom, CA",
         "population": 2477274,
-        "usableShops": 170,
+        "usableShops": 215,
         "belowThreshold": false
       },
       {
@@ -531,7 +531,7 @@
         "rank": 29,
         "name": "Las Vegas–Henderson–North Las Vegas, NV",
         "population": 2407226,
-        "usableShops": 496,
+        "usableShops": 570,
         "belowThreshold": false
       },
       {
@@ -580,7 +580,7 @@
         "rank": 36,
         "name": "San Jose–Sunnyvale–Santa Clara, CA",
         "population": 1984473,
-        "usableShops": 94,
+        "usableShops": 103,
         "belowThreshold": false
       },
       {
@@ -594,7 +594,7 @@
         "rank": 38,
         "name": "Jacksonville, FL",
         "population": 1785500,
-        "usableShops": 181,
+        "usableShops": 211,
         "belowThreshold": false
       },
       {
@@ -608,7 +608,7 @@
         "rank": 40,
         "name": "Raleigh–Cary, NC",
         "population": 1595720,
-        "usableShops": 144,
+        "usableShops": 169,
         "belowThreshold": false
       },
       {
@@ -643,7 +643,7 @@
         "rank": 45,
         "name": "Memphis, TN-MS-AR",
         "population": 1341412,
-        "usableShops": 49,
+        "usableShops": 50,
         "belowThreshold": false
       },
       {
@@ -683,49 +683,180 @@
       }
     ],
     "belowThreshold": [],
-    "outsideTopMetrosOrNoCoords": 12947,
+    "outsideTopMetrosOrNoCoords": 13457,
     "metroThreshold": 15
   },
   "duplicates": {
-    "clusterCount": 0,
-    "duplicateRowCount": 0,
-    "sample": []
+    "clusterCount": 10,
+    "duplicateRowCount": 20,
+    "sample": [
+      {
+        "name": "Exclusive Ink",
+        "address": "927 N Main St, Salinas, 93906",
+        "count": 2,
+        "placeIds": [
+          "booksy:520876",
+          "booksy:1543313"
+        ],
+        "shopIds": [
+          "0d10ff32-ed36-41dc-8329-463d27c5394c",
+          "44e84774-5165-447e-a9ee-feb21a54098d"
+        ]
+      },
+      {
+        "name": "Freshink Tattoos Memphis",
+        "address": "10 N 2nd St., Memphis, 38103",
+        "count": 2,
+        "placeIds": [
+          "booksy:1447505",
+          "booksy:440018"
+        ],
+        "shopIds": [
+          "24a0a90e-9187-4a24-8130-6830022e345b",
+          "6b35a2d4-842b-4d91-be04-dfa420e4f137"
+        ]
+      },
+      {
+        "name": "Chicagoat Tattoos",
+        "address": "South chicago, Chicago, 60617",
+        "count": 2,
+        "placeIds": [
+          "booksy:569685",
+          "booksy:977577"
+        ],
+        "shopIds": [
+          "34dea85e-2bb0-4c54-a8f2-ad09ff7cf313",
+          "9721cf82-5ce3-45c4-b81e-aa8252567363"
+        ]
+      },
+      {
+        "name": "The Needle Box",
+        "address": "1733 E 75th Street, Chicago, 60649",
+        "count": 2,
+        "placeIds": [
+          "booksy:1227534",
+          "booksy:1185669"
+        ],
+        "shopIds": [
+          "3f1d3b2e-e5ea-4f38-8a5f-fd66710e741f",
+          "43dd00e5-a195-480b-8951-11149b30e9cb"
+        ]
+      },
+      {
+        "name": "Little man tattoos",
+        "address": "3438 Lennon rd, Flint, 48507",
+        "count": 2,
+        "placeIds": [
+          "booksy:981827",
+          "booksy:588628"
+        ],
+        "shopIds": [
+          "4fdcdc16-8971-4f3e-9311-f8974f61889e",
+          "d989c34c-9b2f-4254-9f88-8922653de329"
+        ]
+      },
+      {
+        "name": "Tattooarte",
+        "address": "5380 baywater Dr, Tampa, 33615",
+        "count": 2,
+        "placeIds": [
+          "booksy:1172023",
+          "booksy:1172021"
+        ],
+        "shopIds": [
+          "60c2cbe0-3c8f-4c62-b756-aa7ee3c706e5",
+          "c7a434e2-176f-4939-b45f-1beeab817bb7"
+        ]
+      },
+      {
+        "name": "Sleep Ink",
+        "address": "West Little Rock, Little Rock, 72227",
+        "count": 2,
+        "placeIds": [
+          "booksy:1150143",
+          "booksy:1150142"
+        ],
+        "shopIds": [
+          "68f0cbed-1157-4ba2-bf7e-35f60fd879fe",
+          "6df87858-93b0-47fc-a2e3-c7ebc2ecd716"
+        ]
+      },
+      {
+        "name": "One blood tattoo studio",
+        "address": "4101 Bryan St suite 120, Dallas, TX 75204",
+        "count": 2,
+        "placeIds": [
+          "ChIJmxPSIQCZToYRkl6aZPXIfmM",
+          "ChIJJe9eIACZToYRPJa0-LBp49o"
+        ],
+        "shopIds": [
+          "97b9173c-b19c-4fa8-9df2-9baab6436f0b",
+          "f1eba151-f2e3-42ff-9e2d-9467fba87eb3"
+        ]
+      },
+      {
+        "name": "FeminINK LLC",
+        "address": "Av. Felipe Sánchez Osorio, Carolina, 06708",
+        "count": 2,
+        "placeIds": [
+          "booksy:925360",
+          "booksy:925358"
+        ],
+        "shopIds": [
+          "99df1a2b-8763-4584-962b-2bc1ec810bd2",
+          "f811bf94-d5f2-42f5-a40d-f91e14c9328a"
+        ]
+      },
+      {
+        "name": "Maydo’s Ink",
+        "address": "3753 Junction Blvd, Raleigh, 27603",
+        "count": 2,
+        "placeIds": [
+          "booksy:644111",
+          "booksy:644110"
+        ],
+        "shopIds": [
+          "ba70d8e4-8e39-4ffd-8627-991d9edf94ae",
+          "d2605f45-de03-46f5-8de6-bebb275d5c4a"
+        ]
+      }
+    ]
   },
   "completeness": [
     {
       "field": "phone",
-      "populated": 21169,
-      "total": 24320,
-      "pct": 87
+      "populated": 22335,
+      "total": 25594,
+      "pct": 87.3
     },
     {
       "field": "website",
-      "populated": 16285,
-      "total": 24320,
-      "pct": 67
+      "populated": 17219,
+      "total": 25594,
+      "pct": 67.3
     },
     {
       "field": "hours",
-      "populated": 3146,
-      "total": 24320,
-      "pct": 12.9
+      "populated": 3147,
+      "total": 25594,
+      "pct": 12.3
     },
     {
       "field": "description",
       "populated": 2,
-      "total": 24320,
+      "total": 25594,
       "pct": 0
     },
     {
       "field": "cover_image_url",
-      "populated": 3489,
-      "total": 24320,
-      "pct": 14.3
+      "populated": 3493,
+      "total": 25594,
+      "pct": 13.6
     },
     {
       "field": "specialties (N/A — column exists only on artists)",
       "populated": 0,
-      "total": 24320,
+      "total": 25594,
       "pct": 0
     }
   ]

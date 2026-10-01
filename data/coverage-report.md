@@ -1,14 +1,16 @@
 # TattooMaps Coverage Report
 
-Generated: 2026-10-01T01:37:41.224Z
+Generated: 2026-10-01T01:55:26.332Z
+
+Counts active shops only (`is_active = true`).
 
 ## Executive Summary
 
 | Metric | Value |
 |---|---|
-| Total shop rows | 25,594 |
-| Usable rows (map-visible, per full USABLE definition) | 23,907 |
-| Usable % | **93.4%** |
+| Active shop rows | 24,320 |
+| Usable rows (map-visible, per full USABLE definition) | 22,633 |
+| Usable % | **93.1%** |
 | Distinct state codes seen | 53 |
 | Non-standard state codes seen | 2 |
 
@@ -18,39 +20,39 @@ Sorted descending by total. "Usable" = passes the full USABLE definition.
 
 | State | Total | Usable | Usable % |
 |---|---:|---:|---:|
-| CA | 3,205 | 3,099 | 96.7% |
-| FL | 3,015 | 2,859 | 94.8% |
-| TX | 2,667 | 2,499 | 93.7% |
-| NY | 1,291 | 1,227 | 95.0% |
-| NC | 1,073 | 1,042 | 97.1% |
-| PA | 869 | 829 | 95.4% |
-| OH | 769 | 739 | 96.1% |
-| NV | 738 | 696 | 94.3% |
-| WA | 668 | 647 | 96.9% |
-| IL | 615 | 588 | 95.6% |
+| CA | 2,854 | 2,748 | 96.3% |
+| FL | 2,728 | 2,572 | 94.3% |
+| TX | 2,376 | 2,208 | 92.9% |
+| NY | 1,278 | 1,214 | 95.0% |
+| NC | 959 | 928 | 96.8% |
+| PA | 859 | 819 | 95.3% |
+| OH | 768 | 738 | 96.1% |
+| WA | 666 | 645 | 96.8% |
+| NV | 654 | 612 | 93.6% |
+| IL | 612 | 585 | 95.6% |
 | CO | 596 | 565 | 94.8% |
 | AZ | 555 | 537 | 96.8% |
-| MI | 546 | 518 | 94.9% |
-| GA | 524 | 479 | 91.4% |
+| MI | 544 | 516 | 94.9% |
+| GA | 523 | 478 | 91.4% |
 | OR | 504 | 491 | 97.4% |
 | MO | 457 | 424 | 92.8% |
-| TN | 444 | 412 | 92.8% |
+| TN | 443 | 411 | 92.8% |
 | IN | 440 | 423 | 96.1% |
-| WI | 435 | 421 | 96.8% |
-| LA | 412 | 399 | 96.8% |
-| MD | 384 | 360 | 93.8% |
-| NJ | 380 | 328 | 86.3% |
-| VA | 375 | 351 | 93.6% |
-| MA | 352 | 342 | 97.2% |
+| WI | 434 | 420 | 96.8% |
+| MD | 375 | 351 | 93.6% |
+| NJ | 374 | 322 | 86.1% |
+| VA | 366 | 342 | 93.4% |
+| MA | 350 | 340 | 97.1% |
+| LA | 345 | 332 | 96.2% |
 | KY | 304 | 276 | 90.8% |
 | MN | 290 | 281 | 96.9% |
-| CT | 247 | 236 | 95.5% |
-| UT | 238 | 227 | 95.4% |
+| CT | 245 | 234 | 95.5% |
+| UT | 237 | 226 | 95.4% |
 | IA | 228 | 220 | 96.5% |
 | AL | 222 | 198 | 89.2% |
 | OK | 204 | 193 | 94.6% |
 | HI | 179 | 174 | 97.2% |
-| AR | 166 | 160 | 96.4% |
+| AR | 164 | 158 | 96.3% |
 | ID | 156 | 152 | 97.4% |
 | SC | 154 | 143 | 92.9% |
 | NE | 148 | 141 | 95.3% |
@@ -63,12 +65,12 @@ Sorted descending by total. "Usable" = passes the full USABLE definition.
 | MT | 89 | 81 | 91.0% |
 | KS | 85 | 81 | 95.3% |
 | AK | 79 | 76 | 96.2% |
-| DE | 75 | 68 | 90.7% |
+| DE | 74 | 67 | 90.5% |
 | SD | 70 | 67 | 95.7% |
-| VT | 62 | 60 | 96.8% |
+| VT | 61 | 59 | 96.7% |
 | WY | 56 | 52 | 92.9% |
 | ND | 51 | 51 | 100.0% |
-| DC | 46 | 46 | 100.0% |
+| DC | 33 | 33 | 100.0% |
 
 **Zero-count states (0):** none
 
@@ -83,55 +85,55 @@ Sorted descending by total. "Usable" = passes the full USABLE definition.
 
 ## 2. Top 50 US Metros — Usable Shop Coverage
 
-> This section only covers rows with usable coordinates (93.4% of the table). Metro boundaries are approximated via a static centroid + tiered radius (40mi/30mi/20mi by population rank) — see `scripts/lib/metros.ts`. Flagged: fewer than 15 usable shops.
+> This section only covers rows with usable coordinates (93.1% of the table). Metro boundaries are approximated via a static centroid + tiered radius (40mi/30mi/20mi by population rank) — see `scripts/lib/metros.ts`. Flagged: fewer than 15 usable shops.
 
 | Rank | Metro | Population | Usable Shops | Flag |
 |---:|---|---:|---:|---|
-| 1 | New York–Newark–Jersey City, NY-NJ | 20,112,448 | 881 |  |
-| 2 | Los Angeles–Long Beach–Anaheim, CA | 12,844,441 | 892 |  |
-| 3 | Chicago–Naperville–Elgin, IL-IN | 9,434,123 | 367 |  |
-| 4 | Dallas–Fort Worth–Arlington, TX | 8,477,157 | 674 |  |
-| 5 | Houston–Pasadena–The Woodlands, TX | 7,904,627 | 507 |  |
-| 6 | Atlanta–Sandy Springs–Roswell, GA | 6,482,182 | 260 |  |
-| 7 | Washington–Arlington–Alexandria, DC-VA-MD-WV | 6,465,724 | 246 |  |
-| 8 | Miami–Fort Lauderdale–West Palm Beach, FL | 6,391,072 | 707 |  |
+| 1 | New York–Newark–Jersey City, NY-NJ | 20,112,448 | 863 |  |
+| 2 | Los Angeles–Long Beach–Anaheim, CA | 12,844,441 | 794 |  |
+| 3 | Chicago–Naperville–Elgin, IL-IN | 9,434,123 | 364 |  |
+| 4 | Dallas–Fort Worth–Arlington, TX | 8,477,157 | 570 |  |
+| 5 | Houston–Pasadena–The Woodlands, TX | 7,904,627 | 455 |  |
+| 6 | Atlanta–Sandy Springs–Roswell, GA | 6,482,182 | 259 |  |
+| 7 | Washington–Arlington–Alexandria, DC-VA-MD-WV | 6,465,724 | 220 |  |
+| 8 | Miami–Fort Lauderdale–West Palm Beach, FL | 6,391,072 | 623 |  |
 | 9 | Philadelphia–Camden–Wilmington, PA-NJ-DE-MD | 6,329,118 | 296 |  |
 | 10 | Phoenix–Mesa–Chandler, AZ | 5,228,938 | 348 |  |
-| 11 | Boston–Cambridge–Newton, MA-NH | 5,034,221 | 160 |  |
-| 12 | Riverside–San Bernardino–Ontario, CA | 4,769,007 | 235 |  |
-| 13 | San Francisco–Oakland–Fremont, CA | 4,630,041 | 242 |  |
-| 14 | Detroit–Warren–Dearborn, MI | 4,390,913 | 187 |  |
+| 11 | Boston–Cambridge–Newton, MA-NH | 5,034,221 | 158 |  |
+| 12 | Riverside–San Bernardino–Ontario, CA | 4,769,007 | 222 |  |
+| 13 | San Francisco–Oakland–Fremont, CA | 4,630,041 | 232 |  |
+| 14 | Detroit–Warren–Dearborn, MI | 4,390,913 | 186 |  |
 | 15 | Seattle–Tacoma–Bellevue, WA | 4,161,883 | 303 |  |
 | 16 | Minneapolis–St. Paul–Bloomington, MN-WI | 3,790,295 | 168 |  |
-| 17 | Tampa–St. Petersburg–Clearwater, FL | 3,418,895 | 589 |  |
-| 18 | San Diego–Chula Vista–Carlsbad, CA | 3,282,248 | 330 |  |
+| 17 | Tampa–St. Petersburg–Clearwater, FL | 3,418,895 | 549 |  |
+| 18 | San Diego–Chula Vista–Carlsbad, CA | 3,282,248 | 277 |  |
 | 19 | Denver–Aurora–Centennial, CO | 3,092,037 | 282 |  |
-| 20 | Orlando–Kissimmee–Sanford, FL | 2,957,672 | 387 |  |
-| 21 | Charlotte–Concord–Gastonia, NC-SC | 2,938,830 | 191 |  |
-| 22 | Baltimore–Columbia–Towson, MD | 2,857,781 | 171 |  |
+| 20 | Orlando–Kissimmee–Sanford, FL | 2,957,672 | 336 |  |
+| 21 | Charlotte–Concord–Gastonia, NC-SC | 2,938,830 | 179 |  |
+| 22 | Baltimore–Columbia–Towson, MD | 2,857,781 | 167 |  |
 | 23 | St. Louis, MO-IL | 2,814,421 | 108 |  |
-| 24 | San Antonio–New Braunfels, TX | 2,813,140 | 166 |  |
-| 25 | Austin–Round Rock–San Marcos, TX | 2,620,945 | 181 |  |
+| 24 | San Antonio–New Braunfels, TX | 2,813,140 | 159 |  |
+| 25 | Austin–Round Rock–San Marcos, TX | 2,620,945 | 180 |  |
 | 26 | Portland–Vancouver–Hillsboro, OR-WA | 2,542,282 | 302 |  |
-| 27 | Sacramento–Roseville–Folsom, CA | 2,477,274 | 215 |  |
+| 27 | Sacramento–Roseville–Folsom, CA | 2,477,274 | 170 |  |
 | 28 | Pittsburgh, PA | 2,421,992 | 136 |  |
-| 29 | Las Vegas–Henderson–North Las Vegas, NV | 2,407,226 | 570 |  |
+| 29 | Las Vegas–Henderson–North Las Vegas, NV | 2,407,226 | 496 |  |
 | 30 | Cincinnati, OH-KY-IN | 2,312,858 | 108 |  |
 | 31 | Kansas City, MO-KS | 2,270,682 | 123 |  |
 | 32 | Columbus, OH | 2,242,028 | 95 |  |
 | 33 | Indianapolis–Carmel–Greenwood, IN | 2,205,695 | 94 |  |
 | 34 | Nashville-Davidson–Murfreesboro–Franklin, TN | 2,197,416 | 97 |  |
 | 35 | Cleveland, OH | 2,165,775 | 86 |  |
-| 36 | San Jose–Sunnyvale–Santa Clara, CA | 1,984,473 | 103 |  |
+| 36 | San Jose–Sunnyvale–Santa Clara, CA | 1,984,473 | 94 |  |
 | 37 | Virginia Beach–Norfolk–Newport News, VA-NC | 1,797,213 | 55 |  |
-| 38 | Jacksonville, FL | 1,785,500 | 211 |  |
+| 38 | Jacksonville, FL | 1,785,500 | 181 |  |
 | 39 | Providence–Warwick, RI-MA | 1,708,161 | 122 |  |
-| 40 | Raleigh–Cary, NC | 1,595,720 | 169 |  |
+| 40 | Raleigh–Cary, NC | 1,595,720 | 144 |  |
 | 41 | Milwaukee–Waukesha, WI | 1,575,010 | 106 |  |
 | 42 | Oklahoma City, OK | 1,512,813 | 88 |  |
 | 43 | Louisville/Jefferson County, KY-IN | 1,402,509 | 89 |  |
 | 44 | Richmond, VA | 1,389,338 | 68 |  |
-| 45 | Memphis, TN-MS-AR | 1,341,412 | 50 |  |
+| 45 | Memphis, TN-MS-AR | 1,341,412 | 49 |  |
 | 46 | Salt Lake City–Murray, UT | 1,308,377 | 121 |  |
 | 47 | Fresno, CA | 1,203,383 | 72 |  |
 | 48 | Birmingham, AL | 1,197,766 | 31 |  |
@@ -140,37 +142,22 @@ Sorted descending by total. "Usable" = passes the full USABLE definition.
 
 **Metros below threshold (0 of 50):** none
 
-**Usable shops outside every top-50 metro radius (or lacking coordinates):** 13,457
+**Usable shops outside every top-50 metro radius (or lacking coordinates):** 12,947
 
 ## 3. Duplicate Detection
 
 Same normalized (name + address), different `place_id`.
 
-- Duplicate clusters: **10**
-- Rows involved: **20**
+- Duplicate clusters: **0**
+- Rows involved: **0**
 
-Sample (first 10 clusters — full list in coverage-report.json):
-
-| Name | Address | Rows | place_ids |
-|---|---|---:|---|
-| Exclusive Ink | 927 N Main St, Salinas, 93906 | 2 | booksy:520876, booksy:1543313 |
-| Freshink Tattoos Memphis | 10 N 2nd St., Memphis, 38103 | 2 | booksy:1447505, booksy:440018 |
-| Chicagoat Tattoos | South chicago, Chicago, 60617 | 2 | booksy:569685, booksy:977577 |
-| The Needle Box | 1733 E 75th Street, Chicago, 60649 | 2 | booksy:1227534, booksy:1185669 |
-| Little man tattoos | 3438 Lennon rd, Flint, 48507 | 2 | booksy:981827, booksy:588628 |
-| Tattooarte | 5380 baywater Dr, Tampa, 33615 | 2 | booksy:1172023, booksy:1172021 |
-| Sleep Ink | West Little Rock, Little Rock, 72227 | 2 | booksy:1150143, booksy:1150142 |
-| One blood tattoo studio | 4101 Bryan St suite 120, Dallas, TX 75204 | 2 | ChIJmxPSIQCZToYRkl6aZPXIfmM, ChIJJe9eIACZToYRPJa0-LBp49o |
-| FeminINK LLC | Av. Felipe Sánchez Osorio, Carolina, 06708 | 2 | booksy:925360, booksy:925358 |
-| Maydo’s Ink | 3753 Junction Blvd, Raleigh, 27603 | 2 | booksy:644111, booksy:644110 |
-
-## 4. Field Completeness (all 25,594 shop rows)
+## 4. Field Completeness (all 24,320 active shop rows)
 
 | Field | Populated | Total | % |
 |---|---:|---:|---:|
-| phone | 22,335 | 25,594 | 87.3% |
-| website | 17,219 | 25,594 | 67.3% |
-| hours | 3,147 | 25,594 | 12.3% |
-| description | 2 | 25,594 | 0.0% |
-| cover_image_url | 3,493 | 25,594 | 13.6% |
-| specialties (N/A — column exists only on artists) | 0 | 25,594 | 0.0% |
+| phone | 21,169 | 24,320 | 87.0% |
+| website | 16,285 | 24,320 | 67.0% |
+| hours | 3,146 | 24,320 | 12.9% |
+| description | 2 | 24,320 | 0.0% |
+| cover_image_url | 3,489 | 24,320 | 14.3% |
+| specialties (N/A — column exists only on artists) | 0 | 24,320 | 0.0% |

@@ -16,6 +16,12 @@ export interface ScriptArgs {
   withFsq: boolean
   refresh: boolean
   minConfidence: number | null
+  mode: "all" | "enrich" | "insert"
+  requireOpen: boolean
+  requireStreet: boolean
+  requireContact: boolean
+  minSources: number | null
+  compareTiers: boolean
 }
 
 // Accepts both "--flag value" and "--flag=value" — a bare argv.indexOf(flag)
@@ -38,6 +44,13 @@ export function parseScriptArgs(argv: string[] = process.argv.slice(2)): ScriptA
   const state = getArg("--state", argv)
   const minConfidenceRaw = getArg("--min-confidence", argv)
   const minConfidence = minConfidenceRaw ? parseFloat(minConfidenceRaw) : null
+  const minSourcesRaw = getArg("--min-sources", argv)
+  const minSources = minSourcesRaw ? parseInt(minSourcesRaw, 10) : null
+  const mode = getArg("--mode", argv) ?? "all"
+  if (mode !== "all" && mode !== "enrich" && mode !== "insert") {
+    console.error(`--mode must be all, enrich or insert (got "${mode}")`)
+    process.exit(1)
+  }
 
   return {
     dryRun: argv.includes("--dry-run"),
@@ -49,5 +62,11 @@ export function parseScriptArgs(argv: string[] = process.argv.slice(2)): ScriptA
     withFsq: argv.includes("--with-fsq"),
     refresh: argv.includes("--refresh"),
     minConfidence: minConfidence !== null && !isNaN(minConfidence) ? minConfidence : null,
+    mode,
+    requireOpen: argv.includes("--require-open"),
+    requireStreet: argv.includes("--require-street"),
+    requireContact: argv.includes("--require-contact"),
+    minSources: minSources !== null && !isNaN(minSources) ? minSources : null,
+    compareTiers: argv.includes("--compare-tiers"),
   }
 }
