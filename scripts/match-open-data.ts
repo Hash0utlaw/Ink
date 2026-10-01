@@ -13,6 +13,15 @@
 //   --require-street (address starts with a street number), --require-contact
 //   (phone or website), --min-sources=N (distinct independent datasets —
 //   Overture's own "Overture"/"Overture-signals" entries don't count).
+//   Insert mode also drops names with "removal"/"laser", and sends beauty /
+//   PMU names, handle-like names ("ink.by.jo") and rows ≤50m of an active
+//   shop to data/overture-insert-review.csv instead of inserting.
+//   --output=<csv>       where the final insert set is written
+//                        (default data/overture-new-shops.csv)
+//   --input-final=<csv>  insert exactly the rows in that file (a previous
+//                        --output), no recomputation. Each row is re-checked
+//                        and skipped if its overture_id or slug is now used or
+//                        it's ≤50m of an active shop.
 //   --compare-tiers  dry-run comparison of insert tiers T1–T4 (no writes ever);
 //                    writes data/overture-new-T{1..4}.csv, overture-sample-T1.csv
 //                    and overture-holdback.csv.
@@ -45,6 +54,7 @@ import { randomUUID } from "crypto"
 import { parseScriptArgs } from "./lib/args"
 import { US_STATES_PLUS_DC } from "./lib/audit"
 import { getSupabaseAdmin } from "./lib/supabase-admin"
+import type { SupabaseClient } from "@supabase/supabase-js"
 import { UndoLog, loggedUpdate } from "./lib/undo-log"
 import {
   GridIndex,
@@ -333,12 +343,18 @@ function assign(places: Place[], matcher: ShopMatcher, claimed: Set<string>) {
 
 // Blank-only patch for a matched shop. `pending` holds values already planned
 // for this shop by an earlier source, so Foursquare never overrides Overture.
-function fillPatch(shop: Row, p: Place, pending: Row): Row {
+// Coordinates are only taken when the shop has no state or its state equals
+// the source's region — a mismatch means the match is probably wrong, and a
+// wrong pin is worse than none. `stats.coordsBlocked` counts those cases.
+function fillPatch(shop: Row, p: Place, pending: Row, stats?: { coordsBlocked: number }): Row {
   const patch: Row = {}
   const blank = (f: string) => isEmptyValue(shop[f]) && isEmptyValue(pending[f])
   if (!coords(shop) && isEmptyValue(pending.latitude) && p.lat != null && p.lng != null) {
-    patch.latitude = p.lat
-    patch.longitude = p.lng
+    const shopState = stateCode(shop.state) ?? (isEmptyValue(shop.state) ? null : String(shop.state))
+    if (shopState == null || shopState === p.state) {
+      patch.latitude = p.lat
+      patch.longitude = p.lng
+    } else if (stats) stats.coordsBlocked++
   }
   if (blank("state") && p.state) patch.state = p.state
   if (blank("zip") && p.zip) patch.zip = p.zip
@@ -411,7 +427,16 @@ function insertRecord(p: Place, slugs: Set<string>): Row {
 
 // Report-only columns, stripped before insert.
 const REPORT_ONLY = ["confidence", "sources"]
-const NEW_SHOP_HEADERS = ["id", "name", "slug", "address", "city", "state", "zip", "phone", "website", "latitude", "longitude", "overture_id", "confidence", "sources"]
+const NEW_SHOP_HEADERS = [
+  "id", "name", "slug", "address", "city", "state", "zip", "phone", "website", "email", "instagram_url", "facebook_url",
+  "latitude", "longitude", "place_id", "overture_id", "confidence", "sources",
+]
+// Set on every inserted row (not carried in the CSV).
+const INSERT_DEFAULTS = { is_active: true, is_verified: false, accepts_walk_ins: false, rating: 0, review_count: 0 }
+
+const DROP_NAME = /removal|laser/i
+const REVIEW_BEAUTY = /\b(permanent makeup|pmu|brows?|lash(es)?|microblad\w*|cosmetics?|beauty|salons?|spas?)\b/i
+const handleLike = (name: string) => /[._]/.test(name) && !/\s/.test(name.trim())
 
 // ── Main ─────────────────────────────────────────────────────────────────────
 
@@ -446,6 +471,15 @@ Run supabase/migrations/20260930120000_open_data_columns.sql in the Supabase SQL
   const noCoords = active.filter((s) => !coords(s)).length
   const noState = active.filter((s) => isEmptyValue(s.state)).length
   console.log(`  ${active.length} active (${noCoords} without coordinates, ${noState} without state), ${inactive.length} inactive\n`)
+
+  if (ARGS.inputFinal) {
+    if (mode !== "insert") {
+      console.error("--input-final requires --mode=insert")
+      process.exit(1)
+    }
+    await insertFinal(supabase, ARGS.inputFinal, all, active)
+    return
+  }
 
   const overture = readCsv(OVERTURE_CSV).map((r) => overturePlace(r, "overture"))
   const overtureClosed = fs.existsSync(OVERTURE_CLOSED_CSV)
@@ -490,6 +524,7 @@ Run supabase/migrations/20260930120000_open_data_columns.sql in the Supabase SQL
   const filled: Record<string, Record<string, number>> = { overture: {}, fsq: {} }
   const closures: Row[] = []
   let closedPhoneOnly = 0
+  const fillStats = { coordsBlocked: 0 }
   const matchesOut: Row[] = []
 
   const flagClosed = (shop: Row, p: Place, why: string) => {
@@ -508,7 +543,7 @@ Run supabase/migrations/20260930120000_open_data_columns.sql in the Supabase SQL
       if (p.closed && cand.via === "phone≤500m") closedPhoneOnly++
       else if (p.closed) flagClosed(cand.shop, p, "Overture operating_status permanently_closed")
       else {
-        const fill = fillPatch(cand.shop, p, patch)
+        const fill = fillPatch(cand.shop, p, patch, fillStats)
         for (const f of Object.keys(fill)) filled.overture[f] = (filled.overture[f] ?? 0) + 1
         Object.assign(patch, fill)
       }
@@ -517,7 +552,7 @@ Run supabase/migrations/20260930120000_open_data_columns.sql in the Supabase SQL
     for (const { place: p, cand } of fs4.assigned) {
       const patch = patchFor(cand.shop)
       if (p.closed && cand.via !== "phone≤500m") flagClosed(cand.shop, p, "Foursquare date_closed set")
-      const fill = fillPatch(cand.shop, p, patch)
+      const fill = fillPatch(cand.shop, p, patch, fillStats)
       for (const f of Object.keys(fill)) filled.fsq[f] = (filled.fsq[f] ?? 0) + 1
       Object.assign(patch, fill)
     }
@@ -571,16 +606,34 @@ Run supabase/migrations/20260930120000_open_data_columns.sql in the Supabase SQL
     requireContact: ARGS.requireContact,
     minSources: ARGS.minSources,
   }
+  const activeGrid = activeIndex(active)
   const skipped: Record<string, number> = {}
   const inserts: Row[] = []
+  const review: Row[] = []
+  const reviewByReason: Record<string, number> = {}
   const slugs = new Set(all.map((s) => String(s.slug ?? "")))
   for (const p of pool) {
-    const why = baseReason.get(p.id) ?? tierSkip(p, crit)
+    const why = baseReason.get(p.id) ?? tierSkip(p, crit) ?? (DROP_NAME.test(p.name) ? "droppedRemovalLaser" : null)
     if (why) { skipped[why] = (skipped[why] ?? 0) + 1; continue }
+    const reasons = [
+      REVIEW_BEAUTY.test(p.name) ? `beauty/pmu name (${p.name.match(REVIEW_BEAUTY)![0].toLowerCase()})` : null,
+      handleLike(p.name) ? "handle-like name" : null,
+      nearActive(activeGrid, p.lat!, p.lng!) ? `≤${TIER_NEAR_ACTIVE_M}m of an active shop` : null,
+    ].filter((r): r is string => !!r)
+    if (reasons.length) {
+      for (const r of reasons) {
+        const key = r.replace(/ \(.*\)$/, "")
+        reviewByReason[key] = (reviewByReason[key] ?? 0) + 1
+      }
+      review.push({ reason: reasons.join("; "), overture_id: p.id, name: p.name, address: p.address, city: p.city, state: p.state, phone: formatPhone(p.phones[0]), website: p.website, confidence: p.confidence.toFixed(3) })
+      continue
+    }
     inserts.push(reportRow(p, insertRecord(p, slugs)))
   }
-  if (mode !== "enrich")
-    console.log(`Wrote ${writeCsv("data/overture-new-shops.csv", NEW_SHOP_HEADERS, inserts)}`)
+  if (mode !== "enrich") {
+    console.log(`Wrote ${writeCsv("data/overture-insert-review.csv", ["reason", "overture_id", "name", "address", "city", "state", "phone", "website", "confidence"], review)}`)
+    console.log(`Wrote ${writeCsv(ARGS.output ?? "data/overture-new-shops.csv", NEW_SHOP_HEADERS, inserts)}`)
+  }
   console.log("")
 
   // ── Apply ──
@@ -592,18 +645,7 @@ Run supabase/migrations/20260930120000_open_data_columns.sql in the Supabase SQL
       if (++done % 500 === 0) console.log(`  updated ${done}/${updates.length}`)
     })
     if (mode !== "insert") console.log(`Updated ${done} shops`)
-    let inserted = 0
-    for (let i = 0; i < inserts.length; i += INSERT_BATCH) {
-      const batch = inserts.slice(i, i + INSERT_BATCH).map((r) => {
-        const row = { ...r }
-        for (const k of REPORT_ONLY) delete row[k]
-        return row
-      })
-      undo.append(batch.map((r) => ({ table: "shops", id: String(r.id), field: "is_active", old_value: false, new_value: true })))
-      const { error } = await supabase.from("shops").insert(batch)
-      if (error) throw new Error(`insert batch ${i / INSERT_BATCH + 1} failed: ${error.message}`)
-      inserted += batch.length
-    }
+    const inserted = await insertRows(supabase, undo, inserts)
     if (mode !== "enrich") console.log(`Inserted ${inserted} shops`)
     console.log(`Undo log: ${undo.file} (${undo.entries} entries)\n`)
   }
@@ -627,9 +669,10 @@ Run supabase/migrations/20260930120000_open_data_columns.sql in the Supabase SQL
       console.log(`  ${f.padEnd(15)} ${String(filled.overture[f] ?? 0).padStart(9)}${fsq.length ? String(filled.fsq[f] ?? 0).padStart(11) : ""}`)
     }
     console.log(`  ${"overture_id".padEnd(15)} ${String(updates.filter((u) => u.patch.overture_id).length).padStart(9)}`)
-    console.log(`\nCoordinates recovered: ${coordsRecovered} of ${noCoords}`)
+    console.log(`\nCoordinates recovered: ${coordsRecovered} of ${noCoords} (blocked, shop state ≠ source region: ${fillStats.coordsBlocked})`)
     console.log(`States recovered:      ${statesRecovered.length} of ${noState}`)
     console.log(`Possibly closed${verb}: ${closures.length} (not flagged: ${closedPhoneOnly} closed rows matched by phone only)`)
+    console.log(`Shops updated${verb}: ${updates.length}`)
   }
 
   if (mode === "enrich") {
@@ -658,7 +701,100 @@ Run supabase/migrations/20260930120000_open_data_columns.sql in the Supabase SQL
   }
   console.log(`  ${"all".padEnd(3)} ${String(tb).padStart(7)} ${String(tn).padStart(5)} ${String(tg).padStart(6)} ${String(tb + tn + tg).padStart(7)}`)
   console.log(`\nTotal active: ${active.length} → ${active.length + inserts.length}`)
+  console.log(`\nSent to review (data/overture-insert-review.csv): ${review.length} rows`)
+  for (const [r, n] of Object.entries(reviewByReason).sort((a, b) => b[1] - a[1])) console.log(`  ${r.padEnd(26)} ${n}`)
+  printInsertSummary(inserts, before, active.length)
   if (!ARGS.apply) console.log("\nDry run — nothing written. Pass --apply to write (undo-logged).")
+}
+
+function activeIndex(active: Row[]): GridIndex<[number, number]> {
+  const grid = new GridIndex<[number, number]>(0.01, 0.015)
+  for (const s of active) {
+    const c = coords(s)
+    if (c) grid.add(c[0], c[1], c)
+  }
+  return grid
+}
+
+function nearActive(grid: GridIndex<[number, number]>, lat: number, lng: number): boolean {
+  return grid.near(lat, lng).some(([a, b]) => haversineMeters(lat, lng, a, b) <= TIER_NEAR_ACTIVE_M)
+}
+
+// Inserts in batches; each batch is undo-logged (is_active false → true, so
+// undo deactivates rather than deletes) before it's written.
+async function insertRows(supabase: SupabaseClient, undo: UndoLog, rows: Row[]): Promise<number> {
+  let inserted = 0
+  for (let i = 0; i < rows.length; i += INSERT_BATCH) {
+    const batch = rows.slice(i, i + INSERT_BATCH).map((r) => {
+      const row: Row = { ...r, ...INSERT_DEFAULTS }
+      for (const k of REPORT_ONLY) delete row[k]
+      return row
+    })
+    undo.append(batch.map((r) => ({ table: "shops", id: String(r.id), field: "is_active", old_value: false, new_value: true })))
+    const { error } = await supabase.from("shops").insert(batch)
+    if (error) throw new Error(`insert batch ${i / INSERT_BATCH + 1} failed: ${error.message}`)
+    inserted += batch.length
+  }
+  return inserted
+}
+
+// National count, benchmark-state coverage and a 25-row sample of an insert set.
+function printInsertSummary(rows: Row[], before: Record<string, number>, activeTotal: number): void {
+  const byState: Record<string, number> = {}
+  for (const r of rows) byState[String(r.state)] = (byState[String(r.state)] ?? 0) + 1
+  console.log(`\nFinal insert set: ${rows.length} → active total ${activeTotal + rows.length}`)
+  console.log(`  ${"st".padEnd(3)} ${"bench".padStart(6)} ${"now".padStart(5)} ${"cov".padStart(5)} ${"+new".padStart(5)} ${"after".padStart(6)} ${"cov".padStart(5)}`)
+  for (const [st, bench] of Object.entries(BENCHMARKS)) {
+    const b = before[st] ?? 0, n = byState[st] ?? 0
+    const cov = (x: number) => `${Math.round((x / bench) * 100)}%`
+    console.log(`  ${st.padEnd(3)} ${String(bench).padStart(6)} ${String(b).padStart(5)} ${cov(b).padStart(5)} ${("+" + n).padStart(5)} ${String(b + n).padStart(6)} ${cov(b + n).padStart(5)}`)
+  }
+  let seed = 7
+  const rand = () => ((seed = (seed * 1664525 + 1013904223) % 4294967296) / 4294967296)
+  const copy = rows.slice()
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1))
+    ;[copy[i], copy[j]] = [copy[j], copy[i]]
+  }
+  console.log(`\n25 random rows (name | address | city | state | phone | website | confidence):`)
+  for (const r of copy.slice(0, 25))
+    console.log(`  ${r.name} | ${r.address ?? ""} | ${r.city ?? ""} | ${r.state} | ${r.phone ?? ""} | ${r.website ?? ""} | ${r.confidence}`)
+}
+
+// --input-final: insert exactly the rows of a previously written final set.
+async function insertFinal(supabase: SupabaseClient, file: string, all: Row[], active: Row[]): Promise<void> {
+  const rows = readCsv(file)
+  const usedOverture = new Set(all.filter((s) => s.overture_id).map((s) => String(s.overture_id)))
+  const usedSlugs = new Set(all.map((s) => String(s.slug ?? "")))
+  const grid = activeIndex(active)
+  const skips = { overtureIdUsed: 0, slugUsed: 0, nearActive: 0 }
+  const toInsert: Row[] = []
+  for (const r of rows) {
+    const lat = parseFloat(r.latitude as string)
+    const lng = parseFloat(r.longitude as string)
+    if (usedOverture.has(String(r.overture_id))) { skips.overtureIdUsed++; continue }
+    if (usedSlugs.has(String(r.slug))) { skips.slugUsed++; continue }
+    if (nearActive(grid, lat, lng)) { skips.nearActive++; continue }
+    const row: Row = {}
+    for (const h of NEW_SHOP_HEADERS) row[h] = r[h] === "" || r[h] == null ? null : r[h]
+    row.latitude = lat
+    row.longitude = lng
+    usedOverture.add(String(r.overture_id))
+    usedSlugs.add(String(r.slug))
+    toInsert.push(row)
+  }
+  console.log(`${file}: ${rows.length} rows`)
+  console.log(`  skipped, overture_id already used: ${skips.overtureIdUsed}`)
+  console.log(`  skipped, slug already used:        ${skips.slugUsed}`)
+  console.log(`  skipped, now ≤${TIER_NEAR_ACTIVE_M}m of an active shop: ${skips.nearActive}`)
+  console.log(`  to insert: ${toInsert.length}`)
+  if (ARGS.apply) {
+    const undo = new UndoLog("match-open-data-insert")
+    const n = await insertRows(supabase, undo, toInsert)
+    console.log(`Inserted ${n} shops. Undo log: ${undo.file} (${undo.entries} entries)`)
+  } else {
+    console.log("\nDry run — nothing written. Pass --apply to write (undo-logged).")
+  }
 }
 
 function statesBenchmarkFirst(): string[] {

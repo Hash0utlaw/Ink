@@ -22,6 +22,9 @@ export interface ScriptArgs {
   requireContact: boolean
   minSources: number | null
   compareTiers: boolean
+  onlyMatched: boolean
+  inputFinal: string | null
+  output: string | null
 }
 
 // Accepts both "--flag value" and "--flag=value" — a bare argv.indexOf(flag)
@@ -68,5 +71,8 @@ export function parseScriptArgs(argv: string[] = process.argv.slice(2)): ScriptA
     requireContact: argv.includes("--require-contact"),
     minSources: minSources !== null && !isNaN(minSources) ? minSources : null,
     compareTiers: argv.includes("--compare-tiers"),
+    onlyMatched: argv.includes("--only-matched"),
+    inputFinal: getArg("--input-final", argv),
+    output: getArg("--output", argv),
   }
 }

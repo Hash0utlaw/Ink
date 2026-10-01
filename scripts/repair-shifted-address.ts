@@ -2,11 +2,18 @@
 // Repairs active shops whose address columns were imported shifted by one:
 // state is null and `city` holds the street ("1321 Eubank Blvd NE Studio A")
 // while `address` holds a note ("The ABQ Collective").
-// Run: npx tsx scripts/repair-shifted-address.ts [--apply]
+// Run: npx tsx scripts/repair-shifted-address.ts [--only-matched] [--apply]
 //   Dry-run by default. Writes data/shifted-address-repair.csv either way;
 //   --apply also writes (undo-logged). Never deletes rows.
+//   --only-matched  write only rows with a unique Overture match; no-match,
+//                   multiple-match and unparsable rows are left untouched.
 //
-// Proposed fix per row: address = old city value, city = null. Then look the
+// Proposed fix per row: address = old city value, city = null. The old
+// address is dropped when it's only digits ("1333") or already contained in
+// the new address ("A-300"); other text is kept in parentheses:
+// "4901 Tippecanoe Dr 2nd floor (above Waleed's International Hair Design)".
+// overture_id is set from a unique match only when no other shop uses it.
+// Then look the
 // shop up in data/overture_tattoo.csv (+ the closed file), nationwide: same
 // name (generic words removed) AND the street number + street name both
 // appear in Overture's freeform address. Only a UNIQUE match is used, and it
@@ -48,13 +55,26 @@ function streetParts(s: string): { number: string; street: string } | null {
   return street ? { number: m[1].toLowerCase(), street } : null
 }
 
+const squash = (s: unknown) => String(s ?? "").toLowerCase().replace(/[^a-z0-9]/g, "")
+
+// New address from the street (old city value) plus whatever's worth keeping
+// from the old address.
+function mergeAddress(street: string, oldAddress: unknown): { address: string; old: "none" | "digits" | "contained" | "appended" } {
+  const old = String(oldAddress ?? "").trim()
+  if (!old) return { address: street, old: "none" }
+  if (/^\d+$/.test(old)) return { address: street, old: "digits" }
+  if (squash(street).includes(squash(old))) return { address: street, old: "contained" }
+  return { address: `${street} (${old})`, old: "appended" }
+}
+
 async function main() {
   modeBanner(ARGS.apply)
+  if (ARGS.onlyMatched) console.log("--only-matched: only rows with a unique Overture match are written.\n")
   const supabase = getSupabaseAdmin()
 
-  const shops = await fetchAll(supabase, "shops", "id, name, address, city, state, zip, latitude, longitude", (q) =>
-    q.eq("is_active", true)
-  )
+  const all = await fetchAll(supabase, "shops", "id, name, address, city, state, zip, latitude, longitude, is_active, overture_id")
+  const usedOvertureIds = new Map(all.filter((s) => s.overture_id).map((s) => [String(s.overture_id), String(s.id)]))
+  const shops = all.filter((s) => s.is_active === true)
   const detected = shops.filter((s) => isEmptyValue(s.state) && /^\s*\d/.test(String(s.city ?? "")))
   console.log(`${shops.length} active shops; ${detected.length} with no state and a street number in city\n`)
 
@@ -75,11 +95,13 @@ async function main() {
     }
   }
 
-  const stats = { detected: detected.length, unique: 0, none: 0, multiple: 0, unparsable: 0 }
+  const stats = { detected: detected.length, unique: 0, none: 0, multiple: 0, unparsable: 0, overtureIdSet: 0, overtureIdSkipped: 0 }
+  const oldAddr: Record<string, number> = {}
   const plan: { shop: Row; patch: Row; outcome: string; overtureId: string }[] = []
   for (const shop of detected) {
     const street = String(shop.city).trim()
-    const patch: Row = { address: street, city: null }
+    const merged = mergeAddress(street, shop.address)
+    const patch: Row = { address: merged.address, city: null }
     const parts = streetParts(street)
     let outcome = "no match"
     let overtureId = ""
@@ -107,6 +129,14 @@ async function main() {
         stats.unique++
         outcome = "unique match"
         overtureId = String(o.id)
+        const owner = usedOvertureIds.get(overtureId)
+        if (isEmptyValue(shop.overture_id) && (owner == null || owner === String(shop.id))) {
+          patch.overture_id = overtureId
+          usedOvertureIds.set(overtureId, String(shop.id)) // two repaired shops can't share one
+          stats.overtureIdSet++
+        } else {
+          stats.overtureIdSkipped++
+        }
       } else if (hits.length > 1) {
         stats.multiple++
         outcome = `multiple matches (${hits.length})`
@@ -115,13 +145,16 @@ async function main() {
       }
     }
     plan.push({ shop, patch, outcome, overtureId })
+    if (!ARGS.onlyMatched || outcome === "unique match") oldAddr[merged.old] = (oldAddr[merged.old] ?? 0) + 1
   }
+  const toWrite = ARGS.onlyMatched ? plan.filter((p) => p.outcome === "unique match") : plan
 
   const out = writeCsv(
     "data/shifted-address-repair.csv",
-    ["id", "name", "outcome", "overture_id", "old_address", "old_city", "new_address", "new_city", "new_state", "new_zip", "new_latitude", "new_longitude"],
+    ["id", "name", "outcome", "written", "overture_id", "overture_id_set", "old_address", "old_city", "new_address", "new_city", "new_state", "new_zip", "new_latitude", "new_longitude"],
     plan.map(({ shop, patch, outcome, overtureId }) => ({
       id: shop.id, name: shop.name, outcome, overture_id: overtureId,
+      written: !ARGS.onlyMatched || outcome === "unique match", overture_id_set: patch.overture_id != null,
       old_address: shop.address, old_city: shop.city,
       new_address: patch.address, new_city: patch.city, new_state: patch.state, new_zip: patch.zip,
       new_latitude: patch.latitude, new_longitude: patch.longitude,
@@ -130,8 +163,12 @@ async function main() {
 
   if (ARGS.apply) {
     const undo = new UndoLog("repair-shifted-address")
-    await runPool(plan, 10, (p) => loggedUpdate(supabase, undo, "shops", String(p.shop.id), p.shop, p.patch))
-    console.log(`Updated ${plan.length} shops. Undo log: ${undo.file}\n`)
+    let done = 0
+    await runPool(toWrite, 10, async (p) => {
+      await loggedUpdate(supabase, undo, "shops", String(p.shop.id), p.shop, p.patch)
+      done++
+    })
+    console.log(`Updated ${done} shops. Undo log: ${undo.file} (${undo.entries} entries)\n`)
   }
 
   console.log(`── Report${ARGS.apply ? "" : " — DRY RUN"} ──`)
@@ -140,11 +177,15 @@ async function main() {
   console.log(`No match:              ${stats.none}`)
   console.log(`Multiple matches:      ${stats.multiple}`)
   console.log(`Unparsable street:     ${stats.unparsable}`)
-  console.log(`All ${plan.length} rows get address = old city, city = null (unless a unique match supplies the city).`)
+  console.log(`overture_id set:       ${stats.overtureIdSet} (skipped, already used by another shop: ${stats.overtureIdSkipped})`)
+  console.log(`Old address (written rows): ${JSON.stringify(oldAddr)}`)
+  console.log(`Rows ${ARGS.apply ? "written" : "that would be written"}: ${toWrite.length}${ARGS.onlyMatched ? " (unique matches only)" : ""}`)
 
   const fmt = (r: Row) =>
-    `address=${JSON.stringify(r.address ?? null)} city=${JSON.stringify(r.city ?? null)} state=${JSON.stringify(r.state ?? null)} zip=${JSON.stringify(r.zip ?? null)} lat/lng=${r.latitude ?? "∅"},${r.longitude ?? "∅"}`
-  const samples = [...plan.filter((p) => p.outcome === "unique match").slice(0, 7), ...plan.filter((p) => p.outcome !== "unique match").slice(0, 3)]
+    `address=${JSON.stringify(r.address ?? null)} city=${JSON.stringify(r.city ?? null)} state=${JSON.stringify(r.state ?? null)} zip=${JSON.stringify(r.zip ?? null)} lat/lng=${r.latitude ?? "∅"},${r.longitude ?? "∅"} overture_id=${r.overture_id ?? "∅"}`
+  const samples = ARGS.onlyMatched
+    ? toWrite.slice(0, 10)
+    : [...plan.filter((p) => p.outcome === "unique match").slice(0, 7), ...plan.filter((p) => p.outcome !== "unique match").slice(0, 3)]
   console.log(`\nSamples (before → after):`)
   for (const { shop, patch, outcome } of samples) {
     console.log(`  ${shop.name} [${outcome}]`)
