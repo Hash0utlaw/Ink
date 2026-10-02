@@ -30,6 +30,9 @@ export interface ShopRow {
   cover_image_url: string | null
   created_at: string
   updated_at: string
+  // Optional so callers that don't select it keep compiling; computeReport()
+  // only counts rows where it is exactly true.
+  is_active?: boolean | null
 }
 
 export interface StateBucket {
@@ -110,16 +113,20 @@ export async function fetchAllRows<T>(
   supabase: SupabaseClient,
   table: string,
   columns: string,
-  pageSize = 1000
+  pageSize = 1000,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  filter?: (q: any) => any
 ): Promise<T[]> {
   const rows: T[] = []
   let from = 0
   for (;;) {
-    const { data, error } = await supabase
+    let query = supabase
       .from(table)
       .select(columns)
       .order("id", { ascending: true })
       .range(from, from + pageSize - 1)
+    if (filter) query = filter(query)
+    const { data, error } = await query
     if (error) throw new Error(`fetchAllRows(${table}): ${error.message}`)
     const page = (data ?? []) as unknown as T[]
     rows.push(...page)
@@ -162,7 +169,11 @@ function isPopulated(value: unknown): boolean {
 
 // ── Compute ──────────────────────────────────────────────────────────────────
 
-export function computeReport(shops: ShopRow[]): AuditReport {
+// Counts ONLY active shops (is_active = true). Inactive rows are merged-away
+// duplicates or deactivated listings and aren't on the site, so every total,
+// per-state, metro, duplicate and completeness figure ignores them.
+export function computeReport(allShops: ShopRow[]): AuditReport {
+  const shops = allShops.filter((s) => s.is_active === true)
   const slugCounts = new Map<string, number>()
   for (const shop of shops) {
     if (shop.slug) slugCounts.set(shop.slug, (slugCounts.get(shop.slug) ?? 0) + 1)
@@ -325,12 +336,14 @@ export function renderMarkdown(report: AuditReport): string {
   lines.push(``)
   lines.push(`Generated: ${report.generatedAt}`)
   lines.push(``)
+  lines.push(`Counts active shops only (\`is_active = true\`).`)
+  lines.push(``)
 
   lines.push(`## Executive Summary`)
   lines.push(``)
   lines.push(`| Metric | Value |`)
   lines.push(`|---|---|`)
-  lines.push(`| Total shop rows | ${report.totals.totalShops.toLocaleString()} |`)
+  lines.push(`| Active shop rows | ${report.totals.totalShops.toLocaleString()} |`)
   lines.push(`| Usable rows (map-visible, per full USABLE definition) | ${report.totals.usableShops.toLocaleString()} |`)
   lines.push(`| Usable % | **${pct(report.totals.usablePct)}** |`)
   lines.push(`| Distinct state codes seen | ${report.totals.distinctStateCodes} |`)
@@ -397,7 +410,7 @@ export function renderMarkdown(report: AuditReport): string {
     lines.push(``)
   }
 
-  lines.push(`## 4. Field Completeness (all ${report.totals.totalShops.toLocaleString()} shop rows)`)
+  lines.push(`## 4. Field Completeness (all ${report.totals.totalShops.toLocaleString()} active shop rows)`)
   lines.push(``)
   lines.push(`| Field | Populated | Total | % |`)
   lines.push(`|---|---:|---:|---:|`)

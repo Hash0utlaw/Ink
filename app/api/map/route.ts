@@ -112,6 +112,7 @@ async function getShopsWithCoords(rating: number, limit: number): Promise<Record
   let q = supabase
     .from("shops")
     .select("id, name, address, city, state, latitude, longitude, rating, review_count, logo_url, cover_image_url, accepts_walk_ins, hours, description")
+    .eq("is_active", true)
     .not("latitude", "is", null)
     .not("longitude", "is", null)
     .neq("latitude", 0)
@@ -133,6 +134,7 @@ async function getShopsInBounds(
   let q = supabase
     .from("shops")
     .select("id, name, address, city, state, latitude, longitude, rating, review_count, logo_url, cover_image_url, accepts_walk_ins, hours, description")
+    .eq("is_active", true)
     .not("latitude", "is", null)
     .not("longitude", "is", null)
     .neq("latitude", 0)
@@ -159,6 +161,8 @@ async function getArtistsInBounds(
   let q = supabase
     .from("artists")
     .select(ARTIST_JOIN_COLUMNS)
+    .eq("is_active", true)
+    .eq("shops.is_active", true)
     .not("shops.latitude", "is", null)
     .not("shops.longitude", "is", null)
     .neq("shops.latitude", 0)
@@ -243,6 +247,8 @@ export async function GET(request: NextRequest) {
       let aq = supabase
         .from("artists")
         .select(ARTIST_JOIN_COLUMNS)
+        .eq("is_active", true)
+        .eq("shops.is_active", true)
         .not("shops.latitude", "is", null)
         .not("shops.longitude", "is", null)
         .neq("shops.latitude", 0)

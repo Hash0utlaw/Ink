@@ -5,10 +5,26 @@
 
 export interface ScriptArgs {
   dryRun: boolean
+  // True only when --apply is passed. Data-cleanup scripts are dry-run by
+  // default and write only with this flag (--dry-run is unrelated to it).
+  apply: boolean
   validated: boolean
   input: string | null
   state: string | null
   limit: number | null
+  // Open-data scripts (overture/fetch.ts, match-open-data.ts)
+  withFsq: boolean
+  refresh: boolean
+  minConfidence: number | null
+  mode: "all" | "enrich" | "insert"
+  requireOpen: boolean
+  requireStreet: boolean
+  requireContact: boolean
+  minSources: number | null
+  compareTiers: boolean
+  onlyMatched: boolean
+  inputFinal: string | null
+  output: string | null
 }
 
 // Accepts both "--flag value" and "--flag=value" — a bare argv.indexOf(flag)
@@ -29,12 +45,34 @@ export function parseScriptArgs(argv: string[] = process.argv.slice(2)): ScriptA
   const limitRaw = getArg("--limit", argv)
   const limit = limitRaw ? parseInt(limitRaw, 10) : null
   const state = getArg("--state", argv)
+  const minConfidenceRaw = getArg("--min-confidence", argv)
+  const minConfidence = minConfidenceRaw ? parseFloat(minConfidenceRaw) : null
+  const minSourcesRaw = getArg("--min-sources", argv)
+  const minSources = minSourcesRaw ? parseInt(minSourcesRaw, 10) : null
+  const mode = getArg("--mode", argv) ?? "all"
+  if (mode !== "all" && mode !== "enrich" && mode !== "insert") {
+    console.error(`--mode must be all, enrich or insert (got "${mode}")`)
+    process.exit(1)
+  }
 
   return {
     dryRun: argv.includes("--dry-run"),
+    apply: argv.includes("--apply"),
     validated: argv.includes("--validated"),
     input: getArg("--input", argv),
     state: state ? state.trim().toUpperCase() : null,
     limit: limit !== null && !isNaN(limit) ? limit : null,
+    withFsq: argv.includes("--with-fsq"),
+    refresh: argv.includes("--refresh"),
+    minConfidence: minConfidence !== null && !isNaN(minConfidence) ? minConfidence : null,
+    mode,
+    requireOpen: argv.includes("--require-open"),
+    requireStreet: argv.includes("--require-street"),
+    requireContact: argv.includes("--require-contact"),
+    minSources: minSources !== null && !isNaN(minSources) ? minSources : null,
+    compareTiers: argv.includes("--compare-tiers"),
+    onlyMatched: argv.includes("--only-matched"),
+    inputFinal: getArg("--input-final", argv),
+    output: getArg("--output", argv),
   }
 }
