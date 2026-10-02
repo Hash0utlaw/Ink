@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback, useRef } from "react"
+import { useState, useEffect, useCallback, useMemo, useRef } from "react"
 import { MapboxMap, type MapBounds } from "./mapbox-map"
 import { MapSidebar } from "./map-sidebar"
 import { LocationDetails } from "./location-details"
@@ -18,10 +18,62 @@ interface MapFilters {
   searchQuery: string
 }
 
+// The map loads one compact pin per shop/artist from /api/map/pins, keeps
+// them all in the clustered source, and fetches full records from
+// /api/map/details only for the top MAX_CARDS pins in view (sidebar) or a
+// clicked pin (LocationDetails).
+const MAX_CARDS = 100
+
+type Pin = [string, number, number, number, string?] // id, lat, lng, rating, primary specialty
+
+// Minimal MapboxLocation for a pin — enough for clustering, colors, filters
+// and click lookup; replaced by the full record from /api/map/details.
+function pinToLocation(type: "shop" | "artist", [id, lat, lng, rating, primary]: Pin): MapboxLocation {
+  return {
+    id: `${type}-${id}`,
+    name: "",
+    type,
+    coordinates: [lng, lat],
+    address: "",
+    rating,
+    reviewCount: 0,
+    isOpen: false,
+    specialties: primary ? [primary] : [],
+    priceRange: "medium",
+  }
+}
+
+// "shop-<uuid>" → ["shop", "<uuid>"]
+function splitId(id: string): ["shop" | "artist", string] {
+  const dash = id.indexOf("-")
+  return [id.slice(0, dash) as "shop" | "artist", id.slice(dash + 1)]
+}
+
+async function fetchDetails(ids: string[]): Promise<MapboxLocation[]> {
+  const shops: string[] = []
+  const artists: string[] = []
+  for (const id of ids) {
+    const [type, raw] = splitId(id)
+    ;(type === "shop" ? shops : artists).push(raw)
+  }
+  const params = new URLSearchParams()
+  if (shops.length) params.set("shops", shops.join(","))
+  if (artists.length) params.set("artists", artists.join(","))
+  const res = await fetch(`/api/map/details?${params}`)
+  if (!res.ok) throw new Error(`details ${res.status}`)
+  const json = await res.json()
+  return (json.data ?? []) as MapboxLocation[]
+}
+
 export function MapInterface() {
   const { toast } = useToast()
-  const [locations, setLocations] = useState<MapboxLocation[]>([])
-  const [filteredLocations, setFilteredLocations] = useState<MapboxLocation[]>([])
+  // Every pin (stub locations), and full records fetched so far, by id.
+  const [pins, setPins] = useState<MapboxLocation[]>([])
+  const detailsCacheRef = useRef<Map<string, MapboxLocation>>(new Map())
+  // Sidebar: full records for the top-rated pins in view, and in-view counts.
+  const [cards, setCards] = useState<MapboxLocation[]>([])
+  const [inView, setInView] = useState<{ shops: number; artists: number } | null>(null)
+  const [bounds, setBounds] = useState<MapBounds | null>(null)
   const [selectedLocation, setSelectedLocation] = useState<MapboxLocation | null>(null)
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null)
   const [mapCenter, setMapCenter] = useState<[number, number]>([-98.5795, 39.8283])
@@ -40,35 +92,41 @@ export function MapInterface() {
     searchQuery: "",
   })
 
-  // Load locations on mount
+  // Load all pins once, and again when the style filter changes (it narrows
+  // artists server-side; shops are unaffected).
+  const stylesKey = filters.styles.join(",")
   useEffect(() => {
-    const loadLocations = async () => {
+    let cancelled = false
+    const loadPins = async () => {
       try {
-        setLoading(true)
         setDataError(null)
-        const res = await fetch("/api/map?type=all")
+        const res = await fetch(stylesKey ? `/api/map/pins?styles=${encodeURIComponent(stylesKey)}` : "/api/map/pins")
         if (!res.ok) {
-          setDataError(`Couldn't load shops (error ${res.status})`)
-          setLocations([])
-          setFilteredLocations([])
+          if (!cancelled) {
+            setDataError(`Couldn't load shops (error ${res.status})`)
+            setLoading(false)
+          }
           return
         }
         const json = await res.json()
-        const data: MapboxLocation[] = json.data ?? []
-        setLocations(data)
-        setFilteredLocations(data)
+        if (cancelled) return
+        setPins([
+          ...((json.shops ?? []) as Pin[]).map((p) => pinToLocation("shop", p)),
+          ...((json.artists ?? []) as Pin[]).map((p) => pinToLocation("artist", p)),
+        ])
       } catch (error) {
-        console.error("Failed to load locations:", error)
-        setDataError("Couldn't load shops — check your connection")
-        setLocations([])
-        setFilteredLocations([])
-      } finally {
-        setLoading(false)
+        console.error("Failed to load map pins:", error)
+        if (!cancelled) {
+          setDataError("Couldn't load shops — check your connection")
+          setLoading(false)
+        }
       }
     }
-
-    loadLocations()
-  }, [])
+    loadPins()
+    return () => {
+      cancelled = true
+    }
+  }, [stylesKey])
 
   // On mobile the sidebar is a full-width overlay (see map-sidebar.tsx), so
   // default it closed there — otherwise the map itself would be completely
@@ -81,34 +139,18 @@ export function MapInterface() {
     }
   }, [])
 
-  // Viewport-driven refetch, debounced on the map's moveend. Replaces the old
-  // flat MAP_LIMIT-for-everything behavior: as the map pans/zooms, `locations`
-  // is replaced with whatever's actually in the new bounding box (up to the
-  // API's own backstop cap), rather than a fixed nationwide top-500 cut. This
-  // deliberately does NOT toggle `loading` — that's reserved for the initial
-  // load, since flashing the sidebar's skeleton on every pan/zoom would be
-  // jarring for what's meant to be a quiet background refresh.
+  // Viewport bounds, debounced on the map's moveend. No refetch — visible
+  // pins are computed client-side from the full pin set below.
   const moveEndTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const handleMoveEnd = useCallback((bounds: MapBounds) => {
+  const handleMoveEnd = useCallback((next: MapBounds) => {
     if (moveEndTimerRef.current) clearTimeout(moveEndTimerRef.current)
-    moveEndTimerRef.current = setTimeout(async () => {
-      try {
-        const { west, south, east, north } = bounds
-        const res = await fetch(`/api/map?type=all&bbox=${west},${south},${east},${north}`)
-        if (!res.ok) {
-          setDataError(`Couldn't load shops (error ${res.status})`)
-          return
-        }
-        const json = await res.json()
-        const data: MapboxLocation[] = json.data ?? []
-        setDataError(null)
-        setLocations(data)
-      } catch (error) {
-        console.error("Failed to load locations for viewport:", error)
-        setDataError("Couldn't load shops — check your connection")
-      }
-    }, 300)
+    moveEndTimerRef.current = setTimeout(() => setBounds(next), 300)
+  }, [])
+
+  const handleMapLoad = useCallback((map: { getBounds: () => any }) => {
+    const b = map.getBounds()
+    setBounds({ west: b.getWest(), south: b.getSouth(), east: b.getEast(), north: b.getNorth() })
   }, [])
 
   useEffect(() => {
@@ -117,60 +159,75 @@ export function MapInterface() {
     }
   }, [])
 
-  // Filter locations based on current filters
+  // Pins after the filters that pins carry data for (type, rating, radius).
+  // The map clusters all of these.
+  const mapPins = useMemo(() => {
+    return pins.filter((pin) => {
+      if (filters.locationType !== "all" && pin.type !== filters.locationType) return false
+      if (filters.rating > 0 && pin.rating < filters.rating) return false
+      if (userLocation && filters.radius > 0 && calculateDistance(userLocation, pin.coordinates) > filters.radius) return false
+      return true
+    })
+  }, [pins, filters.locationType, filters.rating, filters.radius, userLocation])
+
+  // Pins in view → counts + top MAX_CARDS by rating → fetch any uncached
+  // details → sidebar cards. Stale responses are dropped via requestRef.
+  const requestRef = useRef(0)
   useEffect(() => {
-    let filtered = [...locations]
+    if (pins.length === 0) return
+    const visible = bounds
+      ? mapPins.filter(({ coordinates: [lng, lat] }) =>
+          lat >= bounds.south && lat <= bounds.north && lng >= bounds.west && lng <= bounds.east
+        )
+      : mapPins
+    let shops = 0
+    for (const p of visible) if (p.type === "shop") shops++
+    setInView({ shops, artists: visible.length - shops })
 
-    // Filter by location type
-    if (filters.locationType !== "all") {
-      filtered = filtered.filter((location) => location.type === filters.locationType)
+    const top = [...visible].sort((a, b) => b.rating - a.rating).slice(0, MAX_CARDS)
+    const missing = top.map((p) => p.id).filter((id) => !detailsCacheRef.current.has(id))
+    const request = ++requestRef.current
+    const show = () => {
+      if (request !== requestRef.current) return
+      setCards(top.map((p) => detailsCacheRef.current.get(p.id)).filter((l): l is MapboxLocation => !!l))
+      setLoading(false)
     }
-
-    // Filter by styles
-    if (filters.styles.length > 0) {
-      filtered = filtered.filter((location) =>
-        location.specialties.some((specialty) =>
-          filters.styles.some((style) => specialty.toLowerCase().includes(style.toLowerCase())),
-        ),
-      )
+    if (missing.length === 0) {
+      show()
+      return
     }
-
-    // Filter by price range
-    if (filters.priceRange.length > 0) {
-      filtered = filtered.filter((location) => filters.priceRange.includes(location.priceRange))
-    }
-
-    // Filter by rating
-    if (filters.rating > 0) {
-      filtered = filtered.filter((location) => location.rating >= filters.rating)
-    }
-
-    // Filter by availability
-    if (filters.availableNow) {
-      filtered = filtered.filter((location) => location.isOpen)
-    }
-
-    // Filter by radius (if user location is available)
-    if (userLocation && filters.radius > 0) {
-      filtered = filtered.filter((location) => {
-        const distance = location.distance || calculateDistance(userLocation, location.coordinates)
-        return distance <= filters.radius
+    fetchDetails(missing)
+      .then((rows) => {
+        for (const row of rows) detailsCacheRef.current.set(row.id, row)
+        setDataError(null)
+        show()
       })
-    }
+      .catch((error) => {
+        console.error("Failed to load location details:", error)
+        if (request === requestRef.current) {
+          setDataError("Couldn't load shops — check your connection")
+          setLoading(false)
+        }
+      })
+  }, [pins.length, mapPins, bounds])
 
-    // Filter by search query
-    if (filters.searchQuery.trim()) {
-      const query = filters.searchQuery.toLowerCase()
-      filtered = filtered.filter(
-        (location) =>
-          location.name.toLowerCase().includes(query) ||
-          location.address.toLowerCase().includes(query) ||
-          location.specialties.some((specialty) => specialty.toLowerCase().includes(query)),
+  // Filters that need full records (search, price, availability) apply to
+  // the cards only.
+  const filteredCards = useMemo(() => {
+    const query = filters.searchQuery.trim().toLowerCase()
+    return cards.filter((location) => {
+      if (filters.priceRange.length > 0 && !filters.priceRange.includes(location.priceRange)) return false
+      if (filters.availableNow && !location.isOpen) return false
+      if (
+        query &&
+        !location.name.toLowerCase().includes(query) &&
+        !location.address.toLowerCase().includes(query) &&
+        !location.specialties.some((specialty) => specialty.toLowerCase().includes(query))
       )
-    }
-
-    setFilteredLocations(filtered)
-  }, [locations, filters, userLocation])
+        return false
+      return true
+    })
+  }, [cards, filters.priceRange, filters.availableNow, filters.searchQuery])
 
   // Handle search
   const handleSearch = useCallback(async (query: string) => {
@@ -211,14 +268,33 @@ export function MapInterface() {
     setFilters((prev) => ({ ...prev, ...newFilters }))
   }, [])
 
-  // Handle location selection
-  const handleLocationSelect = useCallback((location: MapboxLocation | null) => {
-    setSelectedLocation(location)
-    if (location) {
+  // Handle location selection. Map clicks pass a pin stub; its full record
+  // is fetched (once) before LocationDetails opens.
+  const handleLocationSelect = useCallback(
+    async (location: MapboxLocation | null) => {
+      if (!location) {
+        setSelectedLocation(null)
+        return
+      }
       setMapCenter(location.coordinates)
       setMapZoom(16)
-    }
-  }, [])
+      const cached = detailsCacheRef.current.get(location.id)
+      if (cached) {
+        setSelectedLocation(cached)
+        return
+      }
+      try {
+        const [full] = await fetchDetails([location.id])
+        if (!full) throw new Error("not found")
+        detailsCacheRef.current.set(full.id, full)
+        setSelectedLocation(full)
+      } catch (error) {
+        console.error("Failed to load location details:", error)
+        toast({ description: "Couldn't load details for this location" })
+      }
+    },
+    [toast]
+  )
 
   // Handle map style change
   const handleMapStyleChange = useCallback((style: string) => {
@@ -231,7 +307,8 @@ export function MapInterface() {
       <MapSidebar
         isOpen={sidebarOpen}
         onToggle={() => setSidebarOpen(!sidebarOpen)}
-        locations={filteredLocations}
+        locations={filteredCards}
+        totals={inView}
         selectedLocation={selectedLocation}
         onLocationSelect={handleLocationSelect}
         filters={filters}
@@ -246,13 +323,14 @@ export function MapInterface() {
       <div className="flex-1 relative">
         <MapboxMap
           accessToken={mapboxConfig.accessToken}
-          locations={filteredLocations}
+          locations={mapPins}
           selectedLocation={selectedLocation}
           onLocationSelect={handleLocationSelect}
           center={mapCenter}
           zoom={mapZoom}
           style={mapStyle as keyof typeof import("@/lib/mapbox").mapStyles}
           onMoveEnd={handleMoveEnd}
+          onMapLoad={handleMapLoad}
           className="w-full h-full"
         />
 
