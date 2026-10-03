@@ -155,6 +155,9 @@ dependencies:
   resend:
     specifier: ^6.12.4
     version: 6.12.4(@react-email/render@2.0.8)
+  robots-parser:
+    specifier: ^3.0.1
+    version: 3.0.1
   sonner:
     specifier: latest
     version: 2.0.7(react-dom@18.3.1)(react@18.3.1)
@@ -5182,6 +5185,11 @@ packages:
     dependencies:
       glob: 7.2.3
     dev: true
+
+  /robots-parser@3.0.1:
+    resolution: {integrity: sha512-s+pyvQeIKIZ0dx5iJiQk1tPLJAWln39+MI5jtM8wnyws+G5azk+dMnMX0qfbqNetKKNgcWWOdi0sfm+FbQbgdQ==}
+    engines: {node: '>=10.0.0'}
+    dev: false
 
   /run-parallel@1.2.0:
     resolution: {integrity: sha512-5l4VyZR86LZ/lDxZTR6jqL8AFE2S0IFLMP26AbjsLVADxHdhB/c0GUsH+y39UfCi3dzz8OlQuPmnaJOMoDHQBA==}
