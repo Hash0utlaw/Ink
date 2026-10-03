@@ -767,9 +767,10 @@ async function insertFinal(supabase: SupabaseClient, file: string, all: Row[], a
   const usedOverture = new Set(all.filter((s) => s.overture_id).map((s) => String(s.overture_id)))
   const usedSlugs = new Set(all.map((s) => String(s.slug ?? "")))
   const grid = activeIndex(active)
-  const skips = { overtureIdUsed: 0, slugUsed: 0, nearActive: 0 }
+  const skips = { noOvertureId: 0, overtureIdUsed: 0, slugUsed: 0, nearActive: 0 }
   const toInsert: Row[] = []
   for (const r of rows) {
+    if (!r.overture_id) { skips.noOvertureId++; continue }
     const lat = parseFloat(r.latitude as string)
     const lng = parseFloat(r.longitude as string)
     if (usedOverture.has(String(r.overture_id))) { skips.overtureIdUsed++; continue }
@@ -779,11 +780,14 @@ async function insertFinal(supabase: SupabaseClient, file: string, all: Row[], a
     for (const h of NEW_SHOP_HEADERS) row[h] = r[h] === "" || r[h] == null ? null : r[h]
     row.latitude = lat
     row.longitude = lng
+    // Always derived from overture_id — older final CSVs have no place_id column.
+    row.place_id = `overture:${r.overture_id}`
     usedOverture.add(String(r.overture_id))
     usedSlugs.add(String(r.slug))
     toInsert.push(row)
   }
   console.log(`${file}: ${rows.length} rows`)
+  console.log(`  skipped, no overture_id:           ${skips.noOvertureId}`)
   console.log(`  skipped, overture_id already used: ${skips.overtureIdUsed}`)
   console.log(`  skipped, slug already used:        ${skips.slugUsed}`)
   console.log(`  skipped, now ≤${TIER_NEAR_ACTIVE_M}m of an active shop: ${skips.nearActive}`)
