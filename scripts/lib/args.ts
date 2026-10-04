@@ -25,6 +25,9 @@ export interface ScriptArgs {
   onlyMatched: boolean
   inputFinal: string | null
   output: string | null
+  // scrape-shop-artists.ts
+  maxCost: number | null
+  retryFailed: boolean
 }
 
 // Accepts both "--flag value" and "--flag=value" — a bare argv.indexOf(flag)
@@ -49,6 +52,8 @@ export function parseScriptArgs(argv: string[] = process.argv.slice(2)): ScriptA
   const minConfidence = minConfidenceRaw ? parseFloat(minConfidenceRaw) : null
   const minSourcesRaw = getArg("--min-sources", argv)
   const minSources = minSourcesRaw ? parseInt(minSourcesRaw, 10) : null
+  const maxCostRaw = getArg("--max-cost", argv)
+  const maxCost = maxCostRaw ? parseFloat(maxCostRaw) : null
   const mode = getArg("--mode", argv) ?? "all"
   if (mode !== "all" && mode !== "enrich" && mode !== "insert") {
     console.error(`--mode must be all, enrich or insert (got "${mode}")`)
@@ -74,5 +79,7 @@ export function parseScriptArgs(argv: string[] = process.argv.slice(2)): ScriptA
     onlyMatched: argv.includes("--only-matched"),
     inputFinal: getArg("--input-final", argv),
     output: getArg("--output", argv),
+    maxCost: maxCost !== null && !isNaN(maxCost) ? maxCost : null,
+    retryFailed: argv.includes("--retry-failed"),
   }
 }

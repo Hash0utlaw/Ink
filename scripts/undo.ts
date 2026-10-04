@@ -4,6 +4,9 @@
 //   Dry-run by default: reports what would be restored and any rows whose
 //   current value no longer matches what the script wrote (changed since).
 //   --apply restores, and undo-logs its own writes so an undo can be undone.
+//   Inserted rows (op "insert") are deleted — the one place a script deletes —
+//   and only for DELETABLE_INSERTS below (shop_artists rows from
+//   scrape-shop-artists.ts). Any other insert entry stops the run.
 
 import { config } from "dotenv"
 config({ path: ".env.local" })
@@ -17,6 +20,9 @@ import { fetchIn, modeBanner, runPool } from "./lib/cleanup-utils"
 
 const ARGS = parseScriptArgs()
 
+// script → table whose rows that script inserted and undo may delete.
+const DELETABLE_INSERTS: Record<string, string> = { "scrape-shop-artists": "shop_artists" }
+
 async function main() {
   if (!ARGS.input) {
     console.error("Usage: npx tsx scripts/undo.ts --input data/undo/<file>.jsonl [--apply]")
@@ -29,12 +35,24 @@ async function main() {
   }
   modeBanner(ARGS.apply)
 
-  const entries = fs
+  const all = fs
     .readFileSync(file, "utf-8")
     .split("\n")
     .filter((l) => l.trim())
     .map((l) => JSON.parse(l) as UndoEntry)
-  console.log(`Read ${entries.length} undo entries from ${file}`)
+  console.log(`Read ${all.length} undo entries from ${file}`)
+
+  const inserts = all.filter((e) => e.op === "insert")
+  // "__deleted__" lines record rows a previous undo deleted; they can't be replayed.
+  const deletedRecords = all.filter((e) => e.field === "__deleted__").length
+  if (deletedRecords > 0) console.log(`  ${deletedRecords} deleted-row records skipped (can't be re-inserted by undo)`)
+  const entries = all.filter((e) => e.op !== "insert" && e.field !== "__deleted__")
+  for (const e of inserts) {
+    if (DELETABLE_INSERTS[e.script] !== e.table) {
+      console.error(`Refusing: insert entry for ${e.table} from ${e.script} — undo only deletes rows listed in DELETABLE_INSERTS.`)
+      process.exit(1)
+    }
+  }
 
   // Walk in reverse so that if a field was changed more than once, the value
   // restored is the oldest one (from the first write). `wrote` keeps the last
@@ -94,9 +112,32 @@ async function main() {
     }
   }
 
+  // Inserted rows: delete those that still exist.
+  let deleted = 0
+  const insertsByTable = new Map<string, string[]>()
+  for (const e of inserts) insertsByTable.set(e.table, [...(insertsByTable.get(e.table) ?? []), e.id])
+  for (const [table, ids] of Array.from(insertsByTable.entries())) {
+    const existing = await fetchIn(supabase, table, "*", "id", ids)
+    missing += ids.length - existing.length
+    console.log(`\n${table}: ${ids.length} inserted rows, ${existing.length} still exist`)
+    if (!ARGS.apply) {
+      deleted += existing.length
+      continue
+    }
+    for (let i = 0; i < existing.length; i += 200) {
+      const chunk = existing.slice(i, i + 200)
+      // Logged for the record only — undo.ts can't re-insert deleted rows.
+      undo.append(chunk.map((r) => ({ table, id: String(r.id), field: "__deleted__", old_value: r, new_value: null })))
+      const { error } = await supabase.from(table).delete().in("id", chunk.map((r) => String(r.id)))
+      if (error) throw new Error(`delete ${table} failed: ${error.message}`)
+      deleted += chunk.length
+    }
+  }
+
   console.log(`\n── Summary ──`)
   console.log(`Rows ${ARGS.apply ? "restored" : "that would be restored"}: ${restored}`)
   console.log(`Fields changed since the script ran (drift): ${drifted}`)
+  if (inserts.length > 0) console.log(`Inserted rows ${ARGS.apply ? "deleted" : "that would be deleted"}: ${deleted}`)
   console.log(`Rows missing: ${missing}`)
   if (ARGS.apply && undo.entries > 0) console.log(`Undo log for this restore: ${undo.file}`)
 }

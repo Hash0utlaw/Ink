@@ -4,6 +4,8 @@
 // The line is appended synchronously BEFORE the database write, so a crash
 // mid-run never leaves a change on disk without its undo record.
 // scripts/undo.ts replays a file in reverse to restore the old values.
+// Entries with op "insert" record a whole new row (new_value is the row);
+// undo.ts deletes those rows, and only for the tables/scripts it allows.
 
 import fs from "fs"
 import path from "path"
@@ -17,6 +19,7 @@ export interface UndoEntry {
   new_value: unknown
   script: string
   timestamp: string
+  op?: "insert"
 }
 
 const UNDO_DIR = path.resolve("data/undo")

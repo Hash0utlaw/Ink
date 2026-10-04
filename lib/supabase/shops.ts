@@ -47,6 +47,7 @@ function rowToShop(row: Record<string, unknown>): Shop {
     hours: (row.hours as Record<string, string>) ?? {},
     specialties: Array.isArray(row.specialties) ? (row.specialties as string[]) : [],
     acceptsWalkIns: Boolean(row.accepts_walk_ins ?? false),
+    possiblyClosed: Boolean(row.possibly_closed ?? false),
   }
 }
 
@@ -55,7 +56,11 @@ export async function getShops(
 ): Promise<{ data: Shop[]; count: number; error: string | null }> {
   try {
     const supabase = createClient()
-    let query = supabase.from("shops").select("*", { count: "exact", head: false }).eq("is_active", true)
+    let query = supabase
+      .from("shops")
+      .select("*", { count: "exact", head: false })
+      .eq("is_active", true)
+      .eq("possibly_closed", false)
 
     // TODO: filters.styles is intentionally a no-op. shops has no specialties
     // column, so filtering on it errors the whole query. Wire this up once
@@ -119,7 +124,23 @@ export async function getShopsNearMe(
       p_walk_ins: filters.acceptsWalkIns ?? null,
     })
     if (error) return { data: [], error: error.message }
-    const shops = (data ?? []).map((row: Record<string, unknown>) => ({
+
+    // The RPC doesn't return possibly_closed, so drop flagged shops here. The
+    // flagged set is small (dozens), so fetching it beats an .in() over every
+    // result id, which can overflow the URL at large radii.
+    const rows = (data ?? []) as Record<string, unknown>[]
+    const closed = new Set<string>()
+    if (rows.length > 0) {
+      const { data: flagged, error: flaggedError } = await supabase
+        .from("shops")
+        .select("id")
+        .eq("is_active", true)
+        .eq("possibly_closed", true)
+      if (flaggedError) return { data: [], error: flaggedError.message }
+      for (const r of flagged ?? []) closed.add(String(r.id))
+    }
+
+    const shops = rows.filter((row) => !closed.has(String(row.id))).map((row) => ({
       ...rowToShop(row),
       distance_mi: Number(row.distance_mi ?? 0),
     }))

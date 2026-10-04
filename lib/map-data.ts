@@ -126,6 +126,7 @@ export function shopQuery(bounds: Bounds | null, rating: number): QueryFactory {
       .from("shops")
       .select(columns, head ? { count: "exact", head: true } : undefined)
       .eq("is_active", true)
+      .eq("possibly_closed", false)
       .not("latitude", "is", null)
       .not("longitude", "is", null)
       .neq("latitude", 0)

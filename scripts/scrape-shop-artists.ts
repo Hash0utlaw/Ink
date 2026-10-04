@@ -2,365 +2,718 @@
 // Fetches each shop's website, uses Claude Haiku to extract artist names,
 // and inserts results into shop_artists. Then run promote-shop-artists.ts.
 //
-// Run: pnpm tsx scripts/scrape-shop-artists.ts [--dry-run] [--limit N] [--state XX]
+// Run: npx tsx scripts/scrape-shop-artists.ts [--apply] [--limit N] [--state XX]
+//          [--max-cost=5] [--retry-failed] [--input=<checkpoint.json>]
+//   Dry-run by default: fetches and extracts (this DOES spend API credit) but
+//   writes nothing to the database. --apply inserts into shop_artists,
+//   undo-logged as inserts (scripts/undo.ts deletes them).
+//
+// Candidates: active shops, not possibly_closed, with a real website (social,
+// link-in-bio and booking platforms excluded), no shop_artists rows yet, and
+// not already in the checkpoint. --input=<checkpoint.json> limits candidates
+// to the shops recorded in that file (e.g. to re-run a pilot on the same shops).
+//
+// Checkpoint (data/scrape-artists-checkpoint.json): every attempted shop_id
+// with its status — ok, no_artists, fetch_failed, robots_blocked, skipped — and
+// the artists extracted. A recorded shop is never re-attempted; with
+// --retry-failed, ONLY fetch_failed shops are re-attempted, with a 15s timeout
+// and, if the homepage still fails, its www/non-www variant and then http://.
+// Artists extracted on a dry run are
+// kept there, so a later --apply inserts them without fetching again.
+//
+// Politeness: robots.txt per origin (user-agent TattooMapsBot), 6 shops at a
+// time, 8s timeout, at most 3 page fetches per shop: the homepage, the linked
+// artists/team page, or — when no link is found — a guess at /artists,
+// /our-artists, /team (first one that returns HTML).
+//
+// Quality: the model labels each person's role and only tattoo artists and
+// apprentices are kept. A name is kept only if it appears in the fetched page
+// text; drops placeholders, handle-like names, names with digits/@/URLs, names
+// over 4 words and duplicates. Every drop is written to
+// data/scrape-artists-dropped.csv with its reason.
+// image_url must be http(s), resolved against the page, and not a
+// logo/icon/favicon/sprite.
+//
+// Cost: input × $1/MTok + output × $5/MTok, logged per call. Stops cleanly at
+// --max-cost (default $5) and immediately on a credit-balance or auth error.
+//
+// Outputs: data/scrape-artists-results.csv (one row per shop attempted this
+// run), data/scrape-artists-extracted.csv (one row per artist kept) and
+// data/scrape-artists-dropped.csv (one row per person dropped). A
+// --retry-failed run writes the same files with a ".retry" suffix.
 
 import { config } from "dotenv"
 config({ path: ".env.local" })
 
-import { createClient } from "@supabase/supabase-js"
+import fs from "fs"
+import { randomUUID } from "crypto"
 import Anthropic from "@anthropic-ai/sdk"
 import { load as cheerioLoad } from "cheerio"
-import pLimit from "p-limit"
+import robotsParser from "robots-parser"
+import type { SupabaseClient } from "@supabase/supabase-js"
+import { parseScriptArgs } from "./lib/args"
+import { getSupabaseAdmin } from "./lib/supabase-admin"
+import { UndoLog } from "./lib/undo-log"
+import { fetchAll, modeBanner, runPool, writeCsv } from "./lib/cleanup-utils"
+import { isPlaceholderName, normalizeArtistName } from "./lib/artist-names"
+import { withRetry } from "./lib/retry"
 
-// ── CLI flags ────────────────────────────────────────────────────────────────
+const ARGS = parseScriptArgs()
+const MAX_COST = ARGS.maxCost ?? 5
 
-const argv = process.argv.slice(2)
-const DRY_RUN = argv.includes("--dry-run")
+const MODEL = "claude-haiku-4-5-20251001"
+const INPUT_USD_PER_MTOK = 1
+const OUTPUT_USD_PER_MTOK = 5
 
-function getArg(flag: string): string | null {
-  const eqIdx = argv.findIndex((a) => a.startsWith(`${flag}=`))
-  if (eqIdx !== -1) return argv[eqIdx].split("=")[1]
-  const spaceIdx = argv.indexOf(flag)
-  if (spaceIdx !== -1 && argv[spaceIdx + 1]) return argv[spaceIdx + 1]
-  return null
-}
+const USER_AGENT = "Mozilla/5.0 (compatible; TattooMapsBot/1.0; +https://tattoo-maps.com)"
+const ROBOTS_UA = "TattooMapsBot"
+const CONCURRENCY = 6
+const TIMEOUT_MS = ARGS.retryFailed ? 15000 : 8000
+const MAX_FETCHES = 3
+const GUESS_PATHS = ["/artists", "/our-artists", "/team"]
+const MIN_TEXT_CHARS = 100
 
-const LIMIT = getArg("--limit") ? parseInt(getArg("--limit")!) : null
-const STATE = getArg("--state")?.toUpperCase() ?? null
-
-if (DRY_RUN) console.log("DRY RUN — no data will be written.\n")
-if (STATE) console.log(`Filtering to state: ${STATE}`)
-if (LIMIT) console.log(`Processing at most ${LIMIT} shops`)
-
-// ── Clients ──────────────────────────────────────────────────────────────────
-
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
-const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
-const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY
-
-if (!SUPABASE_URL || !SERVICE_ROLE_KEY) {
-  console.error("Missing Supabase env vars in .env.local")
-  process.exit(1)
-}
-if (!ANTHROPIC_API_KEY) {
-  console.error("Missing ANTHROPIC_API_KEY in .env.local — add it to proceed")
-  process.exit(1)
-}
-
-const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY.trim())
-const anthropic = new Anthropic({ apiKey: ANTHROPIC_API_KEY })
+const CHECKPOINT = "data/scrape-artists-checkpoint.json"
+const CSV_SUFFIX = ARGS.retryFailed ? ".retry" : ""
+const RESULTS_CSV = `data/scrape-artists-results${CSV_SUFFIX}.csv`
+const EXTRACTED_CSV = `data/scrape-artists-extracted${CSV_SUFFIX}.csv`
+const DROPPED_CSV = `data/scrape-artists-dropped${CSV_SUFFIX}.csv`
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
 type Shop = {
   id: string
   name: string
-  slug: string
   city: string | null
   state: string | null
   website: string
 }
 
+type Status = "ok" | "no_artists" | "fetch_failed" | "robots_blocked" | "skipped"
+
+const ROLES = ["tattoo_artist", "apprentice", "piercer", "manager", "front_desk", "owner_non_artist", "other"] as const
+type Role = (typeof ROLES)[number]
+const KEEP_ROLES = new Set<Role>(["tattoo_artist", "apprentice"])
+
 type ExtractedArtist = {
   name: string
-  specialty?: string
-  image_url?: string
+  role: Role
+  specialty: string | null
+  image_url: string | null
 }
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
+type DropReason = "role" | "handle-like" | "placeholder" | "not-on-page" | "duplicate" | "digits" | "handle/url" | "over 4 words"
+type Dropped = { name: string; role: Role; reason: DropReason }
 
-const SKIP_DOMAINS = [
-  "facebook.com",
-  "instagram.com",
-  "twitter.com",
-  "tiktok.com",
-  ".top/",
-  "usacommetix",
-  "yelp.com",
-  "google.com",
-]
-
-function shouldSkipUrl(url: string): boolean {
-  const lower = url.toLowerCase()
-  return SKIP_DOMAINS.some((d) => lower.includes(d))
+type CheckpointEntry = {
+  status: Status
+  at: string
+  name: string
+  website: string
+  pages: string[]
+  cost: number
+  artists: ExtractedArtist[]
+  dropped?: Dropped[]
+  // Set once the artists are in shop_artists (an --apply run).
+  inserted: boolean
+  note?: string
 }
 
-async function fetchHtml(url: string, timeoutMs = 6000): Promise<string | null> {
+type Checkpoint = Record<string, CheckpointEntry>
+
+// Stops the whole run: no credit left, or the key is rejected.
+class FatalApiError extends Error {}
+
+// ── Candidate filtering ──────────────────────────────────────────────────────
+
+// Hosts that aren't the shop's own site (social, link-in-bio, booking,
+// directories and listings), plus any host containing "directory"/"nearme".
+const EXCLUDED_HOST =
+  /(^|\.)(facebook\.com|fb\.com|instagram\.com|tiktok\.com|youtube\.com|youtu\.be|twitter\.com|x\.com|linktr\.ee|business\.site|negocio\.site|booksy\.com|vagaro\.com|square\.site|squareup\.com|glossgenius\.com|schedulicity\.com|styleseat\.com|fresha\.com|setmore\.com|yelp\.com|tattoodo\.com|tattoshopsnearme\.com|tattooshopsnearme\.com|popl\.co|yellowpages\.com|mapquest\.com|tripadvisor\.com|nextdoor\.com|bbb\.org|manta\.com|groupon\.com)$|(^|\.)google\.[a-z.]+$|directory|nearme/i
+// Spam domains seen in the data.
+const SPAM_URL = /\.top\/|usacommetix/i
+
+function normalizeUrl(website: string): URL | null {
+  const raw = website.trim()
+  if (!raw) return null
   try {
-    const controller = new AbortController()
-    const timer = setTimeout(() => controller.abort(), timeoutMs)
-    const resp = await fetch(url, {
-      signal: controller.signal,
-      headers: {
-        "User-Agent": "Mozilla/5.0 (compatible; TattooMapsBot/1.0; +https://inkfinder.app)",
-        Accept: "text/html,application/xhtml+xml",
-      },
-      redirect: "follow",
-    })
-    clearTimeout(timer)
-    if (!resp.ok) return null
-    const ct = resp.headers.get("content-type") ?? ""
-    if (!ct.includes("html")) return null
-    return await resp.text()
+    const url = new URL(/^https?:\/\//i.test(raw) ? raw : `https://${raw}`)
+    return url.protocol === "http:" || url.protocol === "https:" ? url : null
   } catch {
     return null
   }
+}
+
+function isRealWebsite(website: string | null): boolean {
+  if (!website) return false
+  const url = normalizeUrl(website)
+  if (!url) return false
+  return !EXCLUDED_HOST.test(url.hostname) && !SPAM_URL.test(website)
+}
+
+// ── Checkpoint ───────────────────────────────────────────────────────────────
+
+function loadCheckpoint(): Checkpoint {
+  if (!fs.existsSync(CHECKPOINT)) return {}
+  return JSON.parse(fs.readFileSync(CHECKPOINT, "utf-8")) as Checkpoint
+}
+
+function saveCheckpoint(cp: Checkpoint): void {
+  const tmp = `${CHECKPOINT}.tmp`
+  fs.writeFileSync(tmp, JSON.stringify(cp))
+  fs.renameSync(tmp, CHECKPOINT)
+}
+
+// ── Fetching ─────────────────────────────────────────────────────────────────
+
+type Page = { url: string; html: string }
+
+async function fetchText(url: string, accept: string): Promise<{ text: string; finalUrl: string; contentType: string } | null> {
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS)
+  try {
+    const resp = await fetch(url, {
+      signal: controller.signal,
+      headers: { "User-Agent": USER_AGENT, Accept: accept },
+      redirect: "follow",
+    })
+    if (!resp.ok) return null
+    const text = await resp.text()
+    return { text, finalUrl: resp.url || url, contentType: resp.headers.get("content-type") ?? "" }
+  } catch {
+    return null
+  } finally {
+    clearTimeout(timer)
+  }
+}
+
+// One robots.txt per origin, fetched once. Missing/unreachable → allowed.
+const robotsCache = new Map<string, Promise<ReturnType<typeof robotsParser> | null>>()
+
+function robotsFor(url: URL): Promise<ReturnType<typeof robotsParser> | null> {
+  const origin = url.origin
+  if (!robotsCache.has(origin)) {
+    const robotsUrl = `${origin}/robots.txt`
+    robotsCache.set(
+      origin,
+      fetchText(robotsUrl, "text/plain").then((r) => (r && !/html/i.test(r.contentType) ? robotsParser(robotsUrl, r.text) : null))
+    )
+  }
+  return robotsCache.get(origin)!
+}
+
+async function robotsAllows(url: string): Promise<boolean> {
+  const robots = await robotsFor(new URL(url))
+  return robots?.isDisallowed(url, ROBOTS_UA) !== true
+}
+
+// www/non-www variant of a homepage, then the http:// form of the original.
+function homeVariants(home: URL): string[] {
+  const out: string[] = []
+  const flipped = new URL(home.toString())
+  flipped.hostname = home.hostname.startsWith("www.") ? home.hostname.slice(4) : `www.${home.hostname}`
+  out.push(flipped.toString())
+  if (home.protocol === "https:") {
+    const http = new URL(home.toString())
+    http.protocol = "http:"
+    out.push(http.toString())
+  }
+  return out
+}
+
+async function fetchPage(url: string): Promise<Page | null> {
+  const r = await fetchText(url, "text/html,application/xhtml+xml")
+  if (!r || !/html/i.test(r.contentType)) return null
+  return { url: r.finalUrl, html: r.text }
 }
 
 const ARTIST_PAGE_KEYWORDS = ["artist", "team", "crew", "staff", "tattooer", "meet-us", "meet-our"]
 
-function findArtistPageUrl(baseUrl: string, html: string): string | null {
-  const $ = cheerioLoad(html)
+// Same-host link whose text or href looks like an artists/team page.
+function findArtistPageUrl(page: Page): string | null {
+  const $ = cheerioLoad(page.html)
+  const base = new URL(page.url)
   let found: string | null = null
-
   $("a").each((_, el) => {
     if (found) return
     const href = ($(el).attr("href") ?? "").trim()
+    if (!href || /^(mailto:|tel:|#|javascript:)/i.test(href)) return
     const text = $(el).text().toLowerCase()
     const hrefLower = href.toLowerCase()
-
-    const skip =
-      !href ||
-      href.startsWith("mailto:") ||
-      href.startsWith("tel:") ||
-      href.startsWith("#") ||
-      href.startsWith("javascript:")
-
-    if (skip) return
-
-    const matches = ARTIST_PAGE_KEYWORDS.some(
-      (kw) => text.includes(kw) || hrefLower.includes(kw)
-    )
-    if (matches) found = href
+    if (!ARTIST_PAGE_KEYWORDS.some((kw) => text.includes(kw) || hrefLower.includes(kw))) return
+    try {
+      const target = new URL(href, base)
+      if (target.hostname !== base.hostname) return
+      target.hash = ""
+      if (target.toString() === base.toString()) return
+      found = target.toString()
+    } catch {
+      // unparseable href
+    }
   })
+  return found
+}
 
-  if (!found) return null
+// ── Page content ─────────────────────────────────────────────────────────────
+
+const BAD_IMAGE_PATH = /logo|icon|favicon|sprite/i
+
+// Absolute http(s) image URL, or null if it's relative-unresolvable, data:,
+// or a logo/icon/favicon/sprite.
+function cleanImageUrl(src: string | null | undefined, pageUrl: string): string | null {
+  const raw = (src ?? "").trim().split(/\s+/)[0]
+  if (!raw || raw.startsWith("data:")) return null
   try {
-    const resolved = new URL(found, baseUrl).toString()
-    // Don't follow to a completely different domain
-    const base = new URL(baseUrl)
-    const target = new URL(resolved)
-    if (target.hostname !== base.hostname) return null
-    return resolved
+    const url = new URL(raw, pageUrl)
+    if (url.protocol !== "http:" && url.protocol !== "https:") return null
+    if (BAD_IMAGE_PATH.test(url.pathname)) return null
+    return url.toString()
   } catch {
     return null
   }
 }
 
-function extractPageContent(html: string): string {
-  const $ = cheerioLoad(html)
-
-  $("script, style, nav, footer, header, iframe, noscript, .nav, .footer, .header").remove()
-
-  // Collect img srcs (possible artist photos)
-  const imgs: string[] = []
-  $("img[src]").each((_, el) => {
-    const src = $(el).attr("src") ?? ""
-    if (src && !src.startsWith("data:") && src.length > 8) {
-      imgs.push(`[img: ${src}]`)
+// Everything a name could legitimately appear in: visible text plus image
+// alt/title attributes, normalized the same way names are.
+function pageHaystack(page: Page): string {
+  const $ = cheerioLoad(page.html)
+  $("script, style, noscript").remove()
+  const attrs: string[] = []
+  $("img[alt], [title], [aria-label]").each((_, el) => {
+    for (const a of ["alt", "title", "aria-label"]) {
+      const v = $(el).attr(a)
+      if (v) attrs.push(v)
     }
   })
-
-  const text = $("body").text().replace(/[ \t]+/g, " ").replace(/\n{3,}/g, "\n\n").trim()
-  const combined = imgs.slice(0, 20).join("\n") + "\n\n" + text
-  return combined.slice(0, 8000)
+  return ` ${normalizeArtistName(`${$("body").text()} ${attrs.join(" ")}`)} `
 }
 
-async function extractArtists(
-  pageContent: string,
-  shopName: string
-): Promise<ExtractedArtist[]> {
-  const msg = await anthropic.messages.create({
-    model: "claude-haiku-4-5-20251001",
-    max_tokens: 1024,
-    messages: [
-      {
-        role: "user",
-        content: `Extract tattoo artist information from this tattoo shop webpage.
+// Text + candidate portrait images for the model, capped at 8000 chars.
+function pageContent(page: Page): string {
+  const $ = cheerioLoad(page.html)
+  $("script, style, nav, footer, header, iframe, noscript, .nav, .footer, .header").remove()
+  const imgs: string[] = []
+  const seen = new Set<string>()
+  $("img").each((_, el) => {
+    const $el = $(el)
+    const src = cleanImageUrl($el.attr("data-src") ?? $el.attr("data-lazy-src") ?? $el.attr("src") ?? $el.attr("srcset"), page.url)
+    if (!src || seen.has(src)) return
+    seen.add(src)
+    const alt = ($el.attr("alt") ?? "").trim()
+    imgs.push(`[img: ${src}${alt ? ` | alt: ${alt}` : ""}]`)
+  })
+  const text = $("body").text().replace(/[ \t]+/g, " ").replace(/\s*\n\s*/g, "\n").replace(/\n{3,}/g, "\n\n").trim()
+  return `${imgs.slice(0, 20).join("\n")}\n\n${text}`.slice(0, 8000)
+}
+
+// ── Extraction ───────────────────────────────────────────────────────────────
+
+let anthropic: Anthropic
+const usage = { calls: 0, input: 0, output: 0, cost: 0 }
+
+function isFatal(e: unknown): boolean {
+  if (e instanceof Anthropic.AuthenticationError || e instanceof Anthropic.PermissionDeniedError) return true
+  if (e instanceof Anthropic.APIError && /credit balance|billing/i.test(e.message)) return true
+  return false
+}
+
+async function extractArtists(content: string, shopName: string): Promise<{ artists: ExtractedArtist[]; cost: number }> {
+  let msg: Anthropic.Message
+  try {
+    msg = await anthropic.messages.create({
+      model: MODEL,
+      max_tokens: 1024,
+      messages: [
+        {
+          role: "user",
+          content: `Extract tattoo artist information from this tattoo shop webpage.
 Shop: ${shopName}
 
 Page content:
-${pageContent}
+${content}
 
-Return a JSON array of artists. Each object:
-{ "name": "Artist Name", "specialty": "style (optional)", "image_url": "from [img: ...] lines only if it's a portrait photo (optional)" }
+Return a JSON array with one object per person who works at this shop:
+{ "name": "Person Name", "role": "tattoo_artist", "specialty": "style (optional)", "image_url": "from [img: ...] lines only if it's a portrait photo of that person (optional)" }
+
+"role" must be exactly one of: tattoo_artist, apprentice, piercer, manager, front_desk, owner_non_artist, other.
+- An owner who also tattoos is tattoo_artist; an owner who doesn't is owner_non_artist.
+- A tattoo apprentice is apprentice.
+- Someone who only pierces is piercer.
 
 Rules:
-- Only real people who are tattoo artists at this shop
+- Only real people who work at this shop, named exactly as written on the page
 - Ignore shop services, prices, contact info, reviews, FAQ
-- Return [] if no artists found
+- Return [] if no people found
 - JSON array only, no markdown fences, no extra text`,
-      },
-    ],
-  })
+        },
+      ],
+    })
+  } catch (e) {
+    if (isFatal(e)) throw new FatalApiError((e as Error).message)
+    throw e
+  }
+
+  const input = msg.usage.input_tokens
+  const output = msg.usage.output_tokens
+  const cost = (input * INPUT_USD_PER_MTOK + output * OUTPUT_USD_PER_MTOK) / 1_000_000
+  usage.calls++
+  usage.input += input
+  usage.output += output
+  usage.cost += cost
+  console.log(`    tokens in ${input} / out ${output} — $${cost.toFixed(4)} (running $${usage.cost.toFixed(4)})`)
 
   const block = msg.content[0]
-  if (block.type !== "text") return []
-
+  if (!block || block.type !== "text") return { artists: [], cost }
   try {
     const raw = block.text.trim().replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "")
     const parsed = JSON.parse(raw)
-    if (!Array.isArray(parsed)) return []
-    return parsed.filter(
-      (a): a is ExtractedArtist =>
-        typeof a?.name === "string" && a.name.trim().length > 1
-    )
+    if (!Array.isArray(parsed)) return { artists: [], cost }
+    const artists = parsed
+      .filter((a) => typeof a?.name === "string")
+      .map((a) => ({
+        name: String(a.name).replace(/\s+/g, " ").trim(),
+        role: (ROLES as readonly string[]).includes(a.role) ? (a.role as Role) : "other",
+        specialty: typeof a.specialty === "string" && a.specialty.trim() ? a.specialty.trim() : null,
+        image_url: typeof a.image_url === "string" ? a.image_url : null,
+      }))
+    return { artists, cost }
   } catch {
-    return []
+    return { artists: [], cost }
   }
+}
+
+// No spaces, over 8 chars, and either over 14 chars or starting/ending with a
+// shop-ish word: "danduquettetattoo", "inkbyjess" — but not "Martin" or "Inez".
+const HANDLE_AFFIX = /^(tattoos?|tattz|inked|ink|art)|(tattoos?|tattz|inked|ink|art)$/i
+function isHandleLike(name: string): boolean {
+  return !/\s/.test(name) && name.length > 8 && (name.length > 14 || HANDLE_AFFIX.test(name))
+}
+
+// Exits if isHandleLike disagrees with the expected results.
+function handleSelfTest(): void {
+  const cases: [string, boolean][] = [
+    ["Martin", false], ["Stuart", false], ["Marta", false], ["Kiki", false], ["Inez", false],
+    ["danduquettetattoo", true], ["inkbyjess", true],
+  ]
+  console.log("Handle-like self-test:")
+  let ok = true
+  for (const [name, drop] of cases) {
+    const got = isHandleLike(name)
+    if (got !== drop) ok = false
+    console.log(`  ${name.padEnd(18)} → ${got ? "drop" : "keep"}${got === drop ? "" : `  ✗ expected ${drop ? "drop" : "keep"}`}`)
+  }
+  if (!ok) {
+    console.error("Self-test failed — stopping.")
+    process.exit(1)
+  }
+  console.log("")
+}
+
+// "BRAULIO CAMARENA" → "Braulio Camarena" when the name is all caps with more
+// than 3 letters; mixed-case names are left alone.
+function displayName(name: string): string {
+  const letters = name.replace(/[^\p{L}]/gu, "")
+  if (letters.length <= 3 || letters !== letters.toUpperCase()) return name
+  return name.toLowerCase().replace(/(^|[\s\-'’.])(\p{L})/gu, (_, sep: string, c: string) => sep + c.toUpperCase())
+}
+
+// Why a name is dropped, or null to keep it.
+function rejectName(name: string, haystack: string): DropReason | null {
+  if (isPlaceholderName(name)) return "placeholder"
+  if (isHandleLike(name)) return "handle-like"
+  if (/\d/.test(name)) return "digits"
+  if (/@|https?:|www\.|\.(com|net|org|co|ink)\b/i.test(name)) return "handle/url"
+  if (name.split(/\s+/).length > 4) return "over 4 words"
+  const norm = normalizeArtistName(name)
+  if (!norm || !haystack.includes(` ${norm} `)) return "not-on-page"
+  return null
+}
+
+// ── Per-shop work ────────────────────────────────────────────────────────────
+
+let stopReason: string | null = null
+
+function costLimitReached(): boolean {
+  if (usage.cost >= MAX_COST && !stopReason) stopReason = `--max-cost $${MAX_COST} reached`
+  return usage.cost >= MAX_COST
+}
+
+// Returns null when the shop wasn't attempted (stopped before the API call),
+// so it stays out of the checkpoint.
+async function processShop(shop: Shop): Promise<CheckpointEntry | null> {
+  const entry = (status: Status, pages: string[], extra: Partial<CheckpointEntry> = {}): CheckpointEntry => ({
+    status,
+    at: new Date().toISOString(),
+    name: shop.name,
+    website: shop.website,
+    pages,
+    cost: 0,
+    artists: [],
+    inserted: false,
+    ...extra,
+  })
+
+  const home = normalizeUrl(shop.website)
+  if (!home) return entry("skipped", [], { note: "invalid url" })
+  const homeUrl = home.toString()
+
+  if (!(await robotsAllows(homeUrl))) return entry("robots_blocked", [homeUrl])
+
+  let fetches = 0
+  const tried: string[] = []
+  const pages: Page[] = []
+  const tryFetch = async (url: string): Promise<Page | null> => {
+    if (fetches >= MAX_FETCHES) return null
+    if (!(await robotsAllows(url))) return null
+    fetches++
+    tried.push(url)
+    const page = await fetchPage(url)
+    if (page) pages.push(page)
+    return page
+  }
+
+  let homePage = await tryFetch(homeUrl)
+  // Retry mode: the www/non-www variant, then http://. These count as one
+  // homepage fetch, not against the 3-page budget.
+  if (!homePage && ARGS.retryFailed) {
+    for (const variant of homeVariants(home)) {
+      if (!(await robotsAllows(variant))) continue
+      tried.push(variant)
+      homePage = await fetchPage(variant)
+      if (homePage) {
+        pages.push(homePage)
+        break
+      }
+    }
+  }
+  if (!homePage) return entry("fetch_failed", tried)
+  if (EXCLUDED_HOST.test(new URL(homePage.url).hostname))
+    return entry("skipped", tried, { note: `redirected to ${new URL(homePage.url).hostname}` })
+
+  const linked = findArtistPageUrl(homePage)
+  let artistPage: Page | null = linked ? await tryFetch(linked) : null
+  if (!artistPage) {
+    for (const path of GUESS_PATHS) {
+      if (fetches >= MAX_FETCHES) break
+      artistPage = await tryFetch(new URL(path, homePage.url).toString())
+      if (artistPage) break
+    }
+  }
+
+  const main = artistPage ?? homePage
+  const content = pageContent(main)
+  if (content.replace(/\[img: [^\]]*\]/g, "").trim().length < MIN_TEXT_CHARS)
+    return entry("skipped", tried, { note: "too little page text" })
+
+  if (stopReason || costLimitReached()) return null
+  const { artists: raw, cost } = await extractArtists(content, shop.name)
+
+  const haystack = pages.map(pageHaystack).join(" ")
+  const kept: ExtractedArtist[] = []
+  const seen = new Set<string>()
+  const dropped: Dropped[] = []
+  for (const a of raw) {
+    const norm = normalizeArtistName(a.name)
+    const why: DropReason | null = !KEEP_ROLES.has(a.role) ? "role" : rejectName(a.name, haystack) ?? (seen.has(norm) ? "duplicate" : null)
+    if (why) {
+      dropped.push({ name: a.name, role: a.role, reason: why })
+      continue
+    }
+    seen.add(norm)
+    kept.push({ name: displayName(a.name), role: a.role, specialty: a.specialty, image_url: cleanImageUrl(a.image_url, main.url) })
+  }
+  if (dropped.length) console.log(`    dropped: ${dropped.map((d) => `${d.name} (${d.reason}${d.reason === "role" ? `: ${d.role}` : ""})`).join(", ")}`)
+
+  return entry(kept.length ? "ok" : "no_artists", tried, { cost, artists: kept, dropped })
+}
+
+// ── Inserting ────────────────────────────────────────────────────────────────
+
+// Inserts the shop's artists whose normalized names aren't already present.
+// Every database call is retried (lib/retry.ts). Before retrying the insert it
+// checks whether the failed attempt actually wrote the rows, so a lost
+// response never inserts them twice.
+async function insertArtists(supabase: SupabaseClient, undo: UndoLog, shopId: string, artists: ExtractedArtist[]): Promise<number> {
+  const data = await withRetry(`read shop_artists for ${shopId}`, async () => {
+    const { data, error } = await supabase.from("shop_artists").select("name").eq("shop_id", shopId)
+    if (error) throw new Error(error.message)
+    return data ?? []
+  })
+  const existing = new Set(data.map((r: { name: string | null }) => normalizeArtistName(r.name)))
+  const rows = artists
+    .filter((a) => !existing.has(normalizeArtistName(a.name)))
+    .map((a) => ({ id: randomUUID(), shop_id: shopId, name: displayName(a.name), specialty: a.specialty ?? null, image_url: a.image_url ?? null }))
+  if (rows.length === 0) return 0
+  undo.append(rows.map((r) => ({ table: "shop_artists", id: r.id, field: "__row__", old_value: null, new_value: r, op: "insert" as const })))
+  const ids = rows.map((r) => r.id)
+  await withRetry(`insert shop_artists for ${shopId}`, async (attempt) => {
+    if (attempt > 1) {
+      const { data: present, error } = await supabase.from("shop_artists").select("id").in("id", ids)
+      if (error) throw new Error(error.message)
+      if ((present ?? []).length === ids.length) return
+      if ((present ?? []).length > 0) throw new Error(`partial insert for ${shopId} (${present!.length}/${ids.length})`)
+    }
+    const { error } = await supabase.from("shop_artists").insert(rows)
+    if (error) throw new Error(error.message)
+  })
+  return rows.length
+}
+
+// Rows recorded as inserts in this run's undo log (the authoritative count).
+function undoInsertCount(undo: UndoLog): number {
+  if (!fs.existsSync(undo.file)) return 0
+  return fs.readFileSync(undo.file, "utf-8").split("\n").filter((l) => l.includes('"op":"insert"')).length
 }
 
 // ── Main ─────────────────────────────────────────────────────────────────────
 
 async function main() {
-  // Fetch shops with scrapeable websites
-  let query = supabase
-    .from("shops")
-    .select("id, name, slug, city, state, website")
-    .eq("is_active", true)
-    .not("website", "is", null)
-    .not("website", "eq", "")
-    .not("website", "ilike", "%facebook.com%")
-    .not("website", "ilike", "%instagram.com%")
-    .not("website", "ilike", "%.top/%")
-    .not("website", "ilike", "%usacommetix%")
+  modeBanner(ARGS.apply)
+  handleSelfTest()
+  if (!ARGS.apply) console.log("WARNING: a dry run still fetches sites and calls the Claude API — it spends API credit.\n")
+  console.log(`Max cost: $${MAX_COST}${ARGS.limit ? ` · limit ${ARGS.limit} shops` : ""}${ARGS.state ? ` · state ${ARGS.state}` : ""}${ARGS.retryFailed ? " · retrying fetch_failed" : ""}${ARGS.input ? ` · only shops in ${ARGS.input}` : ""}\n`)
 
-  if (STATE) query = (query as typeof query).eq("state", STATE)
+  if (!process.env.ANTHROPIC_API_KEY) {
+    console.error("Missing ANTHROPIC_API_KEY in .env.local")
+    process.exit(1)
+  }
+  anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+  const supabase = getSupabaseAdmin()
+  const checkpoint = loadCheckpoint()
+  const undo = new UndoLog("scrape-shop-artists")
+  let inserted = 0
+  // Artists inserted this run from earlier dry-run checkpoint entries.
+  const fromCheckpoint: Record<string, unknown>[] = []
 
-  // Paginate through all matching shops (Supabase default cap is 1000/page)
-  const shops: Shop[] = []
-  if (LIMIT) {
-    const { data, error } = await (query as typeof query).limit(LIMIT)
-    if (error) { console.error("Failed to fetch shops:", error.message); process.exit(1) }
-    shops.push(...((data ?? []) as Shop[]))
-  } else {
-    const PAGE = 1000
-    for (let page = 0; ; page++) {
-      const { data, error } = await (query as typeof query).range(page * PAGE, (page + 1) * PAGE - 1)
-      if (error) { console.error("Failed to fetch shops:", error.message); process.exit(1) }
-      if (!data || data.length === 0) break
-      shops.push(...(data as Shop[]))
-      if (data.length < PAGE) break
+  // Artists extracted on an earlier dry run: insert them now, no refetch.
+  if (ARGS.apply) {
+    const pending = Object.entries(checkpoint).filter(([, e]) => e.status === "ok" && !e.inserted)
+    if (pending.length) console.log(`Inserting artists saved from ${pending.length} earlier dry-run shops…`)
+    for (const [shopId, e] of pending) {
+      const n = await insertArtists(supabase, undo, shopId, e.artists)
+      inserted += n
+      e.inserted = true
+      for (const a of e.artists)
+        fromCheckpoint.push({ shop_id: shopId, shop_name: e.name, website: e.website, artist_name: displayName(a.name), role: a.role, specialty: a.specialty, image_url: a.image_url, source: "checkpoint" })
     }
+    if (pending.length) saveCheckpoint(checkpoint)
   }
 
-  if (shops.length === 0) {
-    console.log("No shops matched the filters.")
-    process.exit(0)
-  }
-
-  console.log(`\nFound ${shops.length} shops to process.\n`)
-
-  // Paginate through all seeded shop_ids (re-run safety)
-  const seeded = new Set<string>()
-  for (let page = 0; ; page++) {
-    const { data } = await supabase
-      .from("shop_artists")
-      .select("shop_id")
-      .range(page * 1000, (page + 1) * 1000 - 1)
-    if (!data || data.length === 0) break
-    data.forEach((r: { shop_id: string }) => seeded.add(r.shop_id))
-    if (data.length < 1000) break
-  }
-
-  const limit = pLimit(10)
-  let processed = 0
-  let skipped = 0
-  let alreadySeeded = 0
-  let totalArtists = 0
-  const byState: Record<string, number> = {}
-
-  const tasks = (shops as Shop[]).map((shop) =>
-    limit(async () => {
-      // Skip if already seeded
-      if (seeded.has(shop.id)) {
-        alreadySeeded++
-        return
-      }
-
-      if (shouldSkipUrl(shop.website)) {
-        skipped++
-        return
-      }
-
-      // Fetch homepage
-      const homeHtml = await fetchHtml(shop.website)
-      if (!homeHtml) {
-        skipped++
-        return
-      }
-
-      // Try to find a dedicated artists sub-page
-      let html = homeHtml
-      const artistPageUrl = findArtistPageUrl(shop.website, homeHtml)
-      if (artistPageUrl) {
-        const subHtml = await fetchHtml(artistPageUrl)
-        if (subHtml) html = subHtml
-      }
-
-      const pageContent = extractPageContent(html)
-      const artists = await extractArtists(pageContent, shop.name)
-
-      processed++
-
-      if (artists.length === 0) {
-        skipped++
-        return
-      }
-
-      const label = `${shop.name} (${shop.city ?? "?"}, ${shop.state ?? "?"})`
-      console.log(`  ${label}: ${artists.length} artist(s)`)
-
-      if (DRY_RUN) {
-        console.log("    " + artists.map((a) => a.name).join(", "))
-      } else {
-        const rows = artists.map((a) => ({
-          shop_id: shop.id,
-          name: a.name.trim(),
-          specialty: a.specialty?.trim() || null,
-          image_url: a.image_url || null,
-        }))
-
-        const { error: insertErr } = await supabase.from("shop_artists").insert(rows)
-        if (insertErr) {
-          console.error(`    Insert error:`, insertErr.message)
-          skipped++
-          return
-        }
-      }
-
-      totalArtists += artists.length
-      const st = shop.state ?? "UNKNOWN"
-      byState[st] = (byState[st] ?? 0) + artists.length
-
-      // Polite delay
-      await new Promise((r) => setTimeout(r, 150))
+  const shops = await withRetry("fetch shops", () =>
+    fetchAll<Shop>(supabase, "shops", "id, name, city, state, website", (q) => {
+      let query = q.eq("is_active", true).eq("possibly_closed", false).not("website", "is", null).neq("website", "")
+      if (ARGS.state) query = query.eq("state", ARGS.state)
+      return query
     })
   )
+  const seeded = new Set(
+    (await withRetry("fetch shop_artists", () => fetchAll<{ id: string; shop_id: string }>(supabase, "shop_artists", "id, shop_id"))).map(
+      (r) => r.shop_id
+    )
+  )
+  const withSite = shops.filter((s) => isRealWebsite(s.website))
+  const unseeded = withSite.filter((s) => !seeded.has(s.id))
+  const only = ARGS.input ? new Set(Object.keys(JSON.parse(fs.readFileSync(ARGS.input, "utf-8")) as Checkpoint)) : null
+  const candidates = unseeded.filter((s) => {
+    if (only && !only.has(s.id)) return false
+    const e = checkpoint[s.id]
+    return ARGS.retryFailed ? e?.status === "fetch_failed" : !e
+  })
+  const batch = ARGS.limit ? candidates.slice(0, ARGS.limit) : candidates
 
-  await Promise.all(tasks)
+  console.log(`Active, not possibly_closed, with a website: ${shops.length}`)
+  console.log(`  real website (platforms excluded):        ${withSite.length}`)
+  console.log(`  …with no shop_artists rows:               ${unseeded.length}`)
+  if (only) console.log(`  …in ${ARGS.input}:   ${unseeded.filter((s) => only.has(s.id)).length} of ${only.size}`)
+  console.log(`  …not in checkpoint (candidates):          ${candidates.length}`)
+  console.log(`Processing ${batch.length} shops.\n`)
 
-  // Summary
-  const stateLines = Object.entries(byState)
-    .sort((a, b) => b[1] - a[1])
-    .map(([st, cnt]) => `    ${st.padEnd(4)} ${cnt}`)
-    .join("\n")
+  const results: Record<string, unknown>[] = []
+  const extracted: Record<string, unknown>[] = []
+  const droppedRows: Record<string, unknown>[] = []
+  let sinceSave = 0
+  let fatal: Error | null = null
 
-  console.log("\n=== Summary ===")
-  console.log(`  Shops queried          : ${shops.length}`)
-  console.log(`  Already seeded (skip)  : ${alreadySeeded}`)
-  console.log(`  Processed              : ${processed}`)
-  console.log(`  Failed/no artists      : ${skipped}`)
-  console.log(`  Artists ${DRY_RUN ? "found (dry)" : "inserted"}     : ${totalArtists}`)
-  if (stateLines) {
-    console.log("\n  By state:")
-    console.log(stateLines)
+  await runPool(batch, CONCURRENCY, async (shop) => {
+    if (stopReason || fatal) return
+    let e: CheckpointEntry | null
+    try {
+      e = await processShop(shop)
+    } catch (err) {
+      if (err instanceof FatalApiError) {
+        fatal = err
+        stopReason = `API error: ${err.message}`
+        return
+      }
+      console.error(`  ${shop.name}: ${(err as Error).message} — not recorded, will be retried next run`)
+      return
+    }
+    if (!e) return
+
+    if (ARGS.apply && e.status === "ok") {
+      try {
+        const n = await insertArtists(supabase, undo, shop.id, e.artists)
+        inserted += n
+        e.inserted = true
+      } catch (err) {
+        fatal = err as Error
+        stopReason = (err as Error).message
+      }
+    }
+    checkpoint[shop.id] = e
+    if (++sinceSave >= 10) {
+      saveCheckpoint(checkpoint)
+      sinceSave = 0
+    }
+
+    console.log(`  ${e.status.padEnd(14)} ${shop.name} (${shop.city ?? "?"}, ${shop.state ?? "?"}) — ${e.artists.length} artist(s)${e.note ? ` [${e.note}]` : ""}`)
+    results.push({
+      shop_id: shop.id,
+      name: shop.name,
+      website: shop.website,
+      pages_fetched: e.pages.join(" "),
+      status: e.status,
+      artists_found: e.artists.length,
+      cost: e.cost.toFixed(5),
+    })
+    for (const a of e.artists)
+      extracted.push({ shop_id: shop.id, shop_name: shop.name, website: shop.website, artist_name: a.name, role: a.role, specialty: a.specialty, image_url: a.image_url, source: "this run" })
+    for (const d of e.dropped ?? [])
+      droppedRows.push({ shop_id: shop.id, shop_name: shop.name, website: shop.website, name: d.name, role: d.role, reason: d.reason })
+  })
+
+  saveCheckpoint(checkpoint)
+  writeCsv(RESULTS_CSV, ["shop_id", "name", "website", "pages_fetched", "status", "artists_found", "cost"], results)
+  writeCsv(EXTRACTED_CSV, ["shop_id", "shop_name", "website", "artist_name", "role", "specialty", "image_url", "source"], [...fromCheckpoint, ...extracted])
+  writeCsv(DROPPED_CSV, ["shop_id", "shop_name", "website", "name", "role", "reason"], droppedRows)
+
+  const byStatus: Record<string, number> = {}
+  for (const r of results) byStatus[String(r.status)] = (byStatus[String(r.status)] ?? 0) + 1
+  const withArtists = results.filter((r) => Number(r.artists_found) > 0)
+  // All candidates not yet attempted (ignores --input/--limit), for the projection.
+  const remaining = unseeded.filter((s) => !checkpoint[s.id]).length
+
+  console.log(`\n══ Summary${ARGS.apply ? "" : " — DRY RUN"} ══`)
+  if (stopReason) console.log(`Stopped early: ${stopReason}`)
+  console.log(`Shops attempted: ${results.length}`)
+  for (const [s, n] of Object.entries(byStatus).sort((a, b) => b[1] - a[1])) console.log(`  ${s.padEnd(15)} ${n}`)
+  console.log(`Shops with ≥1 artist: ${withArtists.length}, artists: ${extracted.length}${withArtists.length ? ` (avg ${(extracted.length / withArtists.length).toFixed(2)})` : ""}`)
+  const byReason: Record<string, number> = {}
+  for (const d of droppedRows) byReason[String(d.reason)] = (byReason[String(d.reason)] ?? 0) + 1
+  console.log(`People dropped: ${droppedRows.length}`)
+  for (const [r, n] of Object.entries(byReason).sort((a, b) => b[1] - a[1])) console.log(`  ${r.padEnd(15)} ${n}`)
+  console.log(`API calls: ${usage.calls}, tokens in ${usage.input} / out ${usage.output}`)
+  console.log(`Cost: $${usage.cost.toFixed(4)}${results.length ? ` ($${(usage.cost / results.length).toFixed(5)} per shop attempted)` : ""}`)
+  if (results.length) console.log(`Remaining candidates: ${remaining} → projected ~$${((usage.cost / results.length) * remaining).toFixed(2)}`)
+  console.log(`Wrote ${RESULTS_CSV}, ${EXTRACTED_CSV}, ${DROPPED_CSV}; checkpoint ${CHECKPOINT} (${Object.keys(checkpoint).length} shops)`)
+  if (ARGS.apply) {
+    const logged = undoInsertCount(undo)
+    console.log(`Inserted ${inserted} shop_artists rows (undo log records ${logged}${logged === inserted ? " — match" : " — MISMATCH"}).${undo.entries ? ` Undo log: ${undo.file}` : ""}`)
+    if (inserted > 0) console.log("Next: npx tsx scripts/promote-shop-artists.ts (dry run), then --apply.")
+  } else {
+    console.log("Dry run — nothing written to the database. Pass --apply to insert (artists saved in the checkpoint are inserted without refetching).")
   }
-  console.log(`\n${DRY_RUN ? "[DRY RUN]" : "✓"} Done.`)
-  if (!DRY_RUN && totalArtists > 0) {
-    console.log("\nNext: run promote-shop-artists.ts to promote these into the artists table.")
-    console.log("  pnpm tsx scripts/promote-shop-artists.ts")
-  }
+  if (fatal) process.exit(1)
 }
 
 main().catch((err) => {
