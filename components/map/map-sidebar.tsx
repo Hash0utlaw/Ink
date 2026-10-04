@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { Search, MapPin, Filter, ChevronLeft, ChevronRight, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -11,10 +11,14 @@ import { MapFilters } from "./map-filters"
 import type { MapboxLocation } from "@/lib/mapbox"
 import { Star } from "lucide-react"
 
+const MAX_CARDS = 100
+
 interface MapSidebarProps {
   isOpen: boolean
   onToggle: () => void
   locations: MapboxLocation[]
+  // Shop/artist pins currently in view (after filters); falls back to locations.length.
+  totals?: { shops: number; artists: number } | null
   selectedLocation: MapboxLocation | null
   onLocationSelect: (location: MapboxLocation) => void
   filters: any
@@ -29,6 +33,7 @@ export function MapSidebar({
   isOpen,
   onToggle,
   locations,
+  totals,
   selectedLocation,
   onLocationSelect,
   filters,
@@ -45,6 +50,23 @@ export function MapSidebar({
     e.preventDefault()
     onSearch(searchQuery)
   }
+
+  // The map clusters every pin; the list only renders the top-rated
+  // MAX_CARDS (map-interface already sends at most that many).
+  const visibleLocations = useMemo(
+    () => [...locations].sort((a, b) => b.rating - a.rating).slice(0, MAX_CARDS),
+    [locations]
+  )
+
+  // [count, noun] pairs for the label, e.g. "1,240 shops · 310 artists in view".
+  const countParts: [number, string][] = totals
+    ? ([
+        filters.locationType !== "artist" ? [totals.shops, totals.shops === 1 ? "shop" : "shops"] : null,
+        filters.locationType !== "shop" ? [totals.artists, totals.artists === 1 ? "artist" : "artists"] : null,
+      ].filter(Boolean) as [number, string][])
+    : [[locations.length, locations.length === 1 ? "location" : "locations"]]
+
+  const inViewTotal = countParts.reduce((sum, [n]) => sum + n, 0)
 
   const handleLocationClick = (location: MapboxLocation) => {
     onLocationSelect(location)
@@ -133,12 +155,15 @@ export function MapSidebar({
                     <span className="text-sm font-medium">Loading...</span>
                   </div>
                 ) : (
-                  <>
-                    <span className="text-sm font-semibold text-foreground">{locations.length}</span>
-                    <span className="text-sm text-muted-foreground">
-                      {locations.length === 1 ? "location" : "locations"} found
-                    </span>
-                  </>
+                  <span className="text-sm text-muted-foreground">
+                    {countParts.map(([n, noun], i) => (
+                      <span key={noun}>
+                        {i > 0 && " · "}
+                        <span className="font-semibold text-foreground">{n.toLocaleString()}</span> {noun}
+                      </span>
+                    ))}{" "}
+                    {totals ? "in view" : "found"}
+                  </span>
                 )}
               </div>
               {filters.searchQuery && (
@@ -186,7 +211,7 @@ export function MapSidebar({
                   </div>
                 )
               ) : (
-                locations.map((location) => (
+                visibleLocations.map((location) => (
                   <div
                     key={location.id}
                     onClick={() => handleLocationClick(location)}
@@ -267,6 +292,11 @@ export function MapSidebar({
                     </div>
                   </div>
                 ))
+              )}
+              {!loading && inViewTotal > MAX_CARDS && (
+                <p className="text-sm text-muted-foreground text-center">
+                  Showing {visibleLocations.length} of {inViewTotal.toLocaleString()} — zoom in to see more
+                </p>
               )}
             </div>
           </ScrollArea>

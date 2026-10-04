@@ -64,7 +64,7 @@ export async function getArtists(
 ): Promise<{ data: Artist[]; count: number; error: string | null }> {
   try {
     const supabase = createClient()
-    let query = supabase.from("artists").select("*", { count: "exact", head: false })
+    let query = supabase.from("artists").select("*", { count: "exact", head: false }).eq("is_active", true)
 
     if (filters.styles && filters.styles.length > 0) {
       // overlaps (&&) matches artists who have ANY of the selected styles
@@ -146,6 +146,7 @@ export async function getArtistById(id: string): Promise<Artist | null> {
       .from("artists")
       .select("*, shops(name, address, city, state, phone, hours, website)")
       .eq("id", id)
+      .eq("is_active", true)
       .single()
     if (error || !data) return null
     return rowToArtist(data as Record<string, unknown>)
@@ -158,7 +159,7 @@ export async function getArtistsByIds(ids: string[]): Promise<Artist[]> {
   if (ids.length === 0) return []
   try {
     const supabase = createClient()
-    const { data, error } = await supabase.from("artists").select("*").in("id", ids)
+    const { data, error } = await supabase.from("artists").select("*").in("id", ids).eq("is_active", true)
     if (error || !data) return []
     return data.map((row: Record<string, unknown>) => rowToArtist(row))
   } catch {
@@ -169,7 +170,7 @@ export async function getArtistsByIds(ids: string[]): Promise<Artist[]> {
 export async function getArtistBySlug(slug: string): Promise<Artist | null> {
   try {
     const supabase = createClient()
-    const { data, error } = await supabase.from("artists").select("*").eq("handle", slug).single()
+    const { data, error } = await supabase.from("artists").select("*").eq("handle", slug).eq("is_active", true).single()
     if (error || !data) return null
     return rowToArtist(data as Record<string, unknown>)
   } catch {
@@ -183,6 +184,7 @@ export async function getWorthTheDriveArtists(limit = 6): Promise<Artist[]> {
     const { data, error } = await supabase
       .from("artists")
       .select("*")
+      .eq("is_active", true)
       .gte("rating", 4.8)
       .gt("review_count", 0)
       .neq("availability_status", "not_taking_clients")

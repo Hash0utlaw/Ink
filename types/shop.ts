@@ -25,5 +25,8 @@ export interface Shop {
   }
   specialties: string[]
   acceptsWalkIns: boolean
+  // Open-data signal that the shop may have closed; hidden from lists and the
+  // map, but its page stays reachable.
+  possiblyClosed?: boolean
   distance_mi?: number
 }

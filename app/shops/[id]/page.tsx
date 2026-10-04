@@ -2,7 +2,7 @@ import { notFound } from "next/navigation"
 import { Suspense } from "react"
 import type { Metadata } from "next"
 import Link from "next/link"
-import { ChevronRight } from "lucide-react"
+import { AlertCircle, ChevronRight } from "lucide-react"
 import { Header } from "@/components/layout/header"
 import { HeaderSkeleton } from "@/components/layout/header-skeleton"
 import { Footer } from "@/components/layout/footer"
@@ -100,6 +100,19 @@ export default async function ShopProfilePage({ params }: { params: { id: string
               <ChevronRight className="w-3 h-3" />
               <span className="text-foreground">{shop.name}</span>
             </nav>
+          </div>
+        )}
+        {shop.possiblyClosed && (
+          <div className="container mx-auto px-4 pt-4">
+            <div className="flex items-start gap-2.5 text-sm p-3.5 rounded-xl border bg-amber-500/10 border-amber-500/30 text-amber-400">
+              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+              <span>
+                This shop may be permanently closed.{" "}
+                <Link href={`/claim?shop=${encodeURIComponent(shop.slug)}`} className="underline hover:text-foreground transition-colors">
+                  Own this shop? Claim this listing
+                </Link>
+              </span>
+            </div>
           </div>
         )}
         <ShopHeader shop={shop} initialSaved={isSaved} />

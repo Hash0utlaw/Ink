@@ -98,8 +98,8 @@ async function main() {
 
   console.log("Fetching current shops (read-only)...")
   const SHOP_COLUMNS =
-    "id, name, slug, address, city, state, zip, phone, website, latitude, longitude, place_id, rating, review_count, hours, description, cover_image_url, created_at, updated_at"
-  const shops = await fetchAllRows<ShopRow>(supabase, "shops", SHOP_COLUMNS)
+    "id, name, slug, address, city, state, zip, phone, website, latitude, longitude, place_id, rating, review_count, hours, description, cover_image_url, created_at, updated_at, is_active"
+  const shops = await fetchAllRows<ShopRow>(supabase, "shops", SHOP_COLUMNS, 1000, (q) => q.eq("is_active", true))
   const current = computeReport(shops)
 
   // ── Per-state diff ──

@@ -120,6 +120,13 @@ export function Footer() {
           <p className="text-muted-foreground text-sm">© 2025 TattooMaps. All rights reserved.</p>
           <p className="text-muted-foreground text-sm mt-4 md:mt-0">Built with ❤️ for the global tattoo community</p>
         </div>
+        <p className="text-muted-foreground text-sm mt-4 text-center md:text-left">
+          Places data from{" "}
+          <Link href="/attributions" className="hover:text-accent-text transition-colors">
+            Overture Maps Foundation, including Foursquare data under Apache 2.0
+          </Link>
+          .
+        </p>
       </div>
     </footer>
   )

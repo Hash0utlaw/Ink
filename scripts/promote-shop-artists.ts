@@ -1,30 +1,27 @@
 // promote-shop-artists.ts
-// Promotes every row in shop_artists into a stub artist profile in artists.
-// Run: npx tsx scripts/promote-shop-artists.ts [--dry-run]
+// Promotes shop_artists rows into stub artist profiles in artists.
+// Run: npx tsx scripts/promote-shop-artists.ts [--apply]
+//   Dry-run by default; --apply inserts, undo-logged as is_active false → true
+//   (so scripts/undo.ts deactivates the new artists rather than deleting).
+//   Every database call is retried (lib/retry.ts).
+//
+// Only rows whose shop is active and not possibly_closed are promoted. A row
+// is skipped if its name is a placeholder, if an artist with the same shop_id
+// and normalized display_name already exists, or if its handle is taken.
 
 import { config } from "dotenv"
 config({ path: ".env.local" })
 
-import { createClient } from "@supabase/supabase-js"
+import { randomUUID } from "crypto"
+import { parseScriptArgs } from "./lib/args"
+import { getSupabaseAdmin } from "./lib/supabase-admin"
+import { UndoLog } from "./lib/undo-log"
+import { fetchAll, fetchIn, modeBanner } from "./lib/cleanup-utils"
+import { isPlaceholderName, normalizeArtistName } from "./lib/artist-names"
+import { withRetry } from "./lib/retry"
 
-// ── CLI flags ────────────────────────────────────────────────────────────────
-
-const DRY_RUN = process.argv.includes("--dry-run")
-if (DRY_RUN) console.log("DRY RUN — no data will be written to Supabase.\n")
-
-// ── Supabase (service-role) ──────────────────────────────────────────────────
-
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
-const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-if (!SUPABASE_URL || !SERVICE_ROLE_KEY) {
-  console.error(
-    "Missing env vars. Ensure NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are set in .env.local"
-  )
-  process.exit(1)
-}
-
-const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY.trim())
+const ARGS = parseScriptArgs()
+const BATCH_SIZE = 500
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -43,28 +40,6 @@ function makeHandle(artistName: string, shopSlug: string): string {
   return `${namePart}--${shopPart}`
 }
 
-const PLACEHOLDER_NAMES = new Set([
-  "artist",
-  "staff",
-  "guest",
-  "tattoo artist",
-  "resident artist",
-  "shop artist",
-  "tbd",
-  "n/a",
-  "na",
-  "unknown",
-  "coming soon",
-])
-
-function shouldSkip(name: string | null | undefined): boolean {
-  if (!name) return true
-  const trimmed = name.trim()
-  if (trimmed.length < 2) return true
-  if (PLACEHOLDER_NAMES.has(trimmed.toLowerCase())) return true
-  return false
-}
-
 // Actual shop_artists columns: id, shop_id, name, image_url, specialty, artist_profile_id, created_at
 type ShopArtistRow = {
   id: string
@@ -72,192 +47,29 @@ type ShopArtistRow = {
   name: string | null
   image_url: string | null
   specialty: string | null
-  artist_profile_id: string | null
-  shops: ShopRecord[] | ShopRecord | null
 }
 
-// shops columns used: id, name, slug, city, state, latitude, longitude, address
 type ShopRecord = {
   id: string
-  name: string
-  slug: string
+  slug: string | null
   city: string | null
   state: string | null
 }
 
-// ── STEP 1: Inspect schema ───────────────────────────────────────────────────
-
-async function inspectSchema() {
-  console.log("=== STEP 1: Schema inspection ===\n")
-
-  const { data: saSample, error: saErr } = await supabase
-    .from("shop_artists")
-    .select("*")
-    .limit(3)
-
-  if (saErr) {
-    console.error("Could not read shop_artists:", saErr.message)
-  } else {
-    console.log("shop_artists sample:")
-    if (saSample && saSample.length > 0) {
-      console.log("  columns:", Object.keys(saSample[0]).join(", "))
-      console.log("  first row:", JSON.stringify(saSample[0], null, 2))
-    } else {
-      console.log("  (no rows found)")
-    }
-  }
-
-  const { data: shopSample, error: shopErr } = await supabase
-    .from("shops")
-    .select("id, name, slug, city, state")
-    .limit(1)
-
-  if (shopErr) {
-    console.error("Could not read shops:", shopErr.message)
-  } else {
-    console.log("\nshops sample:")
-    if (shopSample && shopSample.length > 0) {
-      console.log("  first row:", JSON.stringify(shopSample[0], null, 2))
-    } else {
-      console.log("  (no rows found)")
-    }
-  }
-
-  const { data: artistSample, error: artistErr } = await supabase
-    .from("artists")
-    .select("*")
-    .limit(1)
-
-  if (artistErr) {
-    console.error("Could not read artists:", artistErr.message)
-  } else {
-    console.log("\nartists sample:")
-    if (artistSample && artistSample.length > 0) {
-      console.log("  columns:", Object.keys(artistSample[0]).join(", "))
-      console.log("  first row:", JSON.stringify(artistSample[0], null, 2))
-    } else {
-      console.log("  (table appears empty)")
-    }
-  }
-
-  console.log("")
-}
-
-// ── STEP 2: Fetch shop_artists with parent shop ──────────────────────────────
-
-async function fetchShopArtists(): Promise<ShopArtistRow[]> {
-  console.log("=== STEP 2: Fetching shop_artists rows ===\n")
-
-  // Paginate through all rows (Supabase caps at 1000/page by default)
-  const PAGE = 1000
-  const all: ShopArtistRow[] = []
-
-  for (let page = 0; ; page++) {
-    const { data, error } = await supabase
-      .from("shop_artists")
-      .select(`
-        id,
-        shop_id,
-        name,
-        image_url,
-        specialty,
-        artist_profile_id,
-        shops (
-          id,
-          name,
-          slug,
-          city,
-          state
-        )
-      `)
-      .not("name", "is", null)
-      .not("name", "eq", "")
-      .range(page * PAGE, (page + 1) * PAGE - 1)
-
-    if (error) {
-      if (page === 0) {
-        // First page failed — fall back to manual join
-        console.warn("  Relational join failed:", error.message)
-        return fetchShopArtistsManual()
-      }
-      console.warn(`  Page ${page} error (skipping):`, error.message)
-      break
-    }
-
-    if (!data || data.length === 0) break
-    all.push(...(data as unknown as ShopArtistRow[]))
-    if (data.length < PAGE) break
-  }
-
-  console.log(`  Fetched ${all.length} rows across paginated queries.`)
-  return all
-}
-
-async function fetchShopArtistsManual(): Promise<ShopArtistRow[]> {
-  console.log("  Falling back to manual join...")
-
-  const allArtists: unknown[] = []
-  const PAGE = 1000
-  for (let page = 0; ; page++) {
-    const { data, error } = await supabase
-      .from("shop_artists")
-      .select("id, shop_id, name, image_url, specialty, artist_profile_id")
-      .not("name", "is", null)
-      .not("name", "eq", "")
-      .range(page * PAGE, (page + 1) * PAGE - 1)
-    if (error) throw new Error("Failed to fetch shop_artists: " + error.message)
-    if (!data || data.length === 0) break
-    allArtists.push(...data)
-    if (data.length < PAGE) break
-  }
-
-  const allShops: ShopRecord[] = []
-  for (let page = 0; ; page++) {
-    const { data, error } = await supabase
-      .from("shops")
-      .select("id, name, slug, city, state")
-      .range(page * PAGE, (page + 1) * PAGE - 1)
-    if (error) throw new Error("Failed to fetch shops: " + error.message)
-    if (!data || data.length === 0) break
-    allShops.push(...(data as ShopRecord[]))
-    if (data.length < PAGE) break
-  }
-
-  const shopMap = new Map<string, ShopRecord>(allShops.map((s) => [s.id, s]))
-
-  return (allArtists as Array<Record<string, unknown>>).map((a) => ({
-    ...a,
-    shops: shopMap.get(a.shop_id as string) ?? null,
-  })) as unknown as ShopArtistRow[]
-}
-
-// ── STEP 3: Build artist records ─────────────────────────────────────────────
-
-// Actual artists columns:
-//   id, user_id, shop_id, display_name, handle, bio, specialties (array),
-//   city, state, hourly_rate, years_experience, instagram_handle, website_url,
-//   is_available, is_verified, is_active, rating, review_count,
-//   created_at, updated_at, is_claimed, source
-
-function buildArtistRecord(row: ShopArtistRow): Record<string, unknown> | null {
-  if (shouldSkip(row.name)) return null
-
-  const shop: ShopRecord | null = Array.isArray(row.shops)
-    ? (row.shops[0] ?? null)
-    : (row.shops ?? null)
-  if (!shop) return null
-
+// Actual artists columns used:
+//   id, shop_id, display_name, handle, bio, specialties (array), city, state,
+//   avatar_url, is_available, is_verified, is_active, is_claimed, source,
+//   rating, review_count
+function buildArtistRecord(row: ShopArtistRow, shop: ShopRecord): Record<string, unknown> {
   const displayName = row.name!.trim()
-  const handle = makeHandle(displayName, shop.slug ?? shop.id)
-
   // Split comma-separated specialty string into individual tags
-  const specialties: string[] = row.specialty && row.specialty.trim().length > 0
-    ? row.specialty.split(",").map((s: string) => s.trim()).filter(Boolean)
+  const specialties: string[] = row.specialty?.trim()
+    ? row.specialty.split(",").map((s) => s.trim()).filter(Boolean)
     : []
-
   return {
+    id: randomUUID(),
     display_name: displayName,
-    handle,
+    handle: makeHandle(displayName, shop.slug ?? shop.id),
     bio: null,
     avatar_url: row.image_url ?? null,
     city: shop.city ?? null,
@@ -274,111 +86,93 @@ function buildArtistRecord(row: ShopArtistRow): Record<string, unknown> | null {
   }
 }
 
-// ── STEP 4: Upsert in batches ────────────────────────────────────────────────
-
-const BATCH_SIZE = 500
-
-async function upsertBatches(records: Record<string, unknown>[]): Promise<void> {
-  const total = records.length
-  const totalBatches = Math.ceil(total / BATCH_SIZE)
-
-  for (let i = 0; i < totalBatches; i++) {
-    const batch = records.slice(i * BATCH_SIZE, (i + 1) * BATCH_SIZE)
-    const batchNum = i + 1
-
-    if (DRY_RUN) {
-      console.log(
-        `  [DRY RUN] Batch ${batchNum}/${totalBatches} — ${batch.length} artists would be upserted`
-      )
-      if (i === 0 && batch.length > 0) {
-        console.log("  Sample record:", JSON.stringify(batch[0], null, 2))
-      }
-      continue
-    }
-
-    const { error } = await supabase
-      .from("artists")
-      .upsert(batch, { onConflict: "handle", ignoreDuplicates: true })
-
-    if (error) {
-      console.error(`  Batch ${batchNum}/${totalBatches} ERROR:`, error.message)
-    } else {
-      console.log(`  Batch ${batchNum}/${totalBatches} — ${batch.length} artists queued`)
-    }
-  }
-}
-
-// ── STEP 5: Summarise ────────────────────────────────────────────────────────
-
-function summarise(
-  rawCount: number,
-  skippedCount: number,
-  records: Record<string, unknown>[]
-) {
-  const byState: Record<string, number> = {}
-  for (const r of records) {
-    const state = (r.state as string) ?? "UNKNOWN"
-    byState[state] = (byState[state] ?? 0) + 1
-  }
-
-  const stateLines = Object.entries(byState)
-    .sort((a, b) => b[1] - a[1])
-    .map(([state, count]) => `    ${state.padEnd(4)} ${count}`)
-    .join("\n")
-
-  console.log("\n=== Summary ===")
-  console.log(`  Total shop_artists rows read : ${rawCount}`)
-  console.log(`  Skipped (bad/missing names)  : ${skippedCount}`)
-  console.log(`  Artists queued for upsert    : ${records.length}`)
-  if (!DRY_RUN) {
-    console.log("  (existing handles silently ignored — ignoreDuplicates: true)")
-  }
-  if (stateLines) {
-    console.log("\n  By state:")
-    console.log(stateLines)
-  }
-  console.log(
-    `\n${DRY_RUN ? "[DRY RUN]" : "✓"} Done. ${records.length} artists ${DRY_RUN ? "would be" : "were"} promoted from shop_artists.`
-  )
-}
-
 // ── Main ─────────────────────────────────────────────────────────────────────
 
 async function main() {
-  await inspectSchema()
+  modeBanner(ARGS.apply)
+  const supabase = getSupabaseAdmin()
 
-  const rows = await fetchShopArtists()
-  const rawCount = rows.length
-  console.log(`\n  Total rows fetched: ${rawCount}\n`)
+  const rows = await withRetry("fetch shop_artists", () =>
+    fetchAll<ShopArtistRow>(supabase, "shop_artists", "id, shop_id, name, image_url, specialty", (q) =>
+      q.not("name", "is", null).neq("name", "")
+    )
+  )
+  const shopIds = Array.from(new Set(rows.map((r) => r.shop_id)))
+  const shops = await withRetry("fetch shops", () =>
+    fetchIn<ShopRecord & { is_active: boolean; possibly_closed: boolean }>(
+      supabase,
+      "shops",
+      "id, slug, city, state, is_active, possibly_closed",
+      "id",
+      shopIds
+    )
+  )
+  const eligible = new Map<string, ShopRecord>(shops.filter((s) => s.is_active && !s.possibly_closed).map((s) => [s.id, s]))
 
-  const records: Record<string, unknown>[] = []
-  let skippedCount = 0
-
-  for (const row of rows) {
-    const record = buildArtistRecord(row)
-    if (!record) {
-      skippedCount++
-    } else {
-      records.push(record)
-    }
-  }
-
-  console.log(
-    `=== STEP 3: Built ${records.length} artist records (${skippedCount} skipped) ===\n`
+  // Existing artists at these shops, by shop_id + normalized display_name, and all handles.
+  const existing = await withRetry("fetch artists", () =>
+    fetchIn<{ shop_id: string; display_name: string | null }>(supabase, "artists", "id, shop_id, display_name", "shop_id", shopIds)
+  )
+  const existingKeys = new Set(existing.map((a) => `${a.shop_id}|${normalizeArtistName(a.display_name)}`))
+  const handles = new Set(
+    (await withRetry("fetch handles", () => fetchAll<{ handle: string }>(supabase, "artists", "id, handle"))).map((a) => a.handle)
   )
 
-  if (records.length === 0) {
-    console.log("Nothing to insert. Exiting.")
-    process.exit(0)
+  const skips = { placeholder: 0, shopNotEligible: 0, alreadyArtist: 0, handleTaken: 0 }
+  const records: Record<string, unknown>[] = []
+  for (const row of rows) {
+    if (isPlaceholderName(row.name)) { skips.placeholder++; continue }
+    const shop = eligible.get(row.shop_id)
+    if (!shop) { skips.shopNotEligible++; continue }
+    const key = `${row.shop_id}|${normalizeArtistName(row.name)}`
+    if (existingKeys.has(key)) { skips.alreadyArtist++; continue }
+    const record = buildArtistRecord(row, shop)
+    if (handles.has(String(record.handle))) { skips.handleTaken++; continue }
+    existingKeys.add(key)
+    handles.add(String(record.handle))
+    records.push(record)
   }
 
-  console.log("=== STEP 4: Upserting in batches ===\n")
-  await upsertBatches(records)
+  console.log(`shop_artists rows read:              ${rows.length} (${shops.length} shops)`)
+  console.log(`  skipped, placeholder name:         ${skips.placeholder}`)
+  console.log(`  skipped, shop inactive/closed:     ${skips.shopNotEligible}`)
+  console.log(`  skipped, artist already exists:    ${skips.alreadyArtist}`)
+  console.log(`  skipped, handle taken:             ${skips.handleTaken}`)
+  console.log(`  to promote:                        ${records.length}`)
 
-  summarise(rawCount, skippedCount, records)
+  const byState: Record<string, number> = {}
+  for (const r of records) byState[String(r.state ?? "UNKNOWN")] = (byState[String(r.state ?? "UNKNOWN")] ?? 0) + 1
+  const stateLines = Object.entries(byState).sort((a, b) => b[1] - a[1]).slice(0, 15)
+  if (stateLines.length) console.log(`\nBy state (top 15):\n${stateLines.map(([s, n]) => `  ${s.padEnd(8)} ${n}`).join("\n")}`)
+  if (records.length) console.log(`\nSample record: ${JSON.stringify(records[0])}`)
+
+  if (!ARGS.apply) {
+    console.log("\nDry run — nothing written. Pass --apply to write (undo-logged).")
+    return
+  }
+
+  const undo = new UndoLog("promote-shop-artists")
+  let inserted = 0
+  for (let i = 0; i < records.length; i += BATCH_SIZE) {
+    const batch = records.slice(i, i + BATCH_SIZE)
+    undo.append(batch.map((r) => ({ table: "artists", id: String(r.id), field: "is_active", old_value: false, new_value: true })))
+    const ids = batch.map((r) => String(r.id))
+    await withRetry(`insert artists batch ${i / BATCH_SIZE + 1}`, async (attempt) => {
+      // A failed attempt may have written the batch; never insert it twice.
+      if (attempt > 1) {
+        const present = await fetchIn(supabase, "artists", "id", "id", ids)
+        if (present.length === ids.length) return
+        if (present.length > 0) throw new Error(`partial insert (${present.length}/${ids.length})`)
+      }
+      const { error } = await supabase.from("artists").insert(batch)
+      if (error) throw new Error(error.message)
+    })
+    inserted += batch.length
+  }
+  console.log(`\nInserted ${inserted} artists. Undo log: ${undo.file} (${undo.entries} entries)`)
 }
 
 main().catch((err) => {
-  console.error("Fatal error:", err)
+  console.error("Fatal:", err)
   process.exit(1)
 })
