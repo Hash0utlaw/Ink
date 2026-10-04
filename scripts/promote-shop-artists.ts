@@ -3,6 +3,7 @@
 // Run: npx tsx scripts/promote-shop-artists.ts [--apply]
 //   Dry-run by default; --apply inserts, undo-logged as is_active false → true
 //   (so scripts/undo.ts deactivates the new artists rather than deleting).
+//   Every database call is retried (lib/retry.ts).
 //
 // Only rows whose shop is active and not possibly_closed are promoted. A row
 // is skipped if its name is a placeholder, if an artist with the same shop_id
@@ -17,6 +18,7 @@ import { getSupabaseAdmin } from "./lib/supabase-admin"
 import { UndoLog } from "./lib/undo-log"
 import { fetchAll, fetchIn, modeBanner } from "./lib/cleanup-utils"
 import { isPlaceholderName, normalizeArtistName } from "./lib/artist-names"
+import { withRetry } from "./lib/retry"
 
 const ARGS = parseScriptArgs()
 const BATCH_SIZE = 500
@@ -90,29 +92,31 @@ async function main() {
   modeBanner(ARGS.apply)
   const supabase = getSupabaseAdmin()
 
-  const rows = await fetchAll<ShopArtistRow>(supabase, "shop_artists", "id, shop_id, name, image_url, specialty", (q) =>
-    q.not("name", "is", null).neq("name", "")
+  const rows = await withRetry("fetch shop_artists", () =>
+    fetchAll<ShopArtistRow>(supabase, "shop_artists", "id, shop_id, name, image_url, specialty", (q) =>
+      q.not("name", "is", null).neq("name", "")
+    )
   )
   const shopIds = Array.from(new Set(rows.map((r) => r.shop_id)))
-  const shops = await fetchIn<ShopRecord & { is_active: boolean; possibly_closed: boolean }>(
-    supabase,
-    "shops",
-    "id, slug, city, state, is_active, possibly_closed",
-    "id",
-    shopIds
+  const shops = await withRetry("fetch shops", () =>
+    fetchIn<ShopRecord & { is_active: boolean; possibly_closed: boolean }>(
+      supabase,
+      "shops",
+      "id, slug, city, state, is_active, possibly_closed",
+      "id",
+      shopIds
+    )
   )
   const eligible = new Map<string, ShopRecord>(shops.filter((s) => s.is_active && !s.possibly_closed).map((s) => [s.id, s]))
 
   // Existing artists at these shops, by shop_id + normalized display_name, and all handles.
-  const existing = await fetchIn<{ shop_id: string; display_name: string | null }>(
-    supabase,
-    "artists",
-    "id, shop_id, display_name",
-    "shop_id",
-    shopIds
+  const existing = await withRetry("fetch artists", () =>
+    fetchIn<{ shop_id: string; display_name: string | null }>(supabase, "artists", "id, shop_id, display_name", "shop_id", shopIds)
   )
   const existingKeys = new Set(existing.map((a) => `${a.shop_id}|${normalizeArtistName(a.display_name)}`))
-  const handles = new Set((await fetchAll<{ handle: string }>(supabase, "artists", "id, handle")).map((a) => a.handle))
+  const handles = new Set(
+    (await withRetry("fetch handles", () => fetchAll<{ handle: string }>(supabase, "artists", "id, handle"))).map((a) => a.handle)
+  )
 
   const skips = { placeholder: 0, shopNotEligible: 0, alreadyArtist: 0, handleTaken: 0 }
   const records: Record<string, unknown>[] = []
@@ -152,8 +156,17 @@ async function main() {
   for (let i = 0; i < records.length; i += BATCH_SIZE) {
     const batch = records.slice(i, i + BATCH_SIZE)
     undo.append(batch.map((r) => ({ table: "artists", id: String(r.id), field: "is_active", old_value: false, new_value: true })))
-    const { error } = await supabase.from("artists").insert(batch)
-    if (error) throw new Error(`insert batch ${i / BATCH_SIZE + 1} failed: ${error.message}`)
+    const ids = batch.map((r) => String(r.id))
+    await withRetry(`insert artists batch ${i / BATCH_SIZE + 1}`, async (attempt) => {
+      // A failed attempt may have written the batch; never insert it twice.
+      if (attempt > 1) {
+        const present = await fetchIn(supabase, "artists", "id", "id", ids)
+        if (present.length === ids.length) return
+        if (present.length > 0) throw new Error(`partial insert (${present.length}/${ids.length})`)
+      }
+      const { error } = await supabase.from("artists").insert(batch)
+      if (error) throw new Error(error.message)
+    })
     inserted += batch.length
   }
   console.log(`\nInserted ${inserted} artists. Undo log: ${undo.file} (${undo.entries} entries)`)

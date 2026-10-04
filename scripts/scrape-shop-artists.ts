@@ -16,7 +16,9 @@
 // Checkpoint (data/scrape-artists-checkpoint.json): every attempted shop_id
 // with its status — ok, no_artists, fetch_failed, robots_blocked, skipped — and
 // the artists extracted. A recorded shop is never re-attempted; with
-// --retry-failed, fetch_failed shops are. Artists extracted on a dry run are
+// --retry-failed, ONLY fetch_failed shops are re-attempted, with a 15s timeout
+// and, if the homepage still fails, its www/non-www variant and then http://.
+// Artists extracted on a dry run are
 // kept there, so a later --apply inserts them without fetching again.
 //
 // Politeness: robots.txt per origin (user-agent TattooMapsBot), 6 shops at a
@@ -37,7 +39,8 @@
 //
 // Outputs: data/scrape-artists-results.csv (one row per shop attempted this
 // run), data/scrape-artists-extracted.csv (one row per artist kept) and
-// data/scrape-artists-dropped.csv (one row per person dropped).
+// data/scrape-artists-dropped.csv (one row per person dropped). A
+// --retry-failed run writes the same files with a ".retry" suffix.
 
 import { config } from "dotenv"
 config({ path: ".env.local" })
@@ -53,6 +56,7 @@ import { getSupabaseAdmin } from "./lib/supabase-admin"
 import { UndoLog } from "./lib/undo-log"
 import { fetchAll, modeBanner, runPool, writeCsv } from "./lib/cleanup-utils"
 import { isPlaceholderName, normalizeArtistName } from "./lib/artist-names"
+import { withRetry } from "./lib/retry"
 
 const ARGS = parseScriptArgs()
 const MAX_COST = ARGS.maxCost ?? 5
@@ -64,15 +68,16 @@ const OUTPUT_USD_PER_MTOK = 5
 const USER_AGENT = "Mozilla/5.0 (compatible; TattooMapsBot/1.0; +https://tattoo-maps.com)"
 const ROBOTS_UA = "TattooMapsBot"
 const CONCURRENCY = 6
-const TIMEOUT_MS = 8000
+const TIMEOUT_MS = ARGS.retryFailed ? 15000 : 8000
 const MAX_FETCHES = 3
 const GUESS_PATHS = ["/artists", "/our-artists", "/team"]
 const MIN_TEXT_CHARS = 100
 
 const CHECKPOINT = "data/scrape-artists-checkpoint.json"
-const RESULTS_CSV = "data/scrape-artists-results.csv"
-const EXTRACTED_CSV = "data/scrape-artists-extracted.csv"
-const DROPPED_CSV = "data/scrape-artists-dropped.csv"
+const CSV_SUFFIX = ARGS.retryFailed ? ".retry" : ""
+const RESULTS_CSV = `data/scrape-artists-results${CSV_SUFFIX}.csv`
+const EXTRACTED_CSV = `data/scrape-artists-extracted${CSV_SUFFIX}.csv`
+const DROPPED_CSV = `data/scrape-artists-dropped${CSV_SUFFIX}.csv`
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -200,6 +205,20 @@ function robotsFor(url: URL): Promise<ReturnType<typeof robotsParser> | null> {
 async function robotsAllows(url: string): Promise<boolean> {
   const robots = await robotsFor(new URL(url))
   return robots?.isDisallowed(url, ROBOTS_UA) !== true
+}
+
+// www/non-www variant of a homepage, then the http:// form of the original.
+function homeVariants(home: URL): string[] {
+  const out: string[] = []
+  const flipped = new URL(home.toString())
+  flipped.hostname = home.hostname.startsWith("www.") ? home.hostname.slice(4) : `www.${home.hostname}`
+  out.push(flipped.toString())
+  if (home.protocol === "https:") {
+    const http = new URL(home.toString())
+    http.protocol = "http:"
+    out.push(http.toString())
+  }
+  return out
 }
 
 async function fetchPage(url: string): Promise<Page | null> {
@@ -363,9 +382,39 @@ Rules:
   }
 }
 
-// No spaces and either long or containing a shop-ish word: "danduquettetattoo".
+// No spaces, over 8 chars, and either over 14 chars or starting/ending with a
+// shop-ish word: "danduquettetattoo", "inkbyjess" — but not "Martin" or "Inez".
+const HANDLE_AFFIX = /^(tattoos?|tattz|inked|ink|art)|(tattoos?|tattz|inked|ink|art)$/i
 function isHandleLike(name: string): boolean {
-  return !/\s/.test(name) && (name.length > 14 || /tattoo|tattoos|ink|art|studio/i.test(name))
+  return !/\s/.test(name) && name.length > 8 && (name.length > 14 || HANDLE_AFFIX.test(name))
+}
+
+// Exits if isHandleLike disagrees with the expected results.
+function handleSelfTest(): void {
+  const cases: [string, boolean][] = [
+    ["Martin", false], ["Stuart", false], ["Marta", false], ["Kiki", false], ["Inez", false],
+    ["danduquettetattoo", true], ["inkbyjess", true],
+  ]
+  console.log("Handle-like self-test:")
+  let ok = true
+  for (const [name, drop] of cases) {
+    const got = isHandleLike(name)
+    if (got !== drop) ok = false
+    console.log(`  ${name.padEnd(18)} → ${got ? "drop" : "keep"}${got === drop ? "" : `  ✗ expected ${drop ? "drop" : "keep"}`}`)
+  }
+  if (!ok) {
+    console.error("Self-test failed — stopping.")
+    process.exit(1)
+  }
+  console.log("")
+}
+
+// "BRAULIO CAMARENA" → "Braulio Camarena" when the name is all caps with more
+// than 3 letters; mixed-case names are left alone.
+function displayName(name: string): string {
+  const letters = name.replace(/[^\p{L}]/gu, "")
+  if (letters.length <= 3 || letters !== letters.toUpperCase()) return name
+  return name.toLowerCase().replace(/(^|[\s\-'’.])(\p{L})/gu, (_, sep: string, c: string) => sep + c.toUpperCase())
 }
 
 // Why a name is dropped, or null to keep it.
@@ -423,7 +472,20 @@ async function processShop(shop: Shop): Promise<CheckpointEntry | null> {
     return page
   }
 
-  const homePage = await tryFetch(homeUrl)
+  let homePage = await tryFetch(homeUrl)
+  // Retry mode: the www/non-www variant, then http://. These count as one
+  // homepage fetch, not against the 3-page budget.
+  if (!homePage && ARGS.retryFailed) {
+    for (const variant of homeVariants(home)) {
+      if (!(await robotsAllows(variant))) continue
+      tried.push(variant)
+      homePage = await fetchPage(variant)
+      if (homePage) {
+        pages.push(homePage)
+        break
+      }
+    }
+  }
   if (!homePage) return entry("fetch_failed", tried)
   if (EXCLUDED_HOST.test(new URL(homePage.url).hostname))
     return entry("skipped", tried, { note: `redirected to ${new URL(homePage.url).hostname}` })
@@ -458,7 +520,7 @@ async function processShop(shop: Shop): Promise<CheckpointEntry | null> {
       continue
     }
     seen.add(norm)
-    kept.push({ name: a.name, role: a.role, specialty: a.specialty, image_url: cleanImageUrl(a.image_url, main.url) })
+    kept.push({ name: displayName(a.name), role: a.role, specialty: a.specialty, image_url: cleanImageUrl(a.image_url, main.url) })
   }
   if (dropped.length) console.log(`    dropped: ${dropped.map((d) => `${d.name} (${d.reason}${d.reason === "role" ? `: ${d.role}` : ""})`).join(", ")}`)
 
@@ -468,24 +530,46 @@ async function processShop(shop: Shop): Promise<CheckpointEntry | null> {
 // ── Inserting ────────────────────────────────────────────────────────────────
 
 // Inserts the shop's artists whose normalized names aren't already present.
+// Every database call is retried (lib/retry.ts). Before retrying the insert it
+// checks whether the failed attempt actually wrote the rows, so a lost
+// response never inserts them twice.
 async function insertArtists(supabase: SupabaseClient, undo: UndoLog, shopId: string, artists: ExtractedArtist[]): Promise<number> {
-  const { data, error } = await supabase.from("shop_artists").select("name").eq("shop_id", shopId)
-  if (error) throw new Error(`read shop_artists for ${shopId} failed: ${error.message}`)
-  const existing = new Set((data ?? []).map((r: { name: string | null }) => normalizeArtistName(r.name)))
+  const data = await withRetry(`read shop_artists for ${shopId}`, async () => {
+    const { data, error } = await supabase.from("shop_artists").select("name").eq("shop_id", shopId)
+    if (error) throw new Error(error.message)
+    return data ?? []
+  })
+  const existing = new Set(data.map((r: { name: string | null }) => normalizeArtistName(r.name)))
   const rows = artists
     .filter((a) => !existing.has(normalizeArtistName(a.name)))
-    .map((a) => ({ id: randomUUID(), shop_id: shopId, name: a.name, specialty: a.specialty ?? null, image_url: a.image_url ?? null }))
+    .map((a) => ({ id: randomUUID(), shop_id: shopId, name: displayName(a.name), specialty: a.specialty ?? null, image_url: a.image_url ?? null }))
   if (rows.length === 0) return 0
   undo.append(rows.map((r) => ({ table: "shop_artists", id: r.id, field: "__row__", old_value: null, new_value: r, op: "insert" as const })))
-  const { error: insertError } = await supabase.from("shop_artists").insert(rows)
-  if (insertError) throw new Error(`insert shop_artists for ${shopId} failed: ${insertError.message}`)
+  const ids = rows.map((r) => r.id)
+  await withRetry(`insert shop_artists for ${shopId}`, async (attempt) => {
+    if (attempt > 1) {
+      const { data: present, error } = await supabase.from("shop_artists").select("id").in("id", ids)
+      if (error) throw new Error(error.message)
+      if ((present ?? []).length === ids.length) return
+      if ((present ?? []).length > 0) throw new Error(`partial insert for ${shopId} (${present!.length}/${ids.length})`)
+    }
+    const { error } = await supabase.from("shop_artists").insert(rows)
+    if (error) throw new Error(error.message)
+  })
   return rows.length
+}
+
+// Rows recorded as inserts in this run's undo log (the authoritative count).
+function undoInsertCount(undo: UndoLog): number {
+  if (!fs.existsSync(undo.file)) return 0
+  return fs.readFileSync(undo.file, "utf-8").split("\n").filter((l) => l.includes('"op":"insert"')).length
 }
 
 // ── Main ─────────────────────────────────────────────────────────────────────
 
 async function main() {
   modeBanner(ARGS.apply)
+  handleSelfTest()
   if (!ARGS.apply) console.log("WARNING: a dry run still fetches sites and calls the Claude API — it spends API credit.\n")
   console.log(`Max cost: $${MAX_COST}${ARGS.limit ? ` · limit ${ARGS.limit} shops` : ""}${ARGS.state ? ` · state ${ARGS.state}` : ""}${ARGS.retryFailed ? " · retrying fetch_failed" : ""}${ARGS.input ? ` · only shops in ${ARGS.input}` : ""}\n`)
 
@@ -498,25 +582,34 @@ async function main() {
   const checkpoint = loadCheckpoint()
   const undo = new UndoLog("scrape-shop-artists")
   let inserted = 0
+  // Artists inserted this run from earlier dry-run checkpoint entries.
+  const fromCheckpoint: Record<string, unknown>[] = []
 
   // Artists extracted on an earlier dry run: insert them now, no refetch.
   if (ARGS.apply) {
     const pending = Object.entries(checkpoint).filter(([, e]) => e.status === "ok" && !e.inserted)
     if (pending.length) console.log(`Inserting artists saved from ${pending.length} earlier dry-run shops…`)
     for (const [shopId, e] of pending) {
-      inserted += await insertArtists(supabase, undo, shopId, e.artists)
+      const n = await insertArtists(supabase, undo, shopId, e.artists)
+      inserted += n
       e.inserted = true
+      for (const a of e.artists)
+        fromCheckpoint.push({ shop_id: shopId, shop_name: e.name, website: e.website, artist_name: displayName(a.name), role: a.role, specialty: a.specialty, image_url: a.image_url, source: "checkpoint" })
     }
     if (pending.length) saveCheckpoint(checkpoint)
   }
 
-  const shops = await fetchAll<Shop>(supabase, "shops", "id, name, city, state, website", (q) => {
-    let query = q.eq("is_active", true).eq("possibly_closed", false).not("website", "is", null).neq("website", "")
-    if (ARGS.state) query = query.eq("state", ARGS.state)
-    return query
-  })
+  const shops = await withRetry("fetch shops", () =>
+    fetchAll<Shop>(supabase, "shops", "id, name, city, state, website", (q) => {
+      let query = q.eq("is_active", true).eq("possibly_closed", false).not("website", "is", null).neq("website", "")
+      if (ARGS.state) query = query.eq("state", ARGS.state)
+      return query
+    })
+  )
   const seeded = new Set(
-    (await fetchAll<{ id: string; shop_id: string }>(supabase, "shop_artists", "id, shop_id")).map((r) => r.shop_id)
+    (await withRetry("fetch shop_artists", () => fetchAll<{ id: string; shop_id: string }>(supabase, "shop_artists", "id, shop_id"))).map(
+      (r) => r.shop_id
+    )
   )
   const withSite = shops.filter((s) => isRealWebsite(s.website))
   const unseeded = withSite.filter((s) => !seeded.has(s.id))
@@ -524,7 +617,7 @@ async function main() {
   const candidates = unseeded.filter((s) => {
     if (only && !only.has(s.id)) return false
     const e = checkpoint[s.id]
-    return !e || (ARGS.retryFailed && e.status === "fetch_failed")
+    return ARGS.retryFailed ? e?.status === "fetch_failed" : !e
   })
   const batch = ARGS.limit ? candidates.slice(0, ARGS.limit) : candidates
 
@@ -559,7 +652,8 @@ async function main() {
 
     if (ARGS.apply && e.status === "ok") {
       try {
-        inserted += await insertArtists(supabase, undo, shop.id, e.artists)
+        const n = await insertArtists(supabase, undo, shop.id, e.artists)
+        inserted += n
         e.inserted = true
       } catch (err) {
         fatal = err as Error
@@ -583,14 +677,14 @@ async function main() {
       cost: e.cost.toFixed(5),
     })
     for (const a of e.artists)
-      extracted.push({ shop_id: shop.id, shop_name: shop.name, website: shop.website, artist_name: a.name, role: a.role, specialty: a.specialty, image_url: a.image_url })
+      extracted.push({ shop_id: shop.id, shop_name: shop.name, website: shop.website, artist_name: a.name, role: a.role, specialty: a.specialty, image_url: a.image_url, source: "this run" })
     for (const d of e.dropped ?? [])
       droppedRows.push({ shop_id: shop.id, shop_name: shop.name, website: shop.website, name: d.name, role: d.role, reason: d.reason })
   })
 
   saveCheckpoint(checkpoint)
   writeCsv(RESULTS_CSV, ["shop_id", "name", "website", "pages_fetched", "status", "artists_found", "cost"], results)
-  writeCsv(EXTRACTED_CSV, ["shop_id", "shop_name", "website", "artist_name", "role", "specialty", "image_url"], extracted)
+  writeCsv(EXTRACTED_CSV, ["shop_id", "shop_name", "website", "artist_name", "role", "specialty", "image_url", "source"], [...fromCheckpoint, ...extracted])
   writeCsv(DROPPED_CSV, ["shop_id", "shop_name", "website", "name", "role", "reason"], droppedRows)
 
   const byStatus: Record<string, number> = {}
@@ -613,7 +707,8 @@ async function main() {
   if (results.length) console.log(`Remaining candidates: ${remaining} → projected ~$${((usage.cost / results.length) * remaining).toFixed(2)}`)
   console.log(`Wrote ${RESULTS_CSV}, ${EXTRACTED_CSV}, ${DROPPED_CSV}; checkpoint ${CHECKPOINT} (${Object.keys(checkpoint).length} shops)`)
   if (ARGS.apply) {
-    console.log(`Inserted ${inserted} shop_artists rows.${undo.entries ? ` Undo log: ${undo.file}` : ""}`)
+    const logged = undoInsertCount(undo)
+    console.log(`Inserted ${inserted} shop_artists rows (undo log records ${logged}${logged === inserted ? " — match" : " — MISMATCH"}).${undo.entries ? ` Undo log: ${undo.file}` : ""}`)
     if (inserted > 0) console.log("Next: npx tsx scripts/promote-shop-artists.ts (dry run), then --apply.")
   } else {
     console.log("Dry run — nothing written to the database. Pass --apply to insert (artists saved in the checkpoint are inserted without refetching).")

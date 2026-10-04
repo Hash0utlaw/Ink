@@ -14,6 +14,13 @@ export const PLACEHOLDER_NAMES = new Set([
   "na",
   "unknown",
   "coming soon",
+  "unknown artist",
+  "guest artist",
+  "new artist",
+  "tbd artist",
+  "artist tbd",
+  // Exact match only — "Apprentice" alone is a role, not a name.
+  "apprentice",
 ])
 
 export function isPlaceholderName(name: string | null | undefined): boolean {
