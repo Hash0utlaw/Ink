@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { Resend } from "resend"
-import { FROM_EMAIL, REPLY_TO } from "@/lib/site-config"
+import { ADMIN_NOTIFY_EMAIL, FROM_EMAIL, REPLY_TO } from "@/lib/site-config"
 
 export const dynamic = "force-dynamic"
 
@@ -20,7 +20,7 @@ export async function POST(request: Request) {
     const emailPromises: Promise<unknown>[] = [
       resend.emails.send({
         from: fromAddress,
-        to: SUPPORT_EMAIL,
+        to: ADMIN_NOTIFY_EMAIL ?? SUPPORT_EMAIL,
         replyTo: email,
         subject: `[Contact] ${reason} — ${name}`,
         html: `<p>New contact form submission.</p>
