@@ -3,6 +3,7 @@ import { Resend } from "resend"
 import { createClient } from "@/utils/supabase/server"
 import { getArtistBySlug } from "@/lib/supabase/artists"
 import { getShopBySlug } from "@/lib/supabase/shops"
+import { ADMIN_NOTIFY_EMAIL, FROM_EMAIL, REPLY_TO } from "@/lib/site-config"
 
 export const dynamic = "force-dynamic"
 
@@ -38,8 +39,8 @@ export async function POST(request: Request) {
     }
 
     const resend = new Resend(process.env.RESEND_API_KEY)
-    const fromAddress = process.env.RESEND_FROM_EMAIL ?? "TattooMaps <bookings@tattoo-maps.com>"
-    const notifyEmail = fromAddress.match(/<(.+)>/)?.[1] ?? fromAddress
+    const fromAddress = FROM_EMAIL
+    const notifyEmail = ADMIN_NOTIFY_EMAIL ?? fromAddress.match(/<(.+)>/)?.[1] ?? fromAddress
 
     const emailPromises: Promise<unknown>[] = [
       resend.emails.send({
@@ -56,6 +57,7 @@ export async function POST(request: Request) {
       resend.emails.send({
         from: fromAddress,
         to: email,
+        replyTo: REPLY_TO,
         subject: "We received your claim request",
         html: `<p>Hi ${name},</p>
                <p>Thanks for claiming <strong>${listing}</strong> on TattooMaps. We'll verify and get back to you within 2 business days.</p>`,

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { Resend } from "resend"
+import { FROM_EMAIL, REPLY_TO } from "@/lib/site-config"
 
 export const dynamic = "force-dynamic"
 
@@ -14,7 +15,7 @@ export async function POST(request: Request) {
     }
 
     const resend = new Resend(process.env.RESEND_API_KEY)
-    const fromAddress = process.env.RESEND_FROM_EMAIL ?? "TattooMaps <bookings@tattoo-maps.com>"
+    const fromAddress = FROM_EMAIL
 
     const emailPromises: Promise<unknown>[] = [
       resend.emails.send({
@@ -32,6 +33,7 @@ export async function POST(request: Request) {
       resend.emails.send({
         from: fromAddress,
         to: email,
+        replyTo: REPLY_TO,
         subject: "We received your message",
         html: `<p>Hi ${name},</p>
                <p>Thanks for reaching out about "${reason}". We'll reply to this email within 24 hours on business days.</p>`,

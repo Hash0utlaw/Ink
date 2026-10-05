@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import { createClient } from "@/utils/supabase/server"
+import { SITE_URL } from "@/lib/site-config"
 
 export async function login(prevState: any, formData: FormData) {
   const supabase = createClient()
@@ -51,7 +52,7 @@ export async function signup(prevState: any, formData: FormData) {
   const password = formData.get("password") as string
   const role = formData.get("role") as "artist" | "client"
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
+  const siteUrl = SITE_URL
 
   const { error } = await supabase.auth.signUp({
     email,
@@ -88,7 +89,7 @@ export async function forgotPassword(prevState: any, formData: FormData) {
   const supabase = createClient()
 
   const email = formData.get("email") as string
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || "http://localhost:3000"
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || SITE_URL
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: `${siteUrl}/auth/reset-password`,

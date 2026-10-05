@@ -2,8 +2,9 @@ import type { MetadataRoute } from "next"
 import { getAllCityStatePairs, getAllShopIds, getAllArtistIds } from "@/lib/supabase/seo"
 import { STATE_ABBR_TO_NAME, stateAbbrToSlug, cityToSlug } from "@/lib/utils/states"
 import { ALL_STYLES } from "@/app/styles/page"
+import { SITE_URL } from "@/lib/site-config"
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://tattoo-maps.com"
+const BASE_URL = SITE_URL
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [cityPairs, shopIds, artistIds] = await Promise.all([

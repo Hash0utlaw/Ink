@@ -3,6 +3,7 @@ import { Resend } from "resend"
 import { createClient } from "@/utils/supabase/server"
 import { getArtistById } from "@/lib/supabase/artists"
 import { getUserProfile } from "@/lib/supabase/users"
+import { FROM_EMAIL, REPLY_TO } from "@/lib/site-config"
 
 export const dynamic = "force-dynamic"
 
@@ -43,7 +44,7 @@ export async function POST(request: Request) {
     }
 
     const resend = new Resend(process.env.RESEND_API_KEY)
-    const fromAddress = process.env.RESEND_FROM_EMAIL ?? "TattooMaps <bookings@tattoo-maps.com>"
+    const fromAddress = FROM_EMAIL
 
     const artist = await getArtistById(artistId)
     const artistName = artist?.name ?? "the artist"
@@ -68,6 +69,7 @@ export async function POST(request: Request) {
       const { error: artistEmailError } = await resend.emails.send({
         from: fromAddress,
         to: artistEmail,
+        replyTo: REPLY_TO,
         subject: `New booking request from ${clientName}`,
         html: `<p>You have a new booking request from <strong>${clientName}</strong>.</p>
                <p><strong>Email:</strong> ${clientEmail}</p>
@@ -103,6 +105,7 @@ export async function POST(request: Request) {
     await resend.emails.send({
       from: fromAddress,
       to: clientEmail,
+      replyTo: REPLY_TO,
       subject: clientEmailContent.subject,
       html: clientEmailContent.html,
     })

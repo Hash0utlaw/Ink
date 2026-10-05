@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { Resend } from "resend"
 import { createClient } from "@/utils/supabase/server"
 import { getBookingById, updateBookingStatus } from "@/lib/supabase/bookings"
+import { FROM_EMAIL, REPLY_TO, SITE_URL } from "@/lib/site-config"
 
 export const dynamic = "force-dynamic"
 
@@ -43,13 +44,14 @@ export async function PATCH(
     if (resendKey && booking.clientEmail) {
       const resend = new Resend(resendKey)
       const artistName = (artistRow as { display_name: string }).display_name ?? "the artist"
-      const from = "TattooMaps <no-reply@tattoo-maps.com>"
-      const reviewUrl = `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://tattoo-maps.com"}/review/${booking.id}`
+      const from = FROM_EMAIL
+      const reviewUrl = `${SITE_URL}/review/${booking.id}`
 
       if (action === "confirm") {
         await resend.emails.send({
           from,
           to: booking.clientEmail,
+          replyTo: REPLY_TO,
           subject: `Your booking with ${artistName} is confirmed!`,
           html: `<p>Hi ${booking.clientName},</p>
                  <p><strong>${artistName}</strong> has confirmed your booking request.</p>
@@ -61,6 +63,7 @@ export async function PATCH(
         await resend.emails.send({
           from,
           to: booking.clientEmail,
+          replyTo: REPLY_TO,
           subject: `Update on your booking request`,
           html: `<p>Hi ${booking.clientName},</p>
                  <p>Unfortunately, <strong>${artistName}</strong> is unable to take your booking at this time.</p>
@@ -71,6 +74,7 @@ export async function PATCH(
         await resend.emails.send({
           from,
           to: booking.clientEmail,
+          replyTo: REPLY_TO,
           subject: `How was your session with ${artistName}? Leave a review`,
           html: `
             <div style="font-family:sans-serif;max-width:480px;margin:0 auto;">

@@ -4,6 +4,7 @@ import { Poppins } from "next/font/google"
 import "./globals.css"
 import { cn } from "@/lib/utils"
 import { Toaster } from "@/components/ui/toaster"
+import { SITE_URL } from "@/lib/site-config"
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -24,7 +25,7 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL("https://tattoo-maps.com"),
+  metadataBase: new URL(SITE_URL),
   alternates: {
     canonical: "/",
   },
@@ -42,7 +43,7 @@ export const metadata: Metadata = {
     title: "TattooMaps - Discover Artists & Shops Worldwide",
     description:
       "Find tattoo artists and shops near you with our interactive map platform. Explore portfolios, book appointments, and generate AI tattoo designs.",
-    url: "https://tattoomaps.com",
+    url: SITE_URL,
     siteName: "TattooMaps",
     images: [
       {
