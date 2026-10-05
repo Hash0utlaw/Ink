@@ -33,6 +33,12 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   const isProtected = pathname.startsWith("/dashboard") || pathname.startsWith("/artist-dashboard")
 
+  // Admin pages don't advertise themselves: signed-out visitors get a plain 404.
+  // The page itself still checks ADMIN_EMAILS for signed-in users.
+  if (pathname.startsWith("/admin") && !user) {
+    return NextResponse.rewrite(new URL("/_not-found", request.url), { status: 404 })
+  }
+
   if (isProtected && !user) {
     const loginUrl = new URL("/login", request.url)
     loginUrl.searchParams.set("next", pathname)

@@ -1,18 +1,41 @@
 import { NextResponse } from "next/server"
 import { Resend } from "resend"
 import { createClient } from "@/utils/supabase/server"
+import { createAdminClient } from "@/utils/supabase/admin"
 import { getArtistBySlug } from "@/lib/supabase/artists"
 import { getShopBySlug } from "@/lib/supabase/shops"
-import { ADMIN_NOTIFY_EMAIL, FROM_EMAIL, REPLY_TO } from "@/lib/site-config"
+import { ADMIN_NOTIFY_EMAIL, FROM_EMAIL, REPLY_TO, SITE_URL } from "@/lib/site-config"
+import { escapeHtml } from "@/lib/escape-html"
+import { hoursAgo, isNonEmptyString, isValidEmail } from "@/lib/validation"
 
 export const dynamic = "force-dynamic"
+
+const MAX_CLAIMS_PER_DAY = 5
 
 export async function POST(request: Request) {
   try {
     const { artistSlug, shopSlug, name, email, phone, instagram, listing } = await request.json()
 
-    if (!name || !email || !listing) {
-      return NextResponse.json({ success: false, message: "Missing required fields" }, { status: 400 })
+    if (!isNonEmptyString(name) || !isValidEmail(email) || !isNonEmptyString(listing)) {
+      return NextResponse.json(
+        { success: false, message: "Please provide your name, a valid email and the listing." },
+        { status: 400 },
+      )
+    }
+
+    const claimantEmail = email.trim()
+    const admin = createAdminClient()
+
+    const { count: recentClaims } = await admin
+      .from("claim_requests")
+      .select("id", { count: "exact", head: true })
+      .ilike("claimant_email", claimantEmail.replace(/[\\%_]/g, (ch) => `\\${ch}`))
+      .gte("created_at", hoursAgo(24))
+    if ((recentClaims ?? 0) >= MAX_CLAIMS_PER_DAY) {
+      return NextResponse.json(
+        { success: false, message: "Too many claim requests. Please try again tomorrow." },
+        { status: 429 },
+      )
     }
 
     const supabase = createClient()
@@ -25,8 +48,8 @@ export async function POST(request: Request) {
     const { error: dbError } = await supabase.from("claim_requests").insert({
       artist_id: artist?.id ?? null,
       shop_id: shop?.id ?? null,
-      claimant_name: name,
-      claimant_email: email,
+      claimant_name: name.trim(),
+      claimant_email: claimantEmail,
       claimant_phone: phone || null,
       instagram_handle: instagram || null,
       note: listing,
@@ -48,19 +71,20 @@ export async function POST(request: Request) {
         to: notifyEmail,
         subject: `New claim request: ${listing}`,
         html: `<p>New profile claim submitted.</p>
-               <p><strong>Listing:</strong> ${listing}</p>
-               <p><strong>Name:</strong> ${name}</p>
-               <p><strong>Email:</strong> ${email}</p>
-               ${phone ? `<p><strong>Phone:</strong> ${phone}</p>` : ""}
-               ${instagram ? `<p><strong>Instagram:</strong> ${instagram}</p>` : ""}`,
+               <p><strong>Listing:</strong> ${escapeHtml(listing)}</p>
+               <p><strong>Name:</strong> ${escapeHtml(name)}</p>
+               <p><strong>Email:</strong> ${escapeHtml(claimantEmail)}</p>
+               ${phone ? `<p><strong>Phone:</strong> ${escapeHtml(phone)}</p>` : ""}
+               ${instagram ? `<p><strong>Instagram:</strong> ${escapeHtml(instagram)}</p>` : ""}
+               <p><a href="${SITE_URL}/admin/intros">Review pending claims →</a></p>`,
       }),
       resend.emails.send({
         from: fromAddress,
-        to: email,
+        to: claimantEmail,
         replyTo: REPLY_TO,
         subject: "We received your claim request",
-        html: `<p>Hi ${name},</p>
-               <p>Thanks for claiming <strong>${listing}</strong> on TattooMaps. We'll verify and get back to you within 2 business days.</p>`,
+        html: `<p>Hi ${escapeHtml(name)},</p>
+               <p>Thanks for claiming <strong>${escapeHtml(listing)}</strong> on TattooMaps. We'll verify and get back to you within 2 business days.</p>`,
       }),
     ]
 

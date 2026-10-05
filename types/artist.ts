@@ -42,4 +42,7 @@ export interface Artist {
   instagramHandle?: string
   websiteUrl?: string
   isClaimed: boolean
+  /** True when a TattooMaps account owns this profile (artists.user_id is set). */
+  hasAccount?: boolean
+  isVerified?: boolean
 }

@@ -2,7 +2,7 @@ import Link from "next/link"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Star, Share2, Instagram, Globe } from "lucide-react"
+import { Star, Share2, Instagram, Globe, BadgeCheck } from "lucide-react"
 import type { Artist } from "@/types/artist"
 import { SaveButton } from "@/components/saved/save-button"
 
@@ -18,6 +18,7 @@ function initials(name: string) {
 export function ArtistHeader({ artist, initialSaved }: { artist: Artist; initialSaved?: boolean }) {
   const igHandle = artist.instagramHandle?.replace(/^@/, "").trim()
   const websiteUrl = artist.websiteUrl?.trim()
+  const showVerified = artist.hasAccount && artist.isVerified
 
   return (
     <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start">
@@ -35,8 +36,27 @@ export function ArtistHeader({ artist, initialSaved }: { artist: Artist; initial
           <p className="text-lg text-muted-foreground mt-1">at {artist.shopName}</p>
         )}
 
-        {(artist.rating > 0 || artist.isAvailable) && (
+        {!artist.hasAccount && (
+          <p className="text-xs text-muted-foreground mt-1">
+            {artist.shopName ? `Listed from ${artist.shopName}'s website` : "Listed from public sources"} · Is this
+            you?{" "}
+            <Link
+              href={artist.handle ? `/claim?artist=${encodeURIComponent(artist.handle)}` : "/claim"}
+              className="underline hover:text-foreground transition-colors"
+            >
+              Claim this profile
+            </Link>
+          </p>
+        )}
+
+        {(artist.rating > 0 || artist.isAvailable || showVerified) && (
           <div className="flex items-center gap-4 mt-2">
+            {showVerified && (
+              <Badge variant="secondary" className="gap-1">
+                <BadgeCheck className="w-3.5 h-3.5" />
+                Verified
+              </Badge>
+            )}
             {artist.rating > 0 && (
               <div className="flex items-center gap-1">
                 <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" />
