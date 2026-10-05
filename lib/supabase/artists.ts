@@ -56,6 +56,8 @@ export function rowToArtist(row: Record<string, unknown>): Artist {
     instagramHandle: String(row.instagram_handle ?? ""),
     websiteUrl: String(row.website_url ?? ""),
     isClaimed: Boolean(row.is_claimed ?? false),
+    hasAccount: row.user_id != null,
+    isVerified: Boolean(row.is_verified ?? false),
   }
 }
 

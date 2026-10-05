@@ -14,6 +14,7 @@ import { getArtists, getWorthTheDriveArtists } from "@/lib/supabase/artists"
 import { getNewestFlash } from "@/lib/supabase/flash"
 import { getRecentReviews } from "@/lib/supabase/reviews"
 import { getPlatformStats } from "@/lib/supabase/seo"
+import { SITE_URL } from "@/lib/site-config"
 
 async function FeaturedArtistsSection() {
   const { data: artists } = await getArtists()
@@ -42,13 +43,13 @@ const websiteJsonLd = {
   "@context": "https://schema.org",
   "@type": "WebSite",
   "name": "TattooMaps",
-  "url": "https://tattoo-maps.com",
+  "url": SITE_URL,
   "description": "Discover tattoo artists and shops worldwide. Explore portfolios, book appointments, and find your perfect ink.",
   "potentialAction": {
     "@type": "SearchAction",
     "target": {
       "@type": "EntryPoint",
-      "urlTemplate": "https://tattoo-maps.com/search?q={search_term_string}",
+      "urlTemplate": `${SITE_URL}/search?q={search_term_string}`,
     },
     "query-input": "required name=search_term_string",
   },

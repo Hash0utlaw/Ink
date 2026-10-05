@@ -17,8 +17,17 @@ interface AuthFormProps {
 
 export function AuthForm({ mode }: AuthFormProps) {
   const searchParams = useSearchParams()
-  const [message, setMessage] = useState(searchParams.get("message") || "")
-  const [isSuccess, setIsSuccess] = useState(false)
+  const next = searchParams.get("next") ?? ""
+  const [message, setMessage] = useState(() => {
+    if (mode === "login" && searchParams.get("reset") === "1") {
+      return "Password updated. Log in with your new password."
+    }
+    if (mode === "login" && searchParams.get("error") === "confirm_failed") {
+      return "That link expired or was already used. Try logging in, or sign up again."
+    }
+    return searchParams.get("message") || ""
+  })
+  const [isSuccess, setIsSuccess] = useState(() => mode === "login" && searchParams.get("reset") === "1")
   const [isPending, setIsPending] = useState(false)
   const [selectedRole, setSelectedRole] = useState<"artist" | "client" | null>(null)
   const [showPassword, setShowPassword] = useState(false)
@@ -62,7 +71,7 @@ export function AuthForm({ mode }: AuthFormProps) {
 
       {/* Form */}
       <form action={handleSubmit} className="space-y-5">
-        <input type="hidden" name="next" value={searchParams.get("next") ?? ""} />
+        <input type="hidden" name="next" value={next} />
         {/* Full name (signup only) */}
         {!isLogin && (
           <div className="space-y-1.5">
@@ -271,7 +280,7 @@ export function AuthForm({ mode }: AuthFormProps) {
       <p className="mt-7 text-center text-sm text-muted-foreground">
         {isLogin ? "New to TattooMaps?" : "Already have an account?"}{" "}
         <Link
-          href={isLogin ? "/signup" : "/login"}
+          href={`${isLogin ? "/signup" : "/login"}${next ? `?next=${encodeURIComponent(next)}` : ""}`}
           className="font-semibold text-accent-text hover:text-accent-text/80 transition-colors"
         >
           {isLogin ? "Create a free account" : "Sign in instead"}

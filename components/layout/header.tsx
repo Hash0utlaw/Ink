@@ -52,6 +52,9 @@ export function Header() {
   const [role, setRole] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [mobileOpen, setMobileOpen] = useState(false)
+  // From an artist or shop page, send people back there after signing in / up.
+  const returnsHere = /^\/(artists|shops)\/[^/]+/.test(pathname ?? "")
+  const loginHref = returnsHere ? `/login?next=${encodeURIComponent(pathname)}` : "/login"
 
   useEffect(() => {
     const supabase = getClient()
@@ -216,7 +219,7 @@ export function Header() {
                 ) : (
                   <SheetClose asChild>
                     <Button asChild className="w-full">
-                      <Link href="/login">Sign in</Link>
+                      <Link href={loginHref}>Sign in</Link>
                     </Button>
                   </SheetClose>
                 )}
@@ -320,7 +323,7 @@ export function Header() {
             </>
           ) : (
             <Button asChild>
-              <Link href="/login">Sign in</Link>
+              <Link href={loginHref}>Sign in</Link>
             </Button>
           )}
         </div>
