@@ -23,7 +23,7 @@ export default function ShopsPage() {
           <div className="text-center mb-8">
             <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">Find a Shop</h1>
             <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground">
-              Browse our curated list of top-rated tattoo shops from around the world.
+              Browse 26,000+ tattoo shops across all 50 states.
             </p>
           </div>
           <div className="max-w-2xl mx-auto mb-10">

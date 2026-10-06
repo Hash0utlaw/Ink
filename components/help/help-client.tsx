@@ -16,7 +16,6 @@ import {
   Calendar,
   CreditCard,
   Shield,
-  Palette,
   MessageCircle,
   ChevronDown,
   ChevronRight,
@@ -30,18 +29,15 @@ const CATEGORIES = [
   { icon: User, title: "Account & Profile", description: "Manage your account, profile settings, and preferences", articles: 6, slug: "account" },
   { icon: Calendar, title: "Bookings & Appointments", description: "How to book, reschedule, or cancel appointments", articles: 7, slug: "bookings" },
   { icon: CreditCard, title: "Payments & Deposits", description: "Deposits, refunds, and payment methods", articles: 5, slug: "payments" },
-  { icon: Shield, title: "Safety & Trust", description: "Reviews, verification, and community standards", articles: 4, slug: "safety" },
-  { icon: Palette, title: "AI Tattoo Generator", description: "Using the AI design tool, saving, and sharing", articles: 6, slug: "generator" },
+  { icon: Shield, title: "Safety & Trust", description: "Reviews and community standards", articles: 4, slug: "safety" },
 ]
 
 const FAQS = [
   { question: "How do I find a tattoo artist near me?", answer: "Use the interactive map on our Artists page or the Search page. Enter your city or allow location access, then filter by style, price range, and availability. You can also browse the Shops page to find studios by area." },
-  { question: "Is TattooMaps free to use?", answer: "Yes — browsing artists, shops, and styles is completely free for clients. Artists and studios have free and paid listing tiers. The AI Tattoo Generator includes free credits for new users, with additional credits available through a subscription." },
+  { question: "Is TattooMaps free to use?", answer: "Yes — browsing artists, shops, and styles is completely free for clients. Artists and studios have free and paid listing tiers." },
   { question: "How do I book an appointment?", answer: "Visit an artist's profile page and click the Book Appointment button. Select your preferred date, describe your tattoo idea, and confirm the booking. A deposit may be required depending on the artist's policy." },
   { question: "Can I cancel or reschedule a booking?", answer: "Cancellation and reschedule policies are set by each individual artist. Check the artist's profile for their specific policy before booking. Generally, cancellations made 48+ hours in advance are eligible for deposit refunds." },
   { question: "How do I list my studio or artist profile?", answer: "Sign up with an Artist or Studio account via the Join as Artist link. Complete your profile, upload portfolio photos, set your availability, and your listing will go live within 24 hours after a brief review." },
-  { question: "How does the AI Tattoo Generator work?", answer: "The generator uses AI to create custom tattoo design concepts based on your description, style preference, and body placement. Describe your idea, choose a style, and receive several design variations you can save, share, or bring to an artist for inspiration." },
-  { question: "Are artists on TattooMaps verified?", answer: "Artists complete a profile verification process that includes portfolio review and identity checks. Verified artists display a badge on their profile. We also use community reviews and reports to maintain quality standards." },
   { question: "How do I leave a review for an artist?", answer: "After your appointment is marked complete, you will receive a prompt in your client dashboard to leave a review. Reviews include a star rating and written feedback. All reviews are moderated for authenticity." },
 ]
 

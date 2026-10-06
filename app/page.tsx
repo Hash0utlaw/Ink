@@ -44,7 +44,7 @@ const websiteJsonLd = {
   "@type": "WebSite",
   "name": "TattooMaps",
   "url": SITE_URL,
-  "description": "Discover tattoo artists and shops worldwide. Explore portfolios, book appointments, and find your perfect ink.",
+  "description": "Discover tattoo artists and shops across all 50 states. Explore portfolios, book appointments, and find your perfect ink.",
   "potentialAction": {
     "@type": "SearchAction",
     "target": {

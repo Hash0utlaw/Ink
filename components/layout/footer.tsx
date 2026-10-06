@@ -15,7 +15,7 @@ export function Footer() {
               <span className="font-extrabold tracking-wide text-lg">TattooMaps</span>
             </div>
             <p className="text-muted-foreground text-sm leading-relaxed">
-              Discover tattoo artists and shops worldwide through interactive maps. Your journey to the perfect tattoo
+              Discover tattoo artists and shops across the US through interactive maps. Your journey to the perfect tattoo
               starts here.
             </p>
             <div className="flex space-x-4">
@@ -118,7 +118,7 @@ export function Footer() {
 
         <div className="border-t border-border mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
           <p className="text-muted-foreground text-sm">© 2025 TattooMaps. All rights reserved.</p>
-          <p className="text-muted-foreground text-sm mt-4 md:mt-0">Built with ❤️ for the global tattoo community</p>
+          <p className="text-muted-foreground text-sm mt-4 md:mt-0">Built with ❤️ for the tattoo community</p>
         </div>
         <p className="text-muted-foreground text-sm mt-4 text-center md:text-left">
           Places data from{" "}

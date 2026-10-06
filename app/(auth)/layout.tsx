@@ -59,17 +59,17 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
                 </span>
               </h1>
               <p className="text-muted-foreground text-lg leading-relaxed max-w-md">
-                Connect with world-class tattoo artists, explore thousands of styles, and book your perfect ink — all in one place.
+                Find tattoo artists and shops across the US, explore their work, and book your next piece — all in one place.
               </p>
             </div>
 
             {/* Feature bullets */}
             <ul className="space-y-3">
               {[
-                { icon: Users, text: "10,000+ verified artists worldwide" },
-                { icon: MapPin, text: "Interactive map to find shops near you" },
-                { icon: Palette, text: "20+ tattoo styles to browse and explore" },
-                { icon: Star, text: "Trusted by over 500,000 ink enthusiasts" },
+                { icon: Users, text: "21,000+ artists to discover" },
+                { icon: MapPin, text: "26,000+ shops on an interactive map" },
+                { icon: Palette, text: "Browse artists by tattoo style" },
+                { icon: Star, text: "Listings in all 50 states" },
               ].map(({ icon: Icon, text }) => (
                 <li key={text} className="flex items-center gap-3 text-sm text-muted-foreground">
                   <div className="w-7 h-7 rounded-lg bg-accent/15 border border-accent/25 flex items-center justify-center shrink-0">
@@ -84,18 +84,18 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           {/* Bottom stats bar */}
           <div className="flex items-center gap-8">
             <div>
-              <div className="text-2xl font-bold text-foreground">10K+</div>
+              <div className="text-2xl font-bold text-foreground">21,000+</div>
               <div className="text-xs text-muted-foreground">Artists</div>
             </div>
             <div className="w-px h-8 bg-border" />
             <div>
-              <div className="text-2xl font-bold text-foreground">5K+</div>
-              <div className="text-xs text-muted-foreground">Studios</div>
+              <div className="text-2xl font-bold text-foreground">26,000+</div>
+              <div className="text-xs text-muted-foreground">Shops</div>
             </div>
             <div className="w-px h-8 bg-border" />
             <div>
-              <div className="text-2xl font-bold text-foreground">4.9★</div>
-              <div className="text-xs text-muted-foreground">Avg. rating</div>
+              <div className="text-2xl font-bold text-foreground">50</div>
+              <div className="text-xs text-muted-foreground">States</div>
             </div>
           </div>
         </div>

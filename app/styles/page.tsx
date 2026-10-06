@@ -400,7 +400,7 @@ export default function AllStylesPage() {
             <MotionView>
               <h2 className="text-2xl md:text-3xl font-bold mb-3">Not sure which style suits you?</h2>
               <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                Browse artists and shops to get inspired, or use our AI design generator to explore ideas.
+                Browse artists and shops to get inspired and find the right fit.
               </p>
               <div className="flex items-center justify-center gap-3 flex-wrap">
                 <Link

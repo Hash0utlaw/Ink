@@ -40,6 +40,7 @@ import {
 const MOBILE_NAV_ITEMS = [
   { href: "/artists", label: "Artists", icon: Users },
   { href: "/tattoo-shops", label: "Shops", icon: Store },
+  { href: "/map", label: "Map", icon: MapPin },
   { href: "/flash", label: "Flash", icon: Zap },
   { href: "/styles", label: "Styles", icon: Palette },
   { href: "/find-artist", label: "Find Artist", icon: Compass },

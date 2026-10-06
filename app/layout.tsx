@@ -13,10 +13,10 @@ const poppins = Poppins({
 })
 
 export const metadata: Metadata = {
-  title: "TattooMaps - Discover Artists & Shops Worldwide",
+  title: "TattooMaps - Discover Tattoo Artists & Shops Across the US",
   description:
     "The ultimate platform for discovering tattoo artists and shops through interactive maps. Find artists near you, explore styles, and book appointments.",
-  keywords: ["tattoo", "artists", "shops", "maps", "discovery", "booking", "AI generator"],
+  keywords: ["tattoo", "artists", "shops", "maps", "discovery", "booking"],
   authors: [{ name: "TattooMaps Team" }],
   creator: "TattooMaps",
   publisher: "TattooMaps",
@@ -40,9 +40,9 @@ export const metadata: Metadata = {
     shortcut: "/app-icon.png",
   },
   openGraph: {
-    title: "TattooMaps - Discover Artists & Shops Worldwide",
+    title: "TattooMaps - Discover Tattoo Artists & Shops Across the US",
     description:
-      "Find tattoo artists and shops near you with our interactive map platform. Explore portfolios, book appointments, and generate AI tattoo designs.",
+      "Find tattoo artists and shops near you with our interactive map platform. Explore portfolios and book appointments.",
     url: SITE_URL,
     siteName: "TattooMaps",
     images: [
@@ -50,7 +50,7 @@ export const metadata: Metadata = {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "TattooMaps - Discover Artists & Shops Worldwide",
+        alt: "TattooMaps - Discover Tattoo Artists & Shops Across the US",
       },
     ],
     locale: "en_US",
@@ -58,7 +58,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "TattooMaps - Discover Artists & Shops Worldwide",
+    title: "TattooMaps - Discover Tattoo Artists & Shops Across the US",
     description: "Find tattoo artists and shops near you with our interactive map platform.",
     images: ["/og-image.png"],
     creator: "@tattoomaps",
