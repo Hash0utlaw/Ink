@@ -137,10 +137,25 @@ export async function approveClaim(claimId: string): Promise<ActionResult> {
   if (c.status !== "pending") return { ok: false, error: `Claim is already ${c.status}` }
   if (!c.artist_id && !c.shop_id) return { ok: false, error: "This claim isn't linked to an artist or shop" }
 
-  const { error: listingError } = c.artist_id
-    ? await admin.from("artists").update({ claim_email: c.claimant_email }).eq("id", c.artist_id)
-    : await admin.from("shops").update({ claim_email: c.claimant_email }).eq("id", c.shop_id as string)
-  if (listingError) return { ok: false, error: listingError.message }
+  // The claimant's email goes in claim_links (RLS on, no public policies —
+  // service role only), never on the public artists/shops rows. Login and
+  // /auth/confirm link the listing when that email signs in (lib/link-claims.ts).
+  // A row for this claim may already exist if an earlier approve failed after the insert.
+  const { data: existingLink, error: existingError } = await admin
+    .from("claim_links")
+    .select("id")
+    .eq("claim_request_id", claimId)
+    .maybeSingle()
+  if (existingError) return { ok: false, error: existingError.message }
+  if (!existingLink) {
+    const { error: linkError } = await admin.from("claim_links").insert({
+      email: c.claimant_email.trim().toLowerCase(),
+      artist_id: c.artist_id ?? null,
+      shop_id: c.artist_id ? null : c.shop_id,
+      claim_request_id: claimId,
+    })
+    if (linkError) return { ok: false, error: linkError.message }
+  }
 
   const { error } = await admin
     .from("claim_requests")
