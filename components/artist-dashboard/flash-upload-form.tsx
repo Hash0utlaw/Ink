@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Loader2, CheckCircle2 } from "lucide-react"
+import { STYLES } from "@/lib/styles"
 
-const STYLES = ["Traditional", "Neo-Traditional", "Japanese", "Blackwork", "Fine Line", "Realism", "Watercolor", "Geometric", "Other"]
 const SIZES = ["Tiny", "Small", "Medium", "Large"]
 
 export function FlashUploadForm() {
@@ -100,14 +100,14 @@ export function FlashUploadForm() {
         <div className="grid grid-cols-3 gap-1.5">
           {STYLES.map((s) => (
             <button
-              key={s}
+              key={s.slug}
               type="button"
-              onClick={() => setStyle(style === s ? "" : s)}
+              onClick={() => setStyle(style === s.slug ? "" : s.slug)}
               className={`rounded-md border px-1.5 py-1 text-xs font-medium transition-colors ${
-                style === s ? "border-[#7C3AED] bg-[#7C3AED]/10 text-[#7C3AED]" : "border-border bg-muted/30 text-muted-foreground hover:bg-muted/60"
+                style === s.slug ? "border-[#7C3AED] bg-[#7C3AED]/10 text-[#7C3AED]" : "border-border bg-muted/30 text-muted-foreground hover:bg-muted/60"
               }`}
             >
-              {s}
+              {s.label}
             </button>
           ))}
         </div>

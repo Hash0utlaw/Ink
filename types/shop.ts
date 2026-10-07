@@ -23,7 +23,8 @@ export interface Shop {
   hours: {
     [key: string]: string
   }
-  specialties: string[]
+  /** Canonical style slugs from shop_styles (lib/styles.ts), in STYLES order. */
+  styles: string[]
   acceptsWalkIns: boolean
   // Open-data signal that the shop may have closed; hidden from lists and the
   // map, but its page stays reachable.

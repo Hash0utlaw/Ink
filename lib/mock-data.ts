@@ -37,6 +37,7 @@ const artists: Artist[] = [
     name: "Valerie",
     shopName: "Black Oak Tattoo",
     specialties: ["Fine Line", "Botanical", "Blackwork", "Micro-Realism"],
+    styles: [],
     rating: 4.9,
     reviewCount: 124,
     location: {
@@ -100,6 +101,7 @@ const artists: Artist[] = [
     name: "Chloe",
     shopName: "Black Oak Tattoo",
     specialties: ["Watercolor", "Abstract"],
+    styles: [],
     rating: 4.8,
     reviewCount: 88,
     location: { address: "San Francisco", city: "San Francisco", state: "CA", lat: 37.7749, lng: -122.4194 },
@@ -123,6 +125,7 @@ const artists: Artist[] = [
     name: "Kenji",
     shopName: "Oni Tattoo",
     specialties: ["Japanese", "Irezumi", "Dragons", "Large Scale"],
+    styles: [],
     rating: 4.5,
     reviewCount: 150,
     location: {
@@ -214,7 +217,7 @@ const shops: Shop[] = [
       Saturday: "11am - 8pm",
       Sunday: "12pm - 5pm",
     },
-    specialties: ["Fine Line", "Botanical", "Blackwork", "Watercolor", "Abstract", "Realism"],
+    styles: [],
     acceptsWalkIns: true,
   },
   {
@@ -241,7 +244,7 @@ const shops: Shop[] = [
       Saturday: "12pm - 10pm",
       Sunday: "Closed",
     },
-    specialties: ["Japanese", "Irezumi", "Dragons", "Large Scale"],
+    styles: [],
     acceptsWalkIns: false,
   },
 ]

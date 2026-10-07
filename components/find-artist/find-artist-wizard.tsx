@@ -8,21 +8,32 @@ import { Footer } from "@/components/layout/footer"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { MapPin, ArrowLeft, Wand2 } from "lucide-react"
+import { STYLES } from "@/lib/styles"
 
-const STYLES = [
-  { label: "Traditional", emoji: "⚓" },
-  { label: "Neo-Traditional", emoji: "🌹" },
-  { label: "Japanese", emoji: "🐉" },
-  { label: "Blackwork", emoji: "◼" },
-  { label: "Fine Line", emoji: "✒️" },
-  { label: "Realism", emoji: "🖼" },
-  { label: "Watercolor", emoji: "🎨" },
-  { label: "Geometric", emoji: "◆" },
-  { label: "New School", emoji: "🎭" },
-  { label: "Illustrative", emoji: "✏️" },
-  { label: "Tribal", emoji: "🌀" },
-  { label: "Minimalist", emoji: "—" },
-]
+// Decoration only — the style list itself is lib/styles.ts.
+const STYLE_EMOJI: Record<string, string> = {
+  traditional: "⚓",
+  "neo-traditional": "🌹",
+  japanese: "🐉",
+  realism: "🖼",
+  "black-and-grey": "◐",
+  "fine-line": "✒️",
+  blackwork: "◼",
+  illustrative: "✏️",
+  watercolor: "🎨",
+  geometric: "◆",
+  dotwork: "⋯",
+  ornamental: "❋",
+  tribal: "🌀",
+  lettering: "✍️",
+  "new-school": "🎭",
+  anime: "⭐",
+  portrait: "👤",
+  floral: "🌸",
+  chicano: "🌹",
+  color: "🌈",
+  "cover-ups": "♻️",
+}
 
 const SIZES = [
   { label: "Tiny", sub: "coin-sized or smaller", icon: "◦" },
@@ -137,16 +148,16 @@ export function FindArtistWizard() {
               <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
                 {STYLES.map((s) => (
                   <button
-                    key={s.label}
+                    key={s.slug}
                     type="button"
-                    onClick={() => setStyle(s.label)}
+                    onClick={() => setStyle(s.slug)}
                     className={`flex flex-col items-center gap-1.5 rounded-xl border p-4 text-sm font-medium transition-all ${
-                      style === s.label
+                      style === s.slug
                         ? "border-[#7C3AED] bg-[#7C3AED]/10 text-[#7C3AED] shadow-sm shadow-[#7C3AED]/20"
                         : "border-border bg-card text-muted-foreground hover:border-[#7C3AED]/40 hover:bg-muted/40"
                     }`}
                   >
-                    <span className="text-2xl">{s.emoji}</span>
+                    <span className="text-2xl">{STYLE_EMOJI[s.slug]}</span>
                     <span className="text-xs leading-tight text-center">{s.label}</span>
                   </button>
                 ))}

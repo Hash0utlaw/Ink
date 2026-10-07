@@ -15,6 +15,7 @@ import { getFlashById } from "@/lib/supabase/flash"
 import { PublicBookingForm } from "@/components/booking/public-booking-form"
 import { createClient } from "@/utils/supabase/server"
 import { safeImageSrc } from "@/lib/utils/safe-image"
+import { styleLabel, styleLabels } from "@/lib/styles"
 
 async function getPortfolioImages(artistId: string): Promise<string[]> {
   try {
@@ -115,10 +116,10 @@ export default async function BookArtistPage({
                     </div>
                   </div>
 
-                  {artist.specialties.length > 0 && (
+                  {artist.styles.length > 0 && (
                     <div className="flex flex-wrap gap-1.5">
-                      {artist.specialties.slice(0, 6).map((s) => (
-                        <Badge key={s} variant="secondary" className="text-xs">{s}</Badge>
+                      {styleLabels(artist.styles).slice(0, 6).map((label) => (
+                        <Badge key={label} variant="secondary" className="text-xs">{label}</Badge>
                       ))}
                     </div>
                   )}
@@ -187,7 +188,7 @@ export default async function BookArtistPage({
                     artistName={artist.name}
                     prefill={flashListing ? {
                       description: `I'd like to book your flash design: "${flashListing.title}"${flashListing.description ? `. ${flashListing.description}` : ""}`,
-                      style: flashListing.style ?? undefined,
+                      style: flashListing.style ? styleLabel(flashListing.style) ?? flashListing.style : undefined,
                       size: flashListing.size ?? undefined,
                     } : undefined}
                   />

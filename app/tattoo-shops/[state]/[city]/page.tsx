@@ -14,6 +14,7 @@ import { STATE_ABBR_TO_NAME, stateAbbrToSlug } from "@/lib/utils/states"
 import { FinderCta } from "@/components/layout/finder-cta"
 import type { Shop } from "@/types/shop"
 import { safeImageSrc } from "@/lib/utils/safe-image"
+import { styleLabels } from "@/lib/styles"
 
 export const dynamic = "force-dynamic"
 
@@ -78,9 +79,10 @@ function ShopCard({ shop, priority = false }: { shop: Shop; priority?: boolean }
           {shop.acceptsWalkIns && (
             <Badge variant="secondary" className="text-xs">Walk-ins welcome</Badge>
           )}
-          {shop.specialties.slice(0, 2).map((s) => (
-            <Badge key={s} variant="outline" className="text-xs">{s}</Badge>
+          {styleLabels(shop.styles).slice(0, 3).map((label) => (
+            <Badge key={label} variant="outline" className="text-xs">{label}</Badge>
           ))}
+          {shop.styles.length > 3 && <Badge variant="outline" className="text-xs">+{shop.styles.length - 3}</Badge>}
         </div>
       </div>
     </Link>

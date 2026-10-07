@@ -39,7 +39,7 @@ function artistToMapLocation(artist: Artist & { distance_mi?: number }): MapboxL
     reviewCount: artist.reviewCount,
     image: artist.avatarUrl || undefined,
     isOpen: artist.isAvailable,
-    specialties: artist.specialties,
+    styles: artist.styles,
     priceRange: artist.priceRange,
     distance: artist.distance_mi,
     description: artist.bio || undefined,

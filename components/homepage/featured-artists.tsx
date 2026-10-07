@@ -5,6 +5,7 @@ import { Star } from "lucide-react"
 import { MotionView } from "@/components/utils/motion-view"
 import Link from "next/link"
 import type { Artist } from "@/types/artist"
+import { styleLabels } from "@/lib/styles"
 
 interface FeaturedArtistsProps {
   artists?: Artist[]
@@ -38,7 +39,9 @@ export function FeaturedArtists({ artists }: FeaturedArtistsProps) {
                       <AvatarFallback>{artist.name.charAt(0)}</AvatarFallback>
                     </Avatar>
                     <h3 className="font-bold text-xl">{artist.name}</h3>
-                    <p className="text-accent-text text-sm">{artist.specialties.slice(0, 2).join(", ")}</p>
+                    {artist.styles.length > 0 && (
+                      <p className="text-accent-text text-sm">{styleLabels(artist.styles).slice(0, 2).join(", ")}</p>
+                    )}
                     <div className="flex items-center gap-1 mt-2">
                       <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
                       <span className="text-muted-foreground">{artist.rating}</span>

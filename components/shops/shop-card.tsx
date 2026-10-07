@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Star, MapPin } from "lucide-react"
 import type { Shop } from "@/types/shop"
 import { SaveButton } from "@/components/saved/save-button"
+import { styleLabels } from "@/lib/styles"
 
 export function ShopCard({
   shop,
@@ -66,14 +67,16 @@ export function ShopCard({
             </Badge>
           )}
         </div>
-        <div className="flex flex-wrap gap-1">
-          {shop.specialties.slice(0, 4).map((spec) => (
-            <Badge key={spec} variant="secondary">
-              {spec}
-            </Badge>
-          ))}
-          {shop.specialties.length > 4 && <Badge variant="secondary">...</Badge>}
-        </div>
+        {shop.styles.length > 0 && (
+          <div className="flex flex-wrap gap-1">
+            {styleLabels(shop.styles).slice(0, 3).map((label) => (
+              <Badge key={label} variant="secondary">
+                {label}
+              </Badge>
+            ))}
+            {shop.styles.length > 3 && <Badge variant="secondary">+{shop.styles.length - 3}</Badge>}
+          </div>
+        )}
       </CardContent>
       <CardFooter className="p-4">
         <Button asChild className="w-full">

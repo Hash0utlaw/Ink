@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Clock, MapPin } from "lucide-react"
 import type { Shop } from "@/types/shop"
+import { styleLabels } from "@/lib/styles"
 
 export function ShopInfoSidebar({ shop, isOwned = false }: { shop: Shop; isOwned?: boolean }) {
   const today = new Date().toLocaleDateString("en-US", { weekday: "long" })
@@ -50,18 +51,21 @@ export function ShopInfoSidebar({ shop, isOwned = false }: { shop: Shop; isOwned
         </CardContent>
       </Card>
 
-      <Card className="bg-muted/50 border-border/50">
-        <CardHeader>
-          <CardTitle>Specialties</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-wrap gap-2">
-          {shop.specialties.map((spec) => (
-            <Badge key={spec} variant="secondary">
-              {spec}
-            </Badge>
-          ))}
-        </CardContent>
-      </Card>
+      {shop.styles.length > 0 && (
+        <Card className="bg-muted/50 border-border/50">
+          <CardHeader>
+            <CardTitle>Styles</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-wrap gap-2">
+            {styleLabels(shop.styles).slice(0, 3).map((label) => (
+              <Badge key={label} variant="secondary">
+                {label}
+              </Badge>
+            ))}
+            {shop.styles.length > 3 && <Badge variant="secondary">+{shop.styles.length - 3}</Badge>}
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }

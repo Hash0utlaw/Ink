@@ -1,4 +1,5 @@
 import { createClient } from "@/utils/supabase/server"
+import { toStyleSlugs } from "@/lib/styles"
 
 export interface FlashListing {
   id: string
@@ -64,7 +65,8 @@ export async function getFlashListings(filters: FlashFilters = {}): Promise<{ da
       .select("*, artists(display_name, handle, avatar_url)", { count: "exact" })
       .eq("is_available", true)
 
-    if (filters.style) query = query.eq("style", filters.style)
+    const style = filters.style ? toStyleSlugs([filters.style])[0] : undefined
+    if (style) query = query.eq("style", style)
     if (filters.state) query = query.eq("state", filters.state.toUpperCase())
     if (filters.city) query = query.ilike("city", `%${filters.city}%`)
     if (filters.minPrice != null) query = query.gte("price", filters.minPrice)

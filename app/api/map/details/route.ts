@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 import { createClient } from "@/utils/supabase/server"
 import type { MapboxLocation } from "@/lib/mapbox"
-import { ARTIST_JOIN_COLUMNS, SHOP_COLUMNS, artistRowToMapLocation, shopToMapLocation } from "@/lib/map-data"
+import { ARTIST_JOIN_COLUMNS, SHOP_DETAIL_COLUMNS, artistRowToMapLocation, shopToMapLocation } from "@/lib/map-data"
 
 export const dynamic = "force-dynamic"
 
@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
   const supabase = createClient()
   const [shops, artists] = await Promise.all([
     shopIds.length
-      ? supabase.from("shops").select(SHOP_COLUMNS).in("id", shopIds).eq("is_active", true)
+      ? supabase.from("shops").select(SHOP_DETAIL_COLUMNS).in("id", shopIds).eq("is_active", true)
       : Promise.resolve({ data: [], error: null }),
     artistIds.length
       ? supabase

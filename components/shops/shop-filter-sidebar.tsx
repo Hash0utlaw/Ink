@@ -10,8 +10,8 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Filter, Navigation } from "lucide-react"
+import { STYLES } from "@/lib/styles"
 
-const shopSpecialties = ["Fine Line", "Botanical", "Blackwork", "Japanese", "Irezumi", "Watercolor", "Traditional"]
 
 const US_STATES = [
   { value: "TX", label: "Texas (975)" },
@@ -186,22 +186,22 @@ export function ShopFilterSidebar({ filters, onFilterChange, onNearMe }: ShopFil
           )}
         </div>
 
-        {/* Existing — Shop Specialties */}
+        {/* Shop styles — from shop_styles (union of the shop's artists' styles) */}
         <div className="space-y-2">
-          <Label>Shop Specialties</Label>
+          <Label>Styles</Label>
           <div className="space-y-2">
-            {shopSpecialties.map((style) => (
-              <div key={style} className="flex items-center space-x-2">
+            {STYLES.map((style) => (
+              <div key={style.slug} className="flex items-center space-x-2">
                 <Checkbox
-                  id={`shop-${style}`}
-                  checked={filters.styles.includes(style)}
-                  onCheckedChange={() => handleStyleChange(style)}
+                  id={`shop-${style.slug}`}
+                  checked={filters.styles.includes(style.slug)}
+                  onCheckedChange={() => handleStyleChange(style.slug)}
                 />
                 <label
-                  htmlFor={`shop-${style}`}
+                  htmlFor={`shop-${style.slug}`}
                   className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                 >
-                  {style}
+                  {style.label}
                 </label>
               </div>
             ))}

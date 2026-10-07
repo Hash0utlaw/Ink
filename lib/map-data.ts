@@ -5,6 +5,8 @@
 
 import { createClient } from "@/utils/supabase/server"
 import type { MapboxLocation } from "@/lib/mapbox"
+import { sortStyleSlugs, toStyleSlugs } from "@/lib/styles"
+import { SHOP_STYLES_EMBED, shopStylesFromRow } from "@/lib/supabase/shop-styles"
 
 // Supabase/PostgREST returns at most 1,000 rows per request, so every map
 // query is paged through fetchAllPages() below. These are the overall caps
@@ -36,7 +38,7 @@ export function shopToMapLocation(row: Record<string, unknown>, distanceMi?: num
     reviewCount: Number(row.review_count ?? 0),
     image: String(row.logo_url ?? row.cover_image_url ?? "") || undefined,
     isOpen: Boolean(row.accepts_walk_ins ?? false),
-    specialties: Array.isArray(row.specialties) ? (row.specialties as string[]) : [],
+    styles: shopStylesFromRow(row), // only when the select embedded shop_styles
     priceRange: "medium",
     distance: distanceMi,
     description: String(row.description ?? "") || undefined,
@@ -64,7 +66,7 @@ export function artistRowToMapLocation(row: Record<string, unknown>): MapboxLoca
     reviewCount: Number(row.review_count ?? 0),
     image: String(row.avatar_url ?? "") || undefined,
     isOpen: Boolean(row.is_available ?? false),
-    specialties: Array.isArray(row.specialties) ? (row.specialties as string[]) : [],
+    styles: Array.isArray(row.styles) ? sortStyleSlugs(row.styles as string[]) : [],
     priceRange: "medium",
     description: String(row.bio ?? "") || undefined,
     website: String(row.website_url ?? "") || undefined,
@@ -75,9 +77,12 @@ export function artistRowToMapLocation(row: Record<string, unknown>): MapboxLoca
 // Only what the map pins, sidebar cards and LocationDetails read
 // (description/hours/website are shown in LocationDetails).
 export const ARTIST_JOIN_COLUMNS =
-  "id, display_name, city, state, rating, review_count, avatar_url, specialties, is_available, bio, instagram_handle, website_url, shops!inner(latitude, longitude)"
+  "id, display_name, city, state, rating, review_count, avatar_url, styles, is_available, bio, instagram_handle, website_url, shops!inner(latitude, longitude)"
 export const SHOP_COLUMNS =
   "id, name, address, city, latitude, longitude, rating, review_count, logo_url, cover_image_url, accepts_walk_ins, hours, description"
+// For the ≤100 shops in /api/map/details (sidebar cards + LocationDetails);
+// the nationwide/bbox paths skip the embed to keep those pages light.
+export const SHOP_DETAIL_COLUMNS = `${SHOP_COLUMNS}, ${SHOP_STYLES_EMBED}`
 
 // Builds a fully-filtered query for the given select; called once with
 // head: true for the exact count and once per page.
@@ -142,8 +147,9 @@ export function shopQuery(bounds: Bounds | null, rating: number): QueryFactory {
   }
 }
 
-export function artistQuery(bounds: Bounds | null, styles: string[], rating: number): QueryFactory {
+export function artistQuery(bounds: Bounds | null, styleParams: string[], rating: number): QueryFactory {
   const supabase = createClient()
+  const styles = toStyleSlugs(styleParams)
   return (columns, head) => {
     let q = supabase
       .from("artists")
@@ -160,7 +166,7 @@ export function artistQuery(bounds: Bounds | null, styles: string[], rating: num
         .lte("shops.latitude", bounds.north)
         .gte("shops.longitude", bounds.west)
         .lte("shops.longitude", bounds.east)
-    if (styles.length > 0) q = q.overlaps("specialties", styles)
+    if (styles.length > 0) q = q.overlaps("styles", styles)
     if (rating > 0) q = q.gte("rating", rating)
     return q
   }

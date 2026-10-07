@@ -1,5 +1,6 @@
 import { createClient } from "@/utils/supabase/server"
 import type { Artist, Review, AvailabilityStatus, PriceTier } from "@/types/artist"
+import { sortStyleSlugs, toStyleSlugs } from "@/lib/styles"
 
 export type ArtistFilters = {
   styles?: string[]
@@ -16,7 +17,7 @@ export type ArtistFilters = {
 }
 
 // Real artists table columns: id, user_id, shop_id, display_name, handle, bio,
-// specialties (text[]), city, state, hourly_rate, years_experience,
+// specialties (text[]), styles (text[] of lib/styles.ts slugs), city, state, hourly_rate, years_experience,
 // instagram_handle, website_url, avatar_url, is_available, is_verified, is_active,
 // rating, review_count, created_at, updated_at, is_claimed, source
 export function rowToArtist(row: Record<string, unknown>): Artist {
@@ -32,6 +33,7 @@ export function rowToArtist(row: Record<string, unknown>): Artist {
     name: String(row.display_name ?? ""),
     shopName: String(shop?.name ?? ""),
     specialties: Array.isArray(row.specialties) ? (row.specialties as string[]) : [],
+    styles: Array.isArray(row.styles) ? sortStyleSlugs(row.styles as string[]) : [],
     rating: Number(row.rating ?? 0),
     reviewCount: Number(row.review_count ?? 0),
     location: {
@@ -68,9 +70,11 @@ export async function getArtists(
     const supabase = createClient()
     let query = supabase.from("artists").select("*", { count: "exact", head: false }).eq("is_active", true)
 
-    if (filters.styles && filters.styles.length > 0) {
+    // Slugs, or old style names from URLs ("Fine Line") mapped to slugs.
+    const styles = toStyleSlugs(filters.styles ?? [])
+    if (styles.length > 0) {
       // overlaps (&&) matches artists who have ANY of the selected styles
-      query = query.overlaps("specialties", filters.styles)
+      query = query.overlaps("styles", styles)
     }
     // TODO: Re-enable when claimed artists set their own price tier.
     // Every artist currently has the default price_tier "mid", so filters.price

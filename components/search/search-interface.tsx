@@ -8,6 +8,7 @@ import { ResultsList } from "@/components/artists/results-list"
 import { ShopResultsList } from "@/components/shops/shop-results-list"
 import type { Artist } from "@/types/artist"
 import type { Shop } from "@/types/shop"
+import { toStyleSlugs } from "@/lib/styles"
 
 type Filters = {
   styles: string[]
@@ -24,7 +25,8 @@ type Filters = {
 
 function filtersFromParams(params: URLSearchParams): Filters {
   return {
-    styles: params.get("styles")?.split(",").filter(Boolean) ?? [],
+    // Slugs; old links may carry names ("Fine Line") — mapped to slugs.
+    styles: toStyleSlugs(params.get("styles")?.split(",").filter(Boolean) ?? []),
     // TODO: Re-enable when claimed artists set their own price tier.
     price: [],
     rating: Number(params.get("rating")) || 0,

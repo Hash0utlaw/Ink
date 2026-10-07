@@ -15,7 +15,10 @@ export interface Artist {
   handle: string
   name: string
   shopName: string
+  /** Free-text tags as scraped/entered. Display and filtering use `styles`. */
   specialties: string[]
+  /** Canonical style slugs from lib/styles.ts (artists.styles), in STYLES order. */
+  styles: string[]
   rating: number
   reviewCount: number
   location: {

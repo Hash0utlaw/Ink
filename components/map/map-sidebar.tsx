@@ -10,6 +10,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { MapFilters } from "./map-filters"
 import type { MapboxLocation } from "@/lib/mapbox"
 import { Star } from "lucide-react"
+import { styleLabels } from "@/lib/styles"
 
 const MAX_CARDS = 100
 
@@ -269,14 +270,14 @@ export function MapSidebar({
 
                         <div className="flex items-center justify-between">
                           <div className="flex flex-wrap gap-2">
-                            {location.specialties.slice(0, 2).map((specialty) => (
-                              <Badge key={specialty} variant="outline" className="text-xs filter-badge">
-                                {specialty}
+                            {styleLabels(location.styles).slice(0, 2).map((label) => (
+                              <Badge key={label} variant="outline" className="text-xs filter-badge">
+                                {label}
                               </Badge>
                             ))}
-                            {location.specialties.length > 2 && (
+                            {location.styles.length > 2 && (
                               <Badge variant="outline" className="text-xs filter-badge">
-                                +{location.specialties.length - 2}
+                                +{location.styles.length - 2}
                               </Badge>
                             )}
                           </div>

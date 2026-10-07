@@ -7,6 +7,7 @@ import { LocationDetails } from "./location-details"
 import type { MapboxLocation } from "@/lib/mapbox"
 import { calculateDistance, getCurrentLocation, geocodeAddress, mapboxConfig } from "@/lib/mapbox"
 import { useToast } from "@/components/ui/use-toast"
+import { styleLabels } from "@/lib/styles"
 
 interface MapFilters {
   locationType: "all" | "artist" | "shop"
@@ -24,7 +25,7 @@ interface MapFilters {
 // clicked pin (LocationDetails).
 const MAX_CARDS = 100
 
-type Pin = [string, number, number, number, string?] // id, lat, lng, rating, primary specialty
+type Pin = [string, number, number, number, string?] // id, lat, lng, rating, primary style slug
 
 // Minimal MapboxLocation for a pin — enough for clustering, colors, filters
 // and click lookup; replaced by the full record from /api/map/details.
@@ -38,7 +39,7 @@ function pinToLocation(type: "shop" | "artist", [id, lat, lng, rating, primary]:
     rating,
     reviewCount: 0,
     isOpen: false,
-    specialties: primary ? [primary] : [],
+    styles: primary ? [primary] : [],
     priceRange: "medium",
   }
 }
@@ -222,7 +223,7 @@ export function MapInterface() {
         query &&
         !location.name.toLowerCase().includes(query) &&
         !location.address.toLowerCase().includes(query) &&
-        !location.specialties.some((specialty) => specialty.toLowerCase().includes(query))
+        !styleLabels(location.styles).some((label) => label.toLowerCase().includes(query))
       )
         return false
       return true
