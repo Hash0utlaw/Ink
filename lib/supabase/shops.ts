@@ -3,6 +3,7 @@ import type { Shop } from "@/types/shop"
 import type { Artist, Review } from "@/types/artist"
 import { rowToArtist } from "./artists"
 import { matchStyleSlugs, toStyleSlugs } from "@/lib/styles"
+import { SHOP_STYLES_EMBED, fetchShopStyles, shopStylesFromRow } from "./shop-styles"
 
 export type ShopFilters = {
   // Existing (keep these)
@@ -46,7 +47,7 @@ function rowToShop(row: Record<string, unknown>): Shop {
     about: String(row.description ?? ""),
     reviews: Array.isArray(row.reviews) ? (row.reviews as Review[]) : [],
     hours: (row.hours as Record<string, string>) ?? {},
-    specialties: Array.isArray(row.specialties) ? (row.specialties as string[]) : [],
+    styles: shopStylesFromRow(row),
     acceptsWalkIns: Boolean(row.accepts_walk_ins ?? false),
     possiblyClosed: Boolean(row.possibly_closed ?? false),
   }
@@ -57,17 +58,21 @@ export async function getShops(
 ): Promise<{ data: Shop[]; count: number; error: string | null }> {
   try {
     const supabase = createClient()
-    // Style filter: shops with ANY of the selected styles in shop_styles. The
-    // !inner join drops shops with no matching row; each shop still comes back once.
+    // Every shop's styles come back embedded (shop_styles) for the cards. The
+    // style filter is a second, aliased !inner embed: it drops shops with no
+    // matching style without trimming the styles shown. Each shop comes back once.
     const styles = toStyleSlugs(filters.styles ?? [])
     let query = supabase
       .from("shops")
-      .select(styles.length > 0 ? "*, shop_styles!inner(style)" : "*", { count: "exact", head: false })
+      .select(
+        styles.length > 0 ? `*, ${SHOP_STYLES_EMBED}, style_match:shop_styles!inner(style)` : `*, ${SHOP_STYLES_EMBED}`,
+        { count: "exact", head: false }
+      )
       .eq("is_active", true)
       .eq("possibly_closed", false)
 
     if (styles.length > 0) {
-      query = query.in("shop_styles.style", styles)
+      query = query.in("style_match.style", styles)
     }
     if (typeof filters.rating === "number" && filters.rating > 0) {
       query = query.gte("rating", filters.rating)
@@ -144,8 +149,12 @@ export async function getShopsNearMe(
       for (const r of flagged ?? []) closed.add(String(r.id))
     }
 
-    const shops = rows.filter((row) => !closed.has(String(row.id))).map((row) => ({
+    // The RPC can't embed shop_styles; one batched lookup for all results.
+    const open = rows.filter((row) => !closed.has(String(row.id)))
+    const stylesById = await fetchShopStyles(supabase, open.map((row) => String(row.id)))
+    const shops = open.map((row) => ({
       ...rowToShop(row),
+      styles: stylesById.get(String(row.id)) ?? [],
       distance_mi: Number(row.distance_mi ?? 0),
     }))
     return { data: shops, error: null }
@@ -157,7 +166,7 @@ export async function getShopsNearMe(
 export async function getShopById(id: string): Promise<Shop | null> {
   try {
     const supabase = createClient()
-    const { data, error } = await supabase.from("shops").select("*").eq("id", id).eq("is_active", true).single()
+    const { data, error } = await supabase.from("shops").select(`*, ${SHOP_STYLES_EMBED}`).eq("id", id).eq("is_active", true).single()
     if (error || !data) return null
     return rowToShop(data as Record<string, unknown>)
   } catch {
@@ -169,7 +178,7 @@ export async function getShopsByIds(ids: string[]): Promise<Shop[]> {
   if (ids.length === 0) return []
   try {
     const supabase = createClient()
-    const { data, error } = await supabase.from("shops").select("*").in("id", ids).eq("is_active", true)
+    const { data, error } = await supabase.from("shops").select(`*, ${SHOP_STYLES_EMBED}`).in("id", ids).eq("is_active", true)
     if (error || !data) return []
     return data.map((row: Record<string, unknown>) => rowToShop(row))
   } catch {
@@ -181,7 +190,7 @@ export async function getShopsByIds(ids: string[]): Promise<Shop[]> {
 export async function getShopBySlug(slug: string): Promise<Shop | null> {
   try {
     const supabase = createClient()
-    const { data, error } = await supabase.from("shops").select("*").eq("slug", slug).eq("is_active", true).single()
+    const { data, error } = await supabase.from("shops").select(`*, ${SHOP_STYLES_EMBED}`).eq("slug", slug).eq("is_active", true).single()
     if (error || !data) return null
     return rowToShop(data as Record<string, unknown>)
   } catch {

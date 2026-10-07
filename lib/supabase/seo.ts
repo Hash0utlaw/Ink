@@ -1,6 +1,7 @@
 import { createClient } from "@/utils/supabase/server"
 import type { Shop } from "@/types/shop"
 import { stateSlugToAbbr, citySlugToName } from "@/lib/utils/states"
+import { SHOP_STYLES_EMBED, shopStylesFromRow } from "./shop-styles"
 
 // All distinct states with shop counts
 export async function getStatesWithShopCounts(): Promise<{ state: string; count: number }[]> {
@@ -136,7 +137,7 @@ export async function getShopsForCity(
     const supabase = createClient()
     const { data, count, error } = await supabase
       .from("shops")
-      .select("*", { count: "exact" })
+      .select(`*, ${SHOP_STYLES_EMBED}`, { count: "exact" })
       .eq("is_active", true)
       .eq("possibly_closed", false)
       .ilike("city", cityName)
@@ -175,7 +176,7 @@ function rowToShopMinimal(row: Record<string, unknown>): Shop {
     about: String(row.description ?? ""),
     reviews: [],
     hours: (row.hours as Record<string, string>) ?? {},
-    specialties: Array.isArray(row.specialties) ? (row.specialties as string[]) : [],
+    styles: shopStylesFromRow(row),
     acceptsWalkIns: Boolean(row.accepts_walk_ins ?? false),
   }
 }

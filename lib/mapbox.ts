@@ -8,7 +8,7 @@ export interface MapboxLocation {
   reviewCount: number
   image?: string
   isOpen: boolean
-  /** Canonical style slugs (lib/styles.ts). Artists only; shops have none here. */
+  /** Canonical style slugs (lib/styles.ts): artists.styles, or shop_styles for shops. */
   styles: string[]
   priceRange: "low" | "medium" | "high"
   distance?: number // in miles

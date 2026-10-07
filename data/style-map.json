@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-10-07T18:31:17.585Z",
+  "updatedAt": "2026-10-07T20:06:06.454Z",
   "entries": {
     "(C)PTSD": {
       "result": "unknown",
@@ -177,44 +177,44 @@
       "source": "ai"
     },
     "3D Areola": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "3D Areola & Nipple Tattooing": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "3D areola and nipple tattoos": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "3D areola recreation": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "3D areola restoration": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "3D Areola Restoration": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "3D Areola tattoo": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "3D areola tattooing": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "3D Areola Tattoos": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "3D areolas and nipples": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "3D designs": {
       "result": "generic",
@@ -235,32 +235,32 @@
       "source": "ai"
     },
     "3D Nipple & Areola Complex Tattooing": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "3D nipple & areola reconstruction": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "3D nipple and areola reconstruction": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "3D nipple and areola tattoos": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "3D Nipple Areola Tattoos": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "3D Nipple Tattoos": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "3D Nipple/Breast Tattoos": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "3D Realism": {
       "result": [
@@ -573,8 +573,8 @@
       "source": "ai"
     },
     "advanced paramedical tattooing": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "adventure": {
       "result": "unknown",
@@ -1438,10 +1438,8 @@
       "source": "ai"
     },
     "anatomical hearts": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "anatomically accurate tattoos": {
       "result": [
@@ -1450,16 +1448,12 @@
       "source": "ai"
     },
     "anatomy": {
-      "result": [
-        "realism"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "anatomy (spines": {
-      "result": [
-        "realism"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "ancestral": {
       "result": "generic",
@@ -2193,10 +2187,8 @@
       "source": "ai"
     },
     "and insects": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "and intricate objects": {
       "result": "generic",
@@ -2418,10 +2410,8 @@
       "source": "rule"
     },
     "and objects": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "and objects of design": {
       "result": "generic",
@@ -2448,8 +2438,8 @@
       "source": "ai"
     },
     "and paramedical tattoo artist specializing in brows": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "and pattern work": {
       "result": [
@@ -2772,16 +2762,12 @@
       "source": "ai"
     },
     "animal": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Animal": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Animal and exotic designs": {
       "result": [
@@ -2802,23 +2788,16 @@
       "source": "rule"
     },
     "animal designs": {
-      "result": [
-        "floral"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "animal guides": {
-      "result": [
-        "illustrative",
-        "floral"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "animal motifs": {
-      "result": [
-        "floral"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "animal portraits": {
       "result": [
@@ -2851,10 +2830,8 @@
       "source": "rule"
     },
     "animal skulls": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "animal tattoos in black & grey illustrative style": {
       "result": [
@@ -2870,21 +2847,16 @@
       "source": "rule"
     },
     "animal themes": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "animal work": {
       "result": "generic",
       "source": "ai"
     },
     "animal-related designs": {
-      "result": [
-        "illustrative",
-        "realism"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "animal/people portraits": {
       "result": [
@@ -2899,22 +2871,16 @@
       "source": "rule"
     },
     "animalia": {
-      "result": [
-        "floral"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "animals": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Animals": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Animals (no snakes)": {
       "result": [
@@ -2956,11 +2922,8 @@
       "source": "ai"
     },
     "animals/bugs": {
-      "result": [
-        "illustrative",
-        "realism"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "animated": {
       "result": [
@@ -3490,16 +3453,12 @@
       "source": "ai"
     },
     "Aquatic": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "aquatic creatures": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "archaic and mythic imagery": {
       "result": [
@@ -3524,10 +3483,8 @@
       "source": "ai"
     },
     "Architecture castles": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Architecture Realism": {
       "result": [
@@ -3536,60 +3493,60 @@
       "source": "rule"
     },
     "areola": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Areola and 3D Areola Tattooing": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Areola and Nipple Restoration Tattoos": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "areola reconstruction": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Areola Reconstruction": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "areola repigmentation": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Areola Repigmentation": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "areola restoration": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Areola Restoration": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "areola restorative tattoos": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "areola specialist": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "areola)": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Areolae": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "areolas/nipples": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Aric-with-an-A": {
       "result": "unknown",
@@ -3967,10 +3924,8 @@
       "source": "ai"
     },
     "Automotive": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "avant-garde": {
       "result": [
@@ -4256,10 +4211,8 @@
       "source": "rule"
     },
     "big cats": {
-      "result": [
-        "floral"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "big pieces": {
       "result": "generic",
@@ -4388,17 +4341,12 @@
       "source": "ai"
     },
     "biodiversity": {
-      "result": [
-        "floral",
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "biology": {
-      "result": [
-        "realism"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "biomech": {
       "result": [
@@ -4479,10 +4427,8 @@
       "source": "ai"
     },
     "birds": {
-      "result": [
-        "floral"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "birds and pet portraits": {
       "result": [
@@ -4491,10 +4437,8 @@
       "source": "rule"
     },
     "birds)": {
-      "result": [
-        "floral"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "birth flower": {
       "result": [
@@ -8889,12 +8833,12 @@
       "source": "ai"
     },
     "breast cancer reconstruction": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "breast reconstruction": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "bridal henna": {
       "result": "non_tattoo",
@@ -9190,8 +9134,8 @@
       "source": "ai"
     },
     "Brow shaping and paramedical camouflage tattooing": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "brow techniques": {
       "result": "non_tattoo",
@@ -9248,16 +9192,12 @@
       "source": "ai"
     },
     "bugs": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Bugs": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Bugs & Botanicals": {
       "result": [
@@ -9277,16 +9217,12 @@
       "source": "ai"
     },
     "butterflies": {
-      "result": [
-        "floral"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Butterflies": {
-      "result": [
-        "floral"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Cafe Ink": {
       "result": "unknown",
@@ -9322,25 +9258,23 @@
     },
     "camouflage": {
       "result": "generic",
-      "source": "ai"
+      "source": "manual"
     },
     "Camouflage Tattoo": {
       "result": "generic",
-      "source": "ai"
+      "source": "manual"
     },
     "Camouflage Tattoos": {
       "result": "generic",
-      "source": "ai"
+      "source": "manual"
     },
     "camouflaging": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Cancer Fighter/Survivor/Memorial": {
-      "result": [
-        "lettering"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "canvas and skin": {
       "result": "generic",
@@ -9886,11 +9820,8 @@
       "source": "ai"
     },
     "Chimeras": {
-      "result": [
-        "illustrative",
-        "realism"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Chinese": {
       "result": [
@@ -11562,10 +11493,8 @@
       "source": "ai"
     },
     "colorful bugs": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "colorful cartoon art": {
       "result": [
@@ -11637,10 +11566,8 @@
       "source": "ai"
     },
     "colorful monsters": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "colorful neo-traditional": {
       "result": [
@@ -12203,34 +12130,32 @@
       "source": "ai"
     },
     "Cosmetic & Medical Tattoos": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Cosmetic & Restorative - Lip Blush": {
       "result": "non_tattoo",
       "source": "ai"
     },
     "Cosmetic and medical tattooing": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "cosmetic and paramedical tattooing": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Cosmetic and restorative permanent makeup": {
       "result": "non_tattoo",
       "source": "ai"
     },
     "Cosmetic and Restorative Tattooing": {
-      "result": [
-        "cover-ups"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "cosmetic and surgical reconstructive tattooing": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "cosmetic art": {
       "result": "non_tattoo",
@@ -12313,12 +12238,12 @@
       "source": "ai"
     },
     "Cosmetic/Paramedical": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Cosmetic/PMU/Restorative": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "cosmic": {
       "result": "generic",
@@ -12666,10 +12591,8 @@
       "source": "ai"
     },
     "cowboy spirit": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "cowboys": {
       "result": "unknown",
@@ -12882,10 +12805,8 @@
       "source": "ai"
     },
     "Croissant tattoo": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "crosshatching": {
       "result": [
@@ -14653,10 +14574,8 @@
       "source": "ai"
     },
     "deities": {
-      "result": [
-        "ornamental"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "delay.universal": {
       "result": "unknown",
@@ -15115,10 +15034,8 @@
       "source": "ai"
     },
     "devotional pieces": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "DID and psychosis; therapeutic tattooing": {
       "result": "unknown",
@@ -15434,28 +15351,20 @@
       "source": "rule"
     },
     "dragon": {
-      "result": [
-        "japanese"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Dragon": {
-      "result": [
-        "japanese"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "dragon tattoos": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Dragon tattoos": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Dragonball Z": {
       "result": [
@@ -15464,16 +15373,12 @@
       "source": "ai"
     },
     "dragons": {
-      "result": [
-        "japanese"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Dragons": {
-      "result": [
-        "japanese"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Dramatic": {
       "result": "generic",
@@ -15494,10 +15399,8 @@
       "source": "ai"
     },
     "dream catchers": {
-      "result": [
-        "ornamental"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "dreamy art nouveau": {
       "result": [
@@ -15576,10 +15479,8 @@
       "source": "ai"
     },
     "eagles": {
-      "result": [
-        "traditional"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "ear piercing curations": {
       "result": "non_tattoo",
@@ -15776,10 +15677,8 @@
       "source": "rule"
     },
     "entomology-inspired": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Ephemeral": {
       "result": "generic",
@@ -15912,10 +15811,8 @@
       "source": "ai"
     },
     "everyday life": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Everything": {
       "result": "generic",
@@ -16131,22 +16028,16 @@
       "source": "ai"
     },
     "eyes": {
-      "result": [
-        "portrait"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Eyes": {
-      "result": [
-        "portrait"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "eyes)": {
-      "result": [
-        "portrait"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Face & Body Piercing": {
       "result": "non_tattoo",
@@ -16183,10 +16074,8 @@
       "source": "ai"
     },
     "fairies": {
-      "result": [
-        "floral"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "family-friendly environment": {
       "result": "generic",
@@ -16229,11 +16118,8 @@
       "source": "ai"
     },
     "fantastic creatures": {
-      "result": [
-        "illustrative",
-        "anime"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "fantastical creatures": {
       "result": "unknown",
@@ -16313,10 +16199,8 @@
       "source": "ai"
     },
     "fantasy creatures": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "fantasy illustration": {
       "result": [
@@ -16385,18 +16269,12 @@
       "source": "ai"
     },
     "fauna": {
-      "result": [
-        "floral",
-        "realism"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Fauna": {
-      "result": [
-        "floral",
-        "realism"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "faux freckles": {
       "result": "non_tattoo",
@@ -16588,10 +16466,8 @@
       "source": "ai"
     },
     "film/music/culture/sports related": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "fine": {
       "result": [
@@ -18457,20 +18333,16 @@
       "source": "ai"
     },
     "fish": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "fix ups and restorations": {
       "result": "generic",
       "source": "ai"
     },
     "flames": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "flash": {
       "result": "generic",
@@ -19674,16 +19546,12 @@
       "source": "ai"
     },
     "galaxy elements": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "galaxy themed": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "galaxy-inspired concepts": {
       "result": [
@@ -20332,16 +20200,12 @@
       "source": "ai"
     },
     "goddesses": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "gods": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "GOLDEN CHILD": {
       "result": "unknown",
@@ -20713,10 +20577,8 @@
       "source": "rule"
     },
     "greek": {
-      "result": [
-        "geometric"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Greek and Roman sculptures": {
       "result": [
@@ -21125,10 +20987,8 @@
       "source": "ai"
     },
     "Hearts/Love": {
-      "result": [
-        "floral"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Heavier Illustrative": {
       "result": [
@@ -23306,11 +23166,8 @@
       "source": "rule"
     },
     "Italian)": {
-      "result": [
-        "realism",
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Jack of all Trades": {
       "result": "generic",
@@ -24052,10 +23909,8 @@
       "source": "ai"
     },
     "koi": {
-      "result": [
-        "japanese"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "kolorowa realistyka": {
       "result": [
@@ -24178,16 +24033,12 @@
       "source": "rule"
     },
     "landscapes": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Landscapes": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "large": {
       "result": "generic",
@@ -24236,10 +24087,8 @@
       "source": "rule"
     },
     "large cats": {
-      "result": [
-        "realism"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "large color pieces": {
       "result": [
@@ -24916,10 +24765,8 @@
       "source": "ai"
     },
     "Legos": {
-      "result": [
-        "new-school"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Letter": {
       "result": [
@@ -25353,10 +25200,8 @@
       "source": "ai"
     },
     "Literary": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "literary tattoos": {
       "result": "generic",
@@ -25723,16 +25568,12 @@
       "source": "rule"
     },
     "marine life": {
-      "result": [
-        "floral"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Marine-life": {
-      "result": [
-        "floral"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Marvel": {
       "result": [
@@ -25749,12 +25590,12 @@
       "source": "ai"
     },
     "Mastectomy & Top Surgery": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "mastectomy art": {
       "result": "generic",
-      "source": "ai"
+      "source": "manual"
     },
     "mastectomy coverups": {
       "result": [
@@ -25764,23 +25605,23 @@
     },
     "Mastectomy Tattoo Design": {
       "result": "generic",
-      "source": "ai"
+      "source": "manual"
     },
     "Mastectomy Tattooing": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "mastectomy tattoos": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Mastectomy Tattoos": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Mastectomy Work": {
       "result": "generic",
-      "source": "ai"
+      "source": "manual"
     },
     "Master": {
       "result": "generic",
@@ -25878,20 +25719,20 @@
       "source": "ai"
     },
     "Medical & Cosmetic Tattooing": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "medical aesthetics": {
       "result": "non_tattoo",
       "source": "ai"
     },
     "Medical and Cosmetic Tattooing": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "medical and creative tattoos": {
       "result": "generic",
-      "source": "ai"
+      "source": "manual"
     },
     "Medical Esthetician": {
       "result": "non_tattoo",
@@ -25902,46 +25743,44 @@
       "source": "ai"
     },
     "medical phalloplasty tattoos": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "medical restorative tattooing": {
       "result": "generic",
-      "source": "ai"
+      "source": "manual"
     },
     "Medical Tattoo": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Medical Tattoo Expert": {
-      "result": [
-        "cover-ups"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Medical tattooing": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Medical Tattooing": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "medical tattooist": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "medical tattoos": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Medical tattoos": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Medical Tattoos": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "medieval": {
       "result": "unknown",
@@ -25989,11 +25828,8 @@
       "source": "ai"
     },
     "medieval weapons": {
-      "result": [
-        "illustrative",
-        "blackwork"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "medieval woodblock print style": {
       "result": [
@@ -26006,10 +25842,8 @@
       "source": "ai"
     },
     "Mediterranean": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Medium-Large Tattoos": {
       "result": "generic",
@@ -26054,16 +25888,12 @@
       "source": "ai"
     },
     "memorial": {
-      "result": [
-        "portrait"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Memorial": {
-      "result": [
-        "portrait"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Memorial and Tribute Pieces": {
       "result": "generic",
@@ -26098,16 +25928,12 @@
       "source": "ai"
     },
     "memorials": {
-      "result": [
-        "portrait"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "memory tributes": {
-      "result": [
-        "portrait"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Mendhi designs": {
       "result": [
@@ -26116,10 +25942,8 @@
       "source": "ai"
     },
     "mermaids": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Meso American": {
       "result": [
@@ -26586,10 +26410,8 @@
       "source": "ai"
     },
     "Military/Patriotic": {
-      "result": [
-        "traditional"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Miniature": {
       "result": [
@@ -26912,10 +26734,8 @@
       "source": "ai"
     },
     "monsters": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "moody grayscale": {
       "result": [
@@ -26967,22 +26787,16 @@
       "source": "ai"
     },
     "movie monster": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Movie Related": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "movie-related": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "movies": {
       "result": "generic",
@@ -27148,10 +26962,8 @@
       "source": "ai"
     },
     "mushrooms": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "music": {
       "result": "generic",
@@ -27162,10 +26974,8 @@
       "source": "ai"
     },
     "Music Tattoos": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "musician": {
       "result": "unknown",
@@ -27212,10 +27022,8 @@
       "source": "ai"
     },
     "mythical beings": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "mythical creatures": {
       "result": "generic",
@@ -27234,10 +27042,8 @@
       "source": "ai"
     },
     "mythological creatures": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Mythological Figures": {
       "result": [
@@ -27294,10 +27100,8 @@
       "source": "ai"
     },
     "nano hair strokes": {
-      "result": [
-        "fine-line"
-      ],
-      "source": "ai"
+      "result": "non_tattoo",
+      "source": "manual"
     },
     "Nano Stroke Technique": {
       "result": "generic",
@@ -27429,8 +27233,8 @@
       "source": "ai"
     },
     "Natural Cosmetic & Restorative Tattooing": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "natural elements": {
       "result": [
@@ -27813,11 +27617,8 @@
       "source": "ai"
     },
     "Nature/Animals": {
-      "result": [
-        "floral",
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Nature/mushrooms": {
       "result": [
@@ -27830,22 +27631,16 @@
       "source": "ai"
     },
     "nautical": {
-      "result": [
-        "traditional"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Nautical": {
-      "result": [
-        "traditional"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "nautical designs": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "nautical themes": {
       "result": "unknown",
@@ -28903,28 +28698,28 @@
       "source": "ai"
     },
     "Nipple & Areola 3D Tattooing": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "nipple and areola 3-D tattooing": {
       "result": "generic",
-      "source": "ai"
+      "source": "manual"
     },
     "nipple and areola tattoos": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Nipple Recreation": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "nipple restoration": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Nipple Tattoos": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "NO HAIR": {
       "result": "generic",
@@ -29055,10 +28850,8 @@
       "source": "ai"
     },
     "objects": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Obscurative": {
       "result": [
@@ -29101,10 +28894,8 @@
       "source": "ai"
     },
     "occult symbolism": {
-      "result": [
-        "ornamental"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "occult themes": {
       "result": "unknown",
@@ -29125,10 +28916,8 @@
       "source": "ai"
     },
     "oceanic": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Oddball + 90's Nostalgia": {
       "result": "generic",
@@ -29882,10 +29671,8 @@
       "source": "ai"
     },
     "outer space": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Outside The Box Thinking": {
       "result": "generic",
@@ -30176,102 +29963,100 @@
       "source": "ai"
     },
     "Para-Medical": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "para-medical correction (scars": {
-      "result": [
-        "cover-ups"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Paramedical": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Paramedical & Mastectomy Cosmetics": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Paramedical and restorative tattooing": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Paramedical Artist": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "paramedical body art": {
       "result": "generic",
-      "source": "ai"
+      "source": "manual"
     },
     "paramedical micro-pigmentation": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Paramedical micro-pigmentation": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Paramedical Micropigmentation": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "paramedical procedures": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "paramedical reconstruction": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Paramedical Restorative Tattoos": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "paramedical tattoo": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Paramedical Tattoo": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "paramedical tattoo art": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "paramedical tattooing": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Paramedical Tattooing": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Paramedical Tattooing - Camouflage Tattoos": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Paramedical Tattooing & Permanent Makeup": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Paramedical tattooing and permanent makeup": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "paramedical tattoos": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Paramedical tattoos": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Paramedical Tattoos": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "pastels": {
       "result": "unknown",
@@ -30351,20 +30136,16 @@
       "source": "ai"
     },
     "Paw Prints": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "peels": {
       "result": "non_tattoo",
       "source": "ai"
     },
     "pelican": {
-      "result": [
-        "floral"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "pen and ink": {
       "result": [
@@ -30460,8 +30241,8 @@
       "source": "ai"
     },
     "Permanent Cosmetics and Restorative tattoo": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "permanent cosmetics tattooing": {
       "result": "non_tattoo",
@@ -30590,8 +30371,8 @@
       "source": "rule"
     },
     "permanent makeup and paramedical tattooing": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Permanent makeup art": {
       "result": "non_tattoo",
@@ -30626,8 +30407,8 @@
       "source": "ai"
     },
     "Permanent Makeup/Scar Revision": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Permanent Tattooing": {
       "result": "generic",
@@ -30676,10 +30457,8 @@
       "source": "rule"
     },
     "pet memorial": {
-      "result": [
-        "portrait"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "pet portrait tattoos": {
       "result": [
@@ -30718,28 +30497,20 @@
       "source": "rule"
     },
     "pet tattoos": {
-      "result": [
-        "portrait"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "pets": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Pets": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "philosophical themes": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "photo realism": {
       "result": [
@@ -30827,10 +30598,8 @@
       "source": "rule"
     },
     "photorealistic areolas": {
-      "result": [
-        "realism"
-      ],
-      "source": "rule"
+      "result": "generic",
+      "source": "manual"
     },
     "photorealistic portraits": {
       "result": [
@@ -31103,8 +30872,8 @@
       "source": "ai"
     },
     "PMU & Areola reconstruction": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "PMU Artist": {
       "result": "non_tattoo",
@@ -31471,10 +31240,8 @@
       "source": "ai"
     },
     "portals": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "portrait": {
       "result": [
@@ -31705,21 +31472,19 @@
     },
     "post-mastectomy": {
       "result": "generic",
-      "source": "ai"
+      "source": "manual"
     },
     "post-mastectomy 3D nipples/areola": {
-      "result": [
-        "cover-ups"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "post-mastectomy cosmetic tattooing": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Post-mastectomy tattoos": {
       "result": "generic",
-      "source": "ai"
+      "source": "manual"
     },
     "Powder": {
       "result": "non_tattoo",
@@ -31877,11 +31642,8 @@
       "source": "ai"
     },
     "Predator tattoo": {
-      "result": [
-        "illustrative",
-        "realism"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "prenatal henna": {
       "result": "non_tattoo",
@@ -31975,8 +31737,8 @@
       "source": "rule"
     },
     "prosthetic nipples": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "pseudo realism": {
       "result": [
@@ -33024,7 +32786,7 @@
     },
     "reconstructive tattooing": {
       "result": "generic",
-      "source": "ai"
+      "source": "manual"
     },
     "recreations of classical artworks": {
       "result": [
@@ -33094,10 +32856,8 @@
       "source": "ai"
     },
     "religious pieces": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "religious tattoos": {
       "result": "generic",
@@ -33175,12 +32935,12 @@
       "source": "ai"
     },
     "restorative": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "restorative tattooing": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Retro": {
       "result": "unknown",
@@ -33251,10 +33011,8 @@
       "source": "rule"
     },
     "ribcages)": {
-      "result": [
-        "realism"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "rich color": {
       "result": [
@@ -33361,22 +33119,16 @@
       "source": "rule"
     },
     "sacred hearts": {
-      "result": [
-        "ornamental"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "sacred imagery": {
-      "result": [
-        "ornamental"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "sacred tattoos": {
-      "result": [
-        "ornamental"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Sacred-Geometry": {
       "result": [
@@ -33385,10 +33137,8 @@
       "source": "rule"
     },
     "sacro imagery": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "safe and clean tattoos": {
       "result": "generic",
@@ -33533,8 +33283,8 @@
       "source": "ai"
     },
     "Scar & Scalp Tattoo": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "scar and burn coverage": {
       "result": [
@@ -33547,28 +33297,24 @@
       "source": "ai"
     },
     "scar camouflage": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Scar Camouflage": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "scar camouflage and restorative tattooing": {
-      "result": [
-        "cover-ups"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Scar Camouflage and Vitilago": {
-      "result": [
-        "black-and-grey"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Scar Concealment": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "scar cover": {
       "result": [
@@ -33663,16 +33409,12 @@
       "source": "ai"
     },
     "sceneries": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "scenery": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Scheduling Coordinator / Piercer": {
       "result": "generic",
@@ -33947,16 +33689,12 @@
       "source": "ai"
     },
     "sea life": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Sea Life": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "seamless coverups": {
       "result": [
@@ -33965,10 +33703,8 @@
       "source": "rule"
     },
     "Seascape": {
-      "result": [
-        "realism"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Selective Color": {
       "result": [
@@ -34182,11 +33918,8 @@
       "source": "ai"
     },
     "silly creatures": {
-      "result": [
-        "illustrative",
-        "new-school"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Silly Designs": {
       "result": [
@@ -34331,10 +34064,8 @@
       "source": "ai"
     },
     "skeletons": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "sketch": {
       "result": [
@@ -34409,10 +34140,8 @@
       "source": "ai"
     },
     "Skull designs": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Skull Splitter": {
       "result": [
@@ -34421,10 +34150,8 @@
       "source": "ai"
     },
     "skull work": {
-      "result": [
-        "blackwork"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "skulls": {
       "result": "generic",
@@ -34509,10 +34236,8 @@
       "source": "rule"
     },
     "small critters": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "small detail": {
       "result": "generic",
@@ -34688,22 +34413,16 @@
       "source": "ai"
     },
     "snake": {
-      "result": [
-        "traditional"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Snake": {
-      "result": [
-        "traditional"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "snakes": {
-      "result": [
-        "traditional"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "soft": {
       "result": "unknown",
@@ -34961,17 +34680,12 @@
       "source": "ai"
     },
     "Space": {
-      "result": [
-        "illustrative",
-        "color"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "space themes": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "space-themed": {
       "result": "unknown",
@@ -35022,16 +34736,12 @@
       "source": "ai"
     },
     "spiderwebs": {
-      "result": [
-        "blackwork"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "spikes": {
-      "result": [
-        "blackwork"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "spiraling patterns": {
       "result": [
@@ -35121,10 +34831,8 @@
       "source": "ai"
     },
     "spooky animals": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Spooky black and grey": {
       "result": [
@@ -35386,32 +35094,32 @@
       "source": "ai"
     },
     "stretch mark camouflage": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Stretch Mark Concealment": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "stretch mark coverage": {
       "result": "generic",
-      "source": "ai"
+      "source": "manual"
     },
     "Stretch Marks Camouflage": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "stretchmark revision": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Stretchmark Revisions": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Stretchmark Treatments": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "stretchmarks": {
       "result": [
@@ -35869,10 +35577,8 @@
       "source": "ai"
     },
     "Tarot-inspired": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Tat wizard extraordinaire": {
       "result": "generic",
@@ -36531,11 +36237,8 @@
       "source": "ai"
     },
     "thorns": {
-      "result": [
-        "ornamental",
-        "floral"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "thoughtful and lasting work": {
       "result": "generic",
@@ -36556,22 +36259,16 @@
       "source": "ai"
     },
     "tiger": {
-      "result": [
-        "japanese"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Tiger": {
-      "result": [
-        "japanese"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "tigers": {
-      "result": [
-        "japanese"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "tight detail": {
       "result": [
@@ -38121,10 +37818,8 @@
       "source": "rule"
     },
     "tribute tattoos": {
-      "result": [
-        "portrait"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "trippy art work": {
       "result": "unknown",
@@ -38230,10 +37925,8 @@
       "source": "ai"
     },
     "underwater": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "underwater realism": {
       "result": [
@@ -38242,10 +37935,8 @@
       "source": "rule"
     },
     "underwater scenery": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "unforgettable ink and memories": {
       "result": "generic",
@@ -38314,10 +38005,8 @@
       "source": "ai"
     },
     "universe": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "unknown": {
       "result": "unknown",
@@ -38368,10 +38057,8 @@
       "source": "ai"
     },
     "UV tattoos": {
-      "result": [
-        "watercolor"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "variety of styles": {
       "result": "generic",
@@ -38769,10 +38456,8 @@
       "source": "ai"
     },
     "Victorian hands": {
-      "result": [
-        "ornamental"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Victorian new school": {
       "result": [
@@ -38989,10 +38674,8 @@
       "source": "ai"
     },
     "viper": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Visiting Artist": {
       "result": "generic",
@@ -39039,8 +38722,8 @@
       "source": "rule"
     },
     "vitiligo micropigmentation": {
-      "result": "non_tattoo",
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "vivid color": {
       "result": [
@@ -39099,11 +38782,8 @@
       "source": "rule"
     },
     "Water": {
-      "result": [
-        "watercolor",
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "water color": {
       "result": [
@@ -39348,16 +39028,12 @@
       "source": "ai"
     },
     "western": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Western": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "western art": {
       "result": "unknown",
@@ -39534,10 +39210,8 @@
       "source": "ai"
     },
     "white ink": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "white over black": {
       "result": [
@@ -39606,16 +39280,12 @@
       "source": "rule"
     },
     "wildlife": {
-      "result": [
-        "floral"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Wildlife": {
-      "result": [
-        "floral"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Wildlife & Nature Realism": {
       "result": [
@@ -39643,10 +39313,8 @@
       "source": "ai"
     },
     "Wildlife/Animal": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "wings": {
       "result": "unknown",
@@ -39665,26 +39333,20 @@
       "source": "ai"
     },
     "witchy culture": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "witchy iconography": {
-      "result": [
-        "ornamental"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Witchy Stuff": {
       "result": "unknown",
       "source": "ai"
     },
     "witchy symbolism": {
-      "result": [
-        "illustrative"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     },
     "Wizard": {
       "result": "unknown",
@@ -39840,10 +39502,8 @@
       "source": "ai"
     },
     "Zodiac themes": {
-      "result": [
-        "geometric"
-      ],
-      "source": "ai"
+      "result": "generic",
+      "source": "manual"
     }
   }
 }

@@ -217,7 +217,7 @@ const shops: Shop[] = [
       Saturday: "11am - 8pm",
       Sunday: "12pm - 5pm",
     },
-    specialties: ["Fine Line", "Botanical", "Blackwork", "Watercolor", "Abstract", "Realism"],
+    styles: [],
     acceptsWalkIns: true,
   },
   {
@@ -244,7 +244,7 @@ const shops: Shop[] = [
       Saturday: "12pm - 10pm",
       Sunday: "Closed",
     },
-    specialties: ["Japanese", "Irezumi", "Dragons", "Large Scale"],
+    styles: [],
     acceptsWalkIns: false,
   },
 ]

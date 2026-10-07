@@ -11,6 +11,12 @@ import { ALL_STYLES } from "@/app/styles/page"
 import { StyleGallery } from "@/components/styles/style-gallery"
 import { StyleRelated } from "@/components/styles/style-related"
 import { StyleHero } from "@/components/styles/style-hero"
+import { toStyleSlugs } from "@/lib/styles"
+
+// Guide pages whose name isn't on the master style list (lib/styles.ts):
+// Surrealism links to the closest master style; Biomechanical has none, so
+// its artist links are hidden rather than showing unfiltered results.
+const FILTER_OVERRIDES: Record<string, string | null> = { surrealism: "illustrative", biomechanical: null }
 
 // ─── Metadata ─────────────────────────────────────────────────────────────────
 
@@ -32,6 +38,11 @@ export async function generateStaticParams() {
 export default function StylePage({ params }: { params: { styleName: string } }) {
   const style = ALL_STYLES.find((s) => s.slug === params.styleName)
   if (!style) notFound()
+
+  const filterSlug =
+    style.slug in FILTER_OVERRIDES ? FILTER_OVERRIDES[style.slug] : toStyleSlugs([style.name])[0] ?? null
+  const artistsHref = filterSlug ? `/artists?styles=${filterSlug}` : null
+  const shopsHref = `/shops?styles=${encodeURIComponent(filterSlug ?? style.name)}`
 
   const related = ALL_STYLES.filter(
     (s) => s.slug !== style.slug && s.category === style.category
@@ -56,17 +67,19 @@ export default function StylePage({ params }: { params: { styleName: string } })
             </p>
             <div className="flex items-center gap-2 ml-auto">
               <Button asChild size="sm" variant="outline" className="gap-1.5">
-                <Link href={`/shops?styles=${encodeURIComponent(style.name)}`}>
+                <Link href={shopsHref}>
                   <MapPin className="w-3.5 h-3.5" />
                   Find a Shop
                 </Link>
               </Button>
-              <Button asChild size="sm" className="gap-1.5">
-                <Link href={`/artists?styles=${encodeURIComponent(style.name)}`}>
-                  <User className="w-3.5 h-3.5" />
-                  Find an Artist
-                </Link>
-              </Button>
+              {artistsHref && (
+                <Button asChild size="sm" className="gap-1.5">
+                  <Link href={artistsHref}>
+                    <User className="w-3.5 h-3.5" />
+                    Find an Artist
+                  </Link>
+                </Button>
+              )}
             </div>
           </div>
         </div>
@@ -100,12 +113,12 @@ export default function StylePage({ params }: { params: { styleName: string } })
         {/* ── Primary CTA: Find Shop or Artist ─────────────────────────────── */}
         <section className="container mx-auto px-4 pb-10">
           <div className="rounded-2xl overflow-hidden border border-border">
-            <div className="grid md:grid-cols-2">
+            <div className={`grid ${artistsHref ? "md:grid-cols-2" : ""}`}>
 
               {/* Find a Shop card */}
               <Link
-                href={`/shops?styles=${encodeURIComponent(style.name)}`}
-                className="group relative flex flex-col gap-4 p-7 md:p-10 bg-card hover:bg-muted/30 transition-colors border-b md:border-b-0 md:border-r border-border"
+                href={shopsHref}
+                className={`group relative flex flex-col gap-4 p-7 md:p-10 bg-card hover:bg-muted/30 transition-colors ${artistsHref ? "border-b md:border-b-0 md:border-r border-border" : ""}`}
               >
                 <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                   <MapPin className="w-5 h-5 text-primary" />
@@ -126,27 +139,29 @@ export default function StylePage({ params }: { params: { styleName: string } })
               </Link>
 
               {/* Find an Artist card */}
-              <Link
-                href={`/artists?styles=${encodeURIComponent(style.name)}`}
-                className="group relative flex flex-col gap-4 p-7 md:p-10 bg-card hover:bg-muted/30 transition-colors"
-              >
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                  <User className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold mb-1 group-hover:text-primary transition-colors">
-                    Find an Artist
-                  </h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed">
-                    Connect directly with tattoo artists who specialise in {style.name.toLowerCase()}. View
-                    portfolios and book a consultation.
-                  </p>
-                </div>
-                <div className="flex items-center gap-2 text-sm font-semibold text-primary mt-auto">
-                  Browse {style.name} artists
-                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-                </div>
-              </Link>
+              {artistsHref && (
+                <Link
+                  href={artistsHref}
+                  className="group relative flex flex-col gap-4 p-7 md:p-10 bg-card hover:bg-muted/30 transition-colors"
+                >
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <User className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold mb-1 group-hover:text-primary transition-colors">
+                      Find an Artist
+                    </h3>
+                    <p className="text-muted-foreground text-sm leading-relaxed">
+                      Connect directly with tattoo artists who specialise in {style.name.toLowerCase()}. View
+                      portfolios and book a consultation.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm font-semibold text-primary mt-auto">
+                    Browse {style.name} artists
+                    <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                  </div>
+                </Link>
+              )}
 
             </div>
           </div>

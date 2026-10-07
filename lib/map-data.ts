@@ -6,6 +6,7 @@
 import { createClient } from "@/utils/supabase/server"
 import type { MapboxLocation } from "@/lib/mapbox"
 import { sortStyleSlugs, toStyleSlugs } from "@/lib/styles"
+import { SHOP_STYLES_EMBED, shopStylesFromRow } from "@/lib/supabase/shop-styles"
 
 // Supabase/PostgREST returns at most 1,000 rows per request, so every map
 // query is paged through fetchAllPages() below. These are the overall caps
@@ -37,7 +38,7 @@ export function shopToMapLocation(row: Record<string, unknown>, distanceMi?: num
     reviewCount: Number(row.review_count ?? 0),
     image: String(row.logo_url ?? row.cover_image_url ?? "") || undefined,
     isOpen: Boolean(row.accepts_walk_ins ?? false),
-    styles: [],
+    styles: shopStylesFromRow(row), // only when the select embedded shop_styles
     priceRange: "medium",
     distance: distanceMi,
     description: String(row.description ?? "") || undefined,
@@ -79,6 +80,9 @@ export const ARTIST_JOIN_COLUMNS =
   "id, display_name, city, state, rating, review_count, avatar_url, styles, is_available, bio, instagram_handle, website_url, shops!inner(latitude, longitude)"
 export const SHOP_COLUMNS =
   "id, name, address, city, latitude, longitude, rating, review_count, logo_url, cover_image_url, accepts_walk_ins, hours, description"
+// For the ≤100 shops in /api/map/details (sidebar cards + LocationDetails);
+// the nationwide/bbox paths skip the embed to keep those pages light.
+export const SHOP_DETAIL_COLUMNS = `${SHOP_COLUMNS}, ${SHOP_STYLES_EMBED}`
 
 // Builds a fully-filtered query for the given select; called once with
 // head: true for the exact count and once per page.
