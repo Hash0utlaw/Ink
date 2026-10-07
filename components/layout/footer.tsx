@@ -98,7 +98,7 @@ export function Footer() {
         </div>
 
         <div className="border-t border-border mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-muted-foreground text-sm">© 2025 TattooMaps. All rights reserved.</p>
+          <p className="text-muted-foreground text-sm">© {new Date().getFullYear()} TattooMaps. All rights reserved.</p>
           <p className="text-muted-foreground text-sm mt-4 md:mt-0">Built with ❤️ for the tattoo community</p>
         </div>
         <p className="text-muted-foreground text-sm mt-4 text-center md:text-left">

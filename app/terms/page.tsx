@@ -19,7 +19,7 @@ const SECTIONS = [
   { id: "platform-use", title: "Use of the Platform" },
   { id: "artist-terms", title: "Artist & Studio Terms" },
   { id: "bookings", title: "Bookings & Payments" },
-  { id: "ai-generator", title: "AI Tattoo Generator" },
+  { id: "ai-generator", title: "Reserved" },
   { id: "content", title: "User Content" },
   { id: "intellectual-property", title: "Intellectual Property" },
   { id: "disclaimers", title: "Disclaimers" },
@@ -145,7 +145,7 @@ export default function TermsOfServicePage() {
                 </Prose>
               </Section>
 
-              <Section id="ai-generator" title="7. AI Tattoo Generator">
+              <Section id="ai-generator" title="7. Reserved">
                 <Prose>This section is reserved.</Prose>
               </Section>
 

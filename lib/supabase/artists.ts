@@ -72,9 +72,9 @@ export async function getArtists(
       // overlaps (&&) matches artists who have ANY of the selected styles
       query = query.overlaps("specialties", filters.styles)
     }
-    if (filters.price && filters.price.length > 0) {
-      query = query.in("price_range", filters.price)
-    }
+    // TODO: Re-enable when claimed artists set their own price tier.
+    // Every artist currently has the default price_tier "mid", so filters.price
+    // is ignored and results come back unfiltered.
     if (typeof filters.rating === "number" && filters.rating > 0) {
       query = query.gte("rating", filters.rating)
     }

@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
   const primaryStyle = artist.specialties?.[0] ?? "Tattoo"
   const loc = [artist.location.city, artist.location.state].filter(Boolean).join(", ")
   const styleList = artist.specialties?.slice(0, 3).join(", ") ?? primaryStyle
-  const coverImage = artist.portfolioImages?.[0] ?? artist.avatarUrl ?? "/og-image.png"
+  const coverImage = artist.portfolioImages?.[0] ?? artist.avatarUrl ?? "/opengraph-image"
 
   return {
     title: `${artist.name} — ${styleList} Tattoo Artist${loc ? ` in ${loc}` : ""} | TattooMaps`,
@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
     openGraph: {
       title: `${artist.name} | TattooMaps`,
       description: `${primaryStyle} tattoo artist${loc ? ` in ${loc}` : ""}. View portfolio and book on TattooMaps.`,
-      images: coverImage ? [{ url: coverImage, width: 1200, height: 630, alt: artist.name }] : ["/og-image.png"],
+      images: coverImage ? [{ url: coverImage, width: 1200, height: 630, alt: artist.name }] : ["/opengraph-image"],
     },
   }
 }

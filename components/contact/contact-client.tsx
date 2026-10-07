@@ -22,9 +22,7 @@ import {
   User,
   CheckCircle,
   MapPin,
-  Instagram,
-  Twitter,
-} from "lucide-react"
+  } from "lucide-react"
 
 const CONTACT_REASONS = [
   "General inquiry",
@@ -296,20 +294,6 @@ export function ContactClient() {
                     Connect with Us
                   </h3>
                   <div className="flex gap-3">
-                    <a
-                      href="#"
-                      aria-label="TattooMaps on Instagram"
-                      className="w-9 h-9 bg-muted hover:bg-accent/10 border border-border hover:border-accent/40 rounded-lg flex items-center justify-center transition-colors"
-                    >
-                      <Instagram className="w-4 h-4 text-muted-foreground hover:text-accent" />
-                    </a>
-                    <a
-                      href="#"
-                      aria-label="TattooMaps on Twitter"
-                      className="w-9 h-9 bg-muted hover:bg-accent/10 border border-border hover:border-accent/40 rounded-lg flex items-center justify-center transition-colors"
-                    >
-                      <Twitter className="w-4 h-4 text-muted-foreground hover:text-accent" />
-                    </a>
                     <a
                       href="mailto:support@tattoomaps.com"
                       aria-label="Email TattooMaps"

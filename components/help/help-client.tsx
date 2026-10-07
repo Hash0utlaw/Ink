@@ -19,16 +19,15 @@ import {
   MessageCircle,
   ChevronDown,
   BookOpen,
-  Zap,
   HelpCircle,
 } from "lucide-react"
 
 const CATEGORIES = [
-  { icon: MapPin, title: "Finding Artists & Shops", description: "Search, filter, and discover artists near you", articles: 8, slug: "finding" },
-  { icon: User, title: "Account & Profile", description: "Manage your account, profile settings, and preferences", articles: 6, slug: "account" },
-  { icon: Calendar, title: "Bookings & Appointments", description: "How to book, reschedule, or cancel appointments", articles: 7, slug: "bookings" },
-  { icon: CreditCard, title: "Payments & Deposits", description: "Deposits, refunds, and payment methods", articles: 5, slug: "payments" },
-  { icon: Shield, title: "Safety & Trust", description: "Reviews and community standards", articles: 4, slug: "safety" },
+  { icon: MapPin, title: "Finding Artists & Shops", description: "Search, filter, and discover artists near you", slug: "finding" },
+  { icon: User, title: "Account & Profile", description: "Manage your account, profile settings, and preferences", slug: "account" },
+  { icon: Calendar, title: "Bookings & Appointments", description: "How to book, reschedule, or cancel appointments", slug: "bookings" },
+  { icon: CreditCard, title: "Payments & Deposits", description: "Deposits, refunds, and payment methods", slug: "payments" },
+  { icon: Shield, title: "Safety & Trust", description: "Reviews and community standards", slug: "safety" },
 ]
 
 const FAQS = [
@@ -37,15 +36,7 @@ const FAQS = [
   { question: "How do I book an appointment?", answer: "Visit an artist's profile page and click the Book Appointment button. Select your preferred date, describe your tattoo idea, and confirm the booking. A deposit may be required depending on the artist's policy." },
   { question: "Can I cancel or reschedule a booking?", answer: "Cancellation and reschedule policies are set by each individual artist. TattooMaps doesn't take payments or deposits. Deposits, pricing and scheduling are arranged directly with the artist or shop." },
   { question: "How do I list my studio or artist profile?", answer: "Most shops and artists are already listed. If you claim your page, we review it by hand, usually within 1–2 business days." },
-  { question: "How do I leave a review for an artist?", answer: "After your appointment is marked complete, you will receive a prompt in your client dashboard to leave a review. Reviews include a star rating and written feedback. The ratings shown on listings come from public business listings." },
-]
-
-const POPULAR_ARTICLES = [
-  { title: "How to write a great consultation request", category: "Bookings" },
-  { title: "Understanding tattoo deposit policies", category: "Payments" },
-  { title: "What to look for in an artist portfolio", category: "Finding" },
-  { title: "Aftercare tips to protect your new tattoo", category: "Safety" },
-  { title: "Using filters to find your ideal style", category: "Finding" },
+  { question: "How do I leave a review for an artist?", answer: "Reviews are tied to bookings made through TattooMaps. When the artist marks your session as complete, we email you a link to rate it from 1 to 5 stars and add an optional written review. Each booking can be reviewed once. The ratings shown on listings come from public business listings." },
 ]
 
 export function HelpClient() {
@@ -108,8 +99,7 @@ export function HelpClient() {
                           </div>
                           <div className="flex-1 min-w-0">
                             <h3 className="font-semibold text-foreground mb-1">{cat.title}</h3>
-                            <p className="text-sm text-muted-foreground leading-relaxed mb-3">{cat.description}</p>
-                            <span className="text-xs text-muted-foreground">{cat.articles} articles</span>
+                            <p className="text-sm text-muted-foreground leading-relaxed">{cat.description}</p>
                           </div>
                         </div>
                       </CardContent>
@@ -164,31 +154,6 @@ export function HelpClient() {
             )}
           </div>
         </section>
-
-        {/* Popular Articles */}
-        {!searchQuery && (
-          <section className="py-16 px-4">
-            <div className="container mx-auto max-w-6xl">
-              <div className="flex items-center gap-3 mb-8">
-                <Zap className="w-6 h-6 text-accent" />
-                <h2 className="text-2xl font-bold">Popular Articles</h2>
-              </div>
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {POPULAR_ARTICLES.map((article, i) => (
-                  <div key={i} className="flex items-start gap-3 p-4 rounded-xl border border-border bg-card hover:border-accent/40 transition-colors cursor-pointer group">
-                    <div className="w-8 h-8 bg-accent/10 rounded-md flex items-center justify-center shrink-0 mt-0.5">
-                      <BookOpen className="w-4 h-4 text-accent" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-foreground group-hover:text-accent-text transition-colors leading-relaxed">{article.title}</p>
-                      <span className="text-xs text-muted-foreground mt-1 block">{article.category}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-        )}
 
         {/* Still need help CTA */}
         <section className="py-16 px-4 bg-muted/30 border-t border-border">

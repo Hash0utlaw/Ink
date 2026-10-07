@@ -45,14 +45,6 @@ export const metadata: Metadata = {
       "Find tattoo artists and shops near you with our interactive map platform. Explore portfolios and book appointments.",
     url: SITE_URL,
     siteName: "TattooMaps",
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "TattooMaps - Discover Tattoo Artists & Shops Across the US",
-      },
-    ],
     locale: "en_US",
     type: "website",
   },
@@ -60,7 +52,6 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "TattooMaps - Discover Tattoo Artists & Shops Across the US",
     description: "Find tattoo artists and shops near you with our interactive map platform.",
-    images: ["/og-image.png"],
     creator: "@tattoomaps",
   },
   robots: {

@@ -25,7 +25,8 @@ type Filters = {
 function filtersFromParams(params: URLSearchParams): Filters {
   return {
     styles: params.get("styles")?.split(",").filter(Boolean) ?? [],
-    price: params.get("price")?.split(",").filter(Boolean) ?? [],
+    // TODO: Re-enable when claimed artists set their own price tier.
+    price: [],
     rating: Number(params.get("rating")) || 0,
     availableNow: params.get("availableNow") === "true",
     query: params.get("query") ?? "",
