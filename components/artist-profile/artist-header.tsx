@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Star, Share2, Instagram, Globe, BadgeCheck } from "lucide-react"
 import type { Artist } from "@/types/artist"
 import { SaveButton } from "@/components/saved/save-button"
+import { styleLabels } from "@/lib/styles"
 
 function initials(name: string) {
   return name
@@ -72,11 +73,11 @@ export function ArtistHeader({ artist, initialSaved }: { artist: Artist; initial
           </div>
         )}
 
-        {artist.specialties.length > 0 && (
+        {artist.styles.length > 0 && (
           <div className="mt-4 flex flex-wrap gap-2">
-            {artist.specialties.map((spec) => (
-              <Badge key={spec} variant="secondary">
-                {spec}
+            {styleLabels(artist.styles).map((label) => (
+              <Badge key={label} variant="secondary">
+                {label}
               </Badge>
             ))}
           </div>

@@ -8,6 +8,7 @@ import type { ArtistFilterValues } from "./filter-sidebar"
 import { ResultsList } from "./results-list"
 import { X } from "lucide-react"
 import type { Artist } from "@/types/artist"
+import { styleLabel, toStyleSlugs } from "@/lib/styles"
 
 const DEFAULT_FILTERS: ArtistFilterValues = {
   styles: [],
@@ -24,7 +25,8 @@ const DEFAULT_FILTERS: ArtistFilterValues = {
 
 function filtersFromParams(params: URLSearchParams): ArtistFilterValues {
   return {
-    styles: params.get("styles")?.split(",").filter(Boolean) ?? [],
+    // Slugs; old links may carry names ("Fine Line") — mapped to slugs.
+    styles: toStyleSlugs(params.get("styles")?.split(",").filter(Boolean) ?? []),
     // TODO: Re-enable when claimed artists set their own price tier.
     price: [],
     rating: Number(params.get("rating")) || 0,
@@ -225,8 +227,8 @@ export function ArtistSearchInterface() {
             ))}
             {filters.styles.map((style) => (
               <span key={style} className="bg-accent/10 text-accent-text border border-accent/20 text-xs px-2.5 py-1 rounded-full flex items-center gap-1">
-                {style}
-                <button onClick={() => clearFilter(`style:${style}` as any)} aria-label={`Remove ${style} filter`}><X className="w-3 h-3" /></button>
+                {styleLabel(style) ?? style}
+                <button onClick={() => clearFilter(`style:${style}` as any)} aria-label={`Remove ${styleLabel(style) ?? style} filter`}><X className="w-3 h-3" /></button>
               </span>
             ))}
             <button

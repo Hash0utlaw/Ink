@@ -9,6 +9,7 @@ import { Star, MapPin, Clock, Tag } from "lucide-react"
 import type { Artist, AvailabilityStatus, PriceTier } from "@/types/artist"
 import { SaveButton } from "@/components/saved/save-button"
 import { safeImageSrc } from "@/lib/utils/safe-image"
+import { styleLabels } from "@/lib/styles"
 
 interface ArtistCardProps {
   artist: Artist
@@ -132,19 +133,15 @@ export function ArtistCard({ artist, distance, initialSaved }: ArtistCardProps) 
           </span>
         )}
 
-        {artist.specialties.length > 0 && (
+        {artist.styles.length > 0 && (
           <div className="flex flex-wrap gap-1.5 pt-1">
-            {artist.specialties.slice(0, 4).map((spec) => (
-              <Badge key={spec} variant="secondary" className="text-xs">{spec}</Badge>
+            {styleLabels(artist.styles).slice(0, 4).map((label) => (
+              <Badge key={label} variant="secondary" className="text-xs">{label}</Badge>
             ))}
-            {artist.specialties.length > 4 && (
-              <Badge variant="secondary" className="text-xs">+{artist.specialties.length - 4}</Badge>
+            {artist.styles.length > 4 && (
+              <Badge variant="secondary" className="text-xs">+{artist.styles.length - 4}</Badge>
             )}
           </div>
-        )}
-
-        {artist.specialties.length === 0 && !artist.bio && (
-          <p className="text-xs text-muted-foreground italic">No style info yet</p>
         )}
       </CardContent>
 

@@ -130,29 +130,25 @@ export function MapboxMap({
     loadMapbox()
   }, [loadMapbox])
 
-  // Colors a location by its primary specialty — used as a GeoJSON feature
-  // property so the "unclustered-point" layer's paint expression can read it,
-  // instead of setting inline DOM styles per marker.
-  const getStyleColor = useCallback((specialties: string[]): string => {
+  // Colors a location by its primary style slug (lib/styles.ts) — used as a
+  // GeoJSON feature property so the "unclustered-point" layer's paint
+  // expression can read it, instead of setting inline DOM styles per marker.
+  const getStyleColor = useCallback((styles: string[]): string => {
     const STYLE_COLORS: Record<string, string> = {
       traditional:       "#e85d04",
+      "neo-traditional": "#f59e0b",
       japanese:          "#7b2d8b",
-      "fine line":       "#0ea5e9",
       realism:           "#16a34a",
+      "black-and-grey":  "#57534e",
+      "fine-line":       "#0ea5e9",
       blackwork:         "#1c1917",
+      illustrative:      "#d97706",
       watercolor:        "#ec4899",
       geometric:         "#6366f1",
-      "neo-traditional": "#f59e0b",
       portrait:          "#0891b2",
       tribal:            "#92400e",
-      minimalist:        "#64748b",
-      abstract:          "#d97706",
     }
-    const primary = (specialties[0] ?? "").toLowerCase()
-    for (const [key, color] of Object.entries(STYLE_COLORS)) {
-      if (primary.includes(key)) return color
-    }
-    return "#8B1538" // app accent fallback
+    return STYLE_COLORS[styles[0] ?? ""] ?? "#8B1538" // app accent fallback
   }, [])
 
   // Ensures the clustered source + layers exist, (re-)attaches to it after a
@@ -416,7 +412,7 @@ export function MapboxMap({
         type: "Feature",
         id: location.id,
         geometry: { type: "Point", coordinates: location.coordinates },
-        properties: { color: getStyleColor(location.specialties), locType: location.type },
+        properties: { color: getStyleColor(location.styles), locType: location.type },
       })
     }
     locationsByIdRef.current = byId

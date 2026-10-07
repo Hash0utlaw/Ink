@@ -6,7 +6,8 @@
 //   --apply restores, and undo-logs its own writes so an undo can be undone.
 //   Inserted rows (op "insert") are deleted — the one place a script deletes —
 //   and only for DELETABLE_INSERTS below (shop_artists rows from
-//   scrape-shop-artists.ts). Any other insert entry stops the run.
+//   scrape-shop-artists.ts, shop_styles rows from normalize-styles.ts).
+//   Any other insert entry stops the run.
 
 import { config } from "dotenv"
 config({ path: ".env.local" })
@@ -21,7 +22,14 @@ import { fetchIn, modeBanner, runPool } from "./lib/cleanup-utils"
 const ARGS = parseScriptArgs()
 
 // script → table whose rows that script inserted and undo may delete.
-const DELETABLE_INSERTS: Record<string, string> = { "scrape-shop-artists": "shop_artists" }
+const DELETABLE_INSERTS: Record<string, string> = {
+  "scrape-shop-artists": "shop_artists",
+  "normalize-styles": "shop_styles",
+}
+
+// Tables without an id column: their insert entries carry the whole row in
+// new_value, and rows are matched on these key columns instead of id.
+const COMPOSITE_KEYS: Record<string, string[]> = { shop_styles: ["shop_id", "style"] }
 
 async function main() {
   if (!ARGS.input) {
@@ -116,6 +124,29 @@ async function main() {
   let deleted = 0
   const insertsByTable = new Map<string, string[]>()
   for (const e of inserts) insertsByTable.set(e.table, [...(insertsByTable.get(e.table) ?? []), e.id])
+  for (const table of Object.keys(COMPOSITE_KEYS)) {
+    const keys = COMPOSITE_KEYS[table]
+    const rows = inserts.filter((e) => e.table === table).map((e) => e.new_value as Record<string, unknown>)
+    if (rows.length === 0) continue
+    insertsByTable.delete(table)
+    let present = 0
+    for (const row of rows) {
+      const match = Object.fromEntries(keys.map((k) => [k, row[k]]))
+      const { data, error } = await supabase.from(table).select(keys.join(", ")).match(match).limit(1)
+      if (error) throw new Error(`check ${table} failed: ${error.message}`)
+      if (!data || data.length === 0) {
+        missing++
+        continue
+      }
+      present++
+      if (!ARGS.apply) continue
+      undo.append([{ table, id: keys.map((k) => String(row[k])).join("|"), field: "__deleted__", old_value: row, new_value: null }])
+      const del = await supabase.from(table).delete().match(match)
+      if (del.error) throw new Error(`delete ${table} failed: ${del.error.message}`)
+    }
+    console.log(`\n${table}: ${rows.length} inserted rows, ${present} still exist`)
+    deleted += present
+  }
   for (const [table, ids] of Array.from(insertsByTable.entries())) {
     const existing = await fetchIn(supabase, table, "*", "id", ids)
     missing += ids.length - existing.length

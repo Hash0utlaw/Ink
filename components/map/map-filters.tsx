@@ -7,6 +7,7 @@ import { Slider } from "@/components/ui/slider"
 import { Badge } from "@/components/ui/badge"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Plus, Minus } from "lucide-react"
+import { STYLES } from "@/lib/styles"
 
 interface MapFiltersProps {
   filters: {
@@ -20,22 +21,6 @@ interface MapFiltersProps {
   onFilterChange: (filters: any) => void
 }
 
-const tattooStyles = [
-  "Traditional",
-  "Realism",
-  "Japanese",
-  "Geometric",
-  "Watercolor",
-  "Blackwork",
-  "Fine Line",
-  "Neo-Traditional",
-  "Tribal",
-  "Minimalist",
-  "Portrait",
-  "Abstract",
-  "Botanical",
-  "Irezumi",
-]
 
 export function MapFilters({ filters, onFilterChange }: MapFiltersProps) {
   const [openSections, setOpenSections] = useState({
@@ -164,16 +149,16 @@ export function MapFilters({ filters, onFilterChange }: MapFiltersProps) {
         </CollapsibleTrigger>
         <CollapsibleContent className="mt-4">
           <div className="grid grid-cols-2 gap-3 max-h-48 overflow-y-auto scrollbar-ink">
-            {tattooStyles.map((style) => (
-              <div key={style} className="flex items-center space-x-3">
+            {STYLES.map((style) => (
+              <div key={style.slug} className="flex items-center space-x-3">
                 <Checkbox
-                  id={style}
-                  checked={filters.styles.includes(style)}
-                  onCheckedChange={() => handleStyleToggle(style)}
+                  id={`map-style-${style.slug}`}
+                  checked={filters.styles.includes(style.slug)}
+                  onCheckedChange={() => handleStyleToggle(style.slug)}
                   className="rounded"
                 />
-                <label htmlFor={style} className="text-xs text-sidebar-text-primary cursor-pointer font-medium">
-                  {style}
+                <label htmlFor={`map-style-${style.slug}`} className="text-xs text-sidebar-text-primary cursor-pointer font-medium">
+                  {style.label}
                 </label>
               </div>
             ))}

@@ -8,6 +8,11 @@
 // Only rows whose shop is active and not possibly_closed are promoted. A row
 // is skipped if its name is a placeholder, if an artist with the same shop_id
 // and normalized display_name already exists, or if its handle is taken.
+//
+// New artists get artists.styles from their specialties using the same mapping
+// as normalize-styles.ts: data/style-map.json decisions + lib/styles.ts rules.
+// Values with no decision are skipped (no AI call here). Shop styles aren't
+// touched — re-run normalize-styles.ts to refresh shop_styles.
 
 import { config } from "dotenv"
 config({ path: ".env.local" })
@@ -19,6 +24,7 @@ import { UndoLog } from "./lib/undo-log"
 import { fetchAll, fetchIn, modeBanner } from "./lib/cleanup-utils"
 import { isPlaceholderName, normalizeArtistName } from "./lib/artist-names"
 import { withRetry } from "./lib/retry"
+import { loadStyleMap, stylesFor, type StyleMap } from "./lib/style-map"
 
 const ARGS = parseScriptArgs()
 const BATCH_SIZE = 500
@@ -57,10 +63,10 @@ type ShopRecord = {
 }
 
 // Actual artists columns used:
-//   id, shop_id, display_name, handle, bio, specialties (array), city, state,
+//   id, shop_id, display_name, handle, bio, specialties (array), styles (array), city, state,
 //   avatar_url, is_available, is_verified, is_active, is_claimed, source,
 //   rating, review_count
-function buildArtistRecord(row: ShopArtistRow, shop: ShopRecord): Record<string, unknown> {
+function buildArtistRecord(row: ShopArtistRow, shop: ShopRecord, styleMap: StyleMap): Record<string, unknown> {
   const displayName = row.name!.trim()
   // Split comma-separated specialty string into individual tags
   const specialties: string[] = row.specialty?.trim()
@@ -75,6 +81,7 @@ function buildArtistRecord(row: ShopArtistRow, shop: ShopRecord): Record<string,
     city: shop.city ?? null,
     state: shop.state ?? null,
     specialties,
+    styles: stylesFor(specialties, styleMap),
     shop_id: row.shop_id,
     is_available: false,
     is_verified: false,
@@ -91,6 +98,7 @@ function buildArtistRecord(row: ShopArtistRow, shop: ShopRecord): Record<string,
 async function main() {
   modeBanner(ARGS.apply)
   const supabase = getSupabaseAdmin()
+  const styleMap = loadStyleMap()
 
   const rows = await withRetry("fetch shop_artists", () =>
     fetchAll<ShopArtistRow>(supabase, "shop_artists", "id, shop_id, name, image_url, specialty", (q) =>
@@ -126,7 +134,7 @@ async function main() {
     if (!shop) { skips.shopNotEligible++; continue }
     const key = `${row.shop_id}|${normalizeArtistName(row.name)}`
     if (existingKeys.has(key)) { skips.alreadyArtist++; continue }
-    const record = buildArtistRecord(row, shop)
+    const record = buildArtistRecord(row, shop, styleMap)
     if (handles.has(String(record.handle))) { skips.handleTaken++; continue }
     existingKeys.add(key)
     handles.add(String(record.handle))
@@ -139,6 +147,7 @@ async function main() {
   console.log(`  skipped, artist already exists:    ${skips.alreadyArtist}`)
   console.log(`  skipped, handle taken:             ${skips.handleTaken}`)
   console.log(`  to promote:                        ${records.length}`)
+  console.log(`  of which get ≥1 style:             ${records.filter((r) => (r.styles as string[]).length > 0).length}`)
 
   const byState: Record<string, number> = {}
   for (const r of records) byState[String(r.state ?? "UNKNOWN")] = (byState[String(r.state ?? "UNKNOWN")] ?? 0) + 1

@@ -12,18 +12,20 @@ import { ArtistHeader } from "@/components/artist-profile/artist-header"
 import { ProfileTabs } from "@/components/artist-profile/profile-tabs"
 import { BookingSection } from "@/components/artist-profile/booking-section"
 import { RecordVisit } from "@/components/artist-profile/record-visit"
+import { styleLabels } from "@/lib/styles"
 
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
   const artist = await getArtistById(params.id)
   if (!artist) return { title: "Tattoo Artist — TattooMaps" }
 
-  const primaryStyle = artist.specialties?.[0] ?? "Tattoo"
+  const labels = styleLabels(artist.styles)
+  const primaryStyle = labels[0] ?? "Tattoo"
   const loc = [artist.location.city, artist.location.state].filter(Boolean).join(", ")
-  const styleList = artist.specialties?.slice(0, 3).join(", ") ?? primaryStyle
+  const styleList = labels.length > 0 ? `${labels.slice(0, 3).join(", ")} ` : ""
   const coverImage = artist.portfolioImages?.[0] ?? artist.avatarUrl ?? "/opengraph-image"
 
   return {
-    title: `${artist.name} — ${styleList} Tattoo Artist${loc ? ` in ${loc}` : ""} | TattooMaps`,
+    title: `${artist.name} — ${styleList}Tattoo Artist${loc ? ` in ${loc}` : ""} | TattooMaps`,
     description: `Book ${artist.name}, a ${primaryStyle.toLowerCase()} tattoo artist${loc ? ` in ${loc}` : ""}. View portfolio, read reviews, and book your appointment on TattooMaps.`,
     openGraph: {
       title: `${artist.name} | TattooMaps`,
@@ -53,7 +55,7 @@ export default async function ArtistProfilePage({ params }: { params: { id: stri
     "hasOccupation": {
       "@type": "Occupation",
       "name": "Tattoo Artist",
-      "occupationalCategory": artist.specialties?.join(", ") || undefined,
+      "occupationalCategory": styleLabels(artist.styles).join(", ") || undefined,
     },
     "image": artist.avatarUrl || undefined,
     "address": {

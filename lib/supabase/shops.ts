@@ -2,6 +2,7 @@ import { createClient } from "@/utils/supabase/server"
 import type { Shop } from "@/types/shop"
 import type { Artist, Review } from "@/types/artist"
 import { rowToArtist } from "./artists"
+import { matchStyleSlugs, toStyleSlugs } from "@/lib/styles"
 
 export type ShopFilters = {
   // Existing (keep these)
@@ -56,15 +57,18 @@ export async function getShops(
 ): Promise<{ data: Shop[]; count: number; error: string | null }> {
   try {
     const supabase = createClient()
+    // Style filter: shops with ANY of the selected styles in shop_styles. The
+    // !inner join drops shops with no matching row; each shop still comes back once.
+    const styles = toStyleSlugs(filters.styles ?? [])
     let query = supabase
       .from("shops")
-      .select("*", { count: "exact", head: false })
+      .select(styles.length > 0 ? "*, shop_styles!inner(style)" : "*", { count: "exact", head: false })
       .eq("is_active", true)
       .eq("possibly_closed", false)
 
-    // TODO: filters.styles is intentionally a no-op. shops has no specialties
-    // column, so filtering on it errors the whole query. Wire this up once
-    // shop styles have a real home (likely the shop_styles table).
+    if (styles.length > 0) {
+      query = query.in("shop_styles.style", styles)
+    }
     if (typeof filters.rating === "number" && filters.rating > 0) {
       query = query.gte("rating", filters.rating)
     }
@@ -224,6 +228,8 @@ export async function getShopArtists(shopId: string): Promise<Artist[]> {
       name: String(row.name ?? ""),
       shopName: "",
       specialties: row.specialty ? [String(row.specialty)] : [],
+      // Stub rows aren't in artists.styles yet; rules only (no AI) — see lib/styles.ts.
+      styles: row.specialty ? matchStyleSlugs(String(row.specialty)) : [],
       rating: 0,
       reviewCount: 0,
       location: { address: "", city: "", state: "", lat: 0, lng: 0 },

@@ -11,18 +11,8 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { Filter, Navigation } from "lucide-react"
+import { STYLES } from "@/lib/styles"
 
-const tattooStyles = [
-  "Fine Line",
-  "Botanical",
-  "Blackwork",
-  "Japanese",
-  "Irezumi",
-  "Watercolor",
-  "Abstract",
-  "Traditional",
-  "Old School",
-]
 
 const US_STATES = [
   { value: "TX", label: "Texas" },
@@ -203,18 +193,18 @@ export function FilterSidebar({ filters, onFilterChange, onNearMe }: FilterSideb
         <div className="space-y-2">
           <Label>Styles</Label>
           <div className="space-y-2">
-            {tattooStyles.map((style) => (
-              <div key={style} className="flex items-center space-x-2">
+            {STYLES.map((style) => (
+              <div key={style.slug} className="flex items-center space-x-2">
                 <Checkbox
-                  id={`artist-${style}`}
-                  checked={filters.styles.includes(style)}
-                  onCheckedChange={() => handleStyleChange(style)}
+                  id={`artist-${style.slug}`}
+                  checked={filters.styles.includes(style.slug)}
+                  onCheckedChange={() => handleStyleChange(style.slug)}
                 />
                 <label
-                  htmlFor={`artist-${style}`}
+                  htmlFor={`artist-${style.slug}`}
                   className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                 >
-                  {style}
+                  {style.label}
                 </label>
               </div>
             ))}

@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Star, MapPin, Wand2, ArrowLeft } from "lucide-react"
 import { getArtists } from "@/lib/supabase/artists"
 import type { Artist } from "@/types/artist"
+import { styleLabel, toStyleSlugs } from "@/lib/styles"
 
 export const metadata: Metadata = {
   title: "Your Artist Matches — TattooMaps",
@@ -27,7 +28,7 @@ function scoreArtist(
   opts: { style: string; size: string; budget: string; city: string; state: string }
 ): number {
   let score = 0
-  if (opts.style && artist.specialties.some((s) => s.toLowerCase() === opts.style.toLowerCase())) {
+  if (opts.style && artist.styles.includes(opts.style)) {
     score += 3
   }
   if (opts.city && artist.location.city?.toLowerCase() === opts.city.toLowerCase()) {
@@ -62,7 +63,10 @@ export default async function FindArtistResultsPage({
 }: {
   searchParams: { style?: string; size?: string; budget?: string; city?: string; state?: string }
 }) {
-  const { style = "", size = "", budget = "", city = "", state: stateParam = "" } = searchParams
+  const { size = "", budget = "", city = "", state: stateParam = "" } = searchParams
+  // ?style= is a slug; old links may carry a name ("Fine Line") — map it.
+  const style: string = searchParams.style ? toStyleSlugs([searchParams.style])[0] ?? "" : ""
+  const styleName = style ? styleLabel(style) ?? style : ""
 
   const filters: Parameters<typeof getArtists>[0] = {}
   if (style) filters.styles = [style]
@@ -106,7 +110,7 @@ export default async function FindArtistResultsPage({
                   {scored.length} {scored.length === 1 ? "artist" : "artists"} match{scored.length === 1 ? "es" : ""} your style
                 </h1>
                 <p className="text-sm text-muted-foreground">
-                  {style && <span className="font-medium">{style}</span>}
+                  {style && <span className="font-medium">{styleName}</span>}
                   {style && locationLabel && " · "}
                   {locationLabel && <span>{locationLabel}</span>}
                   {size && ` · ${size}`}
@@ -117,7 +121,7 @@ export default async function FindArtistResultsPage({
             {/* Active filter pills */}
             <div className="flex flex-wrap gap-2 mt-4">
               {[
-                style && { key: "style", label: style },
+                style && { key: "style", label: styleName },
                 size && { key: "size", label: size },
                 budget && { key: "budget", label: { low: "Under $200", medium: "$200–$500", high: "$500–$1,000", luxury: "$1,000+" }[budget] ?? budget },
                 city && { key: "city", label: city },
@@ -188,11 +192,11 @@ export default async function FindArtistResultsPage({
                         )}
                       </div>
 
-                      {artist.specialties.length > 0 && (
+                      {artist.styles.length > 0 && (
                         <div className="flex flex-wrap gap-1">
-                          {artist.specialties.slice(0, 3).map((s) => (
-                            <Badge key={s} variant="secondary" className={`text-xs ${s.toLowerCase() === style.toLowerCase() ? "border-[#7C3AED]/40 text-[#7C3AED]" : ""}`}>
-                              {s}
+                          {artist.styles.slice(0, 3).map((slug) => (
+                            <Badge key={slug} variant="secondary" className={`text-xs ${slug === style ? "border-[#7C3AED]/40 text-[#7C3AED]" : ""}`}>
+                              {styleLabel(slug)}
                             </Badge>
                           ))}
                         </div>

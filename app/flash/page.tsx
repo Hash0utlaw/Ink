@@ -10,13 +10,13 @@ import { getFlashListings } from "@/lib/supabase/flash"
 import { getCurrentUserId } from "@/lib/supabase/users"
 import { getSavedIdsForUser } from "@/lib/supabase/saved"
 import { Zap } from "lucide-react"
+import { POPULAR_STYLES, toStyleSlugs } from "@/lib/styles"
 
 export const metadata: Metadata = {
   title: "Flash Tattoos — Browse & Book | TattooMaps",
   description: "Browse ready-to-book flash tattoo designs from artists across the US. Filter by style, price, and location.",
 }
 
-const STYLES = ["Traditional", "Neo-Traditional", "Japanese", "Blackwork", "Fine Line", "Realism", "Watercolor", "Geometric"]
 
 export default async function FlashPage({
   searchParams,
@@ -24,8 +24,10 @@ export default async function FlashPage({
   searchParams: { style?: string; state?: string; city?: string; minPrice?: string; maxPrice?: string; page?: string }
 }) {
   const page = parseInt(searchParams.page ?? "0")
+  // ?style= is a slug; old links may carry a name ("Fine Line") — map it.
+  const activeStyle = searchParams.style ? toStyleSlugs([searchParams.style])[0] ?? "" : ""
   const { data: listings, count } = await getFlashListings({
-    style: searchParams.style,
+    style: activeStyle || undefined,
     state: searchParams.state,
     city: searchParams.city,
     minPrice: searchParams.minPrice ? parseFloat(searchParams.minPrice) : undefined,
@@ -83,20 +85,20 @@ export default async function FlashPage({
               >
                 All styles
               </Link>
-              {STYLES.map((s) => {
-                const params = new URLSearchParams({ ...searchParams, style: s })
+              {POPULAR_STYLES.map((s) => {
+                const params = new URLSearchParams({ ...searchParams, style: s.slug })
                 params.delete("page")
                 return (
                   <Link
-                    key={s}
+                    key={s.slug}
                     href={`/flash?${params}`}
                     className={`shrink-0 rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
-                      searchParams.style === s
+                      activeStyle === s.slug
                         ? "bg-[#7C3AED] border-[#7C3AED] text-white"
                         : "border-border text-muted-foreground hover:bg-muted/60"
                     }`}
                   >
-                    {s}
+                    {s.label}
                   </Link>
                 )
               })}

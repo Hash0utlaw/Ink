@@ -7,6 +7,7 @@ import { Sparkles } from "lucide-react"
 import type { FlashListing } from "@/lib/supabase/flash"
 import { SaveButton } from "@/components/saved/save-button"
 import { safeImageSrc } from "@/lib/utils/safe-image"
+import { styleLabel } from "@/lib/styles"
 
 function priceLabel(listing: FlashListing) {
   if (listing.priceMax) return `$${listing.price}–$${listing.priceMax}`
@@ -57,7 +58,7 @@ export function FlashCard({ listing, initialSaved }: FlashCardProps) {
 
         <div className="flex flex-wrap gap-1">
           {listing.style && (
-            <Badge variant="secondary" className="text-xs">{listing.style}</Badge>
+            <Badge variant="secondary" className="text-xs">{styleLabel(listing.style) ?? listing.style}</Badge>
           )}
           {listing.size && (
             <Badge variant="outline" className="text-xs">{listing.size}</Badge>

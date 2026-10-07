@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { CheckCircle2, Loader2, ShieldCheck } from "lucide-react"
+import { STYLES } from "@/lib/styles"
 
 interface Prefill {
   description?: string
@@ -19,7 +20,9 @@ interface PublicBookingFormProps {
 }
 
 const SIZE_OPTIONS = ["Small", "Medium", "Large", "Full Sleeve"]
-const STYLE_OPTIONS = ["Traditional", "Neo-Traditional", "Japanese", "Blackwork", "Fine Line", "Realism", "Watercolor", "Geometric", "Other"]
+// Booking requests store the readable label (shown as-is in the artist
+// dashboard, admin intros and emails); "Other" covers styles not on the list.
+const STYLE_OPTIONS = [...STYLES.map((s) => s.label), "Other"]
 const BUDGET_OPTIONS = ["Under $200", "$200–$500", "$500–$1,000", "$1,000+"]
 
 export function PublicBookingForm({ artistId, artistName, prefill }: PublicBookingFormProps) {

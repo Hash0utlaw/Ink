@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/utils/supabase/server"
+import { isStyleSlug, toStyleSlugs } from "@/lib/styles"
 
 const FLASH_LIMITS: Record<string, number | null> = {
   free: 3,
@@ -10,7 +11,8 @@ const FLASH_LIMITS: Record<string, number | null> = {
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url)
-    const style = searchParams.get("style")
+    const styleParam = searchParams.get("style")
+    const style = styleParam ? toStyleSlugs([styleParam])[0] : undefined
     const state = searchParams.get("state")
     const city = searchParams.get("city")
     const minPrice = searchParams.get("minPrice")
@@ -97,7 +99,7 @@ export async function POST(req: NextRequest) {
         image_url: imageUrl,
         price: parseFloat(price),
         price_max: priceMax ? parseFloat(priceMax) : null,
-        style: style ?? null,
+        style: isStyleSlug(style) ? style : null,
         size: size ?? null,
         city: artist.city ?? null,
         state: artist.state ?? null,

@@ -3,6 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Star, MapPin, ArrowRight, Car } from "lucide-react"
 import type { Artist } from "@/types/artist"
+import { styleLabels } from "@/lib/styles"
 
 function initials(name: string) {
   return name.split(" ").filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join("")
@@ -68,8 +69,8 @@ export function WorthTheDrive({ artists }: WorthTheDriveProps) {
 
                   <div className="flex items-center gap-2 flex-wrap pt-0.5">
                     <span className="text-xs text-muted-foreground">({artist.reviewCount} reviews)</span>
-                    {artist.specialties.slice(0, 2).map((s) => (
-                      <Badge key={s} variant="secondary" className="text-xs">{s}</Badge>
+                    {styleLabels(artist.styles).slice(0, 2).map((label) => (
+                      <Badge key={label} variant="secondary" className="text-xs">{label}</Badge>
                     ))}
                   </div>
                 </div>
