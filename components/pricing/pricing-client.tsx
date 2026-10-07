@@ -5,6 +5,7 @@ import { Suspense } from "react"
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
 import { HeaderSkeleton } from "@/components/layout/header-skeleton"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -348,8 +349,8 @@ export function PricingClient() {
                       Smaller tattoos (under 4 inches)
                     </li>
                   </ul>
-                  <Button variant="outline" className="w-full bg-transparent">
-                    Find Budget Artists
+                  <Button variant="outline" className="w-full bg-transparent" asChild>
+                    <Link href="/artists">Find Budget Artists</Link>
                   </Button>
                 </CardContent>
               </Card>
@@ -385,7 +386,9 @@ export function PricingClient() {
                       Medium to large pieces
                     </li>
                   </ul>
-                  <Button className="w-full">Find Mid-Range Artists</Button>
+                  <Button className="w-full" asChild>
+                    <Link href="/artists">Find Mid-Range Artists</Link>
+                  </Button>
                 </CardContent>
               </Card>
 
@@ -420,8 +423,8 @@ export function PricingClient() {
                       Exclusive and waitlisted artists
                     </li>
                   </ul>
-                  <Button variant="outline" className="w-full bg-transparent">
-                    Find Premium Artists
+                  <Button variant="outline" className="w-full bg-transparent" asChild>
+                    <Link href="/artists">Find Premium Artists</Link>
                   </Button>
                 </CardContent>
               </Card>

@@ -247,6 +247,9 @@ export function Header() {
           <Link href="/tattoo-shops" className="text-foreground/80 hover:text-foreground transition-colors">
             Shops
           </Link>
+          <Link href="/map" className="text-foreground/80 hover:text-foreground transition-colors">
+            Map
+          </Link>
           <Link href="/flash" className="flex items-center gap-1.5 text-foreground/80 hover:text-foreground transition-colors">
             <Zap className="w-4 h-4" />
             Flash

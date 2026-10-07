@@ -18,7 +18,6 @@ import {
   Shield,
   MessageCircle,
   ChevronDown,
-  ChevronRight,
   BookOpen,
   Zap,
   HelpCircle,
@@ -34,11 +33,11 @@ const CATEGORIES = [
 
 const FAQS = [
   { question: "How do I find a tattoo artist near me?", answer: "Use the interactive map on our Artists page or the Search page. Enter your city or allow location access, then filter by style, price range, and availability. You can also browse the Shops page to find studios by area." },
-  { question: "Is TattooMaps free to use?", answer: "Yes — browsing artists, shops, and styles is completely free for clients. Artists and studios have free and paid listing tiers." },
+  { question: "Is TattooMaps free to use?", answer: "Yes — browsing artists, shops, and styles is completely free for clients. Listings are free. Pro plans for artists and shops are coming soon." },
   { question: "How do I book an appointment?", answer: "Visit an artist's profile page and click the Book Appointment button. Select your preferred date, describe your tattoo idea, and confirm the booking. A deposit may be required depending on the artist's policy." },
-  { question: "Can I cancel or reschedule a booking?", answer: "Cancellation and reschedule policies are set by each individual artist. Check the artist's profile for their specific policy before booking. Generally, cancellations made 48+ hours in advance are eligible for deposit refunds." },
-  { question: "How do I list my studio or artist profile?", answer: "Sign up with an Artist or Studio account via the Join as Artist link. Complete your profile, upload portfolio photos, set your availability, and your listing will go live within 24 hours after a brief review." },
-  { question: "How do I leave a review for an artist?", answer: "After your appointment is marked complete, you will receive a prompt in your client dashboard to leave a review. Reviews include a star rating and written feedback. All reviews are moderated for authenticity." },
+  { question: "Can I cancel or reschedule a booking?", answer: "Cancellation and reschedule policies are set by each individual artist. TattooMaps doesn't take payments or deposits. Deposits, pricing and scheduling are arranged directly with the artist or shop." },
+  { question: "How do I list my studio or artist profile?", answer: "Most shops and artists are already listed. If you claim your page, we review it by hand, usually within 1–2 business days." },
+  { question: "How do I leave a review for an artist?", answer: "After your appointment is marked complete, you will receive a prompt in your client dashboard to leave a review. Reviews include a star rating and written feedback. The ratings shown on listings come from public business listings." },
 ]
 
 const POPULAR_ARTICLES = [
@@ -47,7 +46,6 @@ const POPULAR_ARTICLES = [
   { title: "What to look for in an artist portfolio", category: "Finding" },
   { title: "Aftercare tips to protect your new tattoo", category: "Safety" },
   { title: "Using filters to find your ideal style", category: "Finding" },
-  { title: "How to get the most from the AI Generator", category: "Generator" },
 ]
 
 export function HelpClient() {
@@ -102,18 +100,17 @@ export function HelpClient() {
                 {CATEGORIES.map((cat) => {
                   const Icon = cat.icon
                   return (
-                    <Card key={cat.slug} className="group hover:border-accent/40 transition-all duration-200 cursor-pointer bg-card">
+                    <Card key={cat.slug} className="bg-card">
                       <CardContent className="p-6">
                         <div className="flex items-start gap-4">
-                          <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center shrink-0 group-hover:bg-accent/20 transition-colors">
+                          <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center shrink-0">
                             <Icon className="w-5 h-5 text-accent" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-foreground group-hover:text-accent transition-colors mb-1">{cat.title}</h3>
+                            <h3 className="font-semibold text-foreground mb-1">{cat.title}</h3>
                             <p className="text-sm text-muted-foreground leading-relaxed mb-3">{cat.description}</p>
                             <span className="text-xs text-muted-foreground">{cat.articles} articles</span>
                           </div>
-                          <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-accent group-hover:translate-x-0.5 transition-all shrink-0 mt-0.5" />
                         </div>
                       </CardContent>
                     </Card>

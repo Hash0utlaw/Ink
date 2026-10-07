@@ -128,11 +128,10 @@ export function AvailabilitySettings({
         <p className="text-xs text-muted-foreground mt-1">Shows as "Replies in ~4h" on your card</p>
       </div>
 
-      {/* First-booking discount (Pro) */}
+      {/* First-booking discount */}
       <div>
         <label className="text-sm font-medium mb-1.5 block">
           First-booking discount (%)
-          <span className="ml-2 text-xs text-amber-400 font-normal">Pro</span>
         </label>
         <Input
           type="number"

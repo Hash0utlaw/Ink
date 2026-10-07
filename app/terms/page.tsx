@@ -146,17 +146,7 @@ export default function TermsOfServicePage() {
               </Section>
 
               <Section id="ai-generator" title="7. AI Tattoo Generator">
-                <Prose>
-                  The AI Tattoo Generator produces design concepts for inspiration purposes only. Outputs do not constitute professional tattoo designs and may require modification by a licensed tattoo artist before application. You own the rights to outputs you generate, subject to the following:
-                </Prose>
-                <List
-                  items={[
-                    "You may not use AI-generated outputs to infringe third-party intellectual property rights",
-                    "You may not represent AI-generated outputs as hand-drawn by a human artist",
-                    "TattooMaps grants no warranty that outputs are original or free from third-party claims",
-                    "Free credits are non-transferable and expire according to the terms stated at the time of issuance",
-                  ]}
-                />
+                <Prose>This section is reserved.</Prose>
               </Section>
 
               <Section id="content" title="8. User Content">

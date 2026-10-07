@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { MapPin, Instagram, Twitter, Facebook, Mail } from "lucide-react"
+import { MapPin } from "lucide-react"
 
 export function Footer() {
   return (
@@ -18,20 +18,6 @@ export function Footer() {
               Discover tattoo artists and shops across the US through interactive maps. Your journey to the perfect tattoo
               starts here.
             </p>
-            <div className="flex space-x-4">
-              <Link href="#" className="text-muted-foreground hover:text-accent transition-colors">
-                <Instagram className="w-5 h-5" />
-              </Link>
-              <Link href="#" className="text-muted-foreground hover:text-accent transition-colors">
-                <Twitter className="w-5 h-5" />
-              </Link>
-              <Link href="#" className="text-muted-foreground hover:text-accent transition-colors">
-                <Facebook className="w-5 h-5" />
-              </Link>
-              <Link href="#" className="text-muted-foreground hover:text-accent transition-colors">
-                <Mail className="w-5 h-5" />
-              </Link>
-            </div>
           </div>
 
           {/* Discover */}
@@ -76,12 +62,7 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-muted-foreground hover:text-accent-text transition-colors">
-                  Portfolio Tips
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="text-muted-foreground hover:text-accent-text transition-colors">
+                <Link href="/pricing" className="text-muted-foreground hover:text-accent-text transition-colors">
                   Pricing Guide
                 </Link>
               </li>

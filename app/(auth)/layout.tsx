@@ -122,11 +122,11 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         <div className="p-6 text-center border-t border-border/20">
           <p className="text-xs text-muted-foreground">
             By continuing, you agree to our{" "}
-            <Link href="/support/terms" className="underline hover:text-foreground transition-colors">
+            <Link href="/terms" className="underline hover:text-foreground transition-colors">
               Terms of Service
             </Link>{" "}
             and{" "}
-            <Link href="/support/privacy" className="underline hover:text-foreground transition-colors">
+            <Link href="/privacy" className="underline hover:text-foreground transition-colors">
               Privacy Policy
             </Link>
             .
