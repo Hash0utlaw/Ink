@@ -7,6 +7,10 @@ export async function POST() {
   return new NextResponse(null, { status: 404 })
 }
 
+export async function GET() {
+  return new NextResponse(null, { status: 404 })
+}
+
 // --- Disabled implementation (restore when the generator relaunches) ---
 //
 // import { experimental_generateImage as generateImage } from "ai"

@@ -54,8 +54,11 @@ export function ArtistDashboardSidebar({ isPro = false }: { isPro?: boolean }) {
             <p className="text-primary-foreground text-xs leading-snug opacity-90">
               Priority search, booking button &amp; 30 portfolio photos
             </p>
-            <button className="mt-1 w-full rounded-md py-1.5 text-sm font-semibold text-primary-foreground bg-[hsl(var(--hero-tertiary))] hover:bg-[hsl(var(--hero-tertiary))]/90 transition-colors">
-              Upgrade — $29/mo
+            <button
+              disabled
+              className="mt-1 w-full rounded-md py-1.5 text-sm font-semibold text-primary-foreground bg-[hsl(var(--hero-tertiary))] opacity-80 cursor-not-allowed"
+            >
+              Pro plans coming soon
             </button>
           </div>
         )}

@@ -19,7 +19,7 @@ const SECTIONS = [
   { id: "platform-use", title: "Use of the Platform" },
   { id: "artist-terms", title: "Artist & Studio Terms" },
   { id: "bookings", title: "Bookings & Payments" },
-  { id: "ai-generator", title: "AI Tattoo Generator" },
+  { id: "ai-generator", title: "Reserved" },
   { id: "content", title: "User Content" },
   { id: "intellectual-property", title: "Intellectual Property" },
   { id: "disclaimers", title: "Disclaimers" },
@@ -145,18 +145,8 @@ export default function TermsOfServicePage() {
                 </Prose>
               </Section>
 
-              <Section id="ai-generator" title="7. AI Tattoo Generator">
-                <Prose>
-                  The AI Tattoo Generator produces design concepts for inspiration purposes only. Outputs do not constitute professional tattoo designs and may require modification by a licensed tattoo artist before application. You own the rights to outputs you generate, subject to the following:
-                </Prose>
-                <List
-                  items={[
-                    "You may not use AI-generated outputs to infringe third-party intellectual property rights",
-                    "You may not represent AI-generated outputs as hand-drawn by a human artist",
-                    "TattooMaps grants no warranty that outputs are original or free from third-party claims",
-                    "Free credits are non-transferable and expire according to the terms stated at the time of issuance",
-                  ]}
-                />
+              <Section id="ai-generator" title="7. Reserved">
+                <Prose>This section is reserved.</Prose>
               </Section>
 
               <Section id="content" title="8. User Content">

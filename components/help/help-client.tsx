@@ -16,42 +16,27 @@ import {
   Calendar,
   CreditCard,
   Shield,
-  Palette,
   MessageCircle,
   ChevronDown,
-  ChevronRight,
   BookOpen,
-  Zap,
   HelpCircle,
 } from "lucide-react"
 
 const CATEGORIES = [
-  { icon: MapPin, title: "Finding Artists & Shops", description: "Search, filter, and discover artists near you", articles: 8, slug: "finding" },
-  { icon: User, title: "Account & Profile", description: "Manage your account, profile settings, and preferences", articles: 6, slug: "account" },
-  { icon: Calendar, title: "Bookings & Appointments", description: "How to book, reschedule, or cancel appointments", articles: 7, slug: "bookings" },
-  { icon: CreditCard, title: "Payments & Deposits", description: "Deposits, refunds, and payment methods", articles: 5, slug: "payments" },
-  { icon: Shield, title: "Safety & Trust", description: "Reviews, verification, and community standards", articles: 4, slug: "safety" },
-  { icon: Palette, title: "AI Tattoo Generator", description: "Using the AI design tool, saving, and sharing", articles: 6, slug: "generator" },
+  { icon: MapPin, title: "Finding Artists & Shops", description: "Search, filter, and discover artists near you", slug: "finding" },
+  { icon: User, title: "Account & Profile", description: "Manage your account, profile settings, and preferences", slug: "account" },
+  { icon: Calendar, title: "Bookings & Appointments", description: "How to book, reschedule, or cancel appointments", slug: "bookings" },
+  { icon: CreditCard, title: "Payments & Deposits", description: "Deposits, refunds, and payment methods", slug: "payments" },
+  { icon: Shield, title: "Safety & Trust", description: "Reviews and community standards", slug: "safety" },
 ]
 
 const FAQS = [
   { question: "How do I find a tattoo artist near me?", answer: "Use the interactive map on our Artists page or the Search page. Enter your city or allow location access, then filter by style, price range, and availability. You can also browse the Shops page to find studios by area." },
-  { question: "Is TattooMaps free to use?", answer: "Yes — browsing artists, shops, and styles is completely free for clients. Artists and studios have free and paid listing tiers. The AI Tattoo Generator includes free credits for new users, with additional credits available through a subscription." },
+  { question: "Is TattooMaps free to use?", answer: "Yes — browsing artists, shops, and styles is completely free for clients. Listings are free. Pro plans for artists and shops are coming soon." },
   { question: "How do I book an appointment?", answer: "Visit an artist's profile page and click the Book Appointment button. Select your preferred date, describe your tattoo idea, and confirm the booking. A deposit may be required depending on the artist's policy." },
-  { question: "Can I cancel or reschedule a booking?", answer: "Cancellation and reschedule policies are set by each individual artist. Check the artist's profile for their specific policy before booking. Generally, cancellations made 48+ hours in advance are eligible for deposit refunds." },
-  { question: "How do I list my studio or artist profile?", answer: "Sign up with an Artist or Studio account via the Join as Artist link. Complete your profile, upload portfolio photos, set your availability, and your listing will go live within 24 hours after a brief review." },
-  { question: "How does the AI Tattoo Generator work?", answer: "The generator uses AI to create custom tattoo design concepts based on your description, style preference, and body placement. Describe your idea, choose a style, and receive several design variations you can save, share, or bring to an artist for inspiration." },
-  { question: "Are artists on TattooMaps verified?", answer: "Artists complete a profile verification process that includes portfolio review and identity checks. Verified artists display a badge on their profile. We also use community reviews and reports to maintain quality standards." },
-  { question: "How do I leave a review for an artist?", answer: "After your appointment is marked complete, you will receive a prompt in your client dashboard to leave a review. Reviews include a star rating and written feedback. All reviews are moderated for authenticity." },
-]
-
-const POPULAR_ARTICLES = [
-  { title: "How to write a great consultation request", category: "Bookings" },
-  { title: "Understanding tattoo deposit policies", category: "Payments" },
-  { title: "What to look for in an artist portfolio", category: "Finding" },
-  { title: "Aftercare tips to protect your new tattoo", category: "Safety" },
-  { title: "Using filters to find your ideal style", category: "Finding" },
-  { title: "How to get the most from the AI Generator", category: "Generator" },
+  { question: "Can I cancel or reschedule a booking?", answer: "Cancellation and reschedule policies are set by each individual artist. TattooMaps doesn't take payments or deposits. Deposits, pricing and scheduling are arranged directly with the artist or shop." },
+  { question: "How do I list my studio or artist profile?", answer: "Most shops and artists are already listed. If you claim your page, we review it by hand, usually within 1–2 business days." },
+  { question: "How do I leave a review for an artist?", answer: "Reviews are tied to bookings made through TattooMaps. When the artist marks your session as complete, we email you a link to rate it from 1 to 5 stars and add an optional written review. Each booking can be reviewed once. The ratings shown on listings come from public business listings." },
 ]
 
 export function HelpClient() {
@@ -106,18 +91,16 @@ export function HelpClient() {
                 {CATEGORIES.map((cat) => {
                   const Icon = cat.icon
                   return (
-                    <Card key={cat.slug} className="group hover:border-accent/40 transition-all duration-200 cursor-pointer bg-card">
+                    <Card key={cat.slug} className="bg-card">
                       <CardContent className="p-6">
                         <div className="flex items-start gap-4">
-                          <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center shrink-0 group-hover:bg-accent/20 transition-colors">
+                          <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center shrink-0">
                             <Icon className="w-5 h-5 text-accent" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-foreground group-hover:text-accent transition-colors mb-1">{cat.title}</h3>
-                            <p className="text-sm text-muted-foreground leading-relaxed mb-3">{cat.description}</p>
-                            <span className="text-xs text-muted-foreground">{cat.articles} articles</span>
+                            <h3 className="font-semibold text-foreground mb-1">{cat.title}</h3>
+                            <p className="text-sm text-muted-foreground leading-relaxed">{cat.description}</p>
                           </div>
-                          <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-accent group-hover:translate-x-0.5 transition-all shrink-0 mt-0.5" />
                         </div>
                       </CardContent>
                     </Card>
@@ -171,31 +154,6 @@ export function HelpClient() {
             )}
           </div>
         </section>
-
-        {/* Popular Articles */}
-        {!searchQuery && (
-          <section className="py-16 px-4">
-            <div className="container mx-auto max-w-6xl">
-              <div className="flex items-center gap-3 mb-8">
-                <Zap className="w-6 h-6 text-accent" />
-                <h2 className="text-2xl font-bold">Popular Articles</h2>
-              </div>
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {POPULAR_ARTICLES.map((article, i) => (
-                  <div key={i} className="flex items-start gap-3 p-4 rounded-xl border border-border bg-card hover:border-accent/40 transition-colors cursor-pointer group">
-                    <div className="w-8 h-8 bg-accent/10 rounded-md flex items-center justify-center shrink-0 mt-0.5">
-                      <BookOpen className="w-4 h-4 text-accent" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-foreground group-hover:text-accent-text transition-colors leading-relaxed">{article.title}</p>
-                      <span className="text-xs text-muted-foreground mt-1 block">{article.category}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-        )}
 
         {/* Still need help CTA */}
         <section className="py-16 px-4 bg-muted/30 border-t border-border">

@@ -40,6 +40,7 @@ import {
 const MOBILE_NAV_ITEMS = [
   { href: "/artists", label: "Artists", icon: Users },
   { href: "/tattoo-shops", label: "Shops", icon: Store },
+  { href: "/map", label: "Map", icon: MapPin },
   { href: "/flash", label: "Flash", icon: Zap },
   { href: "/styles", label: "Styles", icon: Palette },
   { href: "/find-artist", label: "Find Artist", icon: Compass },
@@ -245,6 +246,9 @@ export function Header() {
           </Link>
           <Link href="/tattoo-shops" className="text-foreground/80 hover:text-foreground transition-colors">
             Shops
+          </Link>
+          <Link href="/map" className="text-foreground/80 hover:text-foreground transition-colors">
+            Map
           </Link>
           <Link href="/flash" className="flex items-center gap-1.5 text-foreground/80 hover:text-foreground transition-colors">
             <Zap className="w-4 h-4" />

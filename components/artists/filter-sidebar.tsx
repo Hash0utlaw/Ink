@@ -221,7 +221,8 @@ export function FilterSidebar({ filters, onFilterChange, onNearMe }: FilterSideb
           </div>
         </div>
 
-        <div className="space-y-2">
+        {/* TODO: Re-enable when claimed artists set their own price tier. */}
+        <div className="hidden space-y-2">
           <Label>Price Range</Label>
           <ToggleGroup
             type="multiple"

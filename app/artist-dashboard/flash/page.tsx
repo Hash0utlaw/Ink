@@ -54,7 +54,7 @@ export default async function ArtistFlashPage() {
         </div>
         {atLimit && (
           <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 text-xs">
-            Upgrade for unlimited
+            Pro plans coming soon
           </Badge>
         )}
       </div>
@@ -75,8 +75,8 @@ export default async function ArtistFlashPage() {
                   <p className="text-sm text-muted-foreground">
                     You&apos;ve reached the {tier} tier limit of {limit} listings.
                   </p>
-                  <Button className="bg-[#7C3AED] hover:bg-[#6D28D9]" asChild>
-                    <a href="/pricing">Upgrade to Pro</a>
+                  <Button className="bg-[#7C3AED] hover:bg-[#6D28D9]" disabled>
+                    Pro plans coming soon
                   </Button>
                 </div>
               ) : (

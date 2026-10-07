@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { MapPin, Instagram, Twitter, Facebook, Mail } from "lucide-react"
+import { MapPin } from "lucide-react"
 
 export function Footer() {
   return (
@@ -15,23 +15,9 @@ export function Footer() {
               <span className="font-extrabold tracking-wide text-lg">TattooMaps</span>
             </div>
             <p className="text-muted-foreground text-sm leading-relaxed">
-              Discover tattoo artists and shops worldwide through interactive maps. Your journey to the perfect tattoo
+              Discover tattoo artists and shops across the US through interactive maps. Your journey to the perfect tattoo
               starts here.
             </p>
-            <div className="flex space-x-4">
-              <Link href="#" className="text-muted-foreground hover:text-accent transition-colors">
-                <Instagram className="w-5 h-5" />
-              </Link>
-              <Link href="#" className="text-muted-foreground hover:text-accent transition-colors">
-                <Twitter className="w-5 h-5" />
-              </Link>
-              <Link href="#" className="text-muted-foreground hover:text-accent transition-colors">
-                <Facebook className="w-5 h-5" />
-              </Link>
-              <Link href="#" className="text-muted-foreground hover:text-accent transition-colors">
-                <Mail className="w-5 h-5" />
-              </Link>
-            </div>
           </div>
 
           {/* Discover */}
@@ -76,12 +62,7 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-muted-foreground hover:text-accent-text transition-colors">
-                  Portfolio Tips
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="text-muted-foreground hover:text-accent-text transition-colors">
+                <Link href="/pricing" className="text-muted-foreground hover:text-accent-text transition-colors">
                   Pricing Guide
                 </Link>
               </li>
@@ -117,8 +98,8 @@ export function Footer() {
         </div>
 
         <div className="border-t border-border mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-muted-foreground text-sm">© 2025 TattooMaps. All rights reserved.</p>
-          <p className="text-muted-foreground text-sm mt-4 md:mt-0">Built with ❤️ for the global tattoo community</p>
+          <p className="text-muted-foreground text-sm">© {new Date().getFullYear()} TattooMaps. All rights reserved.</p>
+          <p className="text-muted-foreground text-sm mt-4 md:mt-0">Built with ❤️ for the tattoo community</p>
         </div>
         <p className="text-muted-foreground text-sm mt-4 text-center md:text-left">
           Places data from{" "}
