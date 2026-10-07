@@ -31,6 +31,7 @@ export async function generateMetadata({
     openGraph: {
       title: `Best Tattoo Shops in ${cityName}, ${stateAbbr}`,
       description: `${count} tattoo studios in ${cityName}, ${stateName}.`,
+      images: ["/opengraph-image"],
     },
   }
 }

@@ -36,7 +36,7 @@ const FAQS = [
   { question: "How do I book an appointment?", answer: "Visit an artist's profile page and click the Book Appointment button. Select your preferred date, describe your tattoo idea, and confirm the booking. A deposit may be required depending on the artist's policy." },
   { question: "Can I cancel or reschedule a booking?", answer: "Cancellation and reschedule policies are set by each individual artist. TattooMaps doesn't take payments or deposits. Deposits, pricing and scheduling are arranged directly with the artist or shop." },
   { question: "How do I list my studio or artist profile?", answer: "Most shops and artists are already listed. If you claim your page, we review it by hand, usually within 1–2 business days." },
-  { question: "How do I leave a review for an artist?", answer: "Reviews are tied to bookings made through TattooMaps. When the artist marks your session as complete, we email you a link to rate it from 1 to 5 stars and add an optional written review. Each booking can be reviewed once. The ratings shown on listings come from public business listings." },
+  { question: "How do I leave a review for an artist?", answer: "Reviews are tied to bookings made through TattooMaps. When the artist marks your session as complete, we email you a link to rate it from 1 to 5 stars and add an optional written review. Each booking can be reviewed once. Ratings combine public business listings and reviews from TattooMaps clients." },
 ]
 
 export function HelpClient() {
