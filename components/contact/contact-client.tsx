@@ -45,13 +45,6 @@ const CONTACT_CHANNELS = [
     href: "mailto:support@tattoomaps.com",
   },
   {
-    icon: MessageCircle,
-    title: "Live Chat",
-    description: "Chat with a support agent during business hours for immediate help.",
-    detail: "Mon – Fri, 9am – 6pm EST",
-    href: "#",
-  },
-  {
     icon: HelpCircle,
     title: "Help Center",
     description: "Browse articles, FAQs, and guides to solve common issues yourself.",
@@ -121,7 +114,7 @@ export function ContactClient() {
         {/* Contact channels */}
         <section className="py-12 px-4 border-b border-border">
           <div className="container mx-auto max-w-5xl">
-            <div className="grid sm:grid-cols-3 gap-4">
+            <div className="grid sm:grid-cols-2 gap-4">
               {CONTACT_CHANNELS.map((ch) => {
                 const Icon = ch.icon
                 return (

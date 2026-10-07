@@ -4,6 +4,7 @@ import { Poppins } from "next/font/google"
 import "./globals.css"
 import { cn } from "@/lib/utils"
 import { Toaster } from "@/components/ui/toaster"
+import { AdminGateBanner } from "@/components/layout/admin-gate-banner"
 import { SITE_URL } from "@/lib/site-config"
 
 const poppins = Poppins({
@@ -75,6 +76,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className={cn("min-h-screen bg-background font-sans antialiased", poppins.variable)}>
+        <AdminGateBanner />
         {children}
         <Toaster />
       </body>

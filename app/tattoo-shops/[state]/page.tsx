@@ -26,6 +26,7 @@ export async function generateMetadata({ params }: { params: { state: string } }
     openGraph: {
       title: `Best Tattoo Shops in ${stateName}`,
       description: `Find top-rated tattoo studios across ${stateName} on TattooMaps.`,
+      images: ["/opengraph-image"],
     },
   }
 }
