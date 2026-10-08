@@ -1,18 +1,18 @@
+import { readFile } from "node:fs/promises"
+import path from "node:path"
 import { ImageResponse } from "next/og"
 
 export const alt = "TattooMaps — Find tattoo artists and shops across the US"
 export const size = { width: 1200, height: 630 }
 export const contentType = "image/png"
 
-// Fetch a Poppins TTF from Google Fonts at build time. If the network is
-// unavailable, fall back to next/og's default font rather than failing.
+// Poppins (latin) is read from app/fonts — next/og takes .woff but not .woff2 —
+// so the build never fetches from Google Fonts. If a file is missing, fall back
+// to next/og's default font rather than failing.
 async function loadFont(weight: number): Promise<ArrayBuffer | null> {
   try {
-    const css = await fetch(`https://fonts.googleapis.com/css2?family=Poppins:wght@${weight}`).then((r) => r.text())
-    const url = css.match(/src: url\((.+?)\) format\('(?:opentype|truetype)'\)/)?.[1]
-    if (!url) return null
-    const res = await fetch(url)
-    return res.ok ? await res.arrayBuffer() : null
+    const buf = await readFile(path.join(process.cwd(), `app/fonts/poppins-latin-${weight}-normal.woff`))
+    return buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength) as ArrayBuffer
   } catch {
     return null
   }

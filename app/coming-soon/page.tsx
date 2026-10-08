@@ -2,9 +2,16 @@ import { existsSync } from "node:fs"
 import path from "node:path"
 import type { Metadata } from "next"
 import Image from "next/image"
-import { Figtree } from "next/font/google"
+import localFont from "next/font/local"
 
-const figtree = Figtree({ subsets: ["latin"], weight: ["400", "500", "800"] })
+// Figtree (latin, 400/500/800) is stored in app/fonts so builds never fetch from Google Fonts.
+const figtree = localFont({
+  src: [
+    { path: "../fonts/figtree-latin-400-normal.woff2", weight: "400", style: "normal" },
+    { path: "../fonts/figtree-latin-500-normal.woff2", weight: "500", style: "normal" },
+    { path: "../fonts/figtree-latin-800-normal.woff2", weight: "800", style: "normal" },
+  ],
+})
 
 const SUBLINE =
   "Find artists by style and city, see who works where, and request your next piece. We're putting on the finishing touches."
