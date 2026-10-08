@@ -5,13 +5,22 @@ function likeExact(value: string): string {
   return value.replace(/[\\%_]/g, (ch) => `\\${ch}`)
 }
 
-type ClaimLink = { id: string; artist_id: string | null; shop_id: string | null }
+type ClaimLink = {
+  id: string
+  artist_id: string | null
+  shop_id: string | null
+  claim_request_id: string | null
+  claim_requests: { status: string } | null
+}
 
 /**
  * Links artists/shops from approved claims (claim_links rows, written by the
  * admin approve action) whose email matches the signed-in user. Each unlinked
  * row is used once: the listing is linked only if it has no owner yet, then
  * the row gets linked_at, so repeat logins change nothing.
+ * A row tied to a claim_request is used only while that claim is still
+ * approved (a rejected claim can't link); rows with no claim_request_id were
+ * added by hand and are always allowed.
  * claim_links is service-role only (RLS on, no policies) — never expose it.
  */
 export async function linkClaimedProfiles(userId: string, email: string | null | undefined) {
@@ -20,7 +29,7 @@ export async function linkClaimedProfiles(userId: string, email: string | null |
 
   const { data, error } = await admin
     .from("claim_links")
-    .select("id, artist_id, shop_id")
+    .select("id, artist_id, shop_id, claim_request_id, claim_requests(status)")
     .ilike("email", likeExact(email.trim()))
     .is("linked_at", null)
   if (error) {
@@ -30,7 +39,10 @@ export async function linkClaimedProfiles(userId: string, email: string | null |
 
   let artistCount = 0
   let shopCount = 0
-  for (const link of (data ?? []) as ClaimLink[]) {
+  const usable = ((data ?? []) as unknown as ClaimLink[]).filter(
+    (link) => !link.claim_request_id || link.claim_requests?.status === "approved",
+  )
+  for (const link of usable) {
     if (link.artist_id) {
       const { data: linked, error: artistError } = await admin
         .from("artists")
