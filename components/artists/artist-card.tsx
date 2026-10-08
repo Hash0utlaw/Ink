@@ -42,7 +42,7 @@ export function ArtistCard({ artist, distance, initialSaved }: ArtistCardProps) 
   const hasPreview = artist.previewImages.length > 0
 
   return (
-    <Card className="relative overflow-hidden transition-all hover:border-ink hover:-translate-y-1 flex flex-col">
+    <Card className="relative overflow-hidden transition-all hover:border-ink flex flex-col">
       <SaveButton
         itemType="artist"
         itemId={artist.id}

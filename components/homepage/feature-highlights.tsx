@@ -47,7 +47,7 @@ export function FeatureHighlights() {
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
           {features.map((feature, i) => (
             <MotionView key={feature.title} delay={i * 0.1}>
-              <Card className="bg-card border-border/60 transition-all duration-300 hover:border-ink hover:-translate-y-1 h-full">
+              <Card className="bg-card border-border/60 transition-all duration-300 hover:border-ink h-full">
                 <CardHeader className="flex flex-row items-center gap-4">
                   <div className="flex items-center justify-center w-12 h-12 bg-secondary rounded-lg">
                     <feature.icon className="h-6 w-6 text-primary" />

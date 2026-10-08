@@ -120,7 +120,7 @@ export function PricingClient() {
         </section>
 
         {/* Quick Price Calculator */}
-        <section className="py-16 px-4 bg-muted/30">
+        <section className="py-16 px-4 bg-secondary">
           <div className="container mx-auto max-w-6xl">
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold mb-4 flex items-center justify-center gap-3">
@@ -236,18 +236,18 @@ export function PricingClient() {
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="text-center p-6 bg-secondary rounded-lg border border-ink">
-                    <div className="text-4xl font-bold text-primary mb-2">
+                    <div className="text-4xl font-bold text-foreground mb-2">
                       ${priceEstimate.priceRange.min} - ${priceEstimate.priceRange.max}
                     </div>
                     <p className="text-muted-foreground">Estimated Total Cost</p>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="text-center p-4 bg-muted rounded-lg">
+                    <div className="text-center p-4 bg-secondary rounded-lg">
                       <div className="text-2xl font-semibold">${priceEstimate.hourlyRate}</div>
                       <p className="text-sm text-muted-foreground">Per Hour</p>
                     </div>
-                    <div className="text-center p-4 bg-muted rounded-lg">
+                    <div className="text-center p-4 bg-secondary rounded-lg">
                       <div className="text-2xl font-semibold">{priceEstimate.estimatedHours}h</div>
                       <p className="text-sm text-muted-foreground">Est. Time</p>
                     </div>
@@ -319,10 +319,10 @@ export function PricingClient() {
 
             <div className="grid md:grid-cols-3 gap-6">
               {/* Budget Tier */}
-              <Card className="pricing-card">
+              <Card className="pricing-card border-t-3 border-t-bottle-green">
                 <CardHeader>
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-green-500">Budget</CardTitle>
+                    <CardTitle className="text-foreground">Budget</CardTitle>
                     <Badge variant="outline">$</Badge>
                   </div>
                   <CardDescription>$80 - $150 per hour</CardDescription>
@@ -333,19 +333,19 @@ export function PricingClient() {
                   </div>
                   <ul className="space-y-2 text-sm">
                     <li className="flex items-center gap-2">
-                      <CheckCircle className="w-4 h-4 text-green-500" />
+                      <CheckCircle className="w-4 h-4 text-muted-foreground" />
                       Apprentice or newer artists
                     </li>
                     <li className="flex items-center gap-2">
-                      <CheckCircle className="w-4 h-4 text-green-500" />
+                      <CheckCircle className="w-4 h-4 text-muted-foreground" />
                       Simple designs and flash work
                     </li>
                     <li className="flex items-center gap-2">
-                      <CheckCircle className="w-4 h-4 text-green-500" />
+                      <CheckCircle className="w-4 h-4 text-muted-foreground" />
                       Basic traditional styles
                     </li>
                     <li className="flex items-center gap-2">
-                      <CheckCircle className="w-4 h-4 text-green-500" />
+                      <CheckCircle className="w-4 h-4 text-muted-foreground" />
                       Smaller tattoos (under 4 inches)
                     </li>
                   </ul>
@@ -356,10 +356,10 @@ export function PricingClient() {
               </Card>
 
               {/* Mid-Range Tier */}
-              <Card className="pricing-card pricing-card-featured">
+              <Card className="pricing-card pricing-card-featured border-t-3 border-t-navy">
                 <CardHeader>
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-primary">Mid-Range</CardTitle>
+                    <CardTitle className="text-foreground">Mid-Range</CardTitle>
                     <Badge>$$</Badge>
                   </div>
                   <CardDescription>$150 - $250 per hour</CardDescription>
@@ -370,19 +370,19 @@ export function PricingClient() {
                   </div>
                   <ul className="space-y-2 text-sm">
                     <li className="flex items-center gap-2">
-                      <CheckCircle className="w-4 h-4 text-primary" />
+                      <CheckCircle className="w-4 h-4 text-muted-foreground" />
                       Experienced artists (3-8 years)
                     </li>
                     <li className="flex items-center gap-2">
-                      <CheckCircle className="w-4 h-4 text-primary" />
+                      <CheckCircle className="w-4 h-4 text-muted-foreground" />
                       Custom designs and consultations
                     </li>
                     <li className="flex items-center gap-2">
-                      <CheckCircle className="w-4 h-4 text-primary" />
+                      <CheckCircle className="w-4 h-4 text-muted-foreground" />
                       Multiple styles and techniques
                     </li>
                     <li className="flex items-center gap-2">
-                      <CheckCircle className="w-4 h-4 text-primary" />
+                      <CheckCircle className="w-4 h-4 text-muted-foreground" />
                       Medium to large pieces
                     </li>
                   </ul>
@@ -393,10 +393,10 @@ export function PricingClient() {
               </Card>
 
               {/* Premium Tier */}
-              <Card className="pricing-card">
+              <Card className="pricing-card border-t-3 border-t-flash-red">
                 <CardHeader>
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-yellow-500">Premium</CardTitle>
+                    <CardTitle className="text-foreground">Premium</CardTitle>
                     <Badge variant="outline">$$$</Badge>
                   </div>
                   <CardDescription>$250+ per hour</CardDescription>
@@ -407,19 +407,19 @@ export function PricingClient() {
                   </div>
                   <ul className="space-y-2 text-sm">
                     <li className="flex items-center gap-2">
-                      <CheckCircle className="w-4 h-4 text-yellow-500" />
+                      <CheckCircle className="w-4 h-4 text-muted-foreground" />
                       Master artists and celebrities
                     </li>
                     <li className="flex items-center gap-2">
-                      <CheckCircle className="w-4 h-4 text-yellow-500" />
+                      <CheckCircle className="w-4 h-4 text-muted-foreground" />
                       Highly detailed realism work
                     </li>
                     <li className="flex items-center gap-2">
-                      <CheckCircle className="w-4 h-4 text-yellow-500" />
+                      <CheckCircle className="w-4 h-4 text-muted-foreground" />
                       Award-winning portfolios
                     </li>
                     <li className="flex items-center gap-2">
-                      <CheckCircle className="w-4 h-4 text-yellow-500" />
+                      <CheckCircle className="w-4 h-4 text-muted-foreground" />
                       Exclusive and waitlisted artists
                     </li>
                   </ul>
@@ -433,7 +433,7 @@ export function PricingClient() {
         </section>
 
         {/* Factors Affecting Price */}
-        <section className="py-16 px-4 bg-muted/30">
+        <section className="py-16 px-4 bg-secondary">
           <div className="container mx-auto max-w-6xl">
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold mb-4">What Affects Tattoo Pricing?</h2>
@@ -456,11 +456,11 @@ export function PricingClient() {
                 <div className="space-y-2 text-xs">
                   <div className="flex justify-between">
                     <span>Fine Line:</span>
-                    <span className="text-primary">+20%</span>
+                    <span className="text-foreground">+20%</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Realism:</span>
-                    <span className="text-primary">+80%</span>
+                    <span className="text-foreground">+80%</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Traditional:</span>
@@ -482,15 +482,15 @@ export function PricingClient() {
                 <div className="space-y-2 text-xs">
                   <div className="flex justify-between">
                     <span>Small (1-2"):</span>
-                    <span className="text-green-500">$100-300</span>
+                    <span className="text-foreground">$100-300</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Medium (3-5"):</span>
-                    <span className="text-yellow-500">$300-800</span>
+                    <span className="text-foreground">$300-800</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Large (6"+):</span>
-                    <span className="text-red-500">$800+</span>
+                    <span className="text-foreground">$800+</span>
                   </div>
                 </div>
               </Card>
@@ -508,15 +508,15 @@ export function PricingClient() {
                 <div className="space-y-2 text-xs">
                   <div className="flex justify-between">
                     <span>Apprentice:</span>
-                    <span className="text-green-500">$80-120/hr</span>
+                    <span className="text-foreground">$80-120/hr</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Experienced:</span>
-                    <span className="text-yellow-500">$150-250/hr</span>
+                    <span className="text-foreground">$150-250/hr</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Master:</span>
-                    <span className="text-red-500">$250+/hr</span>
+                    <span className="text-foreground">$250+/hr</span>
                   </div>
                 </div>
               </Card>
@@ -534,15 +534,15 @@ export function PricingClient() {
                 <div className="space-y-2 text-xs">
                   <div className="flex justify-between">
                     <span>Minimum:</span>
-                    <span className="text-primary">2-3 hours</span>
+                    <span className="text-foreground">2-3 hours</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Average Session:</span>
-                    <span className="text-primary">4-6 hours</span>
+                    <span className="text-foreground">4-6 hours</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Large Pieces:</span>
-                    <span className="text-primary">Multiple sessions</span>
+                    <span className="text-foreground">Multiple sessions</span>
                   </div>
                 </div>
               </Card>
@@ -560,15 +560,15 @@ export function PricingClient() {
                 <div className="space-y-2 text-xs">
                   <div className="flex justify-between">
                     <span>Rural Areas:</span>
-                    <span className="text-green-500">Lower rates</span>
+                    <span className="text-foreground">Lower rates</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Major Cities:</span>
-                    <span className="text-yellow-500">Higher rates</span>
+                    <span className="text-foreground">Higher rates</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Celebrity Artists:</span>
-                    <span className="text-red-500">Premium rates</span>
+                    <span className="text-foreground">Premium rates</span>
                   </div>
                 </div>
               </Card>
@@ -586,15 +586,15 @@ export function PricingClient() {
                 <div className="space-y-2 text-xs">
                   <div className="flex justify-between">
                     <span>Consultation:</span>
-                    <span className="text-primary">$50-150</span>
+                    <span className="text-foreground">$50-150</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Design Fee:</span>
-                    <span className="text-primary">$100-500</span>
+                    <span className="text-foreground">$100-500</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Touch-ups:</span>
-                    <span className="text-green-500">Often free</span>
+                    <span className="text-foreground">Often free</span>
                   </div>
                 </div>
               </Card>

@@ -81,8 +81,8 @@ export function LiveReviews({ initialReviews }: LiveReviewsProps) {
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
             <div className="relative">
-              <div className="w-2 h-2 rounded-full bg-success animate-ping absolute" />
-              <div className="w-2 h-2 rounded-full bg-success" />
+              <div className="w-2 h-2 rounded-full bg-success border-1.5 border-ink absolute" />
+              <div className="w-2 h-2 rounded-full bg-success border-1.5 border-ink" />
             </div>
             <h2 className="text-2xl font-extrabold">Live Reviews</h2>
           </div>
@@ -149,7 +149,7 @@ export function LiveReviewsSkeleton() {
     <section className="py-12 border-t border-border/50">
       <div className="container mx-auto px-4">
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-2 h-2 rounded-full bg-success" />
+          <div className="w-2 h-2 rounded-full bg-success border-1.5 border-ink" />
           <div className="h-7 w-32 rounded bg-muted animate-pulse" />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

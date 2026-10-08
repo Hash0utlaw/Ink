@@ -13,7 +13,7 @@ export default async function AppointmentsPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Appointments</h1>
         {pendingCount > 0 && (
-          <span className="rounded-lg bg-navy text-cream border border-navy px-3 py-1 text-sm font-medium">
+          <span className="rounded-lg bg-warning text-warning-foreground border border-warning px-3 py-1 text-sm font-medium">
             {pendingCount} pending
           </span>
         )}

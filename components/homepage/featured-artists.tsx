@@ -32,7 +32,7 @@ export function FeaturedArtists({ artists }: FeaturedArtistsProps) {
           {realArtists.map((artist, i) => (
             <MotionView key={artist.id} delay={i * 0.1}>
               <Link href={`/artists/${artist.id}`} className="block h-full">
-                <Card className="overflow-hidden h-full bg-card border-border/60 transition-all duration-300 hover:border-ink hover:-translate-y-1">
+                <Card className="overflow-hidden h-full bg-card border-border/60 transition-all duration-300 hover:border-ink">
                   <CardContent className="p-6 flex flex-col items-center text-center">
                     <Avatar className="w-24 h-24 mb-4 border-2 border-ink">
                       <AvatarImage src={artist.avatarUrl || "/placeholder.svg"} alt={artist.name} />

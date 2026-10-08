@@ -19,7 +19,7 @@ export function ShopCard({
   initialSaved?: boolean
 }) {
   return (
-    <Card className="overflow-hidden transition-all hover:border-ink hover:-translate-y-1 flex flex-col">
+    <Card className="overflow-hidden transition-all hover:border-ink flex flex-col">
       <div className="relative h-32 w-full overflow-hidden">
         <img
           src={shop.coverImageUrl || "/placeholder.svg"}

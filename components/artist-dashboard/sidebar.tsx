@@ -56,7 +56,7 @@ export function ArtistDashboardSidebar({ isPro = false }: { isPro?: boolean }) {
             </p>
             <button
               disabled
-              className="mt-1 w-full rounded-md py-1.5 text-sm font-semibold text-primary-foreground bg-[hsl(var(--hero-tertiary))] opacity-80 cursor-not-allowed"
+              className="mt-1 w-full rounded-md py-1.5 text-sm font-semibold bg-cream text-ink border-1.5 border-ink opacity-80 cursor-not-allowed"
             >
               Pro plans coming soon
             </button>

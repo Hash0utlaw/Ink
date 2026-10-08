@@ -12,11 +12,11 @@ interface BookingCardProps {
 }
 
 const STATUS_STYLES: Record<string, string> = {
-  pending: "bg-navy text-cream border-navy",
+  pending: "bg-warning text-warning-foreground border-warning",
   confirmed: "bg-success text-success-foreground border-success",
   declined: "bg-destructive text-destructive-foreground border-destructive",
-  cancelled: "bg-muted text-muted-foreground border-border",
-  completed: "bg-primary text-primary-foreground border-primary",
+  cancelled: "bg-destructive text-destructive-foreground border-destructive",
+  completed: "bg-navy text-cream border-navy",
 }
 
 function formatDate(dateStr: string | null): string {
