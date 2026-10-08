@@ -45,8 +45,8 @@ export default function ForgotPasswordPage() {
       {isSuccess ? (
         /* ── Success state ──────────────────────────────────────────── */
         <div className="space-y-6">
-          <div className="w-14 h-14 rounded-2xl bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center">
-            <Mail className="w-7 h-7 text-emerald-400" />
+          <div className="w-14 h-14 rounded-lg bg-secondary border border-success flex items-center justify-center">
+            <Mail className="w-7 h-7 text-success" />
           </div>
 
           <div className="space-y-2">
@@ -59,7 +59,7 @@ export default function ForgotPasswordPage() {
             </p>
           </div>
 
-          <div className="flex items-start gap-2.5 text-sm p-3.5 rounded-xl border bg-emerald-500/10 border-emerald-500/30 text-emerald-400">
+          <div className="flex items-start gap-2.5 text-sm p-3.5 rounded-lg border bg-success border-success text-success-foreground">
             <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
             <span>{message}</span>
           </div>
@@ -72,7 +72,7 @@ export default function ForgotPasswordPage() {
                   setIsSuccess(false)
                   setMessage("")
                 }}
-                className="text-accent-text hover:text-accent-text/80 font-medium transition-colors"
+                className="text-navy underline-offset-2 hover:underline font-medium"
               >
                 try again
               </button>
@@ -80,7 +80,7 @@ export default function ForgotPasswordPage() {
             </p>
             <Link
               href="/login"
-              className="inline-flex items-center gap-1.5 text-sm font-semibold text-accent-text hover:text-accent-text/80 transition-colors"
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-navy underline-offset-2 hover:underline"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               Return to sign in
@@ -92,8 +92,8 @@ export default function ForgotPasswordPage() {
         <>
           {/* Icon + heading */}
           <div className="mb-8 space-y-4">
-            <div className="w-14 h-14 rounded-2xl bg-accent/15 border border-accent/25 flex items-center justify-center">
-              <Mail className="w-7 h-7 text-accent" />
+            <div className="w-14 h-14 rounded-lg bg-secondary border border-ink flex items-center justify-center">
+              <Mail className="w-7 h-7 text-primary" />
             </div>
             <div>
               <h2 className="text-3xl font-black tracking-tight text-foreground mb-2">
@@ -119,13 +119,13 @@ export default function ForgotPasswordPage() {
                 required
                 disabled={isPending}
                 autoFocus
-                className="h-11 bg-muted/40 border-border/60 focus:border-accent focus:ring-accent/20 text-foreground placeholder:text-muted-foreground/50 rounded-xl"
+                className="h-11 bg-muted/40 border-border/60 focus:border-ink focus:ring-ring/20 text-foreground placeholder:text-muted-foreground/50 rounded-lg"
               />
             </div>
 
             {/* Error feedback */}
             {message && !isSuccess && (
-              <div className="flex items-start gap-2.5 text-sm p-3.5 rounded-xl border bg-destructive/10 border-destructive/30 text-destructive-foreground">
+              <div className="flex items-start gap-2.5 text-sm p-3.5 rounded-lg border bg-destructive/10 border-destructive/30 text-destructive-foreground">
                 <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                 <span>{message}</span>
               </div>
@@ -134,7 +134,7 @@ export default function ForgotPasswordPage() {
             <Button
               type="submit"
               disabled={isPending}
-              className="w-full h-11 rounded-xl font-semibold text-sm bg-accent hover:bg-accent/90 text-accent-foreground shadow-lg shadow-accent/25 transition-all duration-200"
+              className="w-full h-11 rounded-lg font-semibold text-sm bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-200"
             >
               {isPending ? "Sending reset link..." : "Send reset link"}
             </Button>
@@ -151,7 +151,7 @@ export default function ForgotPasswordPage() {
             Remember your password?{" "}
             <Link
               href="/login"
-              className="font-semibold text-accent-text hover:text-accent-text/80 transition-colors"
+              className="font-semibold text-navy underline-offset-2 hover:underline"
             >
               Sign in instead
             </Link>
@@ -161,7 +161,7 @@ export default function ForgotPasswordPage() {
             Don&apos;t have an account?{" "}
             <Link
               href="/signup"
-              className="font-semibold text-accent-text hover:text-accent-text/80 transition-colors"
+              className="font-semibold text-navy underline-offset-2 hover:underline"
             >
               Create one for free
             </Link>

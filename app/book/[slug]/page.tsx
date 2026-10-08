@@ -89,9 +89,9 @@ export default async function BookArtistPage({
               <Card className="bg-muted/30 border-border/50">
                 <CardContent className="pt-6 space-y-4">
                   <div className="flex items-start gap-4">
-                    <Avatar className="w-20 h-20 border-2 border-accent shrink-0">
+                    <Avatar className="w-20 h-20 border-2 border-ink shrink-0">
                       <AvatarImage src={artist.avatarUrl || ""} alt={artist.name} />
-                      <AvatarFallback className="text-2xl font-bold bg-accent/10 text-accent">
+                      <AvatarFallback className="text-2xl font-bold bg-vellum text-ink border-1.5 border-ink">
                         {initials(artist.name)}
                       </AvatarFallback>
                     </Avatar>
@@ -108,7 +108,7 @@ export default async function BookArtistPage({
                       )}
                       {artist.rating > 0 && (
                         <div className="flex items-center gap-1 mt-1">
-                          <Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" />
+                          <Star className="w-3.5 h-3.5 text-flash-yellow fill-flash-yellow" />
                           <span className="text-sm font-semibold">{artist.rating}</span>
                           <span className="text-xs text-muted-foreground">({artist.reviewCount})</span>
                         </div>
@@ -130,7 +130,7 @@ export default async function BookArtistPage({
 
                   <Link
                     href={`/artists/${artist.id}`}
-                    className="text-xs text-[#7C3AED] hover:underline"
+                    className="text-xs text-navy underline-offset-2 hover:underline"
                   >
                     View full profile →
                   </Link>

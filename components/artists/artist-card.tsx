@@ -22,10 +22,10 @@ function initials(name: string) {
 }
 
 const AVAILABILITY_CONFIG: Record<AvailabilityStatus, { dot: string; label: string; badge: string }> = {
-  available:             { dot: "bg-green-500",  label: "Available now",       badge: "border-green-500/30 text-green-400 bg-green-500/10" },
-  next_week:             { dot: "bg-amber-400",  label: "Available next week", badge: "border-amber-400/30 text-amber-400 bg-amber-400/10" },
-  one_to_two_months:     { dot: "bg-amber-400",  label: "Booked 1–2 months",  badge: "border-amber-400/30 text-amber-400 bg-amber-400/10" },
-  not_taking_clients:    { dot: "bg-zinc-500",   label: "Not taking clients",  badge: "border-zinc-500/30 text-zinc-400 bg-zinc-500/10" },
+  available:             { dot: "bg-success",  label: "Available now",       badge: "border-success text-success-foreground bg-success" },
+  next_week:             { dot: "bg-warning",  label: "Available next week", badge: "border-warning text-warning-foreground bg-warning" },
+  one_to_two_months:     { dot: "bg-warning",  label: "Booked 1–2 months",  badge: "border-warning text-warning-foreground bg-warning" },
+  not_taking_clients:    { dot: "bg-muted-foreground",   label: "Not taking clients",  badge: "border-border text-muted-foreground bg-muted" },
 }
 
 const PRICE_TIER_LABEL: Record<PriceTier, string> = {
@@ -42,7 +42,7 @@ export function ArtistCard({ artist, distance, initialSaved }: ArtistCardProps) 
   const hasPreview = artist.previewImages.length > 0
 
   return (
-    <Card className="relative overflow-hidden transition-all hover:border-accent/50 hover:-translate-y-1 flex flex-col">
+    <Card className="relative overflow-hidden transition-all hover:border-ink hover:-translate-y-1 flex flex-col">
       <SaveButton
         itemType="artist"
         itemId={artist.id}
@@ -67,9 +67,9 @@ export function ArtistCard({ artist, distance, initialSaved }: ArtistCardProps) 
       )}
 
       <CardHeader className="flex flex-row items-start gap-4 p-4">
-        <Avatar className="w-14 h-14 border-2 border-accent shrink-0">
+        <Avatar className="w-14 h-14 border-2 border-ink shrink-0">
           <AvatarImage src={artist.avatarUrl || ""} alt={artist.name} />
-          <AvatarFallback className="text-lg font-bold bg-accent/10 text-accent">
+          <AvatarFallback className="text-lg font-bold bg-vellum text-ink border-1.5 border-ink">
             {initials(artist.name) || "?"}
           </AvatarFallback>
         </Avatar>
@@ -79,7 +79,7 @@ export function ArtistCard({ artist, distance, initialSaved }: ArtistCardProps) 
             <h3 className="font-bold text-base leading-tight truncate">{artist.name}</h3>
             <div className="flex items-center gap-1.5 shrink-0">
               {distance != null && (
-                <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30 whitespace-nowrap">
+                <span className="text-xs px-2 py-0.5 rounded-lg bg-warning text-warning-foreground border border-warning whitespace-nowrap">
                   {distance.toFixed(1)} mi
                 </span>
               )}
@@ -100,7 +100,7 @@ export function ArtistCard({ artist, distance, initialSaved }: ArtistCardProps) 
 
           {hasRating && (
             <div className="flex items-center gap-1 mt-0.5">
-              <Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" />
+              <Star className="w-3.5 h-3.5 text-flash-yellow fill-flash-yellow" />
               <span className="text-sm font-medium">{artist.rating.toFixed(1)}</span>
               <span className="text-xs text-muted-foreground">({artist.reviewCount})</span>
             </div>
@@ -111,7 +111,7 @@ export function ArtistCard({ artist, distance, initialSaved }: ArtistCardProps) 
       <CardContent className="p-4 pt-0 flex-1 space-y-2">
         {/* Availability + response time */}
         <div className="flex items-center gap-3 flex-wrap">
-          <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full border ${avail.badge}`}>
+          <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-lg border ${avail.badge}`}>
             <span className={`w-1.5 h-1.5 rounded-full ${avail.dot}`} />
             {avail.label}
           </span>
@@ -127,7 +127,7 @@ export function ArtistCard({ artist, distance, initialSaved }: ArtistCardProps) 
 
         {/* Discount badge (Pro only) */}
         {artist.firstBookingDiscount != null && artist.firstBookingDiscount > 0 && (
-          <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full border border-amber-500/30 text-amber-400 bg-amber-500/10">
+          <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-lg border border-warning text-warning-foreground bg-warning">
             <Tag className="w-3 h-3" />
             {artist.firstBookingDiscount}% off first session
           </span>
@@ -167,11 +167,11 @@ export function ArtistCardSkeleton() {
         </div>
       </CardHeader>
       <CardContent className="p-4 pt-0 space-y-2">
-        <Skeleton className="h-5 w-32 rounded-full" />
+        <Skeleton className="h-5 w-32 rounded-lg" />
         <div className="flex flex-wrap gap-1.5">
-          <Skeleton className="h-5 w-16 rounded-full" />
-          <Skeleton className="h-5 w-20 rounded-full" />
-          <Skeleton className="h-5 w-14 rounded-full" />
+          <Skeleton className="h-5 w-16 rounded-lg" />
+          <Skeleton className="h-5 w-20 rounded-lg" />
+          <Skeleton className="h-5 w-14 rounded-lg" />
         </div>
       </CardContent>
       <CardFooter className="p-4 pt-0">

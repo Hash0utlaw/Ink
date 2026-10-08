@@ -43,7 +43,7 @@ export function ReviewForm({ bookingId, clientName, artistName }: ReviewFormProp
   if (submitted) {
     return (
       <div className="flex flex-col items-center gap-4 py-12 text-center">
-        <CheckCircle2 className="w-16 h-16 text-green-500" />
+        <CheckCircle2 className="w-16 h-16 text-success" />
         <h2 className="text-xl font-bold">Thank you!</h2>
         <p className="text-muted-foreground text-sm max-w-xs">
           Your review has been posted. It helps other clients find amazing artists like {artistName}.
@@ -67,12 +67,12 @@ export function ReviewForm({ bookingId, clientName, artistName }: ReviewFormProp
               onMouseEnter={() => setHovered(star)}
               onMouseLeave={() => setHovered(0)}
               onClick={() => setRating(star)}
-              className="transition-transform hover:scale-110"
+              className="transition-transform"
             >
               <Star
                 className={`w-10 h-10 transition-colors ${
                   star <= display
-                    ? "text-yellow-400 fill-yellow-400"
+                    ? "text-flash-yellow fill-flash-yellow"
                     : "text-muted-foreground/30"
                 }`}
               />
@@ -97,10 +97,10 @@ export function ReviewForm({ bookingId, clientName, artistName }: ReviewFormProp
         />
       </div>
 
-      {error && <p className="text-sm text-red-500">{error}</p>}
+      {error && <p className="text-sm text-destructive">{error}</p>}
 
       <Button
-        className="w-full bg-[#7C3AED] hover:bg-[#6D28D9] h-12 text-base"
+        className="w-full bg-primary hover:bg-primary/90 h-12 text-base"
         disabled={!rating || submitting}
         onClick={handleSubmit}
       >

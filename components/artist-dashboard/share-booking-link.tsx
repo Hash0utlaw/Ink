@@ -29,11 +29,11 @@ export function ShareBookingLink({ handle }: ShareBookingLinkProps) {
   }
 
   return (
-    <Card className="bg-[#7C3AED]/10 border-[#7C3AED]/30">
+    <Card className="bg-secondary border-ink">
       <CardContent className="py-4">
         <div className="flex items-start gap-3">
-          <div className="rounded-full bg-[#7C3AED]/20 p-2 shrink-0">
-            <Link2 className="w-4 h-4 text-[#7C3AED]" />
+          <div className="rounded-full bg-secondary p-2 shrink-0">
+            <Link2 className="w-4 h-4 text-primary" />
           </div>
           <div className="flex-1 min-w-0 space-y-2">
             <div>
@@ -51,7 +51,7 @@ export function ShareBookingLink({ handle }: ShareBookingLinkProps) {
               />
               <Button
                 size="sm"
-                className={`shrink-0 gap-1.5 h-8 transition-colors ${copied ? "bg-green-600 hover:bg-green-600" : "bg-[#7C3AED] hover:bg-[#6D28D9]"}`}
+                className={`shrink-0 gap-1.5 h-8 transition-colors ${copied ? "bg-success hover:bg-success/90" : "bg-primary hover:bg-primary/90"}`}
                 onClick={copy}
               >
                 {copied ? <><Check className="w-3.5 h-3.5" /> Copied!</> : <><Copy className="w-3.5 h-3.5" /> Copy</>}

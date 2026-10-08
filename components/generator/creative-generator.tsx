@@ -84,7 +84,7 @@ export function CreativeGenerator() {
 
   return (
     <div className="max-w-3xl mx-auto">
-      <div className="p-8 rounded-xl bg-secondary border border-border/50 shadow-lg">
+      <div className="p-8 rounded-lg bg-secondary border border-border/50">
         <div className="mb-6">
           <Progress value={((currentStep + 1) / steps.length) * 100} className="w-full" />
           <p className="text-center text-sm text-muted-foreground mt-2">
@@ -115,7 +115,7 @@ export function CreativeGenerator() {
           ) : (
             <Button
               onClick={handleGenerate}
-              className="bg-accent text-accent-foreground hover:bg-accent/90 shadow-lg shadow-accent/20"
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
             >
               <Sparkles className="mr-2 h-4 w-4" />
               Generate My Tattoo

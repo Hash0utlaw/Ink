@@ -116,7 +116,7 @@ export function FindArtistWizard() {
         <div className="w-full max-w-2xl">
           {/* Header */}
           <div className="text-center mb-10">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#7C3AED]/10 border border-[#7C3AED]/20 text-sm text-[#7C3AED] mb-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-secondary border border-ink text-sm text-primary mb-4">
               <Wand2 className="w-4 h-4" />
               Artist Finder
             </div>
@@ -128,14 +128,14 @@ export function FindArtistWizard() {
           <div className="mb-8">
             <div className="flex justify-between mb-2">
               {STEPS.map((s, i) => (
-                <span key={s} className={`text-xs font-medium ${i === step ? "text-[#7C3AED]" : i < step ? "text-muted-foreground" : "text-muted-foreground/40"}`}>
+                <span key={s} className={`text-xs font-medium ${i === step ? "text-primary" : i < step ? "text-muted-foreground" : "text-muted-foreground/40"}`}>
                   {s}
                 </span>
               ))}
             </div>
             <div className="h-1.5 rounded-full bg-muted overflow-hidden">
               <div
-                className="h-full bg-[#7C3AED] rounded-full transition-all duration-500"
+                className="h-full bg-primary rounded-full transition-all duration-500"
                 style={{ width: `${progress}%` }}
               />
             </div>
@@ -151,10 +151,10 @@ export function FindArtistWizard() {
                     key={s.slug}
                     type="button"
                     onClick={() => setStyle(s.slug)}
-                    className={`flex flex-col items-center gap-1.5 rounded-xl border p-4 text-sm font-medium transition-all ${
+                    className={`flex flex-col items-center gap-1.5 rounded-lg border p-4 text-sm font-medium transition-all ${
                       style === s.slug
-                        ? "border-[#7C3AED] bg-[#7C3AED]/10 text-[#7C3AED] shadow-sm shadow-[#7C3AED]/20"
-                        : "border-border bg-card text-muted-foreground hover:border-[#7C3AED]/40 hover:bg-muted/40"
+                        ? "border-ink bg-secondary text-primary"
+                        : "border-border bg-card text-muted-foreground hover:border-ink hover:bg-muted/40"
                     }`}
                   >
                     <span className="text-2xl">{STYLE_EMOJI[s.slug]}</span>
@@ -175,13 +175,13 @@ export function FindArtistWizard() {
                     key={s.label}
                     type="button"
                     onClick={() => setSize(s.label)}
-                    className={`flex items-center gap-3 rounded-xl border p-5 text-left transition-all ${
+                    className={`flex items-center gap-3 rounded-lg border p-5 text-left transition-all ${
                       size === s.label
-                        ? "border-[#7C3AED] bg-[#7C3AED]/10 shadow-sm shadow-[#7C3AED]/20"
-                        : "border-border bg-card hover:border-[#7C3AED]/40 hover:bg-muted/40"
+                        ? "border-ink bg-secondary"
+                        : "border-border bg-card hover:border-ink hover:bg-muted/40"
                     }`}
                   >
-                    <span className={`text-3xl font-black w-8 text-center ${size === s.label ? "text-[#7C3AED]" : "text-muted-foreground"}`}>{s.icon}</span>
+                    <span className={`text-3xl font-black w-8 text-center ${size === s.label ? "text-primary" : "text-muted-foreground"}`}>{s.icon}</span>
                     <div>
                       <p className="font-bold text-sm">{s.label}</p>
                       <p className="text-xs text-muted-foreground">{s.sub}</p>
@@ -202,13 +202,13 @@ export function FindArtistWizard() {
                     key={b.value}
                     type="button"
                     onClick={() => setBudget(b.value)}
-                    className={`flex flex-col items-center rounded-xl border p-6 transition-all ${
+                    className={`flex flex-col items-center rounded-lg border p-6 transition-all ${
                       budget === b.value
-                        ? "border-[#7C3AED] bg-[#7C3AED]/10 shadow-sm shadow-[#7C3AED]/20"
-                        : "border-border bg-card hover:border-[#7C3AED]/40 hover:bg-muted/40"
+                        ? "border-ink bg-secondary"
+                        : "border-border bg-card hover:border-ink hover:bg-muted/40"
                     }`}
                   >
-                    <span className={`text-3xl font-black ${budget === b.value ? "text-[#7C3AED]" : "text-muted-foreground"}`}>{b.label}</span>
+                    <span className={`text-3xl font-black ${budget === b.value ? "text-primary" : "text-muted-foreground"}`}>{b.label}</span>
                     <span className="text-xs text-muted-foreground mt-1">{b.sub}</span>
                   </button>
                 ))}
@@ -263,7 +263,7 @@ export function FindArtistWizard() {
               </Button>
             )}
             <Button
-              className="flex-1 bg-[#7C3AED] hover:bg-[#6D28D9] h-12 text-base"
+              className="flex-1 bg-primary hover:bg-primary/90 h-12 text-base"
               disabled={!canAdvance()}
               onClick={goNext}
             >
@@ -281,7 +281,7 @@ export function FindArtistWizard() {
 
           <p className="text-center text-xs text-muted-foreground mt-6">
             Already know who you want?{" "}
-            <Link href="/artists" className="text-[#7C3AED] hover:underline">Browse all artists</Link>
+            <Link href="/artists" className="text-navy underline-offset-2 hover:underline">Browse all artists</Link>
           </p>
         </div>
       </main>

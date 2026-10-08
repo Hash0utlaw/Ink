@@ -56,7 +56,7 @@ export function InfoSidebar({
         <CardContent>
           {submitSuccess ? (
             <div className="flex flex-col items-center gap-3 py-8 text-center">
-              <CheckCircle2 className="w-14 h-14 text-green-500" />
+              <CheckCircle2 className="w-14 h-14 text-success" />
               <p className="text-lg font-bold">Request Sent!</p>
               <p className="text-sm text-muted-foreground">The artist will respond within 24 hours.</p>
             </div>
@@ -108,7 +108,7 @@ export function InfoSidebar({
                       disabled={isSubmitting}
                       className={`rounded-md border px-2 py-1.5 text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                         size === option
-                          ? "border-[#7C3AED] bg-[#7C3AED]/10 text-[#7C3AED]"
+                          ? "border-ink bg-secondary text-primary"
                           : "border-border bg-muted/30 text-muted-foreground hover:bg-muted/60"
                       }`}
                     >
@@ -150,15 +150,15 @@ export function InfoSidebar({
 
       <div className="flex justify-between text-xs text-muted-foreground px-1">
         <div className="flex items-center gap-1.5">
-          <ShieldCheck className="w-3.5 h-3.5 text-accent" />
+          <ShieldCheck className="w-3.5 h-3.5 text-primary" />
           <span>Free to Request</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <HeartHandshake className="w-3.5 h-3.5 text-accent" />
+          <HeartHandshake className="w-3.5 h-3.5 text-primary" />
           <span>No commitment</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <MessageCircle className="w-3.5 h-3.5 text-accent" />
+          <MessageCircle className="w-3.5 h-3.5 text-primary" />
           <span>Direct response</span>
         </div>
       </div>
@@ -170,7 +170,7 @@ export function InfoSidebar({
           </CardHeader>
           <CardContent className="space-y-4 text-sm">
             <div className="flex gap-3">
-              <MapPin className="w-4 h-4 mt-1 text-accent shrink-0" />
+              <MapPin className="w-4 h-4 mt-1 text-primary shrink-0" />
               <div>
                 {artist.shopName && <p className="font-semibold">{artist.shopName}</p>}
                 {artist.location.address && (
@@ -185,7 +185,7 @@ export function InfoSidebar({
             </div>
             {Object.keys(artist.hours).length > 0 && (
               <div className="flex gap-3">
-                <Clock className="w-4 h-4 mt-1 text-accent shrink-0" />
+                <Clock className="w-4 h-4 mt-1 text-primary shrink-0" />
                 <div>
                   <p className="font-semibold">Hours</p>
                   <ul className="text-muted-foreground">

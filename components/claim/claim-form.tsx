@@ -46,8 +46,8 @@ export function ClaimForm({ artistSlug, shopSlug, listingName }: ClaimFormProps)
     return (
       <Card className="bg-muted/30 border-border/50">
         <CardContent className="pt-10 pb-10 flex flex-col items-center text-center gap-3">
-          <div className="w-14 h-14 bg-green-500/10 rounded-full flex items-center justify-center">
-            <CheckCircle className="w-8 h-8 text-green-500" />
+          <div className="w-14 h-14 bg-secondary rounded-full flex items-center justify-center">
+            <CheckCircle className="w-8 h-8 text-success" />
           </div>
           <h2 className="text-xl font-bold">Claim submitted</h2>
           <p className="text-muted-foreground text-sm max-w-sm">
@@ -68,7 +68,7 @@ export function ClaimForm({ artistSlug, shopSlug, listingName }: ClaimFormProps)
             placeholder="Your name or shop name"
             value={listing}
             onChange={(e) => setListing(e.target.value)}
-            className="bg-card border-border focus:border-accent/60"
+            className="bg-card border-border focus:border-ink"
           />
         </div>
         <div className="space-y-2">
@@ -78,7 +78,7 @@ export function ClaimForm({ artistSlug, shopSlug, listingName }: ClaimFormProps)
             placeholder="Jane Smith"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="bg-card border-border focus:border-accent/60"
+            className="bg-card border-border focus:border-ink"
           />
         </div>
         <div className="space-y-2">
@@ -89,7 +89,7 @@ export function ClaimForm({ artistSlug, shopSlug, listingName }: ClaimFormProps)
             placeholder="jane@example.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="bg-card border-border focus:border-accent/60"
+            className="bg-card border-border focus:border-ink"
           />
         </div>
         <div className="space-y-2">
@@ -100,7 +100,7 @@ export function ClaimForm({ artistSlug, shopSlug, listingName }: ClaimFormProps)
             placeholder="(555) 123-4567"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            className="bg-card border-border focus:border-accent/60"
+            className="bg-card border-border focus:border-ink"
           />
         </div>
         <div className="space-y-2">
@@ -110,7 +110,7 @@ export function ClaimForm({ artistSlug, shopSlug, listingName }: ClaimFormProps)
             placeholder="@yourstudio"
             value={instagram}
             onChange={(e) => setInstagram(e.target.value)}
-            className="bg-card border-border focus:border-accent/60"
+            className="bg-card border-border focus:border-ink"
           />
         </div>
 

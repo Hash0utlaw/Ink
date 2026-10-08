@@ -62,7 +62,7 @@ export default function StylePage({ params }: { params: { styleName: string } })
         <StyleHero style={style} />
 
         {/* ── Sticky CTA bar ───────────────────────────────────────────────── */}
-        <div className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur-md shadow-sm">
+        <div className="sticky top-0 z-30 border-b border-border bg-background/95">
           <div className="container mx-auto px-4 py-3 flex items-center justify-between gap-4">
             <p className="text-sm text-muted-foreground hidden sm:block">
               Ready to get your <span className="font-semibold text-foreground">{style.name}</span> tattoo?
@@ -99,7 +99,7 @@ export default function StylePage({ params }: { params: { styleName: string } })
 
         {/* ── What makes this style ─────────────────────────────────────────── */}
         <section className="container mx-auto px-4 py-6 pb-10">
-          <div className="rounded-2xl bg-muted/40 border border-border p-6 md:p-8">
+          <div className="rounded-lg bg-muted/40 border border-border p-6 md:p-8">
             <h2 className="text-xl font-bold mb-4">About {style.name}</h2>
             <p className="text-muted-foreground leading-relaxed mb-5">{style.description}</p>
             <div className="flex flex-wrap gap-2">
@@ -114,7 +114,7 @@ export default function StylePage({ params }: { params: { styleName: string } })
 
         {/* ── Primary CTA: Find Shop or Artist ─────────────────────────────── */}
         <section className="container mx-auto px-4 pb-10">
-          <div className="rounded-2xl overflow-hidden border border-border">
+          <div className="rounded-lg overflow-hidden border border-border">
             <div className={`grid ${artistsHref ? "md:grid-cols-2" : ""}`}>
 
               {/* Find a Shop card */}

@@ -340,7 +340,7 @@ export function MapInterface() {
           <select
             value={mapStyle}
             onChange={(e) => handleMapStyleChange(e.target.value)}
-            className="px-3 py-2 bg-card border border-border rounded-lg shadow-sm text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"
+            className="px-3 py-2 bg-card border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"
           >
             <option value="streets">Streets</option>
             <option value="satellite">Satellite</option>

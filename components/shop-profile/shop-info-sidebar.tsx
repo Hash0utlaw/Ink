@@ -14,7 +14,7 @@ export function ShopInfoSidebar({ shop, isOwned = false }: { shop: Shop; isOwned
         </CardHeader>
         <CardContent className="space-y-4 text-sm">
           <div className="flex gap-3">
-            <MapPin className="w-4 h-4 mt-1 text-accent flex-shrink-0" />
+            <MapPin className="w-4 h-4 mt-1 text-primary flex-shrink-0" />
             <div>
               <p className="font-semibold">{shop.name}</p>
               <p className="text-muted-foreground">{shop.location.address}</p>
@@ -22,7 +22,7 @@ export function ShopInfoSidebar({ shop, isOwned = false }: { shop: Shop; isOwned
             </div>
           </div>
           <div className="flex gap-3">
-            <Clock className="w-4 h-4 mt-1 text-accent flex-shrink-0" />
+            <Clock className="w-4 h-4 mt-1 text-primary flex-shrink-0" />
             <div>
               <p className="font-semibold">Hours</p>
               <ul className="text-muted-foreground">

@@ -14,7 +14,7 @@ export default function NotFound() {
       </Suspense>
       <main className="flex flex-1 items-center justify-center bg-background">
         <div className="container mx-auto px-4 py-20 text-center">
-          <div className="mx-auto mb-6 flex h-12 w-12 items-center justify-center rounded-lg bg-accent">
+          <div className="mx-auto mb-6 flex h-12 w-12 items-center justify-center rounded-lg bg-primary">
             <MapPin className="h-7 w-7 text-accent-foreground" />
           </div>
           <h1 className="text-4xl font-extrabold tracking-tight">Page not found</h1>

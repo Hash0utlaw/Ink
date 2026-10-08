@@ -103,13 +103,13 @@ export function PricingClient() {
 
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="relative py-20 px-4 text-center bg-gradient-to-b from-background to-muted/20">
+        <section className="relative py-20 px-4 text-center">
           <div className="container mx-auto max-w-4xl">
             <Badge variant="secondary" className="mb-4">
               <Info className="w-4 h-4 mr-2" />
               Complete Pricing Guide
             </Badge>
-            <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+            <h1 className="text-4xl md:text-6xl font-bold mb-6 text-foreground">
               Tattoo Pricing Guide
             </h1>
             <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
@@ -124,7 +124,7 @@ export function PricingClient() {
           <div className="container mx-auto max-w-6xl">
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold mb-4 flex items-center justify-center gap-3">
-                <Calculator className="w-8 h-8 text-accent" />
+                <Calculator className="w-8 h-8 text-primary" />
                 Price Calculator
               </h2>
               <p className="text-muted-foreground max-w-2xl mx-auto">
@@ -229,14 +229,14 @@ export function PricingClient() {
               <Card className="pricing-card-featured">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <DollarSign className="w-5 h-5 text-accent" />
+                    <DollarSign className="w-5 h-5 text-primary" />
                     Price Estimate
                   </CardTitle>
                   <CardDescription>Based on your specifications</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  <div className="text-center p-6 bg-accent/10 rounded-lg border border-accent/20">
-                    <div className="text-4xl font-bold text-accent mb-2">
+                  <div className="text-center p-6 bg-secondary rounded-lg border border-ink">
+                    <div className="text-4xl font-bold text-primary mb-2">
                       ${priceEstimate.priceRange.min} - ${priceEstimate.priceRange.max}
                     </div>
                     <p className="text-muted-foreground">Estimated Total Cost</p>
@@ -290,11 +290,11 @@ export function PricingClient() {
                     </div>
                   </div>
 
-                  <div className="p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+                  <div className="p-4 bg-card border border-warning rounded-lg">
                     <div className="flex items-start gap-2">
-                      <AlertCircle className="w-4 h-4 text-yellow-500 mt-0.5" />
+                      <AlertCircle className="w-4 h-4 text-foreground mt-0.5" />
                       <div className="text-sm">
-                        <p className="font-medium text-yellow-500">Estimate Only</p>
+                        <p className="font-medium text-foreground">Estimate Only</p>
                         <p className="text-muted-foreground">
                           Final prices may vary based on artist, location, and specific design requirements.
                         </p>
@@ -359,7 +359,7 @@ export function PricingClient() {
               <Card className="pricing-card pricing-card-featured">
                 <CardHeader>
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-accent">Mid-Range</CardTitle>
+                    <CardTitle className="text-primary">Mid-Range</CardTitle>
                     <Badge>$$</Badge>
                   </div>
                   <CardDescription>$150 - $250 per hour</CardDescription>
@@ -370,19 +370,19 @@ export function PricingClient() {
                   </div>
                   <ul className="space-y-2 text-sm">
                     <li className="flex items-center gap-2">
-                      <CheckCircle className="w-4 h-4 text-accent" />
+                      <CheckCircle className="w-4 h-4 text-primary" />
                       Experienced artists (3-8 years)
                     </li>
                     <li className="flex items-center gap-2">
-                      <CheckCircle className="w-4 h-4 text-accent" />
+                      <CheckCircle className="w-4 h-4 text-primary" />
                       Custom designs and consultations
                     </li>
                     <li className="flex items-center gap-2">
-                      <CheckCircle className="w-4 h-4 text-accent" />
+                      <CheckCircle className="w-4 h-4 text-primary" />
                       Multiple styles and techniques
                     </li>
                     <li className="flex items-center gap-2">
-                      <CheckCircle className="w-4 h-4 text-accent" />
+                      <CheckCircle className="w-4 h-4 text-primary" />
                       Medium to large pieces
                     </li>
                   </ul>
@@ -445,8 +445,8 @@ export function PricingClient() {
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               <Card className="pricing-step">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 bg-accent/20 rounded-lg flex items-center justify-center">
-                    <Palette className="w-5 h-5 text-accent" />
+                  <div className="w-10 h-10 bg-secondary rounded-lg flex items-center justify-center">
+                    <Palette className="w-5 h-5 text-primary" />
                   </div>
                   <h3 className="font-semibold">Style & Complexity</h3>
                 </div>
@@ -456,11 +456,11 @@ export function PricingClient() {
                 <div className="space-y-2 text-xs">
                   <div className="flex justify-between">
                     <span>Fine Line:</span>
-                    <span className="text-accent-text">+20%</span>
+                    <span className="text-primary">+20%</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Realism:</span>
-                    <span className="text-accent-text">+80%</span>
+                    <span className="text-primary">+80%</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Traditional:</span>
@@ -471,8 +471,8 @@ export function PricingClient() {
 
               <Card className="pricing-step">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 bg-accent/20 rounded-lg flex items-center justify-center">
-                    <MapPin className="w-5 h-5 text-accent" />
+                  <div className="w-10 h-10 bg-secondary rounded-lg flex items-center justify-center">
+                    <MapPin className="w-5 h-5 text-primary" />
                   </div>
                   <h3 className="font-semibold">Size & Placement</h3>
                 </div>
@@ -497,8 +497,8 @@ export function PricingClient() {
 
               <Card className="pricing-step">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 bg-accent/20 rounded-lg flex items-center justify-center">
-                    <Star className="w-5 h-5 text-accent" />
+                  <div className="w-10 h-10 bg-secondary rounded-lg flex items-center justify-center">
+                    <Star className="w-5 h-5 text-primary" />
                   </div>
                   <h3 className="font-semibold">Artist Experience</h3>
                 </div>
@@ -523,8 +523,8 @@ export function PricingClient() {
 
               <Card className="pricing-step">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 bg-accent/20 rounded-lg flex items-center justify-center">
-                    <Clock className="w-5 h-5 text-accent" />
+                  <div className="w-10 h-10 bg-secondary rounded-lg flex items-center justify-center">
+                    <Clock className="w-5 h-5 text-primary" />
                   </div>
                   <h3 className="font-semibold">Time Required</h3>
                 </div>
@@ -534,23 +534,23 @@ export function PricingClient() {
                 <div className="space-y-2 text-xs">
                   <div className="flex justify-between">
                     <span>Minimum:</span>
-                    <span className="text-accent-text">2-3 hours</span>
+                    <span className="text-primary">2-3 hours</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Average Session:</span>
-                    <span className="text-accent-text">4-6 hours</span>
+                    <span className="text-primary">4-6 hours</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Large Pieces:</span>
-                    <span className="text-accent-text">Multiple sessions</span>
+                    <span className="text-primary">Multiple sessions</span>
                   </div>
                 </div>
               </Card>
 
               <Card className="pricing-step">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 bg-accent/20 rounded-lg flex items-center justify-center">
-                    <TrendingUp className="w-5 h-5 text-accent" />
+                  <div className="w-10 h-10 bg-secondary rounded-lg flex items-center justify-center">
+                    <TrendingUp className="w-5 h-5 text-primary" />
                   </div>
                   <h3 className="font-semibold">Location & Demand</h3>
                 </div>
@@ -575,8 +575,8 @@ export function PricingClient() {
 
               <Card className="pricing-step">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 bg-accent/20 rounded-lg flex items-center justify-center">
-                    <Zap className="w-5 h-5 text-accent" />
+                  <div className="w-10 h-10 bg-secondary rounded-lg flex items-center justify-center">
+                    <Zap className="w-5 h-5 text-primary" />
                   </div>
                   <h3 className="font-semibold">Additional Costs</h3>
                 </div>
@@ -586,11 +586,11 @@ export function PricingClient() {
                 <div className="space-y-2 text-xs">
                   <div className="flex justify-between">
                     <span>Consultation:</span>
-                    <span className="text-accent-text">$50-150</span>
+                    <span className="text-primary">$50-150</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Design Fee:</span>
-                    <span className="text-accent-text">$100-500</span>
+                    <span className="text-primary">$100-500</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Touch-ups:</span>
@@ -613,7 +613,7 @@ export function PricingClient() {
             <div className="grid md:grid-cols-2 gap-6">
               <Card className="p-6">
                 <h3 className="font-semibold mb-3 flex items-center gap-2">
-                  <Users className="w-5 h-5 text-accent" />
+                  <Users className="w-5 h-5 text-primary" />
                   Research Artists
                 </h3>
                 <p className="text-sm text-muted-foreground">
@@ -624,7 +624,7 @@ export function PricingClient() {
 
               <Card className="p-6">
                 <h3 className="font-semibold mb-3 flex items-center gap-2">
-                  <Clock className="w-5 h-5 text-accent" />
+                  <Clock className="w-5 h-5 text-primary" />
                   Book During Off-Peak
                 </h3>
                 <p className="text-sm text-muted-foreground">
@@ -634,7 +634,7 @@ export function PricingClient() {
 
               <Card className="p-6">
                 <h3 className="font-semibold mb-3 flex items-center gap-2">
-                  <Palette className="w-5 h-5 text-accent" />
+                  <Palette className="w-5 h-5 text-primary" />
                   Consider Flash Work
                 </h3>
                 <p className="text-sm text-muted-foreground">
@@ -645,7 +645,7 @@ export function PricingClient() {
 
               <Card className="p-6">
                 <h3 className="font-semibent mb-3 flex items-center gap-2">
-                  <DollarSign className="w-5 h-5 text-accent" />
+                  <DollarSign className="w-5 h-5 text-primary" />
                   Plan for Multiple Sessions
                 </h3>
                 <p className="text-sm text-muted-foreground">

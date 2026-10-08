@@ -23,7 +23,7 @@ export function FeaturedArtists({ artists }: FeaturedArtistsProps) {
         {realArtists.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-muted-foreground">No featured artists yet.</p>
-            <Link href="/artists" className="text-accent-text hover:underline text-sm mt-2 inline-block">
+            <Link href="/artists" className="text-navy hover:underline text-sm mt-2 inline-block">
               Browse all artists →
             </Link>
           </div>
@@ -32,18 +32,18 @@ export function FeaturedArtists({ artists }: FeaturedArtistsProps) {
           {realArtists.map((artist, i) => (
             <MotionView key={artist.id} delay={i * 0.1}>
               <Link href={`/artists/${artist.id}`} className="block h-full">
-                <Card className="overflow-hidden h-full bg-card border-border/60 transition-all duration-300 hover:border-accent/50 hover:shadow-lg hover:-translate-y-1 hover:scale-[1.02]">
+                <Card className="overflow-hidden h-full bg-card border-border/60 transition-all duration-300 hover:border-ink hover:-translate-y-1">
                   <CardContent className="p-6 flex flex-col items-center text-center">
-                    <Avatar className="w-24 h-24 mb-4 border-2 border-accent">
+                    <Avatar className="w-24 h-24 mb-4 border-2 border-ink">
                       <AvatarImage src={artist.avatarUrl || "/placeholder.svg"} alt={artist.name} />
                       <AvatarFallback>{artist.name.charAt(0)}</AvatarFallback>
                     </Avatar>
                     <h3 className="font-bold text-xl">{artist.name}</h3>
                     {artist.styles.length > 0 && (
-                      <p className="text-accent-text text-sm">{styleLabels(artist.styles).slice(0, 2).join(", ")}</p>
+                      <p className="text-primary text-sm">{styleLabels(artist.styles).slice(0, 2).join(", ")}</p>
                     )}
                     <div className="flex items-center gap-1 mt-2">
-                      <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                      <Star className="w-4 h-4 text-flash-yellow fill-flash-yellow" />
                       <span className="text-muted-foreground">{artist.rating}</span>
                     </div>
                   </CardContent>

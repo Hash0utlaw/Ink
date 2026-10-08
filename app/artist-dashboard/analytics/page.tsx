@@ -59,8 +59,8 @@ export default async function AnalyticsPage() {
                 {stat.change !== 0 && (
                   <span
                     className={cn({
-                      "text-green-500": stat.change > 0,
-                      "text-red-500": stat.change < 0,
+                      "text-success": stat.change > 0,
+                      "text-destructive": stat.change < 0,
                     })}
                   >
                     {stat.change > 0 ? (

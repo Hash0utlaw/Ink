@@ -23,7 +23,7 @@ export function RecentlyViewed() {
             <Link
               key={artist.id}
               href={`/artists/${artist.id}`}
-              className="flex items-center gap-2 shrink-0 rounded-full border border-border/50 bg-card pl-1.5 pr-4 py-1.5 hover:border-accent/50 transition-colors"
+              className="flex items-center gap-2 shrink-0 rounded-lg border border-border/50 bg-card pl-1.5 pr-4 py-1.5 hover:border-ink transition-colors"
             >
               <Avatar className="w-8 h-8">
                 <AvatarImage src={artist.avatarUrl || "/placeholder.svg"} alt={artist.name} />

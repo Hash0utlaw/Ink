@@ -65,7 +65,7 @@ export function FlashUploadForm() {
   if (success) {
     return (
       <div className="py-8 flex flex-col items-center gap-2 text-center">
-        <CheckCircle2 className="w-10 h-10 text-green-500" />
+        <CheckCircle2 className="w-10 h-10 text-success" />
         <p className="font-semibold">Listing added!</p>
       </div>
     )
@@ -104,7 +104,7 @@ export function FlashUploadForm() {
               type="button"
               onClick={() => setStyle(style === s.slug ? "" : s.slug)}
               className={`rounded-md border px-1.5 py-1 text-xs font-medium transition-colors ${
-                style === s.slug ? "border-[#7C3AED] bg-[#7C3AED]/10 text-[#7C3AED]" : "border-border bg-muted/30 text-muted-foreground hover:bg-muted/60"
+                style === s.slug ? "border-ink bg-secondary text-primary" : "border-border bg-muted/30 text-muted-foreground hover:bg-muted/60"
               }`}
             >
               {s.label}
@@ -122,7 +122,7 @@ export function FlashUploadForm() {
               type="button"
               onClick={() => setSize(size === s ? "" : s)}
               className={`rounded-md border px-1.5 py-1 text-xs font-medium transition-colors ${
-                size === s ? "border-[#7C3AED] bg-[#7C3AED]/10 text-[#7C3AED]" : "border-border bg-muted/30 text-muted-foreground hover:bg-muted/60"
+                size === s ? "border-ink bg-secondary text-primary" : "border-border bg-muted/30 text-muted-foreground hover:bg-muted/60"
               }`}
             >
               {s}
@@ -147,18 +147,18 @@ export function FlashUploadForm() {
           id="exclusive"
           checked={isExclusive}
           onChange={(e) => setIsExclusive(e.target.checked)}
-          className="accent-[#7C3AED]"
+          className="accent-primary"
         />
         <label htmlFor="exclusive" className="text-xs text-muted-foreground cursor-pointer">
           Exclusive — only one client can book this design
         </label>
       </div>
 
-      {error && <p className="text-xs text-red-500">{error}</p>}
+      {error && <p className="text-xs text-destructive">{error}</p>}
 
       <Button
         type="submit"
-        className="w-full bg-[#7C3AED] hover:bg-[#6D28D9]"
+        className="w-full bg-primary hover:bg-primary/90"
         disabled={!title || !imageUrl || !price || submitting}
       >
         {submitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Adding...</> : "Add Listing"}

@@ -45,7 +45,7 @@ function ShopCard({ shop, priority = false }: { shop: Shop; priority?: boolean }
   return (
     <Link
       href={`/shops/${shop.id}`}
-      className="group flex flex-col rounded-xl border border-border/50 bg-card overflow-hidden hover:border-[#7C3AED]/40 hover:shadow-md transition-all"
+      className="group flex flex-col rounded-lg border border-border/50 bg-card overflow-hidden hover:border-ink transition-all"
     >
       {shop.coverImageUrl ? (
         <div className="relative h-36 overflow-hidden bg-muted">
@@ -53,12 +53,12 @@ function ShopCard({ shop, priority = false }: { shop: Shop; priority?: boolean }
             src={safeImageSrc(shop.coverImageUrl)}
             alt={shop.name}
             fill
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
+            className="object-cover transition-transform duration-300"
             priority={priority}
           />
         </div>
       ) : (
-        <div className="h-36 bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center">
+        <div className="h-36 flex items-center justify-center">
           <MapPin className="w-8 h-8 text-muted-foreground/30" />
         </div>
       )}
@@ -68,7 +68,7 @@ function ShopCard({ shop, priority = false }: { shop: Shop; priority?: boolean }
           <h3 className="font-bold text-sm leading-tight">{shop.name}</h3>
           {shop.rating > 0 && (
             <div className="flex items-center gap-0.5 shrink-0">
-              <Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" />
+              <Star className="w-3.5 h-3.5 text-flash-yellow fill-flash-yellow" />
               <span className="text-xs font-semibold">{shop.rating.toFixed(1)}</span>
               <span className="text-xs text-muted-foreground">({shop.reviewCount})</span>
             </div>

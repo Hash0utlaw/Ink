@@ -140,9 +140,9 @@ export function Header() {
                       <Link
                         href={href}
                         className={cn(
-                          "group flex items-center gap-3 rounded-xl px-3 py-3 text-[15px] font-medium transition-colors",
+                          "group flex items-center gap-3 rounded-lg px-3 py-3 text-[15px] font-medium transition-colors",
                           active
-                            ? "bg-accent/10 text-accent-text"
+                            ? "bg-secondary text-primary"
                             : "text-foreground/80 hover:bg-muted hover:text-foreground"
                         )}
                       >
@@ -150,8 +150,8 @@ export function Header() {
                           className={cn(
                             "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors",
                             active
-                              ? "bg-accent text-accent-foreground"
-                              : "bg-muted text-foreground/70 group-hover:bg-accent/10 group-hover:text-accent"
+                              ? "bg-primary text-primary-foreground"
+                              : "bg-muted text-foreground/70 group-hover:bg-secondary group-hover:text-primary"
                           )}
                         >
                           <Icon className="h-4 w-4" />
@@ -167,10 +167,10 @@ export function Header() {
               {/* Auth section */}
               <div className="mt-auto border-t border-border/40 p-4">
                 {isLoading ? (
-                  <div className="h-14 animate-pulse rounded-xl bg-muted" />
+                  <div className="h-14 animate-pulse rounded-lg bg-muted" />
                 ) : user ? (
                   <div className="space-y-1">
-                    <div className="mb-2 flex items-center gap-3 rounded-xl bg-muted/50 px-3 py-3">
+                    <div className="mb-2 flex items-center gap-3 rounded-lg bg-muted/50 px-3 py-3">
                       <Avatar className="h-9 w-9">
                         <AvatarImage
                           src={user.user_metadata?.avatar_url || "/placeholder-user.jpg"}
@@ -190,7 +190,7 @@ export function Header() {
                     <SheetClose asChild>
                       <Link
                         href={dashboardLink}
-                        className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-foreground/80 transition-colors hover:bg-muted hover:text-foreground"
+                        className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground/80 transition-colors hover:bg-muted hover:text-foreground"
                       >
                         <User className="h-4 w-4" />
                         {dashboardLabel}
@@ -199,7 +199,7 @@ export function Header() {
                     <SheetClose asChild>
                       <Link
                         href={role === "artist" ? "/artist-dashboard/profile" : "/dashboard/profile"}
-                        className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-foreground/80 transition-colors hover:bg-muted hover:text-foreground"
+                        className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground/80 transition-colors hover:bg-muted hover:text-foreground"
                       >
                         <Settings className="h-4 w-4" />
                         Settings
@@ -207,7 +207,7 @@ export function Header() {
                     </SheetClose>
                     <button
                       onClick={handleSignOut}
-                      className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10"
+                      className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10"
                     >
                       <LogOut className="h-4 w-4" />
                       Log out

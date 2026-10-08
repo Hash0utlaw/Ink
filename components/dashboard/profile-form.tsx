@@ -65,7 +65,7 @@ export function ProfileForm({ initialName, initialEmail, initialLocation, avatar
           <Input id="location" value={location} onChange={(e) => setLocation(e.target.value)} />
         </div>
         <div className="flex items-center justify-end gap-3">
-          {saved && <span className="text-sm text-green-500">Saved</span>}
+          {saved && <span className="text-sm text-success">Saved</span>}
           <Button onClick={handleSave} disabled={saving}>
             {saving ? "Saving..." : "Save Changes"}
           </Button>

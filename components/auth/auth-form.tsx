@@ -85,7 +85,7 @@ export function AuthForm({ mode }: AuthFormProps) {
               placeholder="Alex Doe"
               required
               disabled={isPending}
-              className="h-11 bg-muted/40 border-border/60 focus:border-accent focus:ring-accent/20 text-foreground placeholder:text-muted-foreground/50 rounded-xl"
+              className="h-11 bg-muted/40 border-border/60 focus:border-ink focus:ring-ring/20 text-foreground placeholder:text-muted-foreground/50 rounded-lg"
             />
           </div>
         )}
@@ -102,7 +102,7 @@ export function AuthForm({ mode }: AuthFormProps) {
             placeholder="alex@example.com"
             required
             disabled={isPending}
-            className="h-11 bg-muted/40 border-border/60 focus:border-accent focus:ring-accent/20 text-foreground placeholder:text-muted-foreground/50 rounded-xl"
+            className="h-11 bg-muted/40 border-border/60 focus:border-ink focus:ring-ring/20 text-foreground placeholder:text-muted-foreground/50 rounded-lg"
           />
         </div>
 
@@ -115,7 +115,7 @@ export function AuthForm({ mode }: AuthFormProps) {
             {isLogin && (
               <Link
                 href="/forgot-password"
-                className="text-xs text-muted-foreground hover:text-accent-text transition-colors"
+                className="text-xs text-muted-foreground hover:text-navy hover:underline underline-offset-2"
               >
                 Forgot password?
               </Link>
@@ -129,7 +129,7 @@ export function AuthForm({ mode }: AuthFormProps) {
               placeholder={isLogin ? "Enter your password" : "Min. 8 characters"}
               required
               disabled={isPending}
-              className="h-11 bg-muted/40 border-border/60 focus:border-accent focus:ring-accent/20 text-foreground placeholder:text-muted-foreground/50 rounded-xl pr-11"
+              className="h-11 bg-muted/40 border-border/60 focus:border-ink focus:ring-ring/20 text-foreground placeholder:text-muted-foreground/50 rounded-lg pr-11"
             />
             <button
               type="button"
@@ -173,25 +173,25 @@ export function AuthForm({ mode }: AuthFormProps) {
                     onClick={() => setSelectedRole(role)}
                     disabled={isPending}
                     className={cn(
-                      "flex flex-col items-center gap-2 rounded-xl border p-4 text-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent",
+                      "flex flex-col items-center gap-2 rounded-lg border p-4 text-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                       active
-                        ? "border-accent bg-accent/10 shadow-sm shadow-accent/20"
+                        ? "border-ink bg-secondary"
                         : "border-border/60 bg-muted/30 hover:bg-muted/60 hover:border-border",
                     )}
                   >
                     <div
                       className={cn(
                         "w-9 h-9 rounded-lg flex items-center justify-center",
-                        active ? "bg-accent/20" : "bg-muted",
+                        active ? "bg-secondary" : "bg-muted",
                       )}
                     >
-                      <Icon className={cn("h-4.5 w-4.5", active ? "text-accent" : "text-muted-foreground")} />
+                      <Icon className={cn("h-4.5 w-4.5", active ? "text-primary" : "text-muted-foreground")} />
                     </div>
                     <div>
                       <div
                         className={cn(
                           "text-sm font-semibold leading-tight",
-                          active ? "text-accent-text" : "text-foreground",
+                          active ? "text-primary" : "text-foreground",
                         )}
                       >
                         {title}
@@ -209,9 +209,9 @@ export function AuthForm({ mode }: AuthFormProps) {
         {message && (
           <div
             className={cn(
-              "flex items-start gap-2.5 text-sm p-3.5 rounded-xl border",
+              "flex items-start gap-2.5 text-sm p-3.5 rounded-lg border",
               isSuccess
-                ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
+                ? "bg-success border-success text-success-foreground"
                 : "bg-destructive/10 border-destructive/30 text-destructive-foreground",
             )}
           >
@@ -227,7 +227,7 @@ export function AuthForm({ mode }: AuthFormProps) {
         {/* Submit */}
         <Button
           type="submit"
-          className="w-full h-11 rounded-xl font-semibold text-sm bg-accent hover:bg-accent/90 text-accent-foreground shadow-lg shadow-accent/25 transition-all duration-200"
+          className="w-full h-11 rounded-lg font-semibold text-sm bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-200"
           disabled={isPending || (!isLogin && selectedRole === null)}
         >
           {isPending
@@ -255,7 +255,7 @@ export function AuthForm({ mode }: AuthFormProps) {
         <Button
           variant="outline"
           disabled={isPending}
-          className="h-11 rounded-xl border-border/60 bg-muted/30 hover:bg-muted/60 text-foreground font-medium"
+          className="h-11 rounded-lg border-border/60 bg-muted/30 hover:bg-muted/60 text-foreground font-medium"
         >
           <svg role="img" viewBox="0 0 24 24" className="mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg">
             <title>Google</title>
@@ -266,7 +266,7 @@ export function AuthForm({ mode }: AuthFormProps) {
         <Button
           variant="outline"
           disabled={isPending}
-          className="h-11 rounded-xl border-border/60 bg-muted/30 hover:bg-muted/60 text-foreground font-medium"
+          className="h-11 rounded-lg border-border/60 bg-muted/30 hover:bg-muted/60 text-foreground font-medium"
         >
           <svg role="img" viewBox="0 0 24 24" className="mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg">
             <title>GitHub</title>
@@ -281,7 +281,7 @@ export function AuthForm({ mode }: AuthFormProps) {
         {isLogin ? "New to TattooMaps?" : "Already have an account?"}{" "}
         <Link
           href={`${isLogin ? "/signup" : "/login"}${next ? `?next=${encodeURIComponent(next)}` : ""}`}
-          className="font-semibold text-accent-text hover:text-accent-text/80 transition-colors"
+          className="font-semibold text-navy underline-offset-2 hover:underline"
         >
           {isLogin ? "Create a free account" : "Sign in instead"}
         </Link>

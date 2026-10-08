@@ -45,8 +45,8 @@ function scoreArtist(
 
 function matchLabel(score: number, maxScore: number): { label: string; color: string } {
   const pct = maxScore > 0 ? score / maxScore : 0
-  if (pct >= 0.8) return { label: "Top match", color: "bg-green-500/20 text-green-400 border-green-500/30" }
-  if (pct >= 0.5) return { label: "Great match", color: "bg-[#7C3AED]/20 text-[#7C3AED] border-[#7C3AED]/30" }
+  if (pct >= 0.8) return { label: "Top match", color: "bg-success text-success-foreground border-success" }
+  if (pct >= 0.5) return { label: "Great match", color: "bg-secondary text-primary border-ink" }
   return { label: "Good match", color: "bg-muted text-muted-foreground border-border" }
 }
 
@@ -102,8 +102,8 @@ export default async function FindArtistResultsPage({
               </Button>
             </div>
             <div className="flex items-center gap-3">
-              <div className="rounded-full bg-[#7C3AED]/20 p-2">
-                <Wand2 className="w-5 h-5 text-[#7C3AED]" />
+              <div className="rounded-full bg-secondary p-2">
+                <Wand2 className="w-5 h-5 text-primary" />
               </div>
               <div>
                 <h1 className="text-2xl font-extrabold">
@@ -141,7 +141,7 @@ export default async function FindArtistResultsPage({
               <Wand2 className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
               <p className="text-lg font-semibold">No exact matches found</p>
               <p className="text-sm text-muted-foreground mt-1 mb-6">Try broadening your search — remove location or try a different style.</p>
-              <Button asChild className="bg-[#7C3AED] hover:bg-[#6D28D9]">
+              <Button asChild className="bg-primary hover:bg-primary/90">
                 <Link href="/find-artist">Refine my search</Link>
               </Button>
             </div>
@@ -154,11 +154,11 @@ export default async function FindArtistResultsPage({
                   <Link
                     key={artist.id}
                     href={`/artists/${artist.id}`}
-                    className="group flex gap-4 p-4 rounded-xl border border-border/50 bg-card hover:border-[#7C3AED]/40 hover:shadow-md transition-all"
+                    className="group flex gap-4 p-4 rounded-lg border border-border/50 bg-card hover:border-ink transition-all"
                   >
-                    <Avatar className="w-16 h-16 shrink-0 border-2 border-accent/30">
+                    <Avatar className="w-16 h-16 shrink-0 border-2 border-ink">
                       <AvatarImage src={artist.avatarUrl} alt={artist.name} />
-                      <AvatarFallback className="text-lg font-bold bg-accent/10 text-accent">
+                      <AvatarFallback className="text-lg font-bold bg-vellum text-ink border-1.5 border-ink">
                         {initials(artist.name)}
                       </AvatarFallback>
                     </Avatar>
@@ -182,20 +182,20 @@ export default async function FindArtistResultsPage({
                       <div className="flex items-center gap-2 flex-wrap">
                         {artist.rating > 0 && (
                           <span className="flex items-center gap-0.5 text-xs">
-                            <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
+                            <Star className="w-3 h-3 text-flash-yellow fill-flash-yellow" />
                             {artist.rating}
                           </span>
                         )}
                         <span className="text-xs text-muted-foreground">{priceLabel(artist.priceRange)}</span>
                         {artist.isAvailable && (
-                          <span className="text-xs text-green-500">Available</span>
+                          <span className="text-xs text-success">Available</span>
                         )}
                       </div>
 
                       {artist.styles.length > 0 && (
                         <div className="flex flex-wrap gap-1">
                           {artist.styles.slice(0, 3).map((slug) => (
-                            <Badge key={slug} variant="secondary" className={`text-xs ${slug === style ? "border-[#7C3AED]/40 text-[#7C3AED]" : ""}`}>
+                            <Badge key={slug} variant="secondary" className={`text-xs ${slug === style ? "border-ink text-primary" : ""}`}>
                               {styleLabel(slug)}
                             </Badge>
                           ))}

@@ -44,8 +44,8 @@ export default async function ArtistFlashPage() {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="rounded-full bg-[#7C3AED]/20 p-2">
-            <Zap className="w-5 h-5 text-[#7C3AED]" />
+          <div className="rounded-full bg-secondary p-2">
+            <Zap className="w-5 h-5 text-primary" />
           </div>
           <div>
             <h1 className="text-2xl font-bold">Flash Listings</h1>
@@ -53,7 +53,7 @@ export default async function ArtistFlashPage() {
           </div>
         </div>
         {atLimit && (
-          <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 text-xs">
+          <Badge className="bg-warning text-warning-foreground border-warning text-xs">
             Pro plans coming soon
           </Badge>
         )}
@@ -75,7 +75,7 @@ export default async function ArtistFlashPage() {
                   <p className="text-sm text-muted-foreground">
                     You&apos;ve reached the {tier} tier limit of {limit} listings.
                   </p>
-                  <Button className="bg-[#7C3AED] hover:bg-[#6D28D9]" disabled>
+                  <Button className="bg-primary hover:bg-primary/90" disabled>
                     Pro plans coming soon
                   </Button>
                 </div>

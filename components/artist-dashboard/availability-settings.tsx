@@ -7,10 +7,10 @@ import { CheckCircle2, Loader2 } from "lucide-react"
 import type { AvailabilityStatus, PriceTier } from "@/types/artist"
 
 const AVAILABILITY_OPTIONS: { value: AvailabilityStatus; label: string; dot: string }[] = [
-  { value: "available",          label: "Available now",       dot: "bg-green-500" },
-  { value: "next_week",          label: "Available next week", dot: "bg-amber-400" },
-  { value: "one_to_two_months",  label: "Booked 1–2 months",  dot: "bg-amber-400" },
-  { value: "not_taking_clients", label: "Not taking clients",  dot: "bg-zinc-500"  },
+  { value: "available",          label: "Available now",       dot: "bg-success" },
+  { value: "next_week",          label: "Available next week", dot: "bg-warning" },
+  { value: "one_to_two_months",  label: "Booked 1–2 months",  dot: "bg-warning" },
+  { value: "not_taking_clients", label: "Not taking clients",  dot: "bg-muted-foreground"  },
 ]
 
 const PRICE_OPTIONS: { value: PriceTier; label: string; sub: string }[] = [
@@ -80,7 +80,7 @@ export function AvailabilitySettings({
               onClick={() => setAvailability(opt.value)}
               className={`flex items-center gap-2 rounded-lg border px-3 py-2.5 text-sm text-left transition-colors ${
                 availability === opt.value
-                  ? "border-[#7C3AED] bg-[#7C3AED]/10 text-[#7C3AED]"
+                  ? "border-ink bg-secondary text-primary"
                   : "border-border bg-muted/30 text-muted-foreground hover:bg-muted/60"
               }`}
             >
@@ -102,7 +102,7 @@ export function AvailabilitySettings({
               onClick={() => setPriceTier(opt.value)}
               className={`flex flex-col items-center rounded-lg border px-2 py-3 transition-colors ${
                 priceTier === opt.value
-                  ? "border-[#7C3AED] bg-[#7C3AED]/10 text-[#7C3AED]"
+                  ? "border-ink bg-secondary text-primary"
                   : "border-border bg-muted/30 text-muted-foreground hover:bg-muted/60"
               }`}
             >
@@ -145,17 +145,17 @@ export function AvailabilitySettings({
         <p className="text-xs text-muted-foreground mt-1">Shows as "10% off first session" badge on artist cards</p>
       </div>
 
-      {error && <p className="text-sm text-red-500">{error}</p>}
+      {error && <p className="text-sm text-destructive">{error}</p>}
 
       <Button
-        className="bg-[#7C3AED] hover:bg-[#6D28D9] gap-2"
+        className="bg-primary hover:bg-primary/90 gap-2"
         onClick={save}
         disabled={saving}
       >
         {saving ? (
           <><Loader2 className="w-4 h-4 animate-spin" />Saving…</>
         ) : saved ? (
-          <><CheckCircle2 className="w-4 h-4 text-green-400" />Saved!</>
+          <><CheckCircle2 className="w-4 h-4 text-success" />Saved!</>
         ) : (
           "Save availability"
         )}

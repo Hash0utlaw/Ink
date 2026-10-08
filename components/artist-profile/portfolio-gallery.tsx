@@ -12,7 +12,7 @@ export function PortfolioGallery({ images }: { images: string[] }) {
               <img
                 src={src || "/placeholder.svg"}
                 alt={`Portfolio piece ${i + 1}`}
-                className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
+                className="h-full w-full object-cover transition-transform duration-300"
               />
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>

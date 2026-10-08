@@ -10,11 +10,11 @@ import type { BookingRequest } from "@/lib/supabase/bookings"
 import { ShareBookingLink } from "@/components/artist-dashboard/share-booking-link"
 
 const STATUS_STYLES: Record<string, string> = {
-  pending: "bg-blue-500/20 text-blue-500 border-blue-500/30",
-  confirmed: "bg-green-500/20 text-green-500 border-green-500/30",
-  declined: "bg-red-500/20 text-red-500 border-red-500/30",
-  cancelled: "bg-zinc-500/20 text-zinc-400 border-zinc-500/30",
-  completed: "bg-purple-500/20 text-purple-400 border-purple-500/30",
+  pending: "bg-navy text-cream border-navy",
+  confirmed: "bg-success text-success-foreground border-success",
+  declined: "bg-destructive text-destructive-foreground border-destructive",
+  cancelled: "bg-muted text-muted-foreground border-border",
+  completed: "bg-primary text-primary-foreground border-primary",
 }
 
 function formatDate(dateStr: string | null): string {
@@ -58,7 +58,7 @@ export default async function ArtistDashboardPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Dashboard</h1>
         {isPro && (
-          <Badge className="bg-accent text-accent-foreground flex items-center gap-1.5">
+          <Badge className="bg-primary text-primary-foreground flex items-center gap-1.5">
             <Crown className="w-3.5 h-3.5" />
             Pro
           </Badge>

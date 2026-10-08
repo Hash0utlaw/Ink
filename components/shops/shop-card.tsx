@@ -19,7 +19,7 @@ export function ShopCard({
   initialSaved?: boolean
 }) {
   return (
-    <Card className="overflow-hidden transition-all hover:border-accent/50 hover:-translate-y-1 flex flex-col">
+    <Card className="overflow-hidden transition-all hover:border-ink hover:-translate-y-1 flex flex-col">
       <div className="relative h-32 w-full overflow-hidden">
         <img
           src={shop.coverImageUrl || "/placeholder.svg"}
@@ -43,7 +43,7 @@ export function ShopCard({
           <div className="flex items-start justify-between gap-2">
             <h3 className="font-bold text-xl">{shop.name}</h3>
             {distanceMi != null && (
-              <span className="bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs px-2 py-0.5 rounded-full shrink-0">
+              <span className="bg-warning text-warning-foreground border border-warning text-xs px-2 py-0.5 rounded-lg shrink-0">
                 {distanceMi.toFixed(1)} mi away
               </span>
             )}
@@ -57,12 +57,12 @@ export function ShopCard({
       <CardContent className="p-4 pt-0 flex-1">
         <div className="flex items-center gap-2 mb-4">
           <div className="flex items-center gap-1">
-            <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+            <Star className="w-4 h-4 text-flash-yellow fill-flash-yellow" />
             <span className="text-sm font-medium">{shop.rating}</span>
             <span className="text-sm text-muted-foreground">({shop.reviewCount})</span>
           </div>
           {shop.acceptsWalkIns && (
-            <Badge variant="outline" className="border-green-400 text-green-400">
+            <Badge variant="outline" className="border-success text-success">
               Walk-ins Welcome
             </Badge>
           )}

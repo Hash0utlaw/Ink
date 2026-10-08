@@ -81,12 +81,12 @@ export function LiveReviews({ initialReviews }: LiveReviewsProps) {
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
             <div className="relative">
-              <div className="w-2 h-2 rounded-full bg-green-500 animate-ping absolute" />
-              <div className="w-2 h-2 rounded-full bg-green-500" />
+              <div className="w-2 h-2 rounded-full bg-success animate-ping absolute" />
+              <div className="w-2 h-2 rounded-full bg-success" />
             </div>
             <h2 className="text-2xl font-extrabold">Live Reviews</h2>
           </div>
-          <Link href="/artists" className="flex items-center gap-1 text-sm text-[#7C3AED] hover:underline">
+          <Link href="/artists" className="flex items-center gap-1 text-sm text-navy underline-offset-2 hover:underline">
             Find an artist <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
@@ -101,11 +101,11 @@ export function LiveReviews({ initialReviews }: LiveReviewsProps) {
             <Link
               key={review.id}
               href={`/artists/${review.artistId}`}
-              className="group flex gap-3 p-4 rounded-xl border border-border/50 bg-card hover:border-[#7C3AED]/40 transition-all"
+              className="group flex gap-3 p-4 rounded-lg border border-border/50 bg-card hover:border-ink transition-all"
             >
-              <Avatar className="w-10 h-10 shrink-0 border border-accent/30">
+              <Avatar className="w-10 h-10 shrink-0 border border-ink">
                 <AvatarImage src={review.artistAvatar} alt={review.artistName} />
-                <AvatarFallback className="text-xs font-bold bg-accent/10 text-accent-text">
+                <AvatarFallback className="text-xs font-bold bg-vellum text-ink border-1.5 border-ink">
                   {initials(review.artistName)}
                 </AvatarFallback>
               </Avatar>
@@ -122,11 +122,11 @@ export function LiveReviews({ initialReviews }: LiveReviewsProps) {
                   {[1, 2, 3, 4, 5].map((s) => (
                     <Star
                       key={s}
-                      className={`w-3 h-3 ${s <= review.rating ? "text-yellow-400 fill-yellow-400" : "text-muted-foreground/20"}`}
+                      className={`w-3 h-3 ${s <= review.rating ? "text-flash-yellow fill-flash-yellow" : "text-muted-foreground/20"}`}
                     />
                   ))}
                   <span className="ml-1.5 text-xs font-semibold">{review.rating}.0</span>
-                  <span className="ml-1 text-xs text-green-500 flex items-center gap-0.5">
+                  <span className="ml-1 text-xs text-success flex items-center gap-0.5">
                     <Zap className="w-2.5 h-2.5" /> Verified booking
                   </span>
                 </div>
@@ -149,12 +149,12 @@ export function LiveReviewsSkeleton() {
     <section className="py-12 border-t border-border/50">
       <div className="container mx-auto px-4">
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-2 h-2 rounded-full bg-green-500" />
+          <div className="w-2 h-2 rounded-full bg-success" />
           <div className="h-7 w-32 rounded bg-muted animate-pulse" />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="h-20 rounded-xl bg-muted animate-pulse" />
+            <div key={i} className="h-20 rounded-lg bg-muted animate-pulse" />
           ))}
         </div>
       </div>

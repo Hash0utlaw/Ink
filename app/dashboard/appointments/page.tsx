@@ -49,10 +49,10 @@ export default async function AppointmentsPage() {
                 </div>
                 <Badge
                   className={cn({
-                    "bg-blue-500/20 text-blue-500 border-blue-500/30":
+                    "bg-navy text-cream border-navy":
                       booking.status === "pending" || booking.status === "confirmed",
-                    "bg-green-500/20 text-green-500 border-green-500/30": booking.status === "completed",
-                    "bg-red-500/20 text-red-500 border-red-500/30":
+                    "bg-success text-success-foreground border-success": booking.status === "completed",
+                    "bg-destructive text-destructive-foreground border-destructive":
                       booking.status === "declined" || booking.status === "cancelled",
                   })}
                 >

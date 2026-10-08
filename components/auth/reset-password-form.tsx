@@ -10,7 +10,7 @@ import { AlertCircle, ArrowLeft, KeyRound } from "lucide-react"
 import { updatePassword, verifyRecoveryLink } from "@/app/(auth)/actions"
 
 const inputClass =
-  "h-11 bg-muted/40 border-border/60 focus:border-accent focus:ring-accent/20 text-foreground placeholder:text-muted-foreground/50 rounded-xl"
+  "h-11 bg-muted/40 border-border/60 focus:border-ink focus:ring-ring/20 text-foreground placeholder:text-muted-foreground/50 rounded-lg"
 
 export function ResetPasswordForm() {
   const searchParams = useSearchParams()
@@ -57,7 +57,7 @@ export function ResetPasswordForm() {
   if (linkState === "invalid") {
     return (
       <div className="w-full max-w-[420px] space-y-6">
-        <div className="w-14 h-14 rounded-2xl bg-destructive/15 border border-destructive/25 flex items-center justify-center">
+        <div className="w-14 h-14 rounded-lg bg-destructive/15 border border-destructive/25 flex items-center justify-center">
           <AlertCircle className="w-7 h-7 text-destructive" />
         </div>
         <div className="space-y-2">
@@ -68,7 +68,7 @@ export function ResetPasswordForm() {
         </div>
         <Link
           href="/forgot-password"
-          className="inline-flex items-center gap-1.5 text-sm font-semibold text-accent-text hover:text-accent-text/80 transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm font-semibold text-navy underline-offset-2 hover:underline"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           Request a new reset link
@@ -80,8 +80,8 @@ export function ResetPasswordForm() {
   return (
     <div className="w-full max-w-[420px]">
       <div className="mb-8 space-y-4">
-        <div className="w-14 h-14 rounded-2xl bg-accent/15 border border-accent/25 flex items-center justify-center">
-          <KeyRound className="w-7 h-7 text-accent" />
+        <div className="w-14 h-14 rounded-lg bg-secondary border border-ink flex items-center justify-center">
+          <KeyRound className="w-7 h-7 text-primary" />
         </div>
         <div>
           <h2 className="text-3xl font-black tracking-tight text-foreground mb-2">Set a new password</h2>
@@ -125,7 +125,7 @@ export function ResetPasswordForm() {
         </div>
 
         {message && (
-          <div className="flex items-start gap-2.5 text-sm p-3.5 rounded-xl border bg-destructive/10 border-destructive/30 text-destructive-foreground">
+          <div className="flex items-start gap-2.5 text-sm p-3.5 rounded-lg border bg-destructive/10 border-destructive/30 text-destructive-foreground">
             <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
             <span>{message}</span>
           </div>
@@ -134,7 +134,7 @@ export function ResetPasswordForm() {
         <Button
           type="submit"
           disabled={isPending}
-          className="w-full h-11 rounded-xl font-semibold text-sm bg-accent hover:bg-accent/90 text-accent-foreground shadow-lg shadow-accent/25 transition-all duration-200"
+          className="w-full h-11 rounded-lg font-semibold text-sm bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-200"
         >
           {isPending ? "Saving..." : "Update password"}
         </Button>

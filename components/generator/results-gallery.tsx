@@ -36,7 +36,7 @@ export function ResultsGallery({ results, isLoading }: ResultsGalleryProps) {
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="w-8 h-8 text-accent"
+                className="w-8 h-8 text-primary"
               >
                 <path d="M12 3c-1.1 0-2 .9-2 2v2.5a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5V5c0-1.1-.9-2-2-2z" />
                 <path d="M14.5 7.5a2.5 2.5 0 0 1 0 5" />

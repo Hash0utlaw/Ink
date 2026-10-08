@@ -32,8 +32,8 @@ export function BodyPlacementSelector({ selectedValue, onSelect }: BodyPlacement
           key={i}
           d={p.path}
           className={cn(
-            "fill-muted/50 hover:fill-accent/50 cursor-pointer transition-colors",
-            selectedValue === p.name && "fill-accent",
+            "fill-muted/50 hover:fill-primary cursor-pointer transition-colors",
+            selectedValue === p.name && "fill-primary",
           )}
           onClick={() => onSelect(p.name)}
         >
