@@ -7,13 +7,18 @@
 //      backs that up. Artists with no specialties are left alone.
 //   B) active shops listed in data/non-tattoo-deactivate-proposed.csv
 //      (decision = remove; rebuilt from data/non-tattoo-review.csv by
-//      propose-non-tattoo-deactivation.ts when missing), except a shop with at
-//      least one active artist that has a real tattoo style in artists.styles.
+//      propose-non-tattoo-deactivation.ts when missing), except a shop whose
+//      name contains tattoo or ink (so "Tattoo & Supply" stays) or that has at
+//      least one active artist with a real tattoo style in artists.styles.
 //      The active artists of each hidden shop are hidden too.
+// In A and B, an artist is always kept when any specialty mentions tattoo
+// work (tattoo, tattoos, tattooing, tattooer) or medical/paramedical work, or
+// artists.styles is non-empty.
 // Prints counts, 20 random samples per group, and the hidden shops rated over
 // 4.5 with 100+ reviews so big names can be sanity-checked.
-// Run: npx tsx scripts/hide-non-tattoo.ts [--apply]
-//   Dry-run by default; --apply writes (undo-logged).
+// Run: npx tsx scripts/hide-non-tattoo.ts [--apply --expect SHOPS,ARTISTS]
+//   Dry-run by default; --apply writes (undo-logged). --expect takes the dry
+//   run's totals and aborts before any write if they've changed.
 
 import { config } from "dotenv"
 config({ path: ".env.local" })
@@ -30,12 +35,26 @@ import { isStyleSlug } from "../lib/styles"
 
 const ARGS = parseScriptArgs()
 const PROPOSED = "data/non-tattoo-deactivate-proposed.csv"
-const MEDICAL = /medic/i // medical, paramedical
+const MEDICAL = /medic|areola|scar|camouflage|vitiligo/i // medical/paramedical work
+const TATTOO_SPECIALTY = /tattoo/i // tattoo, tattoos, tattooing, tattooer
+const TATTOO_NAME = /tattoo|ink/i // substring, as in propose-non-tattoo-deactivation.ts
 
 type Row = Record<string, unknown>
 
 function hasRealStyle(a: Row): boolean {
   return Array.isArray(a.styles) && a.styles.some((s) => isStyleSlug(String(s)))
+}
+
+function specialtiesOf(a: Row): string[] {
+  return ((a.specialties as string[] | null) ?? []).map((v) => v.trim()).filter(Boolean)
+}
+
+// Never hidden: any tattoo-work or medical/paramedical specialty, or any style at all.
+function keepArtist(a: Row): boolean {
+  return (
+    specialtiesOf(a).some((v) => TATTOO_SPECIALTY.test(v) || MEDICAL.test(v)) ||
+    (Array.isArray(a.styles) && a.styles.length > 0)
+  )
 }
 
 // Seeded shuffle so a dry run and the apply that follows show the same samples.
@@ -61,14 +80,14 @@ async function main() {
       q.eq("is_active", true)
     )
   )
-  let skippedStyled = 0
+  let keptA = 0
   const groupA = artists.filter((a) => {
-    const values = ((a.specialties as string[] | null) ?? []).map((v) => v.trim()).filter(Boolean)
+    const values = specialtiesOf(a)
     if (values.length === 0) return false
     if (values.some((v) => MEDICAL.test(v))) return false
     if (!values.every((v) => resolveValue(v, map)?.result === "non_tattoo")) return false
-    if (hasRealStyle(a)) {
-      skippedStyled++
+    if (keepArtist(a)) {
+      keptA++
       return false
     }
     return true
@@ -82,11 +101,13 @@ async function main() {
   const proposedIds = parseCSV(fs.readFileSync(PROPOSED, "utf-8"))
     .filter((r) => r.decision === "remove" && r.id)
     .map((r) => r.id)
-  const proposedShops = (
+  const activeProposed = (
     await withRetry("fetch shops", () =>
       fetchIn(supabase, "shops", "id, name, city, state, rating, review_count, is_active", "id", proposedIds)
     )
   ).filter((s) => s.is_active === true)
+  const keptForName = activeProposed.filter((s) => TATTOO_NAME.test(String(s.name ?? "")))
+  const proposedShops = activeProposed.filter((s) => !TATTOO_NAME.test(String(s.name ?? "")))
 
   const artistsByShop = new Map<string, Row[]>()
   for (const a of artists) {
@@ -102,18 +123,21 @@ async function main() {
     return !keep
   })
   const groupAIds = new Set(groupA.map((a) => String(a.id)))
-  const groupBArtists = groupB
-    .flatMap((s) => artistsByShop.get(String(s.id)) ?? [])
-    .filter((a) => !groupAIds.has(String(a.id)))
+  const shopArtists = groupB.flatMap((s) => artistsByShop.get(String(s.id)) ?? []).filter((a) => !groupAIds.has(String(a.id)))
+  const keptB = shopArtists.filter(keepArtist)
+  const groupBArtists = shopArtists.filter((a) => !keepArtist(a))
+  const tattooNamed = groupB.filter((s) => TATTOO_NAME.test(String(s.name ?? ""))).length
 
   // ── Report ──
   console.log(`Active artists scanned: ${artists.length}`)
   console.log(`A) artists with only non_tattoo specialties: ${groupA.length}`)
-  console.log(`   (left alone: ${skippedStyled} that also have a real tattoo style)`)
-  console.log(`B) proposed shops in CSV: ${proposedIds.length}, still active: ${proposedShops.length}`)
+  console.log(`   (kept: ${keptA} with a tattoo specialty or a style)`)
+  console.log(`B) proposed shops in CSV: ${proposedIds.length}, still active: ${activeProposed.length}`)
+  console.log(`   kept (name contains tattoo/ink): ${keptForName.length}`)
   console.log(`   kept (an active artist has a real tattoo style): ${keptForArtists.length}`)
-  console.log(`   shops to hide: ${groupB.length}`)
+  console.log(`   shops to hide: ${groupB.length} (names containing tattoo/ink: ${tattooNamed})`)
   console.log(`   their active artists to hide (not already in A): ${groupBArtists.length}`)
+  console.log(`   (their artists kept: ${keptB.length} with a tattoo or medical specialty, or a style)`)
 
   console.log(`\nA samples (name | city, state | specialties):`)
   for (const a of sample(groupA, 20))
@@ -140,6 +164,11 @@ async function main() {
     return
   }
 
+  const expect = process.argv[process.argv.indexOf("--expect") + 1]
+  if (!process.argv.includes("--expect") || expect !== `${groupB.length},${totalArtists}`) {
+    console.error(`\nAborted before writing: totals ${groupB.length},${totalArtists} don't match --expect ${expect ?? "(missing)"}.`)
+    process.exit(1)
+  }
   const undo = new UndoLog("hide-non-tattoo")
   let shopsDone = 0
   let artistsDone = 0
