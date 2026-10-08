@@ -1,31 +1,43 @@
 import { createClient } from "@/utils/supabase/server"
 import type { Shop } from "@/types/shop"
 import { cache } from "react"
-import { stateSlugToAbbr, citySlugToName, groupCitiesBySlug, type CityGroup } from "@/lib/utils/states"
+import { STATE_ABBR_TO_NAME, stateSlugToAbbr, citySlugToName, groupCitiesBySlug, type CityGroup } from "@/lib/utils/states"
 import { SHOP_STYLES_EMBED, shopStylesFromRow } from "./shop-styles"
 
-// All distinct states with shop counts
+// States with shop counts, most shops first. Counted exactly like each state
+// page (the sum of getCitiesForState): listed shops with a known state and a
+// city. Pages past PostgREST's 1000-row cap.
 export async function getStatesWithShopCounts(): Promise<{ state: string; count: number }[]> {
   try {
     const supabase = createClient()
-    const { data, error } = await supabase.rpc
-      ? await supabase
-          .from("shops")
-          .select("state")
-          .eq("is_active", true)
-          .eq("possibly_closed", false)
-          .not("state", "is", null)
-          .neq("state", "")
-      : { data: null, error: new Error("no rpc") }
-
-    if (error || !data) return []
-
-    const counts: Record<string, number> = {}
-    for (const row of data as { state: string }[]) {
-      if (row.state) counts[row.state] = (counts[row.state] ?? 0) + 1
+    const citiesByState = new Map<string, string[]>()
+    for (let from = 0; ; from += 1000) {
+      const { data, error } = await supabase
+        .from("shops")
+        .select("state, city")
+        .eq("is_active", true)
+        .eq("possibly_closed", false)
+        .not("state", "is", null)
+        .neq("state", "")
+        .not("city", "is", null)
+        .neq("city", "")
+        .order("id")
+        .range(from, from + 999)
+      if (error || !data) return []
+      for (const row of data as { state: string; city: string }[]) {
+        const state = row.state.toUpperCase()
+        if (!STATE_ABBR_TO_NAME[state]) continue // no state page for unknown codes
+        const list = citiesByState.get(state) ?? []
+        list.push(row.city)
+        citiesByState.set(state, list)
+      }
+      if (data.length < 1000) break
     }
-    return Object.entries(counts)
-      .map(([state, count]) => ({ state, count }))
+    return Array.from(citiesByState, ([state, cities]) => ({
+      state,
+      count: groupCitiesBySlug(cities).reduce((sum, c) => sum + c.count, 0),
+    }))
+      .filter((s) => s.count > 0)
       .sort((a, b) => b.count - a.count)
   } catch {
     return []
