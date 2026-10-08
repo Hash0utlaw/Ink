@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { useRouter, usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -112,13 +113,13 @@ export function Header() {
   const dashboardLabel = role === "artist" ? "Dashboard" : "Browse"
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b-3 border-ink bg-navy">
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-2">
           {/* Mobile nav trigger */}
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden" aria-label="Open menu">
+              <Button variant="ghost" size="icon" className="md:hidden rounded-lg border-1.5 border-cream text-cream hover:bg-cream/10 hover:text-cream" aria-label="Open menu">
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
@@ -127,12 +128,7 @@ export function Header() {
 
               {/* Brand header */}
               <div className="flex items-center gap-2 border-b border-border/40 px-6 py-5">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent">
-                  <MapPin className="h-5 w-5 text-accent-foreground" />
-                </div>
-                <span className="bg-gradient-to-r from-accent to-accent/80 bg-clip-text text-lg font-bold text-transparent">
-                  TattooMaps
-                </span>
+                <Image src="/brand/logo-wordmark-ink.webp" alt="TattooMaps" width={70} height={40} className="h-10 w-auto" />
               </div>
 
               {/* Nav links */}
@@ -230,34 +226,29 @@ export function Header() {
 
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
-              <MapPin className="w-5 h-5 text-accent-foreground" />
-            </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-accent to-accent/80 bg-clip-text text-transparent">
-              TattooMaps
-            </span>
+            <Image src="/brand/logo-wordmark-cream.webp" alt="TattooMaps" width={70} height={40} className="h-10 w-auto" priority />
           </Link>
         </div>
 
         {/* Navigation */}
         <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
-          <Link href="/artists" className="text-foreground/80 hover:text-foreground transition-colors">
+          <Link href="/artists" className="text-cream underline-offset-4 hover:underline">
             Artists
           </Link>
-          <Link href="/tattoo-shops" className="text-foreground/80 hover:text-foreground transition-colors">
+          <Link href="/tattoo-shops" className="text-cream underline-offset-4 hover:underline">
             Shops
           </Link>
-          <Link href="/map" className="text-foreground/80 hover:text-foreground transition-colors">
+          <Link href="/map" className="text-cream underline-offset-4 hover:underline">
             Map
           </Link>
-          <Link href="/flash" className="flex items-center gap-1.5 text-foreground/80 hover:text-foreground transition-colors">
+          <Link href="/flash" className="flex items-center gap-1.5 text-cream underline-offset-4 hover:underline">
             <Zap className="w-4 h-4" />
             Flash
           </Link>
-          <Link href="/styles" className="text-foreground/80 hover:text-foreground transition-colors">
+          <Link href="/styles" className="text-cream underline-offset-4 hover:underline">
             Styles
           </Link>
-          <Link href="/find-artist" className="flex items-center gap-1.5 text-foreground/80 hover:text-foreground transition-colors">
+          <Link href="/find-artist" className="flex items-center gap-1.5 text-cream underline-offset-4 hover:underline">
             <Compass className="w-4 h-4" />
             Find Artist
           </Link>
@@ -271,13 +262,13 @@ export function Header() {
             <>
               <Link
                 href={dashboardLink}
-                className="hidden md:block text-sm font-medium text-foreground/80 hover:text-foreground transition-colors"
+                className="hidden md:block text-sm font-medium text-cream underline-offset-4 hover:underline"
               >
                 {dashboardLabel}
               </Link>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                  <Button variant="ghost" className="relative h-8 w-8 rounded-lg border-1.5 border-cream p-0 hover:bg-cream/10">
                     <Avatar className="h-8 w-8">
                       <AvatarImage
                         src={user.user_metadata?.avatar_url || "/placeholder-user.jpg"}

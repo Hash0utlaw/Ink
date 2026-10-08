@@ -20,7 +20,7 @@ export function StyleHero({ style }: StyleHeroProps) {
 
   return (
     <div
-      className="relative w-full overflow-hidden bg-zinc-900"
+      className="relative w-full overflow-hidden bg-navy"
       style={{ height: "clamp(280px, 40vh, 420px)" }}
     >
       {/* Background image */}
