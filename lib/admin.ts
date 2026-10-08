@@ -7,3 +7,12 @@ export function isAdmin(email: string | null | undefined): boolean {
     .filter(Boolean)
   return admins.includes(email.trim().toLowerCase())
 }
+
+/**
+ * /admin/design (the brand component reference) is open without signing in on
+ * Vercel preview deployments and in local development. Production keeps the
+ * normal admin check.
+ */
+export function isDesignReferenceOpen(): boolean {
+  return process.env.VERCEL_ENV === "preview" || process.env.NODE_ENV === "development"
+}

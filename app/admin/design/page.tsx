@@ -6,7 +6,7 @@ import { HeaderSkeleton } from "@/components/layout/header-skeleton"
 import { Footer } from "@/components/layout/footer"
 import { BrandReference } from "@/components/brand/brand-reference"
 import { createClient } from "@/utils/supabase/server"
-import { isAdmin } from "@/lib/admin"
+import { isAdmin, isDesignReferenceOpen } from "@/lib/admin"
 
 export const dynamic = "force-dynamic"
 
@@ -16,11 +16,14 @@ export const metadata: Metadata = {
 }
 
 export default async function AdminDesignPage() {
-  const supabase = createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user || !isAdmin(user.email)) notFound()
+  // Open on Vercel previews and in local development; admin-only in production.
+  if (!isDesignReferenceOpen()) {
+    const supabase = createClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    if (!user || !isAdmin(user.email)) notFound()
+  }
 
   return (
     <div className="min-h-screen bg-background">
