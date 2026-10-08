@@ -1,37 +1,35 @@
 import { Suspense } from "react"
 import { HeaderSkeleton } from "@/components/layout/header-skeleton"
 import { Header } from "@/components/layout/header"
-import { HeroSection } from "@/components/homepage/hero-section"
-import { FeatureHighlights } from "@/components/homepage/feature-highlights"
-import { PopularCategories } from "@/components/homepage/popular-categories"
-import { FeaturedArtists, FeaturedArtistsSkeleton } from "@/components/homepage/featured-artists"
-import { NewestFlash, NewestFlashSkeleton } from "@/components/homepage/newest-flash"
-import { WorthTheDrive, WorthTheDriveSkeleton } from "@/components/homepage/worth-the-drive"
-import { LiveReviews, LiveReviewsSkeleton } from "@/components/homepage/live-reviews"
 import { Footer } from "@/components/layout/footer"
+import { HeroSection } from "@/components/homepage/hero-section"
 import { RecentlyViewed } from "@/components/homepage/recently-viewed"
-import { getArtists, getWorthTheDriveArtists } from "@/lib/supabase/artists"
-import { getNewestFlash } from "@/lib/supabase/flash"
+import { BrowseByStyle } from "@/components/homepage/browse-by-style"
+import { TopArtists } from "@/components/homepage/top-artists"
+import { TopShops } from "@/components/homepage/top-shops"
+import { LiveReviews, LiveReviewsSkeleton } from "@/components/homepage/live-reviews"
+import { HowItWorks } from "@/components/homepage/how-it-works"
+import { ClaimBand } from "@/components/homepage/claim-band"
+import { getWorthTheDriveArtists } from "@/lib/supabase/artists"
 import { getRecentReviews } from "@/lib/supabase/reviews"
 import { getPlatformStats } from "@/lib/supabase/seo"
+import { getStyleCounts, getTopRatedShops } from "@/lib/supabase/home"
 import { SITE_URL } from "@/lib/site-config"
 
-async function FeaturedArtistsSection() {
-  const { data: artists } = await getArtists()
-  if (artists.length === 0) {
-    console.warn("[homepage] FeaturedArtists: no artists returned")
-  }
-  return <FeaturedArtists artists={artists} />
+async function BrowseByStyleSection() {
+  const counts = await getStyleCounts()
+  return <BrowseByStyle counts={counts} />
 }
 
-async function NewestFlashSection() {
-  const listings = await getNewestFlash(6)
-  return <NewestFlash listings={listings} />
-}
-
-async function WorthTheDriveSection() {
+async function TopArtistsSection() {
+  // Same query as the former "Worth the Drive" row: top-rated, taking clients.
   const artists = await getWorthTheDriveArtists(6)
-  return <WorthTheDrive artists={artists} />
+  return <TopArtists artists={artists} />
+}
+
+async function TopShopsSection({ shopCount }: { shopCount: number }) {
+  const shops = await getTopRatedShops(4, 50)
+  return <TopShops shops={shops} shopCount={shopCount} />
 }
 
 async function LiveReviewsSection() {
@@ -67,23 +65,23 @@ export default async function HomePage() {
       <Suspense fallback={<HeaderSkeleton />}>
         <Header />
       </Suspense>
-      <main className="flex-1">
+      <main className="flex flex-1 flex-col gap-12 md:gap-20">
         <HeroSection stats={stats} />
         <RecentlyViewed />
-        <FeatureHighlights />
-        <PopularCategories />
-        <Suspense fallback={<FeaturedArtistsSkeleton />}>
-          <FeaturedArtistsSection />
+        <Suspense fallback={null}>
+          <BrowseByStyleSection />
         </Suspense>
-        <Suspense fallback={<NewestFlashSkeleton />}>
-          <NewestFlashSection />
+        <Suspense fallback={null}>
+          <TopArtistsSection />
         </Suspense>
-        <Suspense fallback={<WorthTheDriveSkeleton />}>
-          <WorthTheDriveSection />
+        <Suspense fallback={null}>
+          <TopShopsSection shopCount={stats.shopCount} />
         </Suspense>
         <Suspense fallback={<LiveReviewsSkeleton />}>
           <LiveReviewsSection />
         </Suspense>
+        <HowItWorks />
+        <ClaimBand />
       </main>
       <Footer />
     </div>

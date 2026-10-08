@@ -7,7 +7,7 @@ import { XMarkPath } from "./x-mark"
 // The flash chart: SVG art copied from docs/design/brand-pieces-reference.html.
 // Paths, coordinates, stroke widths and opacities are as in the reference; colors
 // come from the theme tokens via Tailwind fill/stroke classes.
-//   "hero"           home hero chart (viewBox 1200x560)
+//   "hero"           home hero chart (viewBox 1200x560); no neighborhood labels
 //   "hero-centered"  centered hero with coasts at the edges (viewBox 1200x640)
 //   "location"       location map for artist/shop pages (viewBox 600x320)
 
@@ -51,12 +51,6 @@ function HeroChart({ waves, place }: { waves: string; place: string }) {
       {shops.map(([cx, cy]) => (
         <Shop key={`${cx}-${cy}`} cx={cx} cy={cy} />
       ))}
-      <g fontSize="20" className="fill-ink" style={PLACE_FONT}>
-        <text x="910" y="290">Uptown</text>
-        <text x="955" y="170">NoDa</text>
-        <text x="1040" y="225">Plaza Midwood</text>
-        <text x="700" y="410">South End</text>
-      </g>
       <XMarkPath cx={880} cy={282} half={13} />
       <BannerMark cx={930} top={102} width={bannerWidth(place, 26, 240)} fontSize={26} text={place} />
       <CompassRoseMark x={575} y={118} scale={1.15} tone="sea" />
@@ -122,7 +116,7 @@ function LocationChart({ place }: { place: string }) {
 }
 
 const VARIANTS = {
-  hero: { viewBox: "0 0 1200 560", aspect: "xMaxYMid slice", defaultPlace: "Charlotte" },
+  hero: { viewBox: "0 0 1200 560", aspect: "xMaxYMid slice", defaultPlace: "Destination Ink" },
   "hero-centered": { viewBox: "0 0 1200 640", aspect: "xMidYMid slice", defaultPlace: "" },
   location: { viewBox: "0 0 600 320", aspect: "xMidYMid slice", defaultPlace: "NoDa" },
 } as const
@@ -141,7 +135,7 @@ export function FlashChart({ variant, placeName, className }: FlashChartProps) {
   const place = placeName || v.defaultPlace
   const label =
     variant === "hero"
-      ? `Flash-style chart of ${place} with shops marked and a red X`
+      ? `Flash-style sea chart with shops marked, a red X and the banner "${place}"`
       : variant === "location"
         ? `Map of ${place} with a red X`
         : undefined

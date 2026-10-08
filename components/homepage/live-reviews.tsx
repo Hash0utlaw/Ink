@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Star, ArrowRight, Zap } from "lucide-react"
+import { Star, Zap } from "lucide-react"
 import { getClient } from "@/utils/supabase/client"
 import type { Review } from "@/lib/supabase/reviews"
 import type { RealtimePostgresInsertPayload } from "@supabase/supabase-js"
@@ -74,32 +74,31 @@ export function LiveReviews({ initialReviews }: LiveReviewsProps) {
   }, [])
 
   return (
-    <section className="py-12 border-t border-border/50">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-2">
-            <div className="relative">
-              <div className="w-2 h-2 rounded-full bg-success border-1.5 border-ink absolute" />
-              <div className="w-2 h-2 rounded-full bg-success border-1.5 border-ink" />
-            </div>
-            <h2 className="text-2xl font-extrabold">Live Reviews</h2>
-          </div>
-          <Link href="/artists" className="flex items-center gap-1 text-sm text-navy underline-offset-2 hover:underline">
-            Find an artist <ArrowRight className="w-3.5 h-3.5" />
+    <section aria-labelledby="live-reviews-heading" className="mx-auto w-full max-w-[1344px] px-6">
+        <div className="mb-6 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
+          <h2 id="live-reviews-heading" className="flex items-center gap-3 text-[30px] leading-[1.15] text-ink md:text-[34px]">
+            <span aria-hidden="true" className="h-3 w-3 shrink-0 rounded-full border-1.5 border-ink bg-success" />
+            Live Reviews
+          </h2>
+          <Link href="/artists" className="font-semibold text-navy underline underline-offset-2 hover:no-underline">
+            Find an artist
           </Link>
         </div>
 
         {reviews.length === 0 ? (
-          <p className="text-sm text-muted-foreground py-8 text-center">
-            Reviews from real bookings will appear here.
-          </p>
+          <div className="rounded-lg border-1.5 border-ink bg-vellum p-5">
+            <p className="font-semibold text-ink">No reviews yet</p>
+            <p className="mt-1 text-[15px] text-ink-muted">
+              Reviews from real bookings will appear here as clients rate their artists.
+            </p>
+          </div>
         ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {reviews.map((review) => (
             <Link
               key={review.id}
               href={`/artists/${review.artistId}`}
-              className="group flex gap-3 p-4 rounded-lg border border-border/50 bg-card hover:border-ink transition-all"
+              className="group flex gap-3 rounded-lg border-1.5 border-ink bg-vellum p-4 hover:bg-secondary"
             >
               <Avatar className="w-10 h-10 shrink-0 border border-ink">
                 <AvatarImage src={review.artistAvatar} alt={review.artistName} />
@@ -137,24 +136,21 @@ export function LiveReviews({ initialReviews }: LiveReviewsProps) {
           ))}
         </div>
         )}
-      </div>
     </section>
   )
 }
 
 export function LiveReviewsSkeleton() {
   return (
-    <section className="py-12 border-t border-border/50">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-2 h-2 rounded-full bg-success border-1.5 border-ink" />
-          <div className="h-7 w-32 rounded bg-muted animate-pulse" />
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="h-20 rounded-lg bg-muted animate-pulse" />
-          ))}
-        </div>
+    <section className="mx-auto w-full max-w-[1344px] px-6">
+      <div className="mb-6 flex items-center gap-3">
+        <span className="h-3 w-3 rounded-full border-1.5 border-ink bg-success" />
+        <div className="h-8 w-40 rounded-lg bg-muted animate-pulse" />
+      </div>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="h-20 rounded-lg bg-muted animate-pulse" />
+        ))}
       </div>
     </section>
   )

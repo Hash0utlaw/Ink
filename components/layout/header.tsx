@@ -269,16 +269,21 @@ export function Header() {
               </Link>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-8 w-8 rounded-lg border-1.5 border-cream p-0 hover:bg-cream/10">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage
-                        src={user.user_metadata?.avatar_url || "/placeholder-user.jpg"}
-                        alt={user.email ?? "User avatar"}
-                      />
-                      <AvatarFallback className="bg-vellum text-ink font-heading border-1.5 border-ink">
-                        {initials(user.email ?? "") || "U"}
-                      </AvatarFallback>
-                    </Avatar>
+                  <Button
+                    variant="ghost"
+                    aria-label="Account menu"
+                    className="relative h-10 w-10 overflow-hidden rounded-lg border-1.5 border-cream bg-transparent p-0 text-cream hover:bg-cream/10 hover:text-cream [&_svg]:size-5"
+                  >
+                    {user.user_metadata?.avatar_url ? (
+                      <Avatar className="h-full w-full rounded-none">
+                        <AvatarImage src={user.user_metadata.avatar_url} alt="" className="object-cover" />
+                        <AvatarFallback className="rounded-none bg-transparent text-cream">
+                          <User className="h-5 w-5" />
+                        </AvatarFallback>
+                      </Avatar>
+                    ) : (
+                      <User className="h-5 w-5" aria-hidden="true" />
+                    )}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56" align="end" forceMount>
