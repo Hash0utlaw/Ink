@@ -135,9 +135,28 @@ export async function getArtistsNearMe(
       p_available: filters.availableNow ?? null,
     })
     if (error) return { data: [], error: error.message }
-    const artists = (data ?? []).map((row: Record<string, unknown>) => {
-      const r = row as Record<string, unknown>
-      return { ...rowToArtist(r), distance_mi: Number(r.distance_mi ?? 0) }
+
+    // search_artists_near returns artist columns + distance_mi + shops {name,
+    // address, city, state} (nearest first, max 200) but no coordinates; the
+    // map needs them, so fetch the shops' lat/lng in one batched query.
+    const rows = (data ?? []) as Record<string, unknown>[]
+    const shopIds = Array.from(new Set(rows.map((r) => r.shop_id).filter(Boolean).map(String)))
+    const coords = new Map<string, { latitude: unknown; longitude: unknown }>()
+    for (let i = 0; i < shopIds.length; i += 100) {
+      const { data: shops, error: shopError } = await supabase
+        .from("shops")
+        .select("id, latitude, longitude")
+        .in("id", shopIds.slice(i, i + 100))
+      if (shopError) return { data: [], error: shopError.message }
+      for (const s of shops ?? []) coords.set(String(s.id), s)
+    }
+
+    const artists = rows.map((r) => {
+      const shop = coords.get(String(r.shop_id))
+      return {
+        ...rowToArtist({ ...r, latitude: shop?.latitude, longitude: shop?.longitude }),
+        distance_mi: Number(r.distance_mi ?? 0),
+      }
     })
     return { data: artists, error: null }
   } catch (e: unknown) {
