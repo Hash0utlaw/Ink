@@ -6,6 +6,7 @@ import { MotionView } from "@/components/utils/motion-view"
 import Link from "next/link"
 import type { Artist } from "@/types/artist"
 import { styleLabels } from "@/lib/styles"
+import { initials } from "@/lib/initials"
 
 interface FeaturedArtistsProps {
   artists?: Artist[]
@@ -36,7 +37,7 @@ export function FeaturedArtists({ artists }: FeaturedArtistsProps) {
                   <CardContent className="p-6 flex flex-col items-center text-center">
                     <Avatar className="w-24 h-24 mb-4 border-2 border-ink">
                       <AvatarImage src={artist.avatarUrl || "/placeholder.svg"} alt={artist.name} />
-                      <AvatarFallback>{artist.name.charAt(0)}</AvatarFallback>
+                      <AvatarFallback className="bg-vellum text-ink font-heading border-1.5 border-ink">{initials(artist.name)}</AvatarFallback>
                     </Avatar>
                     <h3 className="font-bold text-xl">{artist.name}</h3>
                     {artist.styles.length > 0 && (

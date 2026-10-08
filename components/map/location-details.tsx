@@ -7,7 +7,8 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import type { MapboxLocation } from "@/lib/mapbox"
 import { MapPin, Phone, Globe, Clock, Star, Heart, Share2, Navigation, Calendar, MessageCircle, X } from "lucide-react"
-import { styleLabels } from "@/lib/styles"
+import { styleEntries } from "@/lib/styles"
+import { StyleBadge } from "@/components/brand/style-badge"
 
 interface LocationDetailsProps {
   location: MapboxLocation
@@ -137,10 +138,8 @@ export function LocationDetails({ location, isOpen, onClose }: LocationDetailsPr
               <CardContent className="p-6">
                 <h3 className="text-xl font-semibold mb-4">Styles</h3>
                 <div className="flex flex-wrap gap-2">
-                  {styleLabels(location.styles).map((label) => (
-                    <Badge key={label} variant="outline" className="text-sm py-1 px-3">
-                      {label}
-                    </Badge>
+                  {styleEntries(location.styles).map(({ slug, label }) => (
+                    <StyleBadge key={slug} slug={slug} label={label} className="text-sm py-1 px-3" />
                   ))}
                 </div>
               </CardContent>

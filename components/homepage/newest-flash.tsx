@@ -5,10 +5,8 @@ import { Badge } from "@/components/ui/badge"
 import { Sparkles, Zap, ArrowRight } from "lucide-react"
 import type { FlashListing } from "@/lib/supabase/flash"
 import { safeImageSrc } from "@/lib/utils/safe-image"
+import { initials } from "@/lib/initials"
 
-function initials(name: string) {
-  return name.split(" ").filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join("")
-}
 
 interface NewestFlashProps {
   listings: FlashListing[]
@@ -68,7 +66,7 @@ export function NewestFlash({ listings }: NewestFlashProps) {
                   <div className="flex items-center gap-1.5">
                     <Avatar className="w-4 h-4 shrink-0">
                       <AvatarImage src={listing.artistAvatar} alt={listing.artistName} />
-                      <AvatarFallback className="text-[8px]">{initials(listing.artistName)}</AvatarFallback>
+                      <AvatarFallback className="text-[8px] bg-vellum text-ink font-heading border-1.5 border-ink">{initials(listing.artistName)}</AvatarFallback>
                     </Avatar>
                     <span className="text-xs text-muted-foreground truncate">{listing.artistName}</span>
                   </div>

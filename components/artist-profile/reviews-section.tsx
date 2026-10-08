@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Star } from "lucide-react"
 import type { Review } from "@/lib/supabase/reviews"
+import { initials } from "@/lib/initials"
 
 function formatDate(iso: string) {
   const d = new Date(iso)
@@ -23,7 +24,7 @@ export function ReviewsSection({ reviews }: { reviews: Review[] }) {
           reviews.map((review) => (
             <div key={review.id} className="flex gap-4">
               <Avatar>
-                <AvatarFallback>{review.clientName.charAt(0).toUpperCase()}</AvatarFallback>
+                <AvatarFallback className="bg-vellum text-ink font-heading border-1.5 border-ink">{initials(review.clientName)}</AvatarFallback>
               </Avatar>
               <div className="flex-1">
                 <div className="flex justify-between items-start">

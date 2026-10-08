@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { getRecentlyViewed, type RecentlyViewedArtist } from "@/components/utils/recently-viewed"
+import { initials } from "@/lib/initials"
 
 export function RecentlyViewed() {
   const [items, setItems] = useState<RecentlyViewedArtist[]>([])
@@ -27,7 +28,7 @@ export function RecentlyViewed() {
             >
               <Avatar className="w-8 h-8">
                 <AvatarImage src={artist.avatarUrl || "/placeholder.svg"} alt={artist.name} />
-                <AvatarFallback className="text-xs">{artist.name.charAt(0)}</AvatarFallback>
+                <AvatarFallback className="text-xs bg-vellum text-ink font-heading border-1.5 border-ink">{initials(artist.name)}</AvatarFallback>
               </Avatar>
               <span className="text-sm font-medium whitespace-nowrap">{artist.name}</span>
             </Link>

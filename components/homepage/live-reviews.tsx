@@ -7,10 +7,8 @@ import { Star, ArrowRight, Zap } from "lucide-react"
 import { getClient } from "@/utils/supabase/client"
 import type { Review } from "@/lib/supabase/reviews"
 import type { RealtimePostgresInsertPayload } from "@supabase/supabase-js"
+import { initials } from "@/lib/initials"
 
-function initials(name: string) {
-  return name.split(" ").filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join("")
-}
 
 function timeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime()
@@ -105,7 +103,7 @@ export function LiveReviews({ initialReviews }: LiveReviewsProps) {
             >
               <Avatar className="w-10 h-10 shrink-0 border border-ink">
                 <AvatarImage src={review.artistAvatar} alt={review.artistName} />
-                <AvatarFallback className="text-xs font-bold bg-vellum text-ink border-1.5 border-ink">
+                <AvatarFallback className="text-xs bg-vellum text-ink font-heading border-1.5 border-ink">
                   {initials(review.artistName)}
                 </AvatarFallback>
               </Avatar>

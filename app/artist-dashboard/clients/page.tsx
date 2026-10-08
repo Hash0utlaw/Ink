@@ -3,6 +3,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { getCurrentUserId } from "@/lib/supabase/users"
 import { getBookingsForArtist } from "@/lib/supabase/bookings"
+import { initials } from "@/lib/initials"
 
 interface ClientRow {
   email: string
@@ -58,7 +59,7 @@ export default async function ClientsPage() {
                   <TableCell>
                     <div className="flex items-center gap-3">
                       <Avatar>
-                        <AvatarFallback>{client.name.charAt(0)}</AvatarFallback>
+                        <AvatarFallback className="bg-vellum text-ink font-heading border-1.5 border-ink">{initials(client.name)}</AvatarFallback>
                       </Avatar>
                       <div>
                         <p className="font-medium">{client.name}</p>

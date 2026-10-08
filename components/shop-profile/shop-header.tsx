@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button"
 import { Star, Phone, MapPin } from "lucide-react"
 import type { Shop } from "@/types/shop"
 import { SaveButton } from "@/components/saved/save-button"
+import { initials } from "@/lib/initials"
 
 function directionsHref(shop: Shop) {
   const { lat, lng, address, city, state } = shop.location
@@ -34,7 +35,7 @@ export function ShopHeader({ shop, initialSaved }: { shop: Shop; initialSaved?: 
         <div className="flex flex-col md:flex-row gap-4 md:gap-8 items-center">
           <Avatar className="w-32 h-32 md:w-40 md:h-40 border-4 border-ink bg-background">
             <AvatarImage src={shop.logoUrl || "/placeholder.svg"} alt={`${shop.name} logo`} />
-            <AvatarFallback className="text-4xl">{shop.name.charAt(0)}</AvatarFallback>
+            <AvatarFallback className="text-4xl bg-vellum text-ink font-heading border-1.5 border-ink">{initials(shop.name)}</AvatarFallback>
           </Avatar>
           <div className="flex-1 text-center md:text-left">
             <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">{shop.name}</h1>
