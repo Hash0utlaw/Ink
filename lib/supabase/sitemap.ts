@@ -1,5 +1,5 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js"
-import { cityToSlug, citySlugToName } from "@/lib/utils/states"
+import { groupCitiesBySlug } from "@/lib/utils/states"
 
 // Sitemap data. Uses a cookie-free anon client (public rows only) so it also
 // works outside a request, e.g. in generateSitemaps. PostgREST returns at most
@@ -55,14 +55,13 @@ export async function getListedIds(table: Table, offset: number, limit: number):
 }
 
 /**
- * Distinct city/state pairs with listed shops, one per URL slug. Skips cities
- * whose slug doesn't map back to the stored name (e.g. "St. Louis"), because
- * the city page looks a city up from its slug and would 404 for them.
+ * One entry per city page: listed shops' cities grouped by state and URL slug
+ * (cityToSlug — the same function the pages and links use), so spellings like
+ * "St. Louis" and "St Louis" are one city.
  */
-export async function getSitemapCities(): Promise<{ city: string; state: string; slug: string }[]> {
+export async function getSitemapCities(): Promise<{ state: string; slug: string }[]> {
   const supabase = publicClient()
-  const seen = new Set<string>()
-  const out: { city: string; state: string; slug: string }[] = []
+  const byState = new Map<string, string[]>()
   for (let from = 0; ; from += PAGE) {
     const { data, error } = await listed("shops", supabase.from("shops").select("city, state"))
       .not("city", "is", null)
@@ -73,16 +72,13 @@ export async function getSitemapCities(): Promise<{ city: string; state: string;
       .range(from, from + PAGE - 1)
     if (error) throw new Error(`cities: ${error.message}`)
     for (const row of (data ?? []) as { city: string; state: string }[]) {
-      const slug = cityToSlug(row.city)
-      const key = `${row.state}|${slug}`
-      if (!slug || seen.has(key)) continue
-      if (citySlugToName(slug).toLowerCase() !== row.city.trim().toLowerCase()) continue
-      seen.add(key)
-      out.push({ city: row.city, state: row.state, slug })
+      const list = byState.get(row.state) ?? []
+      list.push(row.city)
+      byState.set(row.state, list)
     }
     if (!data || data.length < PAGE) break
   }
-  return out
+  return Array.from(byState).flatMap(([state, cities]) => groupCitiesBySlug(cities).map(({ slug }) => ({ state, slug })))
 }
 
 export type SitemapPart = { id: number; kind: "pages" } | { id: number; kind: Table; offset: number }

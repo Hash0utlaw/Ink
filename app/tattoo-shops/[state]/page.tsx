@@ -6,7 +6,7 @@ import { Header } from "@/components/layout/header"
 import { HeaderSkeleton } from "@/components/layout/header-skeleton"
 import { Footer } from "@/components/layout/footer"
 import { getCitiesForState } from "@/lib/supabase/seo"
-import { STATE_ABBR_TO_NAME, stateSlugToAbbr, stateAbbrToSlug, cityToSlug } from "@/lib/utils/states"
+import { STATE_ABBR_TO_NAME, stateSlugToAbbr, stateAbbrToSlug } from "@/lib/utils/states"
 import { ChevronRight, MapPin } from "lucide-react"
 
 import { canonicalUrl } from "@/lib/seo"
@@ -74,13 +74,13 @@ export default async function StatePage({ params }: { params: { state: string } 
 
         <div className="container mx-auto px-4 py-10">
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-            {cities.map(({ city, count }) => (
+            {cities.map(({ slug, name, count }) => (
               <Link
-                key={city}
-                href={`/tattoo-shops/${params.state}/${cityToSlug(city)}`}
+                key={slug}
+                href={`/tattoo-shops/${stateAbbrToSlug(abbr)}/${slug}`}
                 className="group flex flex-col p-4 rounded-xl border border-border/50 bg-card hover:border-[#7C3AED]/40 hover:shadow-md transition-all"
               >
-                <span className="font-bold text-sm group-hover:text-[#7C3AED] transition-colors">{city}</span>
+                <span className="font-bold text-sm group-hover:text-[#7C3AED] transition-colors">{name}</span>
                 <span className="text-xs text-muted-foreground mt-1">{count} shops</span>
               </Link>
             ))}

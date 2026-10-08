@@ -1,6 +1,7 @@
 import { createClient } from "@/utils/supabase/server"
 import type { Shop } from "@/types/shop"
-import { stateSlugToAbbr, citySlugToName } from "@/lib/utils/states"
+import { cache } from "react"
+import { stateSlugToAbbr, citySlugToName, groupCitiesBySlug, type CityGroup } from "@/lib/utils/states"
 import { SHOP_STYLES_EMBED, shopStylesFromRow } from "./shop-styles"
 
 // All distinct states with shop counts
@@ -31,34 +32,33 @@ export async function getStatesWithShopCounts(): Promise<{ state: string; count:
   }
 }
 
-// Cities for a given state, with shop counts
-export async function getCitiesForState(
-  stateAbbr: string
-): Promise<{ city: string; count: number }[]> {
+// Cities for a given state, grouped by URL slug (spellings like "St. Louis"
+// and "St Louis" are one city), most shops first. Pages past PostgREST's
+// 1000-row cap; cached per request so the city page and its metadata share it.
+export const getCitiesForState = cache(async (stateAbbr: string): Promise<CityGroup[]> => {
   try {
     const supabase = createClient()
-    const { data, error } = await supabase
-      .from("shops")
-      .select("city")
-      .eq("is_active", true)
-      .eq("possibly_closed", false)
-      .eq("state", stateAbbr.toUpperCase())
-      .not("city", "is", null)
-      .neq("city", "")
-
-    if (error || !data) return []
-
-    const counts: Record<string, number> = {}
-    for (const row of data as { city: string }[]) {
-      if (row.city) counts[row.city] = (counts[row.city] ?? 0) + 1
+    const cities: string[] = []
+    for (let from = 0; ; from += 1000) {
+      const { data, error } = await supabase
+        .from("shops")
+        .select("city")
+        .eq("is_active", true)
+        .eq("possibly_closed", false)
+        .eq("state", stateAbbr.toUpperCase())
+        .not("city", "is", null)
+        .neq("city", "")
+        .order("id")
+        .range(from, from + 999)
+      if (error || !data) return []
+      cities.push(...(data as { city: string }[]).map((r) => r.city))
+      if (data.length < 1000) break
     }
-    return Object.entries(counts)
-      .map(([city, count]) => ({ city, count }))
-      .sort((a, b) => b.count - a.count)
+    return groupCitiesBySlug(cities)
   } catch {
     return []
   }
-}
+})
 
 // Top N cities globally by shop count — used for generateStaticParams
 export async function getTopCities(limit = 50): Promise<{ city: string; state: string; count: number }[]> {
@@ -98,9 +98,15 @@ export async function getShopsForCity(
   pageSize = 24
 ): Promise<{ data: Shop[]; count: number; cityName: string; stateAbbr: string }> {
   const stateAbbr = stateSlugToAbbr(stateSlug)
-  const cityName = citySlugToName(citySlug)
+  const slug = citySlug.toLowerCase()
 
-  if (!stateAbbr) return { data: [], count: 0, cityName, stateAbbr: "" }
+  if (!stateAbbr) return { data: [], count: 0, cityName: citySlugToName(slug), stateAbbr: "" }
+
+  // Match the slug against the state's slugified city names, so every
+  // spelling of the city ("St. Louis", "St Louis") is included.
+  const group = (await getCitiesForState(stateAbbr)).find((c) => c.slug === slug)
+  const cityName = group?.name ?? citySlugToName(slug)
+  if (!group) return { data: [], count: 0, cityName, stateAbbr }
 
   try {
     const supabase = createClient()
@@ -109,7 +115,7 @@ export async function getShopsForCity(
       .select(`*, ${SHOP_STYLES_EMBED}`, { count: "exact" })
       .eq("is_active", true)
       .eq("possibly_closed", false)
-      .ilike("city", cityName)
+      .in("city", group.spellings)
       .eq("state", stateAbbr)
       .order("rating", { ascending: false })
       .range(page * pageSize, (page + 1) * pageSize - 1)
