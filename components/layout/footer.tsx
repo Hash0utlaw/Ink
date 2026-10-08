@@ -1,20 +1,17 @@
 import Link from "next/link"
-import { MapPin } from "lucide-react"
+import Image from "next/image"
 
 export function Footer() {
   return (
-    <footer className="bg-secondary border-t border-border">
+    <footer className="bg-navy border-t-3 border-ink">
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand */}
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
-              <div className="flex items-center justify-center w-8 h-8 bg-accent rounded-lg">
-                <MapPin className="w-5 h-5 text-accent-foreground" />
-              </div>
-              <span className="font-extrabold tracking-wide text-lg">TattooMaps</span>
+              <Image src="/brand/logo-wordmark-cream.webp" alt="TattooMaps" width={83} height={48} className="h-12 w-auto" />
             </div>
-            <p className="text-muted-foreground text-sm leading-relaxed">
+            <p className="text-cream/85 text-sm leading-relaxed">
               Discover tattoo artists and shops across the US through interactive maps. Your journey to the perfect tattoo
               starts here.
             </p>
@@ -22,25 +19,25 @@ export function Footer() {
 
           {/* Discover */}
           <div className="space-y-4">
-            <h3 className="font-semibold text-foreground">Discover</h3>
+            <h3 className="font-semibold text-cream">Discover</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/artists" className="text-muted-foreground hover:text-accent-text transition-colors">
+                <Link href="/artists" className="text-cream/85 underline-offset-4 hover:underline">
                   Find Artists
                 </Link>
               </li>
               <li>
-                <Link href="/tattoo-shops" className="text-muted-foreground hover:text-accent-text transition-colors">
+                <Link href="/tattoo-shops" className="text-cream/85 underline-offset-4 hover:underline">
                   Browse Shops
                 </Link>
               </li>
               <li>
-                <Link href="/styles" className="text-muted-foreground hover:text-accent-text transition-colors">
+                <Link href="/styles" className="text-cream/85 underline-offset-4 hover:underline">
                   Tattoo Styles
                 </Link>
               </li>
               <li>
-                <Link href="/map" className="text-muted-foreground hover:text-accent-text transition-colors">
+                <Link href="/map" className="text-cream/85 underline-offset-4 hover:underline">
                   Map View
                 </Link>
               </li>
@@ -49,20 +46,20 @@ export function Footer() {
 
           {/* For Artists */}
           <div className="space-y-4">
-            <h3 className="font-semibold text-foreground">For Artists</h3>
+            <h3 className="font-semibold text-cream">For Artists</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/artist-dashboard" className="text-muted-foreground hover:text-accent-text transition-colors">
+                <Link href="/artist-dashboard" className="text-cream/85 underline-offset-4 hover:underline">
                   Artist Dashboard
                 </Link>
               </li>
               <li>
-                <Link href="/signup" className="text-muted-foreground hover:text-accent-text transition-colors">
+                <Link href="/signup" className="text-cream/85 underline-offset-4 hover:underline">
                   Join as Artist
                 </Link>
               </li>
               <li>
-                <Link href="/pricing" className="text-muted-foreground hover:text-accent-text transition-colors">
+                <Link href="/pricing" className="text-cream/85 underline-offset-4 hover:underline">
                   Pricing Guide
                 </Link>
               </li>
@@ -71,25 +68,25 @@ export function Footer() {
 
           {/* Support */}
           <div className="space-y-4">
-            <h3 className="font-semibold text-foreground">Support</h3>
+            <h3 className="font-semibold text-cream">Support</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/help" className="text-muted-foreground hover:text-accent-text transition-colors">
+                <Link href="/help" className="text-cream/85 underline-offset-4 hover:underline">
                   Help Center
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="text-muted-foreground hover:text-accent-text transition-colors">
+                <Link href="/contact" className="text-cream/85 underline-offset-4 hover:underline">
                   Contact Us
                 </Link>
               </li>
               <li>
-                <Link href="/privacy" className="text-muted-foreground hover:text-accent-text transition-colors">
+                <Link href="/privacy" className="text-cream/85 underline-offset-4 hover:underline">
                   Privacy Policy
                 </Link>
               </li>
               <li>
-                <Link href="/terms" className="text-muted-foreground hover:text-accent-text transition-colors">
+                <Link href="/terms" className="text-cream/85 underline-offset-4 hover:underline">
                   Terms of Service
                 </Link>
               </li>
@@ -98,12 +95,11 @@ export function Footer() {
         </div>
 
         <div className="border-t border-border mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-muted-foreground text-sm">© {new Date().getFullYear()} TattooMaps. All rights reserved.</p>
-          <p className="text-muted-foreground text-sm mt-4 md:mt-0">Built with ❤️ for the tattoo community</p>
+          <p className="text-cream/85 text-sm">© {new Date().getFullYear()} TattooMaps. All rights reserved.</p>
         </div>
-        <p className="text-muted-foreground text-sm mt-4 text-center md:text-left">
+        <p className="text-cream/85 text-sm mt-4 text-center md:text-left">
           Places data from{" "}
-          <Link href="/attributions" className="hover:text-accent-text transition-colors">
+          <Link href="/attributions" className="underline-offset-4 hover:underline">
             Overture Maps Foundation, including Foursquare data under Apache 2.0
           </Link>
           .

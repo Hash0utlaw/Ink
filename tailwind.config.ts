@@ -58,6 +58,30 @@ const config: Config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        // Brand palette ("The flash chart"), see .claude/skills/tattoomaps-design
+        paper: "hsl(var(--paper))",
+        vellum: "hsl(var(--vellum))",
+        rule: "hsl(var(--rule))",
+        navy: "hsl(var(--navy))",
+        cream: "hsl(var(--cream))",
+        flash: {
+          red: "hsl(var(--flash-red))",
+          yellow: "hsl(var(--flash-yellow))",
+        },
+        "bottle-green": "hsl(var(--bottle-green))",
+        "chart-land": "hsl(var(--chart-land))",
+        success: {
+          DEFAULT: "hsl(var(--success))",
+          foreground: "hsl(var(--success-foreground))",
+        },
+        warning: {
+          DEFAULT: "hsl(var(--warning))",
+          foreground: "hsl(var(--warning-foreground))",
+        },
+        ink: {
+          DEFAULT: "hsl(var(--ink))",
+          muted: "hsl(var(--ink-muted))",
+        },
         // Ink-themed color palette
         "ink-purple": {
           50: "#f5f3ff",
@@ -111,6 +135,15 @@ const config: Config = {
           900: "#7c2d12",
           950: "#431407",
         },
+      },
+      fontFamily: {
+        sans: ["var(--font-sans)", "ui-sans-serif", "system-ui", "sans-serif"],
+        heading: ["var(--font-heading)", "Georgia", "serif"],
+        place: ["var(--font-place)", "Georgia", "serif"],
+      },
+      borderWidth: {
+        "1.5": "1.5px",
+        "3": "3px",
       },
       borderRadius: {
         lg: "var(--radius)",

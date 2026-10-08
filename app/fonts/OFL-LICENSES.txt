@@ -1,0 +1,24 @@
+Font licenses for files in app/fonts/
+======================================
+
+All three typefaces below are licensed under the SIL Open Font License,
+Version 1.1 (OFL-1.1): https://openfontlicense.org/open-font-license-official-text/
+The woff2 files were taken unmodified from the @fontsource npm packages (v5.3.0).
+
+Young Serif
+  Files:   young-serif-latin-400-normal.woff2
+  Source:  @fontsource/young-serif  (https://github.com/noirblancrouge/YoungSerif)
+  Author:  Bastien Sozeau (Noir Blanc Rouge)
+  License: SIL Open Font License 1.1
+
+IM Fell English
+  Files:   im-fell-english-latin-400-italic.woff2
+  Source:  @fontsource/im-fell-english  (https://iginomarini.com/fell/)
+  Author:  Igino Marini
+  License: SIL Open Font License 1.1
+
+Libre Franklin
+  Files:   libre-franklin-latin-{400,500,600,700}-normal.woff2
+  Source:  @fontsource/libre-franklin  (https://github.com/impallari/Libre-Franklin)
+  Authors: Pablo Impallari, Rodrigo Fuenzalida
+  License: SIL Open Font License 1.1

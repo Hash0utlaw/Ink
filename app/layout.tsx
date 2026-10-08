@@ -7,17 +7,26 @@ import { Toaster } from "@/components/ui/toaster"
 import { AdminGateBanner } from "@/components/layout/admin-gate-banner"
 import { SITE_URL } from "@/lib/site-config"
 
-// Poppins (latin, 400–900) is stored in app/fonts so builds never fetch from Google Fonts.
-const poppins = localFont({
+// Brand fonts (see .claude/skills/tattoomaps-design) are stored in app/fonts so builds
+// never fetch from Google Fonts. All three are SIL OFL; see app/fonts/OFL-LICENSES.txt.
+const libreFranklin = localFont({
   src: [
-    { path: "./fonts/poppins-latin-400-normal.woff2", weight: "400", style: "normal" },
-    { path: "./fonts/poppins-latin-500-normal.woff2", weight: "500", style: "normal" },
-    { path: "./fonts/poppins-latin-600-normal.woff2", weight: "600", style: "normal" },
-    { path: "./fonts/poppins-latin-700-normal.woff2", weight: "700", style: "normal" },
-    { path: "./fonts/poppins-latin-800-normal.woff2", weight: "800", style: "normal" },
-    { path: "./fonts/poppins-latin-900-normal.woff2", weight: "900", style: "normal" },
+    { path: "./fonts/libre-franklin-latin-400-normal.woff2", weight: "400", style: "normal" },
+    { path: "./fonts/libre-franklin-latin-500-normal.woff2", weight: "500", style: "normal" },
+    { path: "./fonts/libre-franklin-latin-600-normal.woff2", weight: "600", style: "normal" },
+    { path: "./fonts/libre-franklin-latin-700-normal.woff2", weight: "700", style: "normal" },
   ],
-  variable: "--font-poppins",
+  variable: "--font-sans",
+})
+
+const youngSerif = localFont({
+  src: [{ path: "./fonts/young-serif-latin-400-normal.woff2", weight: "400", style: "normal" }],
+  variable: "--font-heading",
+})
+
+const imFellEnglish = localFont({
+  src: [{ path: "./fonts/im-fell-english-latin-400-italic.woff2", weight: "400", style: "italic" }],
+  variable: "--font-place",
 })
 
 export const metadata: Metadata = {
@@ -36,16 +45,6 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   alternates: {
     canonical: "/",
-  },
-  icons: {
-    icon: [
-      { url: "/app-icon.png", type: "image/png", sizes: "512x512" },
-      { url: "/icon-dark-32x32.png", type: "image/png", sizes: "32x32" },
-    ],
-    apple: [
-      { url: "/app-icon.png", type: "image/png", sizes: "512x512" },
-    ],
-    shortcut: "/app-icon.png",
   },
   openGraph: {
     title: "TattooMaps - Discover Tattoo Artists & Shops Across the US",
@@ -81,8 +80,15 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className="dark">
-      <body className={cn("min-h-screen bg-background font-sans antialiased", poppins.variable)}>
+    <html lang="en">
+      <body
+        className={cn(
+          "min-h-screen bg-background font-sans antialiased",
+          libreFranklin.variable,
+          youngSerif.variable,
+          imFellEnglish.variable
+        )}
+      >
         <AdminGateBanner />
         {children}
         <Toaster />

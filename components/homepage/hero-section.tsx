@@ -71,7 +71,7 @@ export function HeroSection({ stats }: HeroSectionProps = {}) {
   const hasAnyStat = Boolean(stats && (stats.shopCount > 0 || stats.artistCount > 0 || stats.cityCount > 0))
 
   return (
-    <section className="relative min-h-screen w-full flex items-center justify-center overflow-hidden">
+    <section className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-navy">
       <div className="absolute inset-0 hero-grid opacity-50" />
 
       <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-br from-hero-accent/10 to-hero-secondary/10 rounded-full blur-xl animate-float" />

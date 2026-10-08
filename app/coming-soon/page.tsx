@@ -17,7 +17,7 @@ const SUBLINE =
   "Find artists by style and city, see who works where, and request your next piece. We're putting on the finishing touches."
 
 // Use the brand wordmark when it's been added to public/brand; otherwise text.
-const HAS_WORDMARK = existsSync(path.join(process.cwd(), "public/brand/wordmark_color.png"))
+const HAS_WORDMARK = existsSync(path.join(process.cwd(), "public/brand/logo-wordmark-color.png"))
 
 const STATS = ["26,000+ shops", "21,000+ artists", "All 50 states"]
 
@@ -36,10 +36,10 @@ export default function ComingSoonPage() {
         <div className="w-full max-w-[640px] text-center">
           {HAS_WORDMARK ? (
             <Image
-              src="/brand/wordmark_color.png"
+              src="/brand/logo-wordmark-color.png"
               alt="TattooMaps"
-              width={440}
-              height={110}
+              width={600}
+              height={346}
               priority
               className="mx-auto h-20 w-auto sm:h-[110px]"
             />
