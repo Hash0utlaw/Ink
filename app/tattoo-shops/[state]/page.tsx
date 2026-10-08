@@ -9,6 +9,7 @@ import { getCitiesForState } from "@/lib/supabase/seo"
 import { STATE_ABBR_TO_NAME, stateSlugToAbbr, stateAbbrToSlug, cityToSlug } from "@/lib/utils/states"
 import { ChevronRight, MapPin } from "lucide-react"
 
+import { canonicalUrl } from "@/lib/seo"
 export async function generateStaticParams() {
   return Object.keys(STATE_ABBR_TO_NAME).map((abbr) => ({
     state: stateAbbrToSlug(abbr),
@@ -18,7 +19,7 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: { params: { state: string } }): Promise<Metadata> {
   const abbr = stateSlugToAbbr(params.state)
   const stateName = abbr ? STATE_ABBR_TO_NAME[abbr] : null
-  if (!stateName) return { title: "Tattoo Shops — TattooMaps" }
+  if (!abbr || !stateName) return { title: "Tattoo Shops — TattooMaps" }
 
   return {
     title: `Best Tattoo Shops in ${stateName} — TattooMaps`,
@@ -28,6 +29,7 @@ export async function generateMetadata({ params }: { params: { state: string } }
       description: `Find top-rated tattoo studios across ${stateName} on TattooMaps.`,
       images: ["/opengraph-image"],
     },
+    alternates: { canonical: canonicalUrl(`/tattoo-shops/${stateAbbrToSlug(abbr)}`) },
   }
 }
 

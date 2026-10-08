@@ -14,16 +14,24 @@ import { ShopHeader } from "@/components/shop-profile/shop-header"
 import { ShopTabs } from "@/components/shop-profile/shop-tabs"
 import { ShopInfoSidebar } from "@/components/shop-profile/shop-info-sidebar"
 import { cityToSlug, stateAbbrToSlug } from "@/lib/utils/states"
+import { shopHasNameTwin } from "@/lib/supabase/seo"
+import { canonicalUrl, jsonLdHtml, metaDescription, withoutEmpty } from "@/lib/seo"
 
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
   const shop = await getShopById(params.id)
   if (!shop) return { title: "Tattoo Shop — TattooMaps" }
   const loc = [shop.location.city, shop.location.state].filter(Boolean).join(", ")
+  const street = shop.location.address?.split(",")[0]?.trim()
+  // Another listed shop shares this name and city: add the street so the title stays unique.
+  const place = street && (await shopHasNameTwin(shop)) ? [street, loc].filter(Boolean).join(", ") : loc
+  const rating = shop.rating > 0 && shop.reviewCount > 0 ? ` Rated ${shop.rating}/5 from ${shop.reviewCount} reviews.` : ""
+  const summary = shop.about || "Browse artist portfolios and read reviews on TattooMaps."
   return {
-    title: `${shop.name}${loc ? ` — ${loc}` : ""} | TattooMaps`,
-    description: shop.about
-      ? shop.about.slice(0, 160)
-      : `Book an appointment at ${shop.name}${loc ? ` in ${loc}` : ""}. Browse artist portfolios and read reviews on TattooMaps.`,
+    title: `${shop.name}${place ? ` — ${place}` : ""} | TattooMaps`,
+    description: metaDescription(
+      `${shop.name} is a tattoo shop${street ? ` at ${street}` : ""}${loc ? `, ${loc}` : ""}.${rating} ${summary}`,
+    ),
+    alternates: { canonical: canonicalUrl(`/shops/${shop.id}`) },
   }
 }
 
@@ -41,45 +49,45 @@ export default async function ShopProfilePage({ params }: { params: { id: string
   const citySlug = cityToSlug(shop.location.city)
   const cityPageHref = stateSlug && citySlug ? `/tattoo-shops/${stateSlug}/${citySlug}` : null
 
-  // JSON-LD LocalBusiness schema
-  const jsonLd = {
+  // JSON-LD LocalBusiness schema (TattooParlor). Empty fields are dropped.
+  const jsonLd = withoutEmpty({
     "@context": "https://schema.org",
     "@type": "TattooParlor",
     "name": shop.name,
-    "description": shop.about || undefined,
-    "image": shop.coverImageUrl || undefined,
-    "telephone": shop.phone || undefined,
-    "url": shop.website || undefined,
+    "description": shop.about,
+    "image": shop.coverImageUrl,
+    "telephone": shop.phone,
+    "url": canonicalUrl(`/shops/${shop.id}`),
+    "sameAs": shop.website ? [shop.website] : undefined,
     "address": {
       "@type": "PostalAddress",
-      "streetAddress": shop.location.address,
+      // Some addresses also hold "City, ST 12345"; keep only the street.
+      "streetAddress": shop.location.address?.split(",")[0],
       "addressLocality": shop.location.city,
       "addressRegion": shop.location.state,
       "addressCountry": "US",
     },
-    ...(shop.location.lat && shop.location.lng && {
-      "geo": {
-        "@type": "GeoCoordinates",
-        "latitude": shop.location.lat,
-        "longitude": shop.location.lng,
-      },
-    }),
-    ...(shop.rating > 0 && {
-      "aggregateRating": {
-        "@type": "AggregateRating",
-        "ratingValue": shop.rating,
-        "reviewCount": shop.reviewCount,
-        "bestRating": 5,
-        "worstRating": 1,
-      },
-    }),
-  }
+    "geo":
+      shop.location.lat && shop.location.lng
+        ? { "@type": "GeoCoordinates", "latitude": shop.location.lat, "longitude": shop.location.lng }
+        : undefined,
+    "aggregateRating":
+      shop.rating > 0 && shop.reviewCount > 0
+        ? {
+            "@type": "AggregateRating",
+            "ratingValue": shop.rating,
+            "reviewCount": shop.reviewCount,
+            "bestRating": 5,
+            "worstRating": 1,
+          }
+        : undefined,
+  })
 
   return (
     <div className="flex min-h-screen flex-col">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdHtml(jsonLd) }}
       />
       <Suspense fallback={<HeaderSkeleton />}>
         <Header />

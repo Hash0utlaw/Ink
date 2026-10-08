@@ -31,37 +31,6 @@ export async function getStatesWithShopCounts(): Promise<{ state: string; count:
   }
 }
 
-// All distinct city/state pairs — used for sitemap generation
-export async function getAllCityStatePairs(): Promise<{ city: string; state: string }[]> {
-  try {
-    const supabase = createClient()
-    const { data, error } = await supabase
-      .from("shops")
-      .select("city, state")
-      .eq("is_active", true)
-      .eq("possibly_closed", false)
-      .not("city", "is", null)
-      .not("state", "is", null)
-      .neq("city", "")
-      .neq("state", "")
-
-    if (error || !data) return []
-
-    const seen = new Set<string>()
-    const pairs: { city: string; state: string }[] = []
-    for (const row of data as { city: string; state: string }[]) {
-      const key = `${row.city}|${row.state}`
-      if (!seen.has(key)) {
-        seen.add(key)
-        pairs.push({ city: row.city, state: row.state })
-      }
-    }
-    return pairs
-  } catch {
-    return []
-  }
-}
-
 // Cities for a given state, with shop counts
 export async function getCitiesForState(
   stateAbbr: string
@@ -181,33 +150,6 @@ function rowToShopMinimal(row: Record<string, unknown>): Shop {
   }
 }
 
-// All shop IDs for sitemap
-export async function getAllShopIds(): Promise<string[]> {
-  try {
-    const supabase = createClient()
-    const { data, error } = await supabase.from("shops").select("id").eq("is_active", true).eq("possibly_closed", false)
-    if (error || !data) return []
-    return (data as { id: string }[]).map((r) => r.id)
-  } catch {
-    return []
-  }
-}
-
-// All artist IDs for sitemap (active only)
-export async function getAllArtistIds(): Promise<string[]> {
-  try {
-    const supabase = createClient()
-    const { data, error } = await supabase
-      .from("artists")
-      .select("id")
-      .eq("is_active", true)
-    if (error || !data) return []
-    return (data as { id: string }[]).map((r) => r.id)
-  } catch {
-    return []
-  }
-}
-
 // Real platform-wide counts for the homepage hero stats
 export async function getPlatformStats(): Promise<{
   shopCount: number
@@ -237,5 +179,51 @@ export async function getPlatformStats(): Promise<{
     return { shopCount, artistCount, cityCount }
   } catch {
     return { shopCount: 0, artistCount: 0, cityCount: 0 }
+  }
+}
+
+// Escape LIKE wildcards so ilike is an exact, case-insensitive match.
+function likeExact(value: string): string {
+  return value.replace(/[\\%_]/g, (ch) => `\\${ch}`)
+}
+
+// True when another listed shop has the same name, city and state — its page
+// title then adds the street address so titles stay unique.
+export async function shopHasNameTwin(shop: Pick<Shop, "id" | "name" | "location">): Promise<boolean> {
+  try {
+    const supabase = createClient()
+    let q = supabase
+      .from("shops")
+      .select("id", { count: "exact", head: true })
+      .eq("is_active", true)
+      .eq("possibly_closed", false)
+      .ilike("name", likeExact(shop.name))
+      .neq("id", shop.id)
+    q = shop.location.city ? q.ilike("city", likeExact(shop.location.city)) : q.or("city.is.null,city.eq.")
+    q = shop.location.state ? q.eq("state", shop.location.state) : q.or("state.is.null,state.eq.")
+    const { count } = await q
+    return (count ?? 0) > 0
+  } catch {
+    return false
+  }
+}
+
+// True when another active artist has the same name, city and state — the
+// page title then adds the (unique) handle.
+export async function artistHasNameTwin(artist: { id: string; name: string; city: string; state: string }): Promise<boolean> {
+  try {
+    const supabase = createClient()
+    let q = supabase
+      .from("artists")
+      .select("id", { count: "exact", head: true })
+      .eq("is_active", true)
+      .ilike("display_name", likeExact(artist.name))
+      .neq("id", artist.id)
+    q = artist.city ? q.ilike("city", likeExact(artist.city)) : q.or("city.is.null,city.eq.")
+    q = artist.state ? q.eq("state", artist.state) : q.or("state.is.null,state.eq.")
+    const { count } = await q
+    return (count ?? 0) > 0
+  } catch {
+    return false
   }
 }
