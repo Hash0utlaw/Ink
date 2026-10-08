@@ -56,7 +56,7 @@ export function FlashManageCard({ listing }: FlashManageCardProps) {
         <div className="flex items-center gap-1.5">
           <p className="font-semibold text-sm truncate">{listing.title}</p>
           {listing.isExclusive && (
-            <Sparkles className="w-3.5 h-3.5 text-[#7C3AED] shrink-0" />
+            <Sparkles className="w-3.5 h-3.5 text-primary shrink-0" />
           )}
         </div>
         <div className="flex flex-wrap gap-1">
@@ -82,7 +82,7 @@ export function FlashManageCard({ listing }: FlashManageCardProps) {
       <Button
         size="icon"
         variant="ghost"
-        className="shrink-0 h-8 w-8 text-muted-foreground hover:text-red-500"
+        className="shrink-0 h-8 w-8 text-muted-foreground hover:text-destructive"
         onClick={deleteListing}
         disabled={deleting}
       >

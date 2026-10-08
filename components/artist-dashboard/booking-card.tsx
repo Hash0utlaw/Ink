@@ -12,11 +12,11 @@ interface BookingCardProps {
 }
 
 const STATUS_STYLES: Record<string, string> = {
-  pending: "bg-blue-500/20 text-blue-500 border-blue-500/30",
-  confirmed: "bg-green-500/20 text-green-500 border-green-500/30",
-  declined: "bg-red-500/20 text-red-500 border-red-500/30",
-  cancelled: "bg-zinc-500/20 text-zinc-400 border-zinc-500/30",
-  completed: "bg-purple-500/20 text-purple-400 border-purple-500/30",
+  pending: "bg-warning text-warning-foreground border-warning",
+  confirmed: "bg-success text-success-foreground border-success",
+  declined: "bg-destructive text-destructive-foreground border-destructive",
+  cancelled: "bg-destructive text-destructive-foreground border-destructive",
+  completed: "bg-navy text-cream border-navy",
 }
 
 function formatDate(dateStr: string | null): string {
@@ -75,18 +75,18 @@ export function BookingCard({ booking }: BookingCardProps) {
 
       {status === "pending" && (
         <div className="flex flex-col gap-2 shrink-0">
-          <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white gap-1.5" disabled={loading !== null} onClick={() => act("confirm")}>
+          <Button size="sm" className="bg-success hover:bg-success/90 text-success-foreground gap-1.5" disabled={loading !== null} onClick={() => act("confirm")}>
             {loading === "confirm" ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
             Confirm
           </Button>
-          <Button size="sm" variant="outline" className="border-red-500/40 text-red-500 hover:bg-red-500/10 gap-1.5" disabled={loading !== null} onClick={() => act("decline")}>
+          <Button size="sm" variant="outline" className="border-destructive text-destructive hover:bg-destructive/10 gap-1.5" disabled={loading !== null} onClick={() => act("decline")}>
             {loading === "decline" ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <X className="w-3.5 h-3.5" />}
             Decline
           </Button>
         </div>
       )}
       {status === "confirmed" && (
-        <Button size="sm" className="shrink-0 bg-purple-600 hover:bg-purple-700 text-white gap-1.5" disabled={loading !== null} onClick={() => act("complete")}>
+        <Button size="sm" className="shrink-0 bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5" disabled={loading !== null} onClick={() => act("complete")}>
           {loading === "complete" ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
           Complete
         </Button>

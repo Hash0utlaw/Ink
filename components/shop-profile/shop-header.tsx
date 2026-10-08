@@ -28,11 +28,11 @@ export function ShopHeader({ shop, initialSaved }: { shop: Shop; initialSaved?: 
           alt={`${shop.name} interior`}
           className="h-full w-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
+        <div className="absolute inset-0" />
       </div>
-      <div className="container mx-auto px-4 -mt-16 md:-mt-20">
+      <div className="container relative z-10 mx-auto px-4 -mt-16 md:-mt-20">
         <div className="flex flex-col md:flex-row gap-4 md:gap-8 items-center">
-          <Avatar className="w-32 h-32 md:w-40 md:h-40 border-4 border-accent bg-background">
+          <Avatar className="w-32 h-32 md:w-40 md:h-40 border-4 border-ink bg-background">
             <AvatarImage src={shop.logoUrl || "/placeholder.svg"} alt={`${shop.name} logo`} />
             <AvatarFallback className="text-4xl">{shop.name.charAt(0)}</AvatarFallback>
           </Avatar>
@@ -40,7 +40,7 @@ export function ShopHeader({ shop, initialSaved }: { shop: Shop; initialSaved?: 
             <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">{shop.name}</h1>
             <div className="flex items-center justify-center md:justify-start gap-4 mt-2">
               <div className="flex items-center gap-1">
-                <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" />
+                <Star className="w-5 h-5 text-flash-yellow fill-flash-yellow" />
                 <span className="text-lg font-bold">{shop.rating}</span>
                 <span className="text-sm text-muted-foreground">({shop.reviewCount} reviews)</span>
               </div>

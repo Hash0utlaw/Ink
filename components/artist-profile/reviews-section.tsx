@@ -35,7 +35,7 @@ export function ReviewsSection({ reviews }: { reviews: Review[] }) {
                     {[...Array(5)].map((_, i) => (
                       <Star
                         key={i}
-                        className={`w-4 h-4 ${i < review.rating ? "text-yellow-400 fill-yellow-400" : "text-muted-foreground"}`}
+                        className={`w-4 h-4 ${i < review.rating ? "text-flash-yellow fill-flash-yellow" : "text-muted-foreground"}`}
                       />
                     ))}
                   </div>

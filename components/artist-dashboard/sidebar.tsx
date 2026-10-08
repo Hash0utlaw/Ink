@@ -48,7 +48,7 @@ export function ArtistDashboardSidebar({ isPro = false }: { isPro?: boolean }) {
           )
         })}
         {!isPro && (
-          <div className="rounded-lg p-4 mt-2 flex flex-col gap-2 bg-gradient-to-br from-primary to-[hsl(var(--hero-tertiary))]">
+          <div className="rounded-lg p-4 mt-2 flex flex-col gap-2 bg-navy">
             <Crown className="h-5 w-5 text-primary-foreground" />
             <p className="text-primary-foreground font-bold text-sm leading-tight">Upgrade to Pro</p>
             <p className="text-primary-foreground text-xs leading-snug opacity-90">
@@ -56,7 +56,7 @@ export function ArtistDashboardSidebar({ isPro = false }: { isPro?: boolean }) {
             </p>
             <button
               disabled
-              className="mt-1 w-full rounded-md py-1.5 text-sm font-semibold text-primary-foreground bg-[hsl(var(--hero-tertiary))] opacity-80 cursor-not-allowed"
+              className="mt-1 w-full rounded-md py-1.5 text-sm font-semibold bg-cream text-ink border-1.5 border-ink opacity-80 cursor-not-allowed"
             >
               Pro plans coming soon
             </button>
@@ -65,7 +65,7 @@ export function ArtistDashboardSidebar({ isPro = false }: { isPro?: boolean }) {
         <hr className="my-2 border-border/50" />
         <Button
           variant="ghost"
-          className="justify-start text-red-500 hover:text-red-500 hover:bg-red-500/10"
+          className="justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
           onClick={handleSignOut}
         >
           <LogOut className="mr-2 h-4 w-4" />

@@ -23,9 +23,9 @@ export function ArtistHeader({ artist, initialSaved }: { artist: Artist; initial
 
   return (
     <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start">
-      <Avatar className="w-32 h-32 md:w-40 md:h-40 border-4 border-accent shrink-0">
+      <Avatar className="w-32 h-32 md:w-40 md:h-40 border-4 border-ink shrink-0">
         <AvatarImage src={artist.avatarUrl || ""} alt={artist.name} />
-        <AvatarFallback className="text-4xl font-bold bg-accent/10 text-accent">
+        <AvatarFallback className="text-4xl font-bold bg-vellum text-ink border-1.5 border-ink">
           {initials(artist.name) || "?"}
         </AvatarFallback>
       </Avatar>
@@ -60,13 +60,13 @@ export function ArtistHeader({ artist, initialSaved }: { artist: Artist; initial
             )}
             {artist.rating > 0 && (
               <div className="flex items-center gap-1">
-                <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" />
+                <Star className="w-5 h-5 text-flash-yellow fill-flash-yellow" />
                 <span className="text-lg font-bold">{artist.rating}</span>
                 <span className="text-sm text-muted-foreground">({artist.reviewCount} reviews)</span>
               </div>
             )}
             {artist.isAvailable && (
-              <Badge variant="outline" className="border-green-400 text-green-400">
+              <Badge variant="outline" className="border-success text-success">
                 Available for booking
               </Badge>
             )}
@@ -117,7 +117,7 @@ export function ArtistHeader({ artist, initialSaved }: { artist: Artist; initial
           <Share2 className="h-4 w-4" />
         </Button>
         {artist.isClaimed ? (
-          <Button className="bg-accent text-accent-foreground hover:bg-accent/90" asChild>
+          <Button className="bg-primary text-primary-foreground hover:bg-primary/90" asChild>
             <Link href={`/book/${artist.handle || artist.id}`}>Book Now</Link>
           </Button>
         ) : (

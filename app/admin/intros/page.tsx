@@ -57,7 +57,7 @@ function formatDate(iso: string) {
   return new Date(iso).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })
 }
 
-const linkClass = "text-sm text-accent-text hover:underline"
+const linkClass = "text-sm text-navy hover:underline"
 
 export default async function AdminIntrosPage() {
   const supabase = createClient()

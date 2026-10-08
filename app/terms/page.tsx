@@ -61,9 +61,9 @@ export default function TermsOfServicePage() {
                   <a
                     key={s.id}
                     href={`#${s.id}`}
-                    className="flex items-center gap-2 text-sm text-muted-foreground hover:text-accent-text transition-colors py-1 group"
+                    className="flex items-center gap-2 text-sm text-muted-foreground hover:text-navy transition-colors py-1 group"
                   >
-                    <ChevronRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity text-accent" />
+                    <ChevronRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity text-primary" />
                     {s.title}
                   </a>
                 ))}
@@ -72,14 +72,14 @@ export default function TermsOfServicePage() {
 
             {/* Content */}
             <article className="lg:col-span-3 space-y-10 text-foreground">
-              <div className="p-5 bg-muted/40 rounded-xl border border-border/60 text-sm text-muted-foreground leading-relaxed">
+              <div className="p-5 bg-muted/40 rounded-lg border border-border/60 text-sm text-muted-foreground leading-relaxed">
                 Please read these Terms of Service (&quot;Terms&quot;) carefully before using TattooMaps. By accessing or using TattooMaps you agree to be bound by these Terms. If you do not agree, do not use the platform.
               </div>
 
               <Section id="acceptance" title="1. Acceptance of Terms">
                 <Prose>
                   These Terms constitute a legally binding agreement between you and TattooMaps, Inc. (&quot;TattooMaps&quot;, &quot;we&quot;, &quot;our&quot;, or &quot;us&quot;). They govern your access to and use of tattoomaps.com, our mobile applications, and any related services (collectively, the &quot;Platform&quot;). By creating an account or using any feature of the Platform you confirm that you have read, understood, and agree to these Terms, as well as our{" "}
-                  <Link href="/privacy" className="text-accent-text hover:underline">
+                  <Link href="/privacy" className="text-navy hover:underline">
                     Privacy Policy
                   </Link>
                   .
@@ -192,18 +192,18 @@ export default function TermsOfServicePage() {
                 <Prose>
                   Questions about these Terms? Reach us at:
                 </Prose>
-                <div className="flex items-center gap-3 mt-4 p-4 bg-muted/40 rounded-xl border border-border/60">
-                  <Mail className="w-5 h-5 text-accent shrink-0" />
+                <div className="flex items-center gap-3 mt-4 p-4 bg-muted/40 rounded-lg border border-border/60">
+                  <Mail className="w-5 h-5 text-primary shrink-0" />
                   <div>
                     <p className="text-sm font-medium">Legal Team</p>
-                    <a href="mailto:legal@tattoomaps.com" className="text-sm text-accent-text hover:underline">
+                    <a href="mailto:legal@tattoomaps.com" className="text-sm text-navy hover:underline">
                       legal@tattoomaps.com
                     </a>
                   </div>
                 </div>
                 <Prose>
                   You can also use our{" "}
-                  <Link href="/contact" className="text-accent-text hover:underline">
+                  <Link href="/contact" className="text-navy hover:underline">
                     Contact Us
                   </Link>{" "}
                   form and select &quot;General inquiry&quot; as the topic.
@@ -243,7 +243,7 @@ function List({ items }: { items: string[] }) {
     <ul className="space-y-2">
       {items.map((item) => (
         <li key={item} className="flex items-start gap-2 text-sm text-muted-foreground">
-          <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0 mt-2" />
+          <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0 mt-2" />
           {item}
         </li>
       ))}

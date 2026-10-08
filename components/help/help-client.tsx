@@ -76,7 +76,7 @@ export function HelpClient() {
                 placeholder="Search articles, FAQs..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-12 h-13 text-base bg-background border-border focus:border-accent/60 rounded-xl"
+                className="pl-12 h-13 text-base bg-background border-border focus:border-ink rounded-lg"
               />
             </div>
           </div>
@@ -94,8 +94,8 @@ export function HelpClient() {
                     <Card key={cat.slug} className="bg-card">
                       <CardContent className="p-6">
                         <div className="flex items-start gap-4">
-                          <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center shrink-0">
-                            <Icon className="w-5 h-5 text-accent" />
+                          <div className="w-10 h-10 bg-secondary rounded-lg flex items-center justify-center shrink-0">
+                            <Icon className="w-5 h-5 text-primary" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <h3 className="font-semibold text-foreground mb-1">{cat.title}</h3>
@@ -115,7 +115,7 @@ export function HelpClient() {
         <section className={`py-16 px-4 ${!searchQuery ? "bg-muted/30 border-t border-border" : ""}`}>
           <div className="container mx-auto max-w-3xl">
             <div className="flex items-center gap-3 mb-8">
-              <BookOpen className="w-6 h-6 text-accent" />
+              <BookOpen className="w-6 h-6 text-primary" />
               <h2 className="text-2xl font-bold">
                 {searchQuery ? `Results for "${searchQuery}"` : "Frequently Asked Questions"}
               </h2>
@@ -127,13 +127,13 @@ export function HelpClient() {
                 <p className="text-muted-foreground text-lg">No articles found for that search.</p>
                 <p className="text-sm text-muted-foreground mt-2">
                   Try different keywords or{" "}
-                  <Link href="/contact" className="text-accent-text hover:underline">contact our support team</Link>.
+                  <Link href="/contact" className="text-navy hover:underline">contact our support team</Link>.
                 </p>
               </div>
             ) : (
               <div className="space-y-3">
                 {filteredFaqs.map((faq, i) => (
-                  <div key={i} className="border border-border rounded-xl overflow-hidden bg-card">
+                  <div key={i} className="border border-border rounded-lg overflow-hidden bg-card">
                     <button
                       type="button"
                       className="w-full flex items-center justify-between p-5 text-left hover:bg-muted/30 transition-colors"
@@ -158,10 +158,10 @@ export function HelpClient() {
         {/* Still need help CTA */}
         <section className="py-16 px-4 bg-muted/30 border-t border-border">
           <div className="container mx-auto max-w-2xl text-center">
-            <MessageCircle className="w-10 h-10 text-accent mx-auto mb-4" />
+            <MessageCircle className="w-10 h-10 text-primary mx-auto mb-4" />
             <h2 className="text-2xl font-bold mb-3">Still need help?</h2>
             <p className="text-muted-foreground mb-6">Our support team is available Monday through Friday, 9am – 6pm EST.</p>
-            <Link href="/contact" className="inline-flex items-center gap-2 bg-accent text-accent-foreground hover:bg-accent/90 font-semibold px-6 py-3 rounded-xl transition-colors">
+            <Link href="/contact" className="inline-flex items-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 font-semibold px-6 py-3 rounded-lg transition-colors">
               <MessageCircle className="w-4 h-4" />
               Contact Support
             </Link>

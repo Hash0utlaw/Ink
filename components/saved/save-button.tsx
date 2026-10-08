@@ -88,7 +88,7 @@ export function SaveButton({
         className={className}
         aria-pressed={saved}
       >
-        <Heart className={cn("h-4 w-4", saved && "fill-accent text-accent")} />
+        <Heart className={cn("h-4 w-4", saved && "fill-primary text-primary")} />
         {saved ? "Saved" : "Save"}
       </Button>
     )
@@ -103,9 +103,9 @@ export function SaveButton({
       disabled={pending}
       aria-pressed={saved}
       aria-label={saved ? "Remove from saved" : "Save"}
-      className={cn("h-11 w-11 bg-background/80 backdrop-blur-sm", className)}
+      className={cn("h-11 w-11 bg-background/80", className)}
     >
-      <Heart className={cn("h-4 w-4", saved && "fill-accent text-accent")} />
+      <Heart className={cn("h-4 w-4", saved && "fill-primary text-primary")} />
     </Button>
   )
 }

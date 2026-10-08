@@ -119,12 +119,12 @@ export function ContactClient() {
                 const Icon = ch.icon
                 return (
                   <Link key={ch.title} href={ch.href} className="group block">
-                    <Card className="h-full hover:border-accent/40 transition-all duration-200">
+                    <Card className="h-full hover:border-ink transition-all duration-200">
                       <CardContent className="p-6 flex flex-col gap-3">
-                        <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center group-hover:bg-accent/20 transition-colors">
-                          <Icon className="w-5 h-5 text-accent" />
+                        <div className="w-10 h-10 bg-secondary rounded-lg flex items-center justify-center group-hover:bg-secondary transition-colors">
+                          <Icon className="w-5 h-5 text-primary" />
                         </div>
-                        <h3 className="font-semibold text-foreground group-hover:text-accent transition-colors">
+                        <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
                           {ch.title}
                         </h3>
                         <p className="text-sm text-muted-foreground leading-relaxed flex-1">{ch.description}</p>
@@ -150,9 +150,9 @@ export function ContactClient() {
                 <h2 className="text-2xl font-bold mb-6">Send us a message</h2>
 
                 {submitted ? (
-                  <div className="flex flex-col items-center text-center py-16 px-6 border border-border rounded-2xl bg-card">
-                    <div className="w-16 h-16 bg-green-500/10 rounded-full flex items-center justify-center mb-4">
-                      <CheckCircle className="w-8 h-8 text-green-500" />
+                  <div className="flex flex-col items-center text-center py-16 px-6 border border-border rounded-lg bg-card">
+                    <div className="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mb-4">
+                      <CheckCircle className="w-8 h-8 text-success" />
                     </div>
                     <h3 className="text-xl font-bold mb-2">Message received!</h3>
                     <p className="text-muted-foreground max-w-sm">
@@ -166,7 +166,7 @@ export function ContactClient() {
                         setSubmitted(false)
                         setFormData({ name: "", email: "", reason: "", message: "" })
                       }}
-                      className="mt-6 text-sm text-accent-text hover:underline"
+                      className="mt-6 text-sm text-navy hover:underline"
                     >
                       Send another message
                     </button>
@@ -182,7 +182,7 @@ export function ContactClient() {
                           value={formData.name}
                           onChange={(e) => handleChange("name", e.target.value)}
                           required
-                          className="bg-card border-border focus:border-accent/60"
+                          className="bg-card border-border focus:border-ink"
                         />
                       </div>
                       <div className="space-y-2">
@@ -194,7 +194,7 @@ export function ContactClient() {
                           value={formData.email}
                           onChange={(e) => handleChange("email", e.target.value)}
                           required
-                          className="bg-card border-border focus:border-accent/60"
+                          className="bg-card border-border focus:border-ink"
                         />
                       </div>
                     </div>
@@ -224,7 +224,7 @@ export function ContactClient() {
                         value={formData.message}
                         onChange={(e) => handleChange("message", e.target.value)}
                         required
-                        className="bg-card border-border focus:border-accent/60 resize-none"
+                        className="bg-card border-border focus:border-ink resize-none"
                       />
                     </div>
 
@@ -272,11 +272,11 @@ export function ContactClient() {
                   </h3>
                   <div className="space-y-2 text-sm">
                     <div className="flex items-center gap-2 text-muted-foreground">
-                      <Clock className="w-4 h-4 text-accent shrink-0" />
+                      <Clock className="w-4 h-4 text-primary shrink-0" />
                       Mon – Fri: 9am – 6pm EST
                     </div>
                     <div className="flex items-center gap-2 text-muted-foreground">
-                      <Clock className="w-4 h-4 text-accent shrink-0" />
+                      <Clock className="w-4 h-4 text-primary shrink-0" />
                       Sat – Sun: Closed
                     </div>
                   </div>
@@ -290,21 +290,21 @@ export function ContactClient() {
                     <a
                       href="mailto:support@tattoomaps.com"
                       aria-label="Email TattooMaps"
-                      className="w-9 h-9 bg-muted hover:bg-accent/10 border border-border hover:border-accent/40 rounded-lg flex items-center justify-center transition-colors"
+                      className="w-9 h-9 bg-muted hover:bg-secondary border border-border hover:border-ink rounded-lg flex items-center justify-center transition-colors"
                     >
-                      <Mail className="w-4 h-4 text-muted-foreground hover:text-accent" />
+                      <Mail className="w-4 h-4 text-muted-foreground hover:text-primary" />
                     </a>
                   </div>
                 </div>
 
-                <div className="p-4 bg-muted/50 rounded-xl border border-border/50 space-y-2">
+                <div className="p-4 bg-muted/50 rounded-lg border border-border/50 space-y-2">
                   <div className="flex items-center gap-2">
-                    <Shield className="w-4 h-4 text-accent" />
+                    <Shield className="w-4 h-4 text-primary" />
                     <span className="text-sm font-medium">Privacy Notice</span>
                   </div>
                   <p className="text-xs text-muted-foreground leading-relaxed">
                     Information you share here is used solely to respond to your inquiry. See our{" "}
-                    <Link href="/privacy" className="text-accent-text hover:underline">
+                    <Link href="/privacy" className="text-navy hover:underline">
                       Privacy Policy
                     </Link>
                     .

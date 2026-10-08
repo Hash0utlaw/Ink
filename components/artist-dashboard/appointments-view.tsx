@@ -89,7 +89,7 @@ export function AppointmentsView({ bookings }: { bookings: BookingRequest[] }) {
               modifiers={{ booked: bookedDates }}
               modifiersClassNames={{
                 booked:
-                  "relative after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:h-1 after:w-1 after:rounded-full after:bg-accent after:content-['']",
+                  "relative after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:h-1 after:w-1 after:rounded-full after:bg-primary after:content-['']",
               }}
             />
           </CardContent>

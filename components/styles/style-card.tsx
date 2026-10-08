@@ -18,7 +18,7 @@ export function StyleCard({ style }: StyleCardProps) {
 
   return (
     <Link href={`/styles/${style.slug}`} className="group block">
-      <div className="relative overflow-hidden rounded-xl aspect-[4/3] shadow-sm hover:shadow-xl transition-all duration-300 border border-border/60 bg-muted">
+      <div className="relative overflow-hidden rounded-lg aspect-[4/3] transition-all duration-300 border border-border/60 bg-muted">
         {/* Hero image or fallback */}
         {imgFailed ? (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-muted-foreground bg-muted">
@@ -29,21 +29,21 @@ export function StyleCard({ style }: StyleCardProps) {
           <img
             src={style.heroImage}
             alt={`${style.name} tattoo style`}
-            className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            className="absolute inset-0 h-full w-full object-cover transition-transform duration-500"
             loading="lazy"
             onError={() => setImgFailed(true)}
           />
         )}
 
         {/* Gradient overlay — shown even over fallback for consistent text legibility */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
+        <div className="absolute inset-0 bg-ink/50" />
 
         {/* Tags top-left */}
         <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
           {style.tags.slice(0, 2).map((tag) => (
             <span
               key={tag}
-              className="bg-black/50 backdrop-blur-sm text-white/90 text-[10px] font-medium px-2 py-0.5 rounded-full"
+              className="bg-black/50 text-white/90 text-[10px] font-medium px-2 py-0.5 rounded-lg"
             >
               {tag}
             </span>

@@ -53,8 +53,8 @@ export default async function FlashPage({
           <div className="container mx-auto px-4 py-6">
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div className="rounded-full bg-[#7C3AED]/20 p-2">
-                  <Zap className="w-5 h-5 text-[#7C3AED]" />
+                <div className="rounded-full bg-secondary p-2">
+                  <Zap className="w-5 h-5 text-primary" />
                 </div>
                 <div>
                   <h1 className="text-2xl font-extrabold">Flash</h1>
@@ -66,7 +66,7 @@ export default async function FlashPage({
               {hasFilters && (
                 <Link
                   href="/flash"
-                  className="text-xs text-[#7C3AED] hover:underline shrink-0"
+                  className="text-xs text-navy underline-offset-2 hover:underline shrink-0"
                 >
                   Clear filters
                 </Link>
@@ -77,9 +77,9 @@ export default async function FlashPage({
             <div className="mt-4 flex gap-2 overflow-x-auto pb-1 scrollbar-none">
               <Link
                 href="/flash"
-                className={`shrink-0 rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+                className={`shrink-0 rounded-lg border px-3 py-1 text-xs font-medium transition-colors ${
                   !searchParams.style
-                    ? "bg-[#7C3AED] border-[#7C3AED] text-white"
+                    ? "bg-primary border-ink text-primary-foreground"
                     : "border-border text-muted-foreground hover:bg-muted/60"
                 }`}
               >
@@ -92,9 +92,9 @@ export default async function FlashPage({
                   <Link
                     key={s.slug}
                     href={`/flash?${params}`}
-                    className={`shrink-0 rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+                    className={`shrink-0 rounded-lg border px-3 py-1 text-xs font-medium transition-colors ${
                       activeStyle === s.slug
-                        ? "bg-[#7C3AED] border-[#7C3AED] text-white"
+                        ? "bg-primary border-ink text-primary-foreground"
                         : "border-border text-muted-foreground hover:bg-muted/60"
                     }`}
                   >

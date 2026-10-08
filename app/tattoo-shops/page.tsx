@@ -26,7 +26,7 @@ export default async function TattooShopsIndexPage() {
         <div className="border-b border-border/50 bg-muted/30">
           <div className="container mx-auto px-4 py-8">
             <div className="flex items-center gap-3 mb-2">
-              <MapPin className="w-6 h-6 text-[#7C3AED]" />
+              <MapPin className="w-6 h-6 text-primary" />
               <h1 className="text-3xl font-extrabold">Tattoo Shops in the US</h1>
             </div>
             <p className="text-muted-foreground">
@@ -44,9 +44,9 @@ export default async function TattooShopsIndexPage() {
                 <Link
                   key={state}
                   href={`/tattoo-shops/${slug}`}
-                  className="group flex flex-col p-4 rounded-xl border border-border/50 bg-card hover:border-[#7C3AED]/40 hover:shadow-md transition-all"
+                  className="group flex flex-col p-4 rounded-lg border border-border/50 bg-card hover:border-ink transition-all"
                 >
-                  <span className="font-bold text-sm group-hover:text-[#7C3AED] transition-colors">{name}</span>
+                  <span className="font-bold text-sm group-hover:text-navy transition-colors">{name}</span>
                   <span className="text-xs text-muted-foreground mt-1">{count.toLocaleString()} shops</span>
                 </Link>
               )

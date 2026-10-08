@@ -92,7 +92,7 @@ export function MapSidebar({
       */}
       <div
         className={`
-        sidebar-modern flex flex-col transition-all duration-500 ease-out shadow-2xl
+        sidebar-modern flex flex-col transition-all duration-500 ease-out
         fixed inset-y-0 left-0 z-40 md:relative md:inset-auto md:z-30
         ${isOpen ? "w-full max-w-[420px] md:w-[420px]" : "w-0"}
         ${isOpen ? "opacity-100" : "opacity-0 pointer-events-none"}
@@ -108,7 +108,7 @@ export function MapSidebar({
               variant="ghost"
               size="sm"
               onClick={() => setShowFilters(!showFilters)}
-              className={`sidebar-button rounded-full w-10 h-10 p-0 ${showFilters ? "bg-accent/10 text-accent" : ""}`}
+              className={`sidebar-button rounded-full w-10 h-10 p-0 ${showFilters ? "bg-secondary text-primary" : ""}`}
             >
               <Filter className="w-4 h-4" />
             </Button>
@@ -190,7 +190,7 @@ export function MapSidebar({
                 Array.from({ length: 3 }).map((_, i) => (
                   <div key={i} className="sidebar-card p-6 animate-pulse">
                     <div className="flex items-start gap-4">
-                      <div className="w-20 h-20 bg-muted rounded-xl"></div>
+                      <div className="w-20 h-20 bg-muted rounded-lg"></div>
                       <div className="flex-1 space-y-3">
                         <div className="h-5 bg-muted rounded-lg w-3/4"></div>
                         <div className="h-4 bg-muted rounded-lg w-1/2"></div>
@@ -225,7 +225,7 @@ export function MapSidebar({
                       <img
                         src={location.image || "/placeholder.svg?height=80&width=80&query=tattoo shop"}
                         alt={location.name}
-                        className="w-20 h-20 location-card-image group-hover:scale-105"
+                        className="w-20 h-20 location-card-image"
                       />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between mb-3">
@@ -239,10 +239,10 @@ export function MapSidebar({
                                 {location.type}
                               </Badge>
                               <span
-                                className={`text-xs font-medium px-2 py-1 rounded-full ${
+                                className={`text-xs font-medium px-2 py-1 rounded-lg ${
                                   location.isOpen
-                                    ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                                    : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                                    ? "bg-success text-success-foreground"
+                                    : "bg-destructive text-destructive-foreground"
                                 }`}
                               >
                                 {location.isOpen ? "Open" : "Closed"}
@@ -257,7 +257,7 @@ export function MapSidebar({
                               <Star
                                 key={i}
                                 className={`w-4 h-4 ${
-                                  i < Math.floor(location.rating) ? "fill-yellow-400 text-yellow-400" : "text-border"
+                                  i < Math.floor(location.rating) ? "fill-flash-yellow text-flash-yellow" : "text-border"
                                 }`}
                               />
                             ))}

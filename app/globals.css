@@ -90,11 +90,11 @@
 @layer components {
   /* Adding pricing guide specific components */
   .pricing-card {
-    @apply bg-card border border-border rounded-xl p-6 hover:border-accent/50 transition-all duration-300 relative overflow-hidden;
+    @apply bg-card border border-border rounded-lg p-6 hover:border-ink transition-all duration-300 relative overflow-hidden;
   }
 
   .pricing-card-featured {
-    @apply border-accent shadow-lg shadow-accent/20;
+    @apply border-ink border-1.5;
   }
 
   .pricing-calculator {
@@ -108,7 +108,7 @@
   /* Custom scrollbar */
   .scrollbar-ink {
     scrollbar-width: thin;
-    scrollbar-color: theme("colors.ink-purple.400") theme("colors.ink-gray.100");
+    scrollbar-color: hsl(var(--rule)) transparent;
   }
 
   .scrollbar-ink::-webkit-scrollbar {
@@ -116,15 +116,16 @@
   }
 
   .scrollbar-ink::-webkit-scrollbar-track {
-    @apply bg-ink-gray-100 dark:bg-ink-dark-800;
+    background: transparent;
   }
 
   .scrollbar-ink::-webkit-scrollbar-thumb {
-    @apply bg-ink-purple-400 rounded-full;
+    background: hsl(var(--rule));
+    border-radius: 9999px;
   }
 
   .scrollbar-ink::-webkit-scrollbar-thumb:hover {
-    @apply bg-ink-purple-500;
+    background: hsl(var(--ink-muted));
   }
 
   /* Hero-specific components inspired by design inspiration */
@@ -146,13 +147,9 @@
     @apply bg-primary text-primary-foreground hover:bg-primary/90 font-medium px-8 py-4 rounded-lg transition-all duration-300 hover:scale-105;
   }
 
-  .hero-button-secondary {
-    @apply border border-white/30 text-white hover:bg-white/10 font-medium px-8 py-4 rounded-full transition-all duration-300;
-  }
-
   /* Modern sidebar components inspired by design inspiration */
   .sidebar-modern {
-    @apply bg-background border-r border-border backdrop-blur-xl;
+    @apply bg-background border-r border-border;
   }
 
   .sidebar-header {
@@ -160,11 +157,11 @@
   }
 
   .modern-location-card {
-    @apply bg-card border border-border/50 rounded-xl hover:border-accent/30 hover:bg-muted/50 transition-all duration-300 cursor-pointer;
+    @apply bg-card border border-border/50 rounded-lg hover:border-ink hover:bg-muted/50 transition-all duration-300 cursor-pointer;
   }
 
   .modern-location-card-selected {
-    @apply border-accent bg-accent/5 shadow-sm;
+    @apply border-ink bg-secondary;
   }
 
   .sidebar-filter-section {
@@ -172,15 +169,15 @@
   }
 
   .sidebar-search {
-    @apply bg-card border border-border/50 rounded-xl focus-within:border-accent/50 focus-within:ring-1 focus-within:ring-accent/20 transition-all duration-200;
+    @apply bg-card border border-border/50 rounded-lg focus-within:border-ink focus-within:ring-1 focus-within:ring-ring transition-all duration-200;
   }
 
   .sidebar-button {
-    @apply bg-card hover:bg-muted/50 border border-border/50 text-foreground hover:border-accent/30 rounded-lg transition-all duration-200;
+    @apply bg-card hover:bg-muted/50 border border-border/50 text-foreground hover:border-ink rounded-lg transition-all duration-200;
   }
 
   .sidebar-toggle {
-    @apply bg-card/90 backdrop-blur-sm border border-border/50 hover:bg-muted/50 shadow-lg hover:shadow-xl transition-all duration-300;
+    @apply bg-card border border-border/50 hover:bg-muted/50 transition-all duration-300;
   }
 
   .location-card-image {
@@ -188,27 +185,14 @@
   }
 
   .filter-badge {
-    @apply bg-accent/10 text-accent-text border-accent/20 hover:bg-accent/20 transition-colors duration-200;
+    @apply bg-secondary text-primary border-ink hover:bg-secondary transition-colors duration-200;
   }
 }
 
 @layer utilities {
-  /* Animation utilities */
-  .animate-fade-in {
-    animation: fade-in 0.5s ease-out;
-  }
-
-  .animate-slide-up {
-    animation: slide-up 0.3s ease-out;
-  }
-
-  /* Hero animation utilities */
+  /* Hero animation utilities (animate-float: hero-section only, rebuilt later) */
   .animate-float {
     animation: float 6s ease-in-out infinite;
-  }
-
-  .animate-pulse-slow {
-    animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
 
   @keyframes float {

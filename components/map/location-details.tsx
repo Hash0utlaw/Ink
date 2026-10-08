@@ -66,7 +66,7 @@ export function LocationDetails({ location, isOpen, onClose }: LocationDetailsPr
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-2">
-                <DialogTitle className="text-2xl font-bold text-gray-900">{location.name}</DialogTitle>
+                <DialogTitle className="text-2xl font-bold text-foreground">{location.name}</DialogTitle>
                 <Badge variant={location.type === "artist" ? "default" : "secondary"} className="text-sm">
                   {location.type}
                 </Badge>
@@ -77,19 +77,19 @@ export function LocationDetails({ location, isOpen, onClose }: LocationDetailsPr
                     <Star
                       key={i}
                       className={`w-5 h-5 ${
-                        i < Math.floor(location.rating) ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
+                        i < Math.floor(location.rating) ? "fill-flash-yellow text-flash-yellow" : "text-border"
                       }`}
                     />
                   ))}
                 </div>
                 <span className="text-lg font-semibold">{location.rating}</span>
-                <span className="text-gray-500">({location.reviewCount} reviews)</span>
+                <span className="text-muted-foreground">({location.reviewCount} reviews)</span>
               </div>
-              <div className="flex items-center gap-2 text-gray-600">
+              <div className="flex items-center gap-2 text-muted-foreground">
                 <MapPin className="w-5 h-5" />
                 <span className="text-lg">{location.address}</span>
                 {location.distance && (
-                  <span className="text-gray-500">
+                  <span className="text-muted-foreground">
                     •{" "}
                     {location.distance < 1
                       ? `${(location.distance * 5280).toFixed(0)} ft away`
@@ -98,7 +98,7 @@ export function LocationDetails({ location, isOpen, onClose }: LocationDetailsPr
                 )}
               </div>
             </div>
-            <Button variant="ghost" size="sm" onClick={onClose} className="text-gray-400 hover:text-gray-600">
+            <Button variant="ghost" size="sm" onClick={onClose} className="text-muted-foreground hover:text-foreground">
               <X className="w-5 h-5" />
             </Button>
           </div>
@@ -115,7 +115,7 @@ export function LocationDetails({ location, isOpen, onClose }: LocationDetailsPr
                     <img
                       src={image || "/placeholder.svg"}
                       alt={`${location.name} portfolio ${index + 1}`}
-                      className="w-full h-full object-cover rounded-lg hover:scale-105 transition-transform cursor-pointer"
+                      className="w-full h-full object-cover rounded-lg transition-transform cursor-pointer"
                     />
                   </div>
                 ))}
@@ -127,7 +127,7 @@ export function LocationDetails({ location, isOpen, onClose }: LocationDetailsPr
           <Card>
             <CardContent className="p-6">
               <h3 className="text-xl font-semibold mb-3">About</h3>
-              <p className="text-gray-600 leading-relaxed">{location.description}</p>
+              <p className="text-muted-foreground leading-relaxed">{location.description}</p>
             </CardContent>
           </Card>
 
@@ -155,12 +155,12 @@ export function LocationDetails({ location, isOpen, onClose }: LocationDetailsPr
                 <h3 className="text-xl font-semibold mb-4">Contact</h3>
                 <div className="space-y-3">
                   <div className="flex items-center gap-3">
-                    <Phone className="w-5 h-5 text-gray-400" />
+                    <Phone className="w-5 h-5 text-muted-foreground" />
                     <span className="text-lg">(555) 123-4567</span>
                   </div>
                   {location.website && (
                     <div className="flex items-center gap-3">
-                      <Globe className="w-5 h-5 text-gray-400" />
+                      <Globe className="w-5 h-5 text-muted-foreground" />
                       <a
                         href={location.website}
                         target="_blank"
@@ -183,7 +183,7 @@ export function LocationDetails({ location, isOpen, onClose }: LocationDetailsPr
                   {Object.entries(location.hours ?? {}).map(([day, hours]) => (
                     <div key={day} className="flex justify-between">
                       <span className="capitalize font-medium">{day}</span>
-                      <span className="text-gray-600">{hours}</span>
+                      <span className="text-muted-foreground">{hours}</span>
                     </div>
                   ))}
                 </div>
@@ -202,22 +202,22 @@ export function LocationDetails({ location, isOpen, onClose }: LocationDetailsPr
             <CardContent className="p-6">
               <h3 className="text-xl font-semibold mb-4">Pricing</h3>
               <div className="flex items-center gap-3">
-                <span className="text-gray-600">Price Range:</span>
+                <span className="text-muted-foreground">Price Range:</span>
                 <div className="flex">
                   {Array.from({ length: 3 }).map((_, i) => (
                     <span
                       key={i}
                       className={`text-xl ${
                         i < (location.priceRange === "low" ? 1 : location.priceRange === "medium" ? 2 : 3)
-                          ? "text-green-600"
-                          : "text-gray-300"
+                          ? "text-success"
+                          : "text-muted-foreground"
                       }`}
                     >
                       $
                     </span>
                   ))}
                 </div>
-                <span className="text-gray-500 capitalize">({location.priceRange})</span>
+                <span className="text-muted-foreground capitalize">({location.priceRange})</span>
               </div>
             </CardContent>
           </Card>
@@ -241,7 +241,7 @@ export function LocationDetails({ location, isOpen, onClose }: LocationDetailsPr
                 <Button
                   variant="outline"
                   onClick={handleFavorite}
-                  className={isFavorited ? "text-red-500 border-red-500" : ""}
+                  className={isFavorited ? "text-destructive border-destructive" : ""}
                 >
                   <Heart className={`w-4 h-4 mr-2 ${isFavorited ? "fill-current" : ""}`} />
                   {isFavorited ? "Saved" : "Save"}

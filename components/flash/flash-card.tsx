@@ -27,18 +27,18 @@ export function FlashCard({ listing, initialSaved }: FlashCardProps) {
   const bookHref = `/book/${listing.artistHandle || listing.artistId}?flash=${listing.id}`
 
   return (
-    <div className="group relative flex flex-col rounded-xl overflow-hidden border border-border/50 bg-card hover:border-[#7C3AED]/40 transition-all hover:shadow-lg hover:shadow-[#7C3AED]/10">
+    <div className="group relative flex flex-col rounded-lg overflow-hidden border border-border/50 bg-card hover:border-ink transition-all">
       {/* Image */}
       <div className="relative aspect-square overflow-hidden bg-muted">
         <Image
           src={safeImageSrc(listing.imageUrl)}
           alt={listing.title}
           fill
-          className="object-cover group-hover:scale-105 transition-transform duration-300"
+          className="object-cover transition-transform duration-300"
         />
         <div className="absolute top-2 right-2 z-10 flex flex-col items-end gap-1">
           {listing.isExclusive && (
-            <Badge className="bg-[#7C3AED] text-white border-0 gap-1 text-xs shadow-md">
+            <Badge className="bg-primary text-primary-foreground border-0 gap-1 text-xs">
               <Sparkles className="w-3 h-3" />
               Exclusive
             </Badge>
@@ -46,7 +46,7 @@ export function FlashCard({ listing, initialSaved }: FlashCardProps) {
           <SaveButton itemType="artist" itemId={listing.artistId} variant="icon" initialSaved={initialSaved} />
         </div>
         <div className="absolute bottom-2 left-2">
-          <span className="bg-black/70 text-white text-sm font-bold px-2 py-0.5 rounded-md backdrop-blur-sm">
+          <span className="bg-black/70 text-white text-sm font-bold px-2 py-0.5 rounded-md">
             {priceLabel(listing)}
           </span>
         </div>
@@ -72,14 +72,14 @@ export function FlashCard({ listing, initialSaved }: FlashCardProps) {
           >
             <Avatar className="w-5 h-5 shrink-0">
               <AvatarImage src={listing.artistAvatar} alt={listing.artistName} />
-              <AvatarFallback className="text-[8px] bg-accent/20 text-accent-text">{initials(listing.artistName)}</AvatarFallback>
+              <AvatarFallback className="text-[8px] bg-vellum text-ink border-1.5 border-ink">{initials(listing.artistName)}</AvatarFallback>
             </Avatar>
             <span className="text-xs text-muted-foreground truncate">{listing.artistName}</span>
           </Link>
 
           <Button
             size="sm"
-            className="shrink-0 h-7 text-xs bg-[#7C3AED] hover:bg-[#6D28D9] px-2.5"
+            className="shrink-0 h-7 text-xs bg-primary hover:bg-primary/90 px-2.5"
             asChild
           >
             <Link href={bookHref}>Book</Link>

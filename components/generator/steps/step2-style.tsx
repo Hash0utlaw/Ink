@@ -31,8 +31,8 @@ export function Step2Style({ formData, updateFormData }: StepProps) {
             className={cn(
               "cursor-pointer transition-all duration-200",
               formData.style === style.name
-                ? "border-accent ring-2 ring-accent shadow-lg"
-                : "border-border hover:border-accent/50",
+                ? "border-ink ring-2 ring-ring"
+                : "border-border hover:border-ink",
             )}
           >
             <CardContent className="p-0 aspect-square flex flex-col justify-end">
@@ -41,7 +41,7 @@ export function Step2Style({ formData, updateFormData }: StepProps) {
                 alt={style.name}
                 className="w-full h-full object-cover absolute inset-0 rounded-lg"
               />
-              <div className="relative z-10 p-2 bg-gradient-to-t from-black/80 to-transparent w-full rounded-b-lg">
+              <div className="relative z-10 p-2 w-full rounded-b-lg bg-navy">
                 <h3 className="font-bold text-white text-center">{style.name}</h3>
               </div>
             </CardContent>

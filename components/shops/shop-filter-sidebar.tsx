@@ -89,7 +89,7 @@ export function ShopFilterSidebar({ filters, onFilterChange, onNearMe }: ShopFil
     <Card className="sticky top-20 bg-muted/50 border-border/50">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Filter className="text-accent" />
+          <Filter className="text-primary" />
           Filters
         </CardTitle>
       </CardHeader>

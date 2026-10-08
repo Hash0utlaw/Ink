@@ -77,7 +77,7 @@ export function PublicBookingForm({ artistId, artistName, prefill }: PublicBooki
   if (submitted) {
     return (
       <div className="flex flex-col items-center gap-4 py-12 text-center">
-        <CheckCircle2 className="w-16 h-16 text-green-500" />
+        <CheckCircle2 className="w-16 h-16 text-success" />
         <h3 className="text-xl font-bold">Request Sent!</h3>
         <p className="text-muted-foreground text-sm max-w-xs">
           {artistName} will review your brief and respond within 24 hours.
@@ -93,9 +93,9 @@ export function PublicBookingForm({ artistId, artistName, prefill }: PublicBooki
         {[1, 2, 3].map((s) => (
           <div key={s} className="flex items-center gap-2">
             <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${
-              step > s ? "bg-green-500 text-white" : step === s ? "bg-[#7C3AED] text-white" : "bg-muted text-muted-foreground"
+              step > s ? "bg-success text-success-foreground" : step === s ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
             }`}>{s}</div>
-            {s < 3 && <div className={`h-px flex-1 w-8 ${step > s ? "bg-green-500" : "bg-border"}`} />}
+            {s < 3 && <div className={`h-px flex-1 w-8 ${step > s ? "bg-success" : "bg-border"}`} />}
           </div>
         ))}
         <span className="text-xs text-muted-foreground ml-2">
@@ -123,7 +123,7 @@ export function PublicBookingForm({ artistId, artistName, prefill }: PublicBooki
             />
           </div>
           <Button
-            className="w-full bg-[#7C3AED] hover:bg-[#6D28D9]"
+            className="w-full bg-primary hover:bg-primary/90"
             disabled={!description.trim()}
             onClick={() => setStep(2)}
           >
@@ -143,7 +143,7 @@ export function PublicBookingForm({ artistId, artistName, prefill }: PublicBooki
                   type="button"
                   onClick={() => setStyle(s)}
                   className={`rounded-md border px-2 py-2 text-xs font-medium transition-colors ${
-                    style === s ? "border-[#7C3AED] bg-[#7C3AED]/10 text-[#7C3AED]" : "border-border bg-muted/30 text-muted-foreground hover:bg-muted/60"
+                    style === s ? "border-ink bg-secondary text-primary" : "border-border bg-muted/30 text-muted-foreground hover:bg-muted/60"
                   }`}
                 >
                   {s}
@@ -160,7 +160,7 @@ export function PublicBookingForm({ artistId, artistName, prefill }: PublicBooki
                   type="button"
                   onClick={() => setSize(s)}
                   className={`rounded-md border px-2 py-1.5 text-xs font-medium transition-colors ${
-                    size === s ? "border-[#7C3AED] bg-[#7C3AED]/10 text-[#7C3AED]" : "border-border bg-muted/30 text-muted-foreground hover:bg-muted/60"
+                    size === s ? "border-ink bg-secondary text-primary" : "border-border bg-muted/30 text-muted-foreground hover:bg-muted/60"
                   }`}
                 >
                   {s}
@@ -177,7 +177,7 @@ export function PublicBookingForm({ artistId, artistName, prefill }: PublicBooki
                   type="button"
                   onClick={() => setBudget(b)}
                   className={`rounded-md border px-2 py-2 text-xs font-medium transition-colors ${
-                    budget === b ? "border-[#7C3AED] bg-[#7C3AED]/10 text-[#7C3AED]" : "border-border bg-muted/30 text-muted-foreground hover:bg-muted/60"
+                    budget === b ? "border-ink bg-secondary text-primary" : "border-border bg-muted/30 text-muted-foreground hover:bg-muted/60"
                   }`}
                 >
                   {b}
@@ -191,7 +191,7 @@ export function PublicBookingForm({ artistId, artistName, prefill }: PublicBooki
           </div>
           <div className="flex gap-2">
             <Button variant="outline" className="flex-1" onClick={() => setStep(1)}>← Back</Button>
-            <Button className="flex-1 bg-[#7C3AED] hover:bg-[#6D28D9]" onClick={() => setStep(3)}>Next →</Button>
+            <Button className="flex-1 bg-primary hover:bg-primary/90" onClick={() => setStep(3)}>Next →</Button>
           </div>
         </div>
       )}
@@ -211,12 +211,12 @@ export function PublicBookingForm({ artistId, artistName, prefill }: PublicBooki
             <Input type="tel" placeholder="(555) 000-0000" value={phone} onChange={(e) => setPhone(e.target.value)} />
           </div>
 
-          {error && <p className="text-sm text-red-500">{error}</p>}
+          {error && <p className="text-sm text-destructive">{error}</p>}
 
           <div className="flex gap-2">
             <Button variant="outline" className="flex-1" onClick={() => setStep(2)} disabled={submitting}>← Back</Button>
             <Button
-              className="flex-1 bg-[#7C3AED] hover:bg-[#6D28D9]"
+              className="flex-1 bg-primary hover:bg-primary/90"
               disabled={!name.trim() || !email.trim() || submitting}
               onClick={handleSubmit}
             >
@@ -225,7 +225,7 @@ export function PublicBookingForm({ artistId, artistName, prefill }: PublicBooki
           </div>
 
           <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
-            <ShieldCheck className="w-3.5 h-3.5 text-[#7C3AED]" />
+            <ShieldCheck className="w-3.5 h-3.5 text-primary" />
             No payment required — artist reviews and responds within 24 hrs
           </div>
         </div>

@@ -20,8 +20,8 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         <div className="absolute inset-0 hero-grid opacity-40" />
 
         {/* Ambient glow orbs */}
-        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-accent/20 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-48 h-48 bg-[hsl(var(--hero-accent))]/15 rounded-full blur-3xl" />
+        <div className="absolute top-1/4 left-1/4 w-64 h-64 rounded-full" />
+        <div className="absolute bottom-1/4 right-1/4 w-48 h-48 rounded-full" />
 
         {/* Image mosaic */}
         <div className="absolute inset-0 grid grid-cols-3 grid-rows-2 gap-1 p-1 opacity-30">
@@ -37,13 +37,13 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         </div>
 
         {/* Dark overlay over mosaic */}
-        <div className="absolute inset-0 bg-gradient-to-br from-background/90 via-background/70 to-background/85" />
+        <div className="absolute inset-0 bg-card/80" />
 
         {/* Content */}
         <div className="relative z-10 flex flex-col justify-between h-full p-10 xl:p-14">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5 w-fit">
-            <div className="w-9 h-9 bg-accent rounded-xl flex items-center justify-center shadow-lg shadow-accent/30">
+            <div className="w-9 h-9 bg-primary rounded-lg flex items-center justify-center">
               <MapPin className="w-5 h-5 text-white" />
             </div>
             <span className="text-xl font-bold text-foreground">TattooMaps</span>
@@ -54,7 +54,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             <div className="space-y-4">
               <h1 className="text-4xl xl:text-5xl font-black tracking-tight text-foreground leading-tight">
                 Find Your Next
-                <span className="block text-transparent bg-gradient-to-r from-accent via-[hsl(var(--hero-accent))] to-[hsl(var(--hero-secondary))] bg-clip-text">
+                <span className="block text-foreground">
                   Masterpiece
                 </span>
               </h1>
@@ -72,8 +72,8 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
                 { icon: Star, text: "Listings in all 50 states" },
               ].map(({ icon: Icon, text }) => (
                 <li key={text} className="flex items-center gap-3 text-sm text-muted-foreground">
-                  <div className="w-7 h-7 rounded-lg bg-accent/15 border border-accent/25 flex items-center justify-center shrink-0">
-                    <Icon className="w-3.5 h-3.5 text-accent" />
+                  <div className="w-7 h-7 rounded-lg bg-secondary border border-ink flex items-center justify-center shrink-0">
+                    <Icon className="w-3.5 h-3.5 text-primary" />
                   </div>
                   {text}
                 </li>
@@ -106,7 +106,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         {/* Mobile-only top bar */}
         <div className="lg:hidden flex items-center justify-between p-5 border-b border-border/40">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
               <MapPin className="w-4 h-4 text-white" />
             </div>
             <span className="font-bold text-foreground">TattooMaps</span>

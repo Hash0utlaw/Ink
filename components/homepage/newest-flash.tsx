@@ -22,12 +22,12 @@ export function NewestFlash({ listings }: NewestFlashProps) {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
-            <Zap className="w-5 h-5 text-[#7C3AED]" />
+            <Zap className="w-5 h-5 text-primary" />
             <h2 className="text-2xl font-extrabold">Newest Flash</h2>
           </div>
           <Link
             href="/flash"
-            className="flex items-center gap-1 text-sm text-[#7C3AED] hover:underline"
+            className="flex items-center gap-1 text-sm text-navy underline-offset-2 hover:underline"
           >
             View all <ArrowRight className="w-3.5 h-3.5" />
           </Link>
@@ -40,25 +40,25 @@ export function NewestFlash({ listings }: NewestFlashProps) {
               <Link
                 key={listing.id}
                 href={bookHref}
-                className="group shrink-0 w-48 flex flex-col rounded-xl overflow-hidden border border-border/50 bg-card hover:border-[#7C3AED]/40 transition-all hover:shadow-lg hover:shadow-[#7C3AED]/10"
+                className="group shrink-0 w-48 flex flex-col rounded-lg overflow-hidden border border-border/50 bg-card hover:border-ink transition-all"
               >
                 <div className="relative aspect-square overflow-hidden bg-muted">
                   <Image
                     src={safeImageSrc(listing.imageUrl)}
                     alt={listing.title}
                     fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    className="object-cover transition-transform duration-300"
                   />
                   {listing.isExclusive && (
                     <div className="absolute top-2 right-2">
-                      <Badge className="bg-[#7C3AED] text-white border-0 gap-1 text-xs">
+                      <Badge className="bg-primary text-primary-foreground border-0 gap-1 text-xs">
                         <Sparkles className="w-2.5 h-2.5" />
                         Excl.
                       </Badge>
                     </div>
                   )}
                   <div className="absolute bottom-2 left-2">
-                    <span className="bg-black/70 text-white text-xs font-bold px-1.5 py-0.5 rounded backdrop-blur-sm">
+                    <span className="bg-black/70 text-white text-xs font-bold px-1.5 py-0.5 rounded">
                       ${listing.price}{listing.priceMax ? `–$${listing.priceMax}` : ""}
                     </span>
                   </div>
@@ -90,12 +90,12 @@ export function NewestFlashSkeleton() {
     <section className="py-12 border-t border-border/50">
       <div className="container mx-auto px-4">
         <div className="flex items-center gap-2 mb-6">
-          <Zap className="w-5 h-5 text-[#7C3AED]" />
+          <Zap className="w-5 h-5 text-primary" />
           <div className="h-7 w-36 rounded bg-muted animate-pulse" />
         </div>
         <div className="flex gap-4 overflow-x-auto pb-3">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="shrink-0 w-48 rounded-xl bg-muted animate-pulse aspect-[3/4]" />
+            <div key={i} className="shrink-0 w-48 rounded-lg bg-muted animate-pulse aspect-[3/4]" />
           ))}
         </div>
       </div>

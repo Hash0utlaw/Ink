@@ -37,7 +37,7 @@ export function StyleGallery({ images, styleName }: StyleGalleryProps) {
             <button
               key={src + i}
               type="button"
-              className="group relative overflow-hidden rounded-xl aspect-square cursor-zoom-in w-full block border border-border/50 hover:border-primary/40 transition-colors bg-muted"
+              className="group relative overflow-hidden rounded-lg aspect-square cursor-zoom-in w-full block border border-border/50 hover:border-primary/40 transition-colors bg-muted"
               onClick={() => !failed && setLightboxSrc(src)}
               aria-label={`View ${styleName} example ${i + 1}`}
             >
@@ -48,7 +48,7 @@ export function StyleGallery({ images, styleName }: StyleGalleryProps) {
                   <img
                     src={src}
                     alt={`${styleName} tattoo example ${i + 1}`}
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    className="h-full w-full object-cover transition-transform duration-500"
                     loading={i < 4 ? "eager" : "lazy"}
                     onError={() => handleError(src)}
                   />
@@ -66,7 +66,7 @@ export function StyleGallery({ images, styleName }: StyleGalleryProps) {
       {/* Lightbox */}
       {lightboxSrc && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
           onClick={() => setLightboxSrc(null)}
         >
           <button
@@ -80,7 +80,7 @@ export function StyleGallery({ images, styleName }: StyleGalleryProps) {
           <img
             src={lightboxSrc}
             alt="Selected tattoo example"
-            className="max-h-[90vh] max-w-[90vw] object-contain rounded-xl shadow-2xl"
+            className="max-h-[90vh] max-w-[90vw] object-contain rounded-lg"
             onClick={(e) => e.stopPropagation()}
           />
         </div>

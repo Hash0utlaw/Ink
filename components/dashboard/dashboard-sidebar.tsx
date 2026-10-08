@@ -33,7 +33,7 @@ export function DashboardSidebar() {
           </Button>
         ))}
         <hr className="my-2 border-border/50" />
-        <Button variant="ghost" className="justify-start text-red-500 hover:text-red-500 hover:bg-red-500/10">
+        <Button variant="ghost" className="justify-start text-destructive hover:text-destructive hover:bg-destructive/10">
           <LogOut className="mr-2 h-4 w-4" />
           Log Out
         </Button>

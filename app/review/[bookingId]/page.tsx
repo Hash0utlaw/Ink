@@ -23,7 +23,7 @@ export default async function ReviewPage({ params }: { params: { bookingId: stri
         <Header />
         <main className="flex-1 flex items-center justify-center px-4">
           <div className="text-center space-y-4 max-w-sm">
-            <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto" />
+            <CheckCircle2 className="w-16 h-16 text-success mx-auto" />
             <h1 className="text-2xl font-bold">Review already submitted</h1>
             <p className="text-muted-foreground">Thanks for sharing your experience!</p>
           </div>
