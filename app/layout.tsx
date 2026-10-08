@@ -1,15 +1,22 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Poppins } from "next/font/google"
+import localFont from "next/font/local"
 import "./globals.css"
 import { cn } from "@/lib/utils"
 import { Toaster } from "@/components/ui/toaster"
 import { AdminGateBanner } from "@/components/layout/admin-gate-banner"
 import { SITE_URL } from "@/lib/site-config"
 
-const poppins = Poppins({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800", "900"],
+// Poppins (latin, 400–900) is stored in app/fonts so builds never fetch from Google Fonts.
+const poppins = localFont({
+  src: [
+    { path: "./fonts/poppins-latin-400-normal.woff2", weight: "400", style: "normal" },
+    { path: "./fonts/poppins-latin-500-normal.woff2", weight: "500", style: "normal" },
+    { path: "./fonts/poppins-latin-600-normal.woff2", weight: "600", style: "normal" },
+    { path: "./fonts/poppins-latin-700-normal.woff2", weight: "700", style: "normal" },
+    { path: "./fonts/poppins-latin-800-normal.woff2", weight: "800", style: "normal" },
+    { path: "./fonts/poppins-latin-900-normal.woff2", weight: "900", style: "normal" },
+  ],
   variable: "--font-poppins",
 })
 

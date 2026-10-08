@@ -1,9 +1,10 @@
 // propose-non-tattoo-deactivation.ts
 // REPORT ONLY — never writes to the database. Narrows data/non-tattoo-review.csv
 // to a proposed deactivation list:
-//   - supply stores (\bsupply\b|\bsupplies\b), even if the name says tattoo, and
-//   - PMU / brow / lash / salon / nail / vape / laser-removal names that do NOT
-//     contain tattoo or ink anywhere (substring, so "Inkredible Brows" stays).
+//   - supply stores (\bsupply\b|\bsupplies\b) and PMU / brow / lash / salon /
+//     nail / vape / laser-removal names, in both cases only when the name does
+//     NOT contain tattoo or ink anywhere (substring, so "Tattoo & Supply" and
+//     "Inkredible Brows" stay).
 // Writes data/non-tattoo-deactivate-proposed.csv with decision = "remove" for
 // a human to edit before anything is applied.
 // Run: npx tsx scripts/propose-non-tattoo-deactivation.ts
@@ -21,9 +22,9 @@ const TATTOO_WORD = /tattoo|ink/i
 
 // The term that puts a name on the list, or null if it stays.
 function proposeTerm(name: string): string | null {
+  if (TATTOO_WORD.test(name)) return null
   const supply = name.match(SUPPLY)
   if (supply) return supply[1].toLowerCase()
-  if (TATTOO_WORD.test(name)) return null
   const m = name.match(NON_TATTOO)
   if (!m) return null
   const term = m[1].toLowerCase()

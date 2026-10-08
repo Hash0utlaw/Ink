@@ -1,95 +1,76 @@
 import { createClient } from "@/utils/supabase/server"
 import type { Shop } from "@/types/shop"
-import { stateSlugToAbbr, citySlugToName } from "@/lib/utils/states"
+import { cache } from "react"
+import { STATE_ABBR_TO_NAME, stateSlugToAbbr, citySlugToName, groupCitiesBySlug, type CityGroup } from "@/lib/utils/states"
 import { SHOP_STYLES_EMBED, shopStylesFromRow } from "./shop-styles"
 
-// All distinct states with shop counts
+// States with shop counts, most shops first. Counted exactly like each state
+// page (the sum of getCitiesForState): listed shops with a known state and a
+// city. Pages past PostgREST's 1000-row cap.
 export async function getStatesWithShopCounts(): Promise<{ state: string; count: number }[]> {
   try {
     const supabase = createClient()
-    const { data, error } = await supabase.rpc
-      ? await supabase
-          .from("shops")
-          .select("state")
-          .eq("is_active", true)
-          .eq("possibly_closed", false)
-          .not("state", "is", null)
-          .neq("state", "")
-      : { data: null, error: new Error("no rpc") }
-
-    if (error || !data) return []
-
-    const counts: Record<string, number> = {}
-    for (const row of data as { state: string }[]) {
-      if (row.state) counts[row.state] = (counts[row.state] ?? 0) + 1
-    }
-    return Object.entries(counts)
-      .map(([state, count]) => ({ state, count }))
-      .sort((a, b) => b.count - a.count)
-  } catch {
-    return []
-  }
-}
-
-// All distinct city/state pairs — used for sitemap generation
-export async function getAllCityStatePairs(): Promise<{ city: string; state: string }[]> {
-  try {
-    const supabase = createClient()
-    const { data, error } = await supabase
-      .from("shops")
-      .select("city, state")
-      .eq("is_active", true)
-      .eq("possibly_closed", false)
-      .not("city", "is", null)
-      .not("state", "is", null)
-      .neq("city", "")
-      .neq("state", "")
-
-    if (error || !data) return []
-
-    const seen = new Set<string>()
-    const pairs: { city: string; state: string }[] = []
-    for (const row of data as { city: string; state: string }[]) {
-      const key = `${row.city}|${row.state}`
-      if (!seen.has(key)) {
-        seen.add(key)
-        pairs.push({ city: row.city, state: row.state })
+    const citiesByState = new Map<string, string[]>()
+    for (let from = 0; ; from += 1000) {
+      const { data, error } = await supabase
+        .from("shops")
+        .select("state, city")
+        .eq("is_active", true)
+        .eq("possibly_closed", false)
+        .not("state", "is", null)
+        .neq("state", "")
+        .not("city", "is", null)
+        .neq("city", "")
+        .order("id")
+        .range(from, from + 999)
+      if (error || !data) return []
+      for (const row of data as { state: string; city: string }[]) {
+        const state = row.state.toUpperCase()
+        if (!STATE_ABBR_TO_NAME[state]) continue // no state page for unknown codes
+        const list = citiesByState.get(state) ?? []
+        list.push(row.city)
+        citiesByState.set(state, list)
       }
+      if (data.length < 1000) break
     }
-    return pairs
-  } catch {
-    return []
-  }
-}
-
-// Cities for a given state, with shop counts
-export async function getCitiesForState(
-  stateAbbr: string
-): Promise<{ city: string; count: number }[]> {
-  try {
-    const supabase = createClient()
-    const { data, error } = await supabase
-      .from("shops")
-      .select("city")
-      .eq("is_active", true)
-      .eq("possibly_closed", false)
-      .eq("state", stateAbbr.toUpperCase())
-      .not("city", "is", null)
-      .neq("city", "")
-
-    if (error || !data) return []
-
-    const counts: Record<string, number> = {}
-    for (const row of data as { city: string }[]) {
-      if (row.city) counts[row.city] = (counts[row.city] ?? 0) + 1
-    }
-    return Object.entries(counts)
-      .map(([city, count]) => ({ city, count }))
+    return Array.from(citiesByState, ([state, cities]) => ({
+      state,
+      count: groupCitiesBySlug(cities).reduce((sum, c) => sum + c.count, 0),
+    }))
+      .filter((s) => s.count > 0)
       .sort((a, b) => b.count - a.count)
   } catch {
     return []
   }
 }
+
+// Cities for a given state, grouped by URL slug (spellings like "St. Louis"
+// and "St Louis" are one city), most shops first. Pages past PostgREST's
+// 1000-row cap; cached per request so the city page and its metadata share it.
+export const getCitiesForState = cache(async (stateAbbr: string): Promise<CityGroup[]> => {
+  try {
+    const supabase = createClient()
+    const cities: string[] = []
+    for (let from = 0; ; from += 1000) {
+      const { data, error } = await supabase
+        .from("shops")
+        .select("city")
+        .eq("is_active", true)
+        .eq("possibly_closed", false)
+        .eq("state", stateAbbr.toUpperCase())
+        .not("city", "is", null)
+        .neq("city", "")
+        .order("id")
+        .range(from, from + 999)
+      if (error || !data) return []
+      cities.push(...(data as { city: string }[]).map((r) => r.city))
+      if (data.length < 1000) break
+    }
+    return groupCitiesBySlug(cities)
+  } catch {
+    return []
+  }
+})
 
 // Top N cities globally by shop count — used for generateStaticParams
 export async function getTopCities(limit = 50): Promise<{ city: string; state: string; count: number }[]> {
@@ -129,9 +110,15 @@ export async function getShopsForCity(
   pageSize = 24
 ): Promise<{ data: Shop[]; count: number; cityName: string; stateAbbr: string }> {
   const stateAbbr = stateSlugToAbbr(stateSlug)
-  const cityName = citySlugToName(citySlug)
+  const slug = citySlug.toLowerCase()
 
-  if (!stateAbbr) return { data: [], count: 0, cityName, stateAbbr: "" }
+  if (!stateAbbr) return { data: [], count: 0, cityName: citySlugToName(slug), stateAbbr: "" }
+
+  // Match the slug against the state's slugified city names, so every
+  // spelling of the city ("St. Louis", "St Louis") is included.
+  const group = (await getCitiesForState(stateAbbr)).find((c) => c.slug === slug)
+  const cityName = group?.name ?? citySlugToName(slug)
+  if (!group) return { data: [], count: 0, cityName, stateAbbr }
 
   try {
     const supabase = createClient()
@@ -140,7 +127,7 @@ export async function getShopsForCity(
       .select(`*, ${SHOP_STYLES_EMBED}`, { count: "exact" })
       .eq("is_active", true)
       .eq("possibly_closed", false)
-      .ilike("city", cityName)
+      .in("city", group.spellings)
       .eq("state", stateAbbr)
       .order("rating", { ascending: false })
       .range(page * pageSize, (page + 1) * pageSize - 1)
@@ -181,33 +168,6 @@ function rowToShopMinimal(row: Record<string, unknown>): Shop {
   }
 }
 
-// All shop IDs for sitemap
-export async function getAllShopIds(): Promise<string[]> {
-  try {
-    const supabase = createClient()
-    const { data, error } = await supabase.from("shops").select("id").eq("is_active", true).eq("possibly_closed", false)
-    if (error || !data) return []
-    return (data as { id: string }[]).map((r) => r.id)
-  } catch {
-    return []
-  }
-}
-
-// All artist IDs for sitemap (active only)
-export async function getAllArtistIds(): Promise<string[]> {
-  try {
-    const supabase = createClient()
-    const { data, error } = await supabase
-      .from("artists")
-      .select("id")
-      .eq("is_active", true)
-    if (error || !data) return []
-    return (data as { id: string }[]).map((r) => r.id)
-  } catch {
-    return []
-  }
-}
-
 // Real platform-wide counts for the homepage hero stats
 export async function getPlatformStats(): Promise<{
   shopCount: number
@@ -237,5 +197,51 @@ export async function getPlatformStats(): Promise<{
     return { shopCount, artistCount, cityCount }
   } catch {
     return { shopCount: 0, artistCount: 0, cityCount: 0 }
+  }
+}
+
+// Escape LIKE wildcards so ilike is an exact, case-insensitive match.
+function likeExact(value: string): string {
+  return value.replace(/[\\%_]/g, (ch) => `\\${ch}`)
+}
+
+// True when another listed shop has the same name, city and state — its page
+// title then adds the street address so titles stay unique.
+export async function shopHasNameTwin(shop: Pick<Shop, "id" | "name" | "location">): Promise<boolean> {
+  try {
+    const supabase = createClient()
+    let q = supabase
+      .from("shops")
+      .select("id", { count: "exact", head: true })
+      .eq("is_active", true)
+      .eq("possibly_closed", false)
+      .ilike("name", likeExact(shop.name))
+      .neq("id", shop.id)
+    q = shop.location.city ? q.ilike("city", likeExact(shop.location.city)) : q.or("city.is.null,city.eq.")
+    q = shop.location.state ? q.eq("state", shop.location.state) : q.or("state.is.null,state.eq.")
+    const { count } = await q
+    return (count ?? 0) > 0
+  } catch {
+    return false
+  }
+}
+
+// True when another active artist has the same name, city and state — the
+// page title then adds the (unique) handle.
+export async function artistHasNameTwin(artist: { id: string; name: string; city: string; state: string }): Promise<boolean> {
+  try {
+    const supabase = createClient()
+    let q = supabase
+      .from("artists")
+      .select("id", { count: "exact", head: true })
+      .eq("is_active", true)
+      .ilike("display_name", likeExact(artist.name))
+      .neq("id", artist.id)
+    q = artist.city ? q.ilike("city", likeExact(artist.city)) : q.or("city.is.null,city.eq.")
+    q = artist.state ? q.eq("state", artist.state) : q.or("state.is.null,state.eq.")
+    const { count } = await q
+    return (count ?? 0) > 0
+  } catch {
+    return false
   }
 }

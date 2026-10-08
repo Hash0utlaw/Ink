@@ -13,6 +13,8 @@ import { ProfileTabs } from "@/components/artist-profile/profile-tabs"
 import { BookingSection } from "@/components/artist-profile/booking-section"
 import { RecordVisit } from "@/components/artist-profile/record-visit"
 import { styleLabels } from "@/lib/styles"
+import { artistHasNameTwin } from "@/lib/supabase/seo"
+import { canonicalUrl, jsonLdHtml, metaDescription } from "@/lib/seo"
 
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
   const artist = await getArtistById(params.id)
@@ -24,9 +26,22 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
   const styleList = labels.length > 0 ? `${labels.slice(0, 3).join(", ")} ` : ""
   const coverImage = artist.portfolioImages?.[0] ?? artist.avatarUrl ?? "/opengraph-image"
 
+  // Another active artist shares this name and city: add the (unique) handle so the title stays unique.
+  const twin = await artistHasNameTwin({
+    id: artist.id,
+    name: artist.name,
+    city: artist.location.city,
+    state: artist.location.state,
+  })
+  const name = twin && artist.handle ? `${artist.name} (@${artist.handle})` : artist.name
+  const at = artist.shopName ? ` at ${artist.shopName}` : ""
+
   return {
-    title: `${artist.name} — ${styleList}Tattoo Artist${loc ? ` in ${loc}` : ""} | TattooMaps`,
-    description: `Book ${artist.name}, a ${primaryStyle.toLowerCase()} tattoo artist${loc ? ` in ${loc}` : ""}. View portfolio, read reviews, and book your appointment on TattooMaps.`,
+    title: `${name} — ${styleList}Tattoo Artist${loc ? ` in ${loc}` : ""} | TattooMaps`,
+    description: metaDescription(
+      `Book ${name}, a ${primaryStyle.toLowerCase()} tattoo artist${at}${loc ? ` in ${loc}` : ""}. View portfolio, read reviews, and book your appointment on TattooMaps.`,
+    ),
+    alternates: { canonical: canonicalUrl(`/artists/${artist.id}`) },
     openGraph: {
       title: `${artist.name} | TattooMaps`,
       description: `${primaryStyle} tattoo artist${loc ? ` in ${loc}` : ""}. View portfolio and book on TattooMaps.`,
@@ -82,7 +97,7 @@ export default async function ArtistProfilePage({ params }: { params: { id: stri
     <div className="flex min-h-screen flex-col">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdHtml(jsonLd) }}
       />
       <Suspense fallback={<HeaderSkeleton />}>
         <Header />

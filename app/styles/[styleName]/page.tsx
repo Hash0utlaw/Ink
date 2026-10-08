@@ -20,12 +20,14 @@ const FILTER_OVERRIDES: Record<string, string | null> = { surrealism: "illustrat
 
 // ─── Metadata ─────────────────────────────────────────────────────────────────
 
+import { canonicalUrl } from "@/lib/seo"
 export async function generateMetadata({ params }: { params: { styleName: string } }) {
   const style = ALL_STYLES.find((s) => s.slug === params.styleName)
   if (!style) return {}
   return {
     title: `${style.name} Tattoos — Artists & Inspiration | TattooMaps`,
     description: `${style.description} Browse ${style.name.toLowerCase()} tattoo artists and shops on TattooMaps.`,
+    alternates: { canonical: canonicalUrl(`/styles/${style.slug}`) },
   }
 }
 

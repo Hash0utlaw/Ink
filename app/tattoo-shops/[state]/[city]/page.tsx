@@ -10,12 +10,13 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Star, MapPin, Phone, Globe, ChevronRight } from "lucide-react"
 import { getShopsForCity } from "@/lib/supabase/seo"
-import { STATE_ABBR_TO_NAME, stateAbbrToSlug } from "@/lib/utils/states"
+import { STATE_ABBR_TO_NAME, stateAbbrToSlug, cityToSlug } from "@/lib/utils/states"
 import { FinderCta } from "@/components/layout/finder-cta"
 import type { Shop } from "@/types/shop"
 import { safeImageSrc } from "@/lib/utils/safe-image"
 import { styleLabels } from "@/lib/styles"
 
+import { canonicalUrl, jsonLdHtml } from "@/lib/seo"
 export const dynamic = "force-dynamic"
 
 export async function generateMetadata({
@@ -34,6 +35,9 @@ export async function generateMetadata({
       description: `${count} tattoo studios in ${cityName}, ${stateName}.`,
       images: ["/opengraph-image"],
     },
+    ...(stateAbbr && {
+      alternates: { canonical: canonicalUrl(`/tattoo-shops/${stateAbbrToSlug(stateAbbr)}/${cityToSlug(cityName)}`) },
+    }),
   }
 }
 
@@ -144,7 +148,7 @@ export default async function CityPage({
     <div className="flex min-h-screen flex-col bg-background">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdHtml(jsonLd) }}
       />
 
       <Suspense fallback={<HeaderSkeleton />}>
