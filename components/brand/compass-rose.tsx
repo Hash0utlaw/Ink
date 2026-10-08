@@ -10,13 +10,15 @@ interface CompassRoseMarkProps {
   y: number
   scale?: number
   tone?: Tone
+  /** Extra classes on the group, e.g. to hide it at some breakpoints. */
+  className?: string
 }
 
 /** The compass as an SVG group, for use inside a chart. */
-export function CompassRoseMark({ x, y, scale = 1, tone = "sea" }: CompassRoseMarkProps) {
+export function CompassRoseMark({ x, y, scale = 1, tone = "sea", className }: CompassRoseMarkProps) {
   const ringAndN = tone === "sea" ? "stroke-cream" : "stroke-ink"
   return (
-    <g transform={`translate(${x} ${y}) scale(${scale})`} className="stroke-ink" strokeWidth="1.6" strokeLinejoin="round">
+    <g transform={`translate(${x} ${y}) scale(${scale})`} className={cn("stroke-ink", className)} strokeWidth="1.6" strokeLinejoin="round">
       <circle r="30" fill="none" className={ringAndN} strokeOpacity="0.5" strokeWidth="1" />
       <path d="M0,0 L-6,-6 L-26,-26 Z M0,0 L6,6 L26,26 Z M0,0 L6,-6 L26,-26 Z M0,0 L-6,6 L-26,26 Z" className="fill-flash-red" />
       <path d="M0,0 L6,-6 L-26,-26 Z M0,0 L-6,6 L26,26 Z M0,0 L6,6 L26,-26 Z M0,0 L-6,-6 L-26,26 Z" className="fill-vellum" />

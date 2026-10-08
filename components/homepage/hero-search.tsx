@@ -87,8 +87,8 @@ export function HeroSearch({ shopCount, artistCount }: HeroSearchProps) {
 
   const counts = shopCount > 0 && artistCount > 0
   return (
-    <div className="w-full max-w-[470px] rounded-lg border-2 border-ink bg-vellum p-5 sm:p-7">
-      <h1 className="text-balance font-heading text-[34px] leading-[1.08] text-ink md:text-[48px]">
+    <div className="w-full rounded-lg border-2 border-ink bg-vellum p-5 sm:p-7 lg:max-w-[470px]">
+      <h1 className="text-balance font-heading text-[32px] leading-[1.08] text-ink md:text-[40px] lg:text-[48px]">
         Find a tattoo artist near you
       </h1>
       <p className="mt-3 text-pretty text-base leading-[1.55] text-ink-muted">
