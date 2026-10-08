@@ -126,3 +126,8 @@ export function toStyleSlugs(values: string[]): StyleSlug[] {
 export function styleLabels(slugs: readonly string[] | null | undefined): string[] {
   return sortStyleSlugs(slugs ?? []).map((s) => BY_SLUG.get(s)!.label)
 }
+
+/** Same set and order as styleLabels(), with each label's slug (for style chips). */
+export function styleEntries(slugs: readonly string[] | null | undefined): { slug: StyleSlug; label: string }[] {
+  return sortStyleSlugs(slugs ?? []).map((slug) => ({ slug, label: BY_SLUG.get(slug)!.label }))
+}

@@ -5,16 +5,10 @@ import { Button } from "@/components/ui/button"
 import { Star, Share2, Instagram, Globe, BadgeCheck } from "lucide-react"
 import type { Artist } from "@/types/artist"
 import { SaveButton } from "@/components/saved/save-button"
-import { styleLabels } from "@/lib/styles"
+import { styleEntries } from "@/lib/styles"
+import { StyleBadge } from "@/components/brand/style-badge"
+import { initials } from "@/lib/initials"
 
-function initials(name: string) {
-  return name
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((w) => w[0].toUpperCase())
-    .join("")
-}
 
 export function ArtistHeader({ artist, initialSaved }: { artist: Artist; initialSaved?: boolean }) {
   const igHandle = artist.instagramHandle?.replace(/^@/, "").trim()
@@ -25,7 +19,7 @@ export function ArtistHeader({ artist, initialSaved }: { artist: Artist; initial
     <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start">
       <Avatar className="w-32 h-32 md:w-40 md:h-40 border-4 border-ink shrink-0">
         <AvatarImage src={artist.avatarUrl || ""} alt={artist.name} />
-        <AvatarFallback className="text-4xl font-bold bg-vellum text-ink border-1.5 border-ink">
+        <AvatarFallback className="text-4xl bg-vellum text-ink font-heading border-1.5 border-ink">
           {initials(artist.name) || "?"}
         </AvatarFallback>
       </Avatar>
@@ -75,10 +69,8 @@ export function ArtistHeader({ artist, initialSaved }: { artist: Artist; initial
 
         {artist.styles.length > 0 && (
           <div className="mt-4 flex flex-wrap gap-2">
-            {styleLabels(artist.styles).map((label) => (
-              <Badge key={label} variant="secondary">
-                {label}
-              </Badge>
+            {styleEntries(artist.styles).map(({ slug, label }) => (
+              <StyleBadge key={slug} slug={slug} label={label} />
             ))}
           </div>
         )}

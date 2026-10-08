@@ -8,15 +8,14 @@ import type { FlashListing } from "@/lib/supabase/flash"
 import { SaveButton } from "@/components/saved/save-button"
 import { safeImageSrc } from "@/lib/utils/safe-image"
 import { styleLabel } from "@/lib/styles"
+import { StyleBadge } from "@/components/brand/style-badge"
+import { initials } from "@/lib/initials"
 
 function priceLabel(listing: FlashListing) {
   if (listing.priceMax) return `$${listing.price}–$${listing.priceMax}`
   return `$${listing.price}`
 }
 
-function initials(name: string) {
-  return name.split(" ").filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join("")
-}
 
 interface FlashCardProps {
   listing: FlashListing
@@ -58,7 +57,7 @@ export function FlashCard({ listing, initialSaved }: FlashCardProps) {
 
         <div className="flex flex-wrap gap-1">
           {listing.style && (
-            <Badge variant="secondary" className="text-xs">{styleLabel(listing.style) ?? listing.style}</Badge>
+            <StyleBadge slug={listing.style} label={styleLabel(listing.style) ?? listing.style} className="text-xs" />
           )}
           {listing.size && (
             <Badge variant="outline" className="text-xs">{listing.size}</Badge>
@@ -72,7 +71,7 @@ export function FlashCard({ listing, initialSaved }: FlashCardProps) {
           >
             <Avatar className="w-5 h-5 shrink-0">
               <AvatarImage src={listing.artistAvatar} alt={listing.artistName} />
-              <AvatarFallback className="text-[8px] bg-vellum text-ink border-1.5 border-ink">{initials(listing.artistName)}</AvatarFallback>
+              <AvatarFallback className="text-[8px] bg-vellum text-ink font-heading border-1.5 border-ink">{initials(listing.artistName)}</AvatarFallback>
             </Avatar>
             <span className="text-xs text-muted-foreground truncate">{listing.artistName}</span>
           </Link>

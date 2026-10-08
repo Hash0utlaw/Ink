@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { initials } from "@/lib/initials"
 
 interface ProfileFormProps {
   initialName: string
@@ -46,7 +47,7 @@ export function ProfileForm({ initialName, initialEmail, initialLocation, avatar
         <div className="flex items-center gap-4">
           <Avatar className="w-20 h-20">
             <AvatarImage src={avatarUrl || "/placeholder.svg"} />
-            <AvatarFallback>{(name || "?").charAt(0)}</AvatarFallback>
+            <AvatarFallback className="bg-vellum text-ink font-heading border-1.5 border-ink">{initials(name) || "?"}</AvatarFallback>
           </Avatar>
           <Button variant="outline">Change Photo</Button>
         </div>

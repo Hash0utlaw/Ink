@@ -37,6 +37,7 @@ import {
   SheetClose,
   SheetTitle,
 } from "@/components/ui/sheet"
+import { initials } from "@/lib/initials"
 
 const MOBILE_NAV_ITEMS = [
   { href: "/artists", label: "Artists", icon: Users },
@@ -176,8 +177,8 @@ export function Header() {
                           src={user.user_metadata?.avatar_url || "/placeholder-user.jpg"}
                           alt={user.email ?? "User avatar"}
                         />
-                        <AvatarFallback>
-                          {user.email?.charAt(0).toUpperCase() ?? "U"}
+                        <AvatarFallback className="bg-vellum text-ink font-heading border-1.5 border-ink">
+                          {initials(user.email ?? "") || "U"}
                         </AvatarFallback>
                       </Avatar>
                       <div className="min-w-0">
@@ -274,8 +275,8 @@ export function Header() {
                         src={user.user_metadata?.avatar_url || "/placeholder-user.jpg"}
                         alt={user.email ?? "User avatar"}
                       />
-                      <AvatarFallback>
-                        {user.email?.charAt(0).toUpperCase() ?? "U"}
+                      <AvatarFallback className="bg-vellum text-ink font-heading border-1.5 border-ink">
+                        {initials(user.email ?? "") || "U"}
                       </AvatarFallback>
                     </Avatar>
                   </Button>

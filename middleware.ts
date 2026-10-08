@@ -1,6 +1,6 @@
 import { createServerClient } from "@supabase/ssr"
 import { NextResponse, type NextRequest } from "next/server"
-import { isAdmin } from "@/lib/admin"
+import { isAdmin, isDesignReferenceOpen } from "@/lib/admin"
 import {
   COMING_SOON_PATH,
   GATE_ADMIN_COOKIE,
@@ -69,8 +69,10 @@ export async function middleware(request: NextRequest) {
   const isProtected = pathname.startsWith("/dashboard") || pathname.startsWith("/artist-dashboard")
 
   // Admin pages don't advertise themselves: signed-out visitors get a plain 404.
-  // The page itself still checks ADMIN_EMAILS for signed-in users.
-  if (pathname.startsWith("/admin") && !user) {
+  // The page itself still checks ADMIN_EMAILS for signed-in users. The design
+  // reference is the one exception, and only on previews and in development.
+  const openDesignReference = pathname === "/admin/design" && isDesignReferenceOpen()
+  if (pathname.startsWith("/admin") && !user && !openDesignReference) {
     return NextResponse.rewrite(new URL("/_not-found", request.url), { status: 404 })
   }
 

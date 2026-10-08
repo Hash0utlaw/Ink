@@ -16,6 +16,7 @@ import { PublicBookingForm } from "@/components/booking/public-booking-form"
 import { createClient } from "@/utils/supabase/server"
 import { safeImageSrc } from "@/lib/utils/safe-image"
 import { styleLabel, styleLabels } from "@/lib/styles"
+import { initials } from "@/lib/initials"
 
 async function getPortfolioImages(artistId: string): Promise<string[]> {
   try {
@@ -32,9 +33,6 @@ async function getPortfolioImages(artistId: string): Promise<string[]> {
   }
 }
 
-function initials(name: string) {
-  return name.split(" ").filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join("")
-}
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const artist = await getArtistBySlug(params.slug)
@@ -91,7 +89,7 @@ export default async function BookArtistPage({
                   <div className="flex items-start gap-4">
                     <Avatar className="w-20 h-20 border-2 border-ink shrink-0">
                       <AvatarImage src={artist.avatarUrl || ""} alt={artist.name} />
-                      <AvatarFallback className="text-2xl font-bold bg-vellum text-ink border-1.5 border-ink">
+                      <AvatarFallback className="text-2xl bg-vellum text-ink font-heading border-1.5 border-ink">
                         {initials(artist.name)}
                       </AvatarFallback>
                     </Avatar>

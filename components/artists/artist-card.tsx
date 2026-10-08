@@ -9,7 +9,9 @@ import { Star, MapPin, Clock, Tag } from "lucide-react"
 import type { Artist, AvailabilityStatus, PriceTier } from "@/types/artist"
 import { SaveButton } from "@/components/saved/save-button"
 import { safeImageSrc } from "@/lib/utils/safe-image"
-import { styleLabels } from "@/lib/styles"
+import { styleEntries } from "@/lib/styles"
+import { StyleBadge } from "@/components/brand/style-badge"
+import { initials } from "@/lib/initials"
 
 interface ArtistCardProps {
   artist: Artist
@@ -17,9 +19,6 @@ interface ArtistCardProps {
   initialSaved?: boolean
 }
 
-function initials(name: string) {
-  return name.split(" ").filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join("")
-}
 
 const AVAILABILITY_CONFIG: Record<AvailabilityStatus, { dot: string; label: string; badge: string }> = {
   available:             { dot: "bg-success",  label: "Available now",       badge: "border-success text-success-foreground bg-success" },
@@ -69,7 +68,7 @@ export function ArtistCard({ artist, distance, initialSaved }: ArtistCardProps) 
       <CardHeader className="flex flex-row items-start gap-4 p-4">
         <Avatar className="w-14 h-14 border-2 border-ink shrink-0">
           <AvatarImage src={artist.avatarUrl || ""} alt={artist.name} />
-          <AvatarFallback className="text-lg font-bold bg-vellum text-ink border-1.5 border-ink">
+          <AvatarFallback className="text-lg bg-vellum text-ink font-heading border-1.5 border-ink">
             {initials(artist.name) || "?"}
           </AvatarFallback>
         </Avatar>
@@ -135,8 +134,8 @@ export function ArtistCard({ artist, distance, initialSaved }: ArtistCardProps) 
 
         {artist.styles.length > 0 && (
           <div className="flex flex-wrap gap-1.5 pt-1">
-            {styleLabels(artist.styles).slice(0, 4).map((label) => (
-              <Badge key={label} variant="secondary" className="text-xs">{label}</Badge>
+            {styleEntries(artist.styles).slice(0, 4).map(({ slug, label }) => (
+              <StyleBadge key={slug} slug={slug} label={label} className="text-xs" />
             ))}
             {artist.styles.length > 4 && (
               <Badge variant="secondary" className="text-xs">+{artist.styles.length - 4}</Badge>

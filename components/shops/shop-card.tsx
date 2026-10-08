@@ -7,7 +7,9 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Star, MapPin } from "lucide-react"
 import type { Shop } from "@/types/shop"
 import { SaveButton } from "@/components/saved/save-button"
-import { styleLabels } from "@/lib/styles"
+import { styleEntries } from "@/lib/styles"
+import { StyleBadge } from "@/components/brand/style-badge"
+import { initials } from "@/lib/initials"
 
 export function ShopCard({
   shop,
@@ -37,7 +39,7 @@ export function ShopCard({
       <CardHeader className="flex flex-row items-start gap-4 p-4 -mt-12">
         <Avatar className="w-20 h-20 border-4 border-background bg-background">
           <AvatarImage src={shop.logoUrl || "/placeholder.svg"} alt={`${shop.name} logo`} />
-          <AvatarFallback>{shop.name.charAt(0)}</AvatarFallback>
+          <AvatarFallback className="bg-vellum text-ink font-heading border-1.5 border-ink">{initials(shop.name)}</AvatarFallback>
         </Avatar>
         <div className="flex-1 pt-12">
           <div className="flex items-start justify-between gap-2">
@@ -69,10 +71,8 @@ export function ShopCard({
         </div>
         {shop.styles.length > 0 && (
           <div className="flex flex-wrap gap-1">
-            {styleLabels(shop.styles).slice(0, 3).map((label) => (
-              <Badge key={label} variant="secondary">
-                {label}
-              </Badge>
+            {styleEntries(shop.styles).slice(0, 3).map(({ slug, label }) => (
+              <StyleBadge key={slug} slug={slug} label={label} />
             ))}
             {shop.styles.length > 3 && <Badge variant="secondary">+{shop.styles.length - 3}</Badge>}
           </div>

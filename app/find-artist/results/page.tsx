@@ -11,6 +11,7 @@ import { Star, MapPin, Wand2, ArrowLeft } from "lucide-react"
 import { getArtists } from "@/lib/supabase/artists"
 import type { Artist } from "@/types/artist"
 import { styleLabel, toStyleSlugs } from "@/lib/styles"
+import { initials } from "@/lib/initials"
 
 export const metadata: Metadata = {
   title: "Your Artist Matches — TattooMaps",
@@ -50,9 +51,6 @@ function matchLabel(score: number, maxScore: number): { label: string; color: st
   return { label: "Good match", color: "bg-muted text-muted-foreground border-border" }
 }
 
-function initials(name: string) {
-  return name.split(" ").filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join("")
-}
 
 function priceLabel(range: string) {
   return { low: "$", medium: "$$", high: "$$$" }[range] ?? "$$"
@@ -158,7 +156,7 @@ export default async function FindArtistResultsPage({
                   >
                     <Avatar className="w-16 h-16 shrink-0 border-2 border-ink">
                       <AvatarImage src={artist.avatarUrl} alt={artist.name} />
-                      <AvatarFallback className="text-lg font-bold bg-vellum text-ink border-1.5 border-ink">
+                      <AvatarFallback className="text-lg bg-vellum text-ink font-heading border-1.5 border-ink">
                         {initials(artist.name)}
                       </AvatarFallback>
                     </Avatar>

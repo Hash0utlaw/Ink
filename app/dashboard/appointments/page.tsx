@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils"
 import { getCurrentUserId, getUserProfile } from "@/lib/supabase/users"
 import { getBookingsForClient } from "@/lib/supabase/bookings"
 import { getArtistsByIds } from "@/lib/supabase/artists"
+import { initials } from "@/lib/initials"
 
 export default async function AppointmentsPage() {
   const userId = await getCurrentUserId()
@@ -29,7 +30,7 @@ export default async function AppointmentsPage() {
               <div key={booking.id} className="flex items-center gap-4 p-4 border rounded-lg">
                 <Avatar className="w-16 h-16">
                   <AvatarImage src={artist?.avatarUrl || "/placeholder.svg"} />
-                  <AvatarFallback>{(artist?.name ?? "?").charAt(0)}</AvatarFallback>
+                  <AvatarFallback className="bg-vellum text-ink font-heading border-1.5 border-ink">{initials(artist?.name ?? "") || "?"}</AvatarFallback>
                 </Avatar>
                 <div className="flex-1">
                   <p className="font-semibold">

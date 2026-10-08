@@ -4,10 +4,8 @@ import { Badge } from "@/components/ui/badge"
 import { Star, MapPin, ArrowRight, Car } from "lucide-react"
 import type { Artist } from "@/types/artist"
 import { styleLabels } from "@/lib/styles"
+import { initials } from "@/lib/initials"
 
-function initials(name: string) {
-  return name.split(" ").filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join("")
-}
 
 interface WorthTheDriveProps {
   artists: Artist[]
@@ -43,7 +41,7 @@ export function WorthTheDrive({ artists }: WorthTheDriveProps) {
               >
                 <Avatar className="w-14 h-14 shrink-0 border-2 border-ink">
                   <AvatarImage src={artist.avatarUrl} alt={artist.name} />
-                  <AvatarFallback className="font-bold bg-vellum text-ink border-1.5 border-ink">
+                  <AvatarFallback className="bg-vellum text-ink font-heading border-1.5 border-ink">
                     {initials(artist.name)}
                   </AvatarFallback>
                 </Avatar>
