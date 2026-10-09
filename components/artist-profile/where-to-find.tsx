@@ -14,17 +14,42 @@ function formatCoordinates([lng, lat]: [number, number]) {
   return `${Math.abs(lat).toFixed(3)}° ${lat >= 0 ? "N" : "S"}, ${Math.abs(lng).toFixed(3)}° ${lng >= 0 ? "E" : "W"}`
 }
 
-/** The shop on a static chart (when it has coordinates), its address, rating and hours. */
-export function WhereToFind({ name, shop }: { name: string; shop: ArtistShop }) {
+const WEEKDAYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
+
+/** Hours in weekday order (jsonb keeps keys alphabetical); unknown keys go last. */
+function orderedHours(hours: Record<string, string>) {
+  const rank = (day: string) => {
+    const i = WEEKDAYS.indexOf(day.toLowerCase())
+    return i === -1 ? WEEKDAYS.length : i
+  }
+  return Object.entries(hours)
+    .filter(([, value]) => String(value ?? "").trim())
+    .sort(([a], [b]) => rank(a) - rank(b))
+}
+
+interface WhereToFindProps {
+  name: string
+  shop: ArtistShop
+  /** On the shop's own page: no "View shop" link, and the rating is already in its header. */
+  onShopPage?: boolean
+  phone?: string
+  website?: string
+}
+
+/** The shop on a static chart (when it has coordinates), its address, rating, contact and hours. */
+export function WhereToFind({ name, shop, onShopPage = false, phone, website }: WhereToFindProps) {
   const address = formatMapAddress(shop.address, shop.city, shop.state, shop.zip)
-  const hours = Object.entries(shop.hours)
+  const hours = orderedHours(shop.hours)
+  const websiteUrl = website?.trim()
   const directions = shop.coordinates
     ? `https://www.google.com/maps/dir/?api=1&destination=${shop.coordinates[1]},${shop.coordinates[0]}`
     : `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent([shop.name, address].join(", "))}`
 
   return (
     <ProfileSection id="where" title={`Where to find ${name}`}>
-      <div className={shop.coordinates ? "grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-10" : undefined}>
+      <div
+        className={shop.coordinates ? "grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-10" : undefined}
+      >
         {shop.coordinates && (
           <NeatlineFrame>
             <div className="relative">
@@ -55,18 +80,37 @@ export function WhereToFind({ name, shop }: { name: string; shop: ArtistShop }) 
           {shop.coordinates && (
             <p className="mt-1 font-place text-base italic text-ink-muted">{formatCoordinates(shop.coordinates)}</p>
           )}
-          <p className="mt-1 tabular-nums text-ink-muted">
-            {shop.rating > 0
-              ? `Rated ${shop.rating.toFixed(1)}${shop.reviewCount > 0 ? ` from ${shop.reviewCount.toLocaleString("en-US")} ${shop.reviewCount === 1 ? "review" : "reviews"}` : ""}`
-              : "No reviews yet"}
-          </p>
+          {!onShopPage && (
+            <p className="mt-1 tabular-nums text-ink-muted">
+              {shop.rating > 0
+                ? `Rated ${shop.rating.toFixed(1)}${shop.reviewCount > 0 ? ` from ${shop.reviewCount.toLocaleString("en-US")} ${shop.reviewCount === 1 ? "review" : "reviews"}` : ""}`
+                : "No reviews yet"}
+            </p>
+          )}
           <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2">
             <a href={directions} target="_blank" rel="noopener noreferrer" className={TEXT_LINK}>
               Get directions
             </a>
-            <Link href={`/shops/${shop.id}`} className={TEXT_LINK}>
-              View shop
-            </Link>
+            {phone && (
+              <a href={`tel:${phone}`} className={TEXT_LINK}>
+                Call {phone}
+              </a>
+            )}
+            {websiteUrl && (
+              <a
+                href={websiteUrl.startsWith("http") ? websiteUrl : `https://${websiteUrl}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={TEXT_LINK}
+              >
+                Website
+              </a>
+            )}
+            {!onShopPage && (
+              <Link href={`/shops/${shop.id}`} className={TEXT_LINK}>
+                View shop
+              </Link>
+            )}
           </div>
 
           {hours.length > 0 && (

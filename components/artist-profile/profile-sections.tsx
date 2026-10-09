@@ -5,7 +5,7 @@ import { allowedImageSrc } from "@/lib/utils/safe-image"
 import { PortfolioGallery } from "./portfolio-gallery"
 
 /** A profile section: Young Serif 30px heading, then its content. */
-export function ProfileSection({ id, title, children }: { id: string; title: string; children: ReactNode }) {
+export function ProfileSection({ id, title, children }: { id: string; title: ReactNode; children: ReactNode }) {
   return (
     <section aria-labelledby={id}>
       <h2 id={id} className="font-heading text-[26px] leading-[1.15] text-ink lg:text-[30px]">
@@ -59,30 +59,38 @@ export function ProfileSections({ artist, reviews }: { artist: Artist; reviews: 
       </ProfileSection>
 
       <ProfileSection id="reviews" title="Reviews">
-        {reviews.length === 0 ? (
-          // The header's rating comes from public listings; say these are TattooMaps reviews.
-          <EmptyBox title={artist.reviewCount > 0 ? "No TattooMaps reviews yet" : "No reviews yet"}>
-            Reviews appear here after clients book through TattooMaps.
-          </EmptyBox>
-        ) : (
-          <ul className="border-t border-rule">
-            {reviews.map((review) => (
-              <li key={review.id} className="border-b border-rule py-5">
-                <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-                  <p className="font-semibold text-ink">{review.clientName}</p>
-                  <p className="text-[15px] tabular-nums text-ink-muted">
-                    Rated {review.rating} of 5
-                    {formatDate(review.createdAt) && `, ${formatDate(review.createdAt)}`}
-                  </p>
-                </div>
-                {review.reviewText && (
-                  <p className="mt-2 max-w-prose text-base leading-[1.55] text-ink text-pretty">{review.reviewText}</p>
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
+        <ReviewList reviews={reviews} hasListingRating={artist.reviewCount > 0} />
       </ProfileSection>
     </div>
+  )
+}
+
+/** TattooMaps reviews as rule-divided rows, or the empty state. */
+export function ReviewList({ reviews, hasListingRating }: { reviews: Review[]; hasListingRating: boolean }) {
+  if (reviews.length === 0) {
+    // The header's rating comes from public listings; say these are TattooMaps reviews.
+    return (
+      <EmptyBox title={hasListingRating ? "No TattooMaps reviews yet" : "No reviews yet"}>
+        Reviews appear here after clients book through TattooMaps.
+      </EmptyBox>
+    )
+  }
+  return (
+    <ul className="border-t border-rule">
+      {reviews.map((review) => (
+        <li key={review.id} className="border-b border-rule py-5">
+          <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+            <p className="font-semibold text-ink">{review.clientName}</p>
+            <p className="text-[15px] tabular-nums text-ink-muted">
+              Rated {review.rating} of 5
+              {formatDate(review.createdAt) && `, ${formatDate(review.createdAt)}`}
+            </p>
+          </div>
+          {review.reviewText && (
+            <p className="mt-2 max-w-prose text-base leading-[1.55] text-ink text-pretty">{review.reviewText}</p>
+          )}
+        </li>
+      ))}
+    </ul>
   )
 }

@@ -31,7 +31,7 @@ function rowToShop(row: Record<string, unknown>): Shop {
   return {
     id: String(row.id ?? ""),
     slug: String(row.slug ?? ""),
-    name: String(row.name ?? ""),
+    name: String(row.name ?? "").trim(),
     logoUrl: String(row.logo_url ?? ""),
     coverImageUrl: String(row.cover_image_url ?? ""),
     rating: Number(row.rating ?? 0),
@@ -42,6 +42,7 @@ function rowToShop(row: Record<string, unknown>): Shop {
       state: String(row.state ?? ""),
       lat: Number(row.latitude ?? 0),
       lng: Number(row.longitude ?? 0),
+      zip: String(row.zip ?? ""),
     },
     phone: String(row.phone ?? ""),
     website: String(row.website ?? ""),
@@ -51,6 +52,7 @@ function rowToShop(row: Record<string, unknown>): Shop {
     hours: (row.hours as Record<string, string>) ?? {},
     styles: shopStylesFromRow(row),
     acceptsWalkIns: Boolean(row.accepts_walk_ins ?? false),
+    isClaimed: Boolean(row.owner_user_id),
     possiblyClosed: Boolean(row.possibly_closed ?? false),
   }
 }
@@ -231,7 +233,7 @@ export async function getShopArtists(shopId: string): Promise<Artist[]> {
     return stubs.map((row: Record<string, unknown>) => ({
       id: String(row.id ?? ""),
       handle: String(row.id ?? ""),
-      name: String(row.name ?? ""),
+      name: String(row.name ?? "").trim(),
       shopName: "",
       specialties: row.specialty ? [String(row.specialty)] : [],
       // Stub rows aren't in artists.styles yet; rules only (no AI) — see lib/styles.ts.
