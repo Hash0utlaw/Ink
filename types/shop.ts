@@ -14,6 +14,7 @@ export interface Shop {
     state: string
     lat: number
     lng: number
+    zip?: string
   }
   phone: string
   website: string
@@ -26,6 +27,8 @@ export interface Shop {
   /** Canonical style slugs from shop_styles (lib/styles.ts), in STYLES order. */
   styles: string[]
   acceptsWalkIns: boolean
+  /** An owner has claimed the listing (shops.owner_user_id). */
+  isClaimed?: boolean
   // Open-data signal that the shop may have closed; hidden from lists and the
   // map, but its page stays reachable.
   possiblyClosed?: boolean
