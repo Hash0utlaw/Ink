@@ -42,13 +42,16 @@ export function ArtistCard({ artist, distance, initialSaved }: ArtistCardProps) 
 
   return (
     <Card className="relative overflow-hidden transition-all hover:border-ink flex flex-col">
-      <SaveButton
-        itemType="artist"
-        itemId={artist.id}
-        variant="icon"
-        initialSaved={initialSaved}
-        className="absolute top-3 right-3 z-10"
-      />
+      {/* Stub artists (shop_artists rows) have no profile, so nothing to save or link to. */}
+      {!artist.isStub && (
+        <SaveButton
+          itemType="artist"
+          itemId={artist.id}
+          variant="icon"
+          initialSaved={initialSaved}
+          className="absolute top-3 right-3 z-10"
+        />
+      )}
       {/* Portfolio strip */}
       {hasPreview && (
         <div className="grid grid-cols-3 h-24 overflow-hidden">
@@ -144,11 +147,13 @@ export function ArtistCard({ artist, distance, initialSaved }: ArtistCardProps) 
         )}
       </CardContent>
 
-      <CardFooter className="p-4 pt-0">
-        <Button asChild className="flex-1">
-          <Link href={`/artists/${artist.id}`}>View Profile</Link>
-        </Button>
-      </CardFooter>
+      {!artist.isStub && (
+        <CardFooter className="p-4 pt-0">
+          <Button asChild className="flex-1">
+            <Link href={`/artists/${artist.id}`}>View Profile</Link>
+          </Button>
+        </CardFooter>
+      )}
     </Card>
   )
 }

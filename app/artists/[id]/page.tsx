@@ -1,10 +1,10 @@
-import { notFound } from "next/navigation"
+import { notFound, permanentRedirect } from "next/navigation"
 import { Suspense } from "react"
 import type { Metadata } from "next"
 import { HeaderSkeleton } from "@/components/layout/header-skeleton"
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
-import { getArtistById } from "@/lib/supabase/artists"
+import { getArtistById, shopArtistRedirectPath } from "@/lib/supabase/artists"
 import { getCurrentUserId } from "@/lib/supabase/users"
 import { getSavedIdsForUser } from "@/lib/supabase/saved"
 import { getReviewsForArtist } from "@/lib/supabase/reviews"
@@ -54,6 +54,9 @@ export default async function ArtistProfilePage({ params }: { params: { id: stri
   const artist = await getArtistById(params.id)
 
   if (!artist) {
+    // Old links used shop_artists row ids; send those to the real profile (or the shop), 308.
+    const redirectPath = await shopArtistRedirectPath(params.id)
+    if (redirectPath) permanentRedirect(redirectPath)
     notFound()
   }
 
