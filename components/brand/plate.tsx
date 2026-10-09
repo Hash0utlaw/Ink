@@ -13,6 +13,10 @@ interface PlateProps {
   primaryStyle?: string | null
   /** Outer width in px; height follows the 4:5 ratio. */
   size?: number
+  /** Fill the parent's width instead of a fixed size (initials scale with it). */
+  fluid?: boolean
+  /** next/image sizes hint for fluid plates. */
+  sizes?: string
   className?: string
 }
 
@@ -22,16 +26,16 @@ interface PlateProps {
  * No photo: vellum fill, initials in Young Serif, 5px bottom edge in the
  * primary style's plate-edge color (ink when the style has none).
  */
-export function Plate({ src, alt, name, primaryStyle, size = 160, className }: PlateProps) {
+export function Plate({ src, alt, name, primaryStyle, size = 160, fluid = false, sizes, className }: PlateProps) {
   const edge = (primaryStyle && STYLE_EDGE_COLOR[primaryStyle as keyof typeof STYLE_EDGE_COLOR]) || "hsl(var(--ink))"
   return (
     <div
       className={cn("aspect-[4/5] shrink-0 border-1.5 border-ink bg-paper p-[5px]", className)}
-      style={{ width: size }}
+      style={fluid ? { width: "100%", containerType: "inline-size" } : { width: size }}
     >
       {src ? (
         <div className="relative h-full w-full overflow-hidden border border-ink">
-          <Image src={src} alt={alt} fill sizes={`${size}px`} className="object-cover" />
+          <Image src={src} alt={alt} fill sizes={sizes ?? (fluid ? "50vw" : `${size}px`)} className="object-cover" />
         </div>
       ) : (
         <div
@@ -40,7 +44,7 @@ export function Plate({ src, alt, name, primaryStyle, size = 160, className }: P
           role="img"
           aria-label={alt}
         >
-          <span className="font-heading leading-none text-ink" style={{ fontSize: Math.round(size * 0.36) }} aria-hidden="true">
+          <span className="font-heading leading-none text-ink" style={{ fontSize: fluid ? "36cqw" : Math.round(size * 0.36) }} aria-hidden="true">
             {initials(name) || "?"}
           </span>
         </div>

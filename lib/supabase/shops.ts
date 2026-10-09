@@ -17,6 +17,7 @@ export type ShopFilters = {
   city?: string        // partial: WHERE city ILIKE '%$1%'
   query?: string       // name search: WHERE name ILIKE '%$1%'
   sortBy?: 'rating' | 'review_count' | 'name'
+  minReviewCount?: number // WHERE review_count >= $1 (homepage top-rated list)
   page?: number        // default 0
   pageSize?: number    // default 24
 }
@@ -91,6 +92,9 @@ export async function getShops(
     }
     if (filters.query) {
       query = query.ilike("name", `%${filters.query.trim()}%`)
+    }
+    if (typeof filters.minReviewCount === "number" && filters.minReviewCount > 0) {
+      query = query.gte("review_count", filters.minReviewCount)
     }
 
     // Sorting

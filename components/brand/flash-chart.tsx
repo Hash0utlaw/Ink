@@ -7,7 +7,7 @@ import { XMarkPath } from "./x-mark"
 // The flash chart: SVG art copied from docs/design/brand-pieces-reference.html.
 // Paths, coordinates, stroke widths and opacities are as in the reference; colors
 // come from the theme tokens via Tailwind fill/stroke classes.
-//   "hero"           home hero chart (viewBox 1200x560)
+//   "hero"           home hero chart (viewBox 1200x560); no neighborhood labels
 //   "hero-centered"  centered hero with coasts at the edges (viewBox 1200x640)
 //   "location"       location map for artist/shop pages (viewBox 600x320)
 
@@ -25,9 +25,12 @@ const Waves = ({ id, w, h, d, opacity, strokeWidth }: { id: string; w: number; h
   </defs>
 )
 
-function HeroChart({ waves, place }: { waves: string; place: string }) {
-  const coast =
-    "M620,600 C600,530 642,486 622,432 C604,380 650,350 660,300 C670,250 640,210 668,170 C694,134 730,150 760,120 C790,90 820,96 850,70 C880,44 940,58 980,40 C1030,18 1100,30 1210,20"
+/** Hero coastline in viewBox units (1200x560): absolute cubic segments only. */
+export const HERO_COAST =
+  "M620,600 C600,530 642,486 622,432 C604,380 650,350 660,300 C670,250 640,210 668,170 C694,134 730,150 760,120 C790,90 820,96 850,70 C880,44 940,58 980,40 C1030,18 1100,30 1210,20"
+
+function HeroChart({ waves, place, compassClassName }: { waves: string; place: string; compassClassName?: string }) {
+  const coast = HERO_COAST
   const roads = "M700,300 C780,290 860,300 1210,250 M880,600 C870,500 880,400 900,300 C910,230 960,150 1000,40"
   const river = "M1210,380 C1120,390 1080,350 1010,368 C940,386 920,450 850,468 C780,486 720,456 662,486 C646,494 636,502 630,512"
   const shops: [number, number][] = [
@@ -51,15 +54,9 @@ function HeroChart({ waves, place }: { waves: string; place: string }) {
       {shops.map(([cx, cy]) => (
         <Shop key={`${cx}-${cy}`} cx={cx} cy={cy} />
       ))}
-      <g fontSize="20" className="fill-ink" style={PLACE_FONT}>
-        <text x="910" y="290">Uptown</text>
-        <text x="955" y="170">NoDa</text>
-        <text x="1040" y="225">Plaza Midwood</text>
-        <text x="700" y="410">South End</text>
-      </g>
       <XMarkPath cx={880} cy={282} half={13} />
       <BannerMark cx={930} top={102} width={bannerWidth(place, 26, 240)} fontSize={26} text={place} />
-      <CompassRoseMark x={575} y={118} scale={1.15} tone="sea" />
+      <CompassRoseMark x={575} y={118} scale={1.15} tone="sea" className={compassClassName} />
     </>
   )
 }
@@ -122,7 +119,7 @@ function LocationChart({ place }: { place: string }) {
 }
 
 const VARIANTS = {
-  hero: { viewBox: "0 0 1200 560", aspect: "xMaxYMid slice", defaultPlace: "Charlotte" },
+  hero: { viewBox: "0 0 1200 560", aspect: "xMaxYMid slice", defaultPlace: "Destination Ink" },
   "hero-centered": { viewBox: "0 0 1200 640", aspect: "xMidYMid slice", defaultPlace: "" },
   location: { viewBox: "0 0 600 320", aspect: "xMidYMid slice", defaultPlace: "NoDa" },
 } as const
@@ -131,17 +128,24 @@ interface FlashChartProps {
   variant: keyof typeof VARIANTS
   /** Name on the banner ("hero" and "location"). */
   placeName?: string
+  /**
+   * "top-right" anchors the crop to the top-right corner (xMaxYMin slice), so
+   * short, wide strips keep the banner, X and compass inside the frame.
+   */
+  crop?: "default" | "top-right"
+  /** Classes on the chart's own compass ("hero" only), e.g. to hide it at some widths. */
+  compassClassName?: string
   className?: string
 }
 
 /** The flash chart. Fills its container; give the container a height. */
-export function FlashChart({ variant, placeName, className }: FlashChartProps) {
+export function FlashChart({ variant, placeName, crop = "default", compassClassName, className }: FlashChartProps) {
   const waves = `waves-${useId().replace(/:/g, "")}`
   const v = VARIANTS[variant]
   const place = placeName || v.defaultPlace
   const label =
     variant === "hero"
-      ? `Flash-style chart of ${place} with shops marked and a red X`
+      ? `Flash-style sea chart with shops marked, a red X and the banner "${place}"`
       : variant === "location"
         ? `Map of ${place} with a red X`
         : undefined
@@ -151,11 +155,11 @@ export function FlashChart({ variant, placeName, className }: FlashChartProps) {
         viewBox={v.viewBox}
         width="100%"
         height="100%"
-        preserveAspectRatio={v.aspect}
+        preserveAspectRatio={crop === "top-right" ? "xMaxYMin slice" : v.aspect}
         className="absolute inset-0 block"
         {...(label ? { role: "img", "aria-label": label } : { "aria-hidden": true })}
       >
-        {variant === "hero" && <HeroChart waves={waves} place={place} />}
+        {variant === "hero" && <HeroChart waves={waves} place={place} compassClassName={compassClassName} />}
         {variant === "hero-centered" && <HeroCenteredChart waves={waves} />}
         {variant === "location" && <LocationChart place={place} />}
       </svg>

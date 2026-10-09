@@ -26,6 +26,13 @@ export function MapPin({ number, selected = false, className }: MapPinProps) {
   )
 }
 
+/** 1,000 and up read as "1k", "2k", "10k" so the number always fits the seal. */
+export function formatSealCount(count: number | string): string {
+  const n = typeof count === "number" ? count : Number(count)
+  if (!Number.isFinite(n) || n < 1000) return String(count)
+  return `${Math.floor(n / 1000)}k`
+}
+
 export function ClusterSeal({ count, className }: { count: number | string; className?: string }) {
   return (
     <span
@@ -35,7 +42,7 @@ export function ClusterSeal({ count, className }: { count: number | string; clas
         className
       )}
     >
-      {count}
+      {formatSealCount(count)}
     </span>
   )
 }
