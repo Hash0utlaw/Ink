@@ -1,41 +1,23 @@
-import Link from "next/link"
-import type { Artist } from "@/types/artist"
-import { Plate } from "@/components/brand/plate"
-import { StyleBadge } from "@/components/brand/style-badge"
-import { EmptyBox, ProfileSection } from "@/components/artist-profile/profile-sections"
-import { styleEntries } from "@/lib/styles"
-import { allowedImageSrc } from "@/lib/utils/safe-image"
+"use client"
 
-function ArtistPlate({ artist }: { artist: Artist }) {
-  // Stubs (from shop_artists) have no profile page: name only, no photo, no link.
-  const photo = artist.isStub ? null : allowedImageSrc(artist.avatarUrl)
-  const styles = artist.isStub ? [] : styleEntries(artist.styles).slice(0, 2)
-  return (
-    <>
-      <Plate
-        src={photo}
-        alt={photo ? artist.name : `${artist.name} initials`}
-        name={artist.name}
-        primaryStyle={artist.isStub ? null : artist.styles[0]}
-        fluid
-        sizes="(min-width: 1024px) 270px, 45vw"
-      />
-      <span className="mt-3 block font-heading text-[19px] leading-tight text-ink text-balance lg:text-[21px]">
-        {artist.name}
-      </span>
-      {styles.length > 0 && (
-        <span className="mt-2 flex flex-wrap gap-1.5">
-          {styles.map(({ slug, label }) => (
-            <StyleBadge key={slug} slug={slug} label={label} />
-          ))}
-        </span>
-      )}
-    </>
-  )
+import { useState } from "react"
+import type { Artist } from "@/types/artist"
+import { ArtistPlateCard, ArtistPlateGrid } from "@/components/artists/artist-plate-card"
+import { EmptyBox, ProfileSection } from "@/components/artist-profile/profile-sections"
+
+const INITIAL = 12
+
+/** Best rated first, then A to Z. */
+function byRatingThenName(a: Artist, b: Artist) {
+  return b.rating - a.rating || a.name.localeCompare(b.name, "en", { sensitivity: "base" })
 }
 
-/** Every artist at the shop as plates, 2 across on mobile and 4 on desktop. */
+/** The shop's artists as plates: the first 12, then "Show all {n} artists" in place. */
 export function ShopArtists({ shopName, artists }: { shopName: string; artists: Artist[] }) {
+  const [expanded, setExpanded] = useState(false)
+  const sorted = [...artists].sort(byRatingThenName)
+  const shown = expanded ? sorted : sorted.slice(0, INITIAL)
+
   return (
     <ProfileSection
       id="artists"
@@ -49,24 +31,24 @@ export function ShopArtists({ shopName, artists }: { shopName: string; artists: 
       {artists.length === 0 ? (
         <EmptyBox title="No artists listed yet.">If you work here, claim this shop to add your team.</EmptyBox>
       ) : (
-        <ul className="grid grid-cols-2 gap-x-4 gap-y-8 lg:grid-cols-4 lg:gap-x-6">
-          {artists.map((artist) => (
-            <li key={artist.id} className="min-w-0">
-              {artist.isStub ? (
-                <div className="p-2">
-                  <ArtistPlate artist={artist} />
-                </div>
-              ) : (
-                <Link
-                  href={`/artists/${artist.id}`}
-                  className="block rounded-lg border-1.5 border-transparent p-2 hover:border-ink hover:bg-vellum focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  <ArtistPlate artist={artist} />
-                </Link>
-              )}
-            </li>
-          ))}
-        </ul>
+        <>
+          <ArtistPlateGrid>
+            {shown.map((artist) => (
+              <li key={artist.id} className="min-w-0">
+                <ArtistPlateCard artist={artist} />
+              </li>
+            ))}
+          </ArtistPlateGrid>
+          {sorted.length > shown.length && (
+            <button
+              type="button"
+              onClick={() => setExpanded(true)}
+              className="mt-6 min-h-11 text-[15px] font-semibold text-navy underline underline-offset-2 hover:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              Show all {sorted.length} artists
+            </button>
+          )}
+        </>
       )}
     </ProfileSection>
   )

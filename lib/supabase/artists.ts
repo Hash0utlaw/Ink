@@ -81,7 +81,8 @@ export async function getArtists(
   try {
     const supabase = createClient()
     const zip = filters.zip?.trim()
-    const columns: string = zip ? "*, shops!inner(zip)" : "*"
+    // The shop's name for the cards; !inner when matching on the shop's ZIP.
+    const columns: string = zip ? "*, shops!inner(name, zip)" : "*, shops(name)"
     let query = supabase
       .from("artists")
       .select(columns, { count: "exact", head: false })
@@ -117,7 +118,13 @@ export async function getArtists(
 
     const sortCol = filters.sortBy ?? "display_name"
     const sortMap: Record<string, string> = { rating: "rating", review_count: "review_count", name: "display_name" }
-    query = query.order(sortMap[sortCol] ?? "display_name", { ascending: sortCol !== "review_count" })
+    // Rating and review count best first, names A to Z; name and id break ties so pages don't overlap.
+    const sortColumn = sortMap[sortCol] ?? "display_name"
+    query = query
+      // Unrated artists (null) last, not first as Postgres puts them in descending order.
+      .order(sortColumn, { ascending: sortColumn === "display_name", nullsFirst: false })
+      .order("display_name", { ascending: true })
+      .order("id", { ascending: true })
 
     // Always paginate — default page 0, 24 per page
     const page = filters.page ?? 0

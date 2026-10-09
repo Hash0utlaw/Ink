@@ -129,7 +129,10 @@ export async function getShopsForCity(
       .eq("possibly_closed", false)
       .in("city", group.spellings)
       .eq("state", stateAbbr)
-      .order("rating", { ascending: false })
+      // Unrated last; name and id break ties so pages don't overlap.
+      .order("rating", { ascending: false, nullsFirst: false })
+      .order("name", { ascending: true })
+      .order("id", { ascending: true })
       .range(page * pageSize, (page + 1) * pageSize - 1)
 
     if (error || !data) return { data: [], count: 0, cityName, stateAbbr }
@@ -156,6 +159,7 @@ function rowToShopMinimal(row: Record<string, unknown>): Shop {
       state: String(row.state ?? ""),
       lat: Number(row.latitude ?? 0),
       lng: Number(row.longitude ?? 0),
+      zip: String(row.zip ?? ""),
     },
     phone: String(row.phone ?? ""),
     website: String(row.website ?? ""),

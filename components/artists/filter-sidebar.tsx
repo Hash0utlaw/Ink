@@ -1,17 +1,15 @@
 "use client"
 
 import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
-import { Checkbox } from "@/components/ui/checkbox"
 import { Switch } from "@/components/ui/switch"
 import { Slider } from "@/components/ui/slider"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-import { Filter, Navigation } from "lucide-react"
-import { STYLES } from "@/lib/styles"
+import { Navigation } from "lucide-react"
+import { FIELD_CLASS, FilterGroup, StyleChips } from "@/components/listings/filter-controls"
 
 
 const US_STATES = [
@@ -99,203 +97,176 @@ export function FilterSidebar({ filters, onFilterChange, onNearMe, showAvailable
     nearMeActive
 
   return (
-    <Card className="sticky top-20 bg-muted/50 border-border/50">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Filter className="text-primary" />
-          Filters
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
+    <div className="space-y-6">
+      <FilterGroup label="Search by name" htmlFor="artist-query">
+        <Input
+          id="artist-query"
+          placeholder="e.g. Jane Ink"
+          value={filters.query}
+          onChange={(e) => onFilterChange({ ...filters, query: e.target.value })}
+          className={FIELD_CLASS}
+        />
+      </FilterGroup>
 
-        <div className="space-y-1.5">
-          <Label className="text-xs text-muted-foreground">Search by name</Label>
+      <div className="space-y-3">
+        <FilterGroup label="ZIP code" htmlFor="artist-zip">
           <Input
-            placeholder="e.g. Jane Ink"
-            value={filters.query}
-            onChange={(e) => onFilterChange({ ...filters, query: e.target.value })}
+            id="artist-zip"
+            placeholder="75201"
+            maxLength={5}
+            inputMode="numeric"
+            value={filters.zip}
+            onChange={(e) => onFilterChange({ ...filters, zip: e.target.value })}
+            className={FIELD_CLASS}
           />
-        </div>
+        </FilterGroup>
 
-        <div className="space-y-3">
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Location</p>
+        <FilterGroup label="City" htmlFor="artist-city">
+          <Input
+            id="artist-city"
+            placeholder="Austin"
+            value={filters.city}
+            onChange={(e) => onFilterChange({ ...filters, city: e.target.value })}
+            className={FIELD_CLASS}
+          />
+        </FilterGroup>
 
-          <div className="space-y-1.5">
-            <Label className="text-xs text-muted-foreground">ZIP Code</Label>
-            <Input
-              placeholder="75201"
-              maxLength={5}
-              inputMode="numeric"
-              value={filters.zip}
-              onChange={(e) => onFilterChange({ ...filters, zip: e.target.value })}
-            />
-          </div>
+        <FilterGroup label="State">
+          <Select
+            value={filters.state || "all"}
+            onValueChange={(value) => onFilterChange({ ...filters, state: value === "all" ? "" : value })}
+          >
+            <SelectTrigger className={FIELD_CLASS} aria-label="State">
+              <SelectValue placeholder="All states" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All states</SelectItem>
+              {US_STATES.map((s) => (
+                <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </FilterGroup>
 
-          <div className="space-y-1.5">
-            <Label className="text-xs text-muted-foreground">City</Label>
-            <Input
-              placeholder="Austin"
-              value={filters.city}
-              onChange={(e) => onFilterChange({ ...filters, city: e.target.value })}
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <Label className="text-xs text-muted-foreground">State</Label>
-            <Select
-              value={filters.state || "all"}
-              onValueChange={(value) => onFilterChange({ ...filters, state: value === "all" ? "" : value })}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="All States" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All States</SelectItem>
-                {US_STATES.map((s) => (
-                  <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
+        {onNearMe && (
           <Button
             variant="outline"
-            className="w-full"
+            className="min-h-11 w-full rounded-lg border-1.5 border-ink bg-vellum text-[15px] font-semibold text-ink hover:bg-secondary"
             onClick={handleNearMe}
             disabled={locating}
           >
-            <Navigation className="w-4 h-4 mr-2" />
-            {locating ? "Locating..." : "Near Me"}
+            <Navigation className="mr-2 h-4 w-4" />
+            {locating ? "Locating..." : "Near me"}
           </Button>
-          {locationError && (
-            <p className="text-xs text-muted-foreground">Location not available</p>
-          )}
+        )}
+        {locationError && (
+          <p className="text-sm text-ink-muted">Location not available</p>
+        )}
 
-          {nearMeActive && (
-            <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground">Radius</Label>
-              <Select
-                value={String(filters.radiusMiles ?? 25)}
-                onValueChange={(value) => onFilterChange({ ...filters, radiusMiles: Number(value) })}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="5">5 mi</SelectItem>
-                  <SelectItem value="10">10 mi</SelectItem>
-                  <SelectItem value="25">25 mi</SelectItem>
-                  <SelectItem value="50">50 mi</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-        </div>
+        {nearMeActive && (
+          <FilterGroup label="Radius">
+            <Select
+              value={String(filters.radiusMiles ?? 25)}
+              onValueChange={(value) => onFilterChange({ ...filters, radiusMiles: Number(value) })}
+            >
+              <SelectTrigger className={FIELD_CLASS} aria-label="Radius">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="5">5 mi</SelectItem>
+                <SelectItem value="10">10 mi</SelectItem>
+                <SelectItem value="25">25 mi</SelectItem>
+                <SelectItem value="50">50 mi</SelectItem>
+              </SelectContent>
+            </Select>
+          </FilterGroup>
+        )}
+      </div>
 
-        <div className="space-y-2">
-          <Label>Styles</Label>
-          <div className="space-y-2">
-            {STYLES.map((style) => (
-              <div key={style.slug} className="flex items-center space-x-2">
-                <Checkbox
-                  id={`artist-${style.slug}`}
-                  checked={filters.styles.includes(style.slug)}
-                  onCheckedChange={() => handleStyleChange(style.slug)}
-                />
-                <label
-                  htmlFor={`artist-${style.slug}`}
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  {style.label}
-                </label>
-              </div>
-            ))}
-          </div>
-        </div>
+      <FilterGroup label="Styles">
+        <StyleChips selected={filters.styles} onToggle={handleStyleChange} />
+      </FilterGroup>
 
-        {/* TODO: Re-enable when claimed artists set their own price tier. */}
-        <div className="hidden space-y-2">
-          <Label>Price Range</Label>
-          <ToggleGroup
-            type="multiple"
-            variant="outline"
-            value={filters.price}
-            onValueChange={(value) => onFilterChange({ ...filters, price: value })}
-            className="w-full"
-          >
-            <ToggleGroupItem value="low" className="w-1/3 text-xs px-2">$</ToggleGroupItem>
-            <ToggleGroupItem value="medium" className="w-1/3 text-xs px-2">$$</ToggleGroupItem>
-            <ToggleGroupItem value="high" className="w-1/3 text-xs px-2">$$$</ToggleGroupItem>
-          </ToggleGroup>
-        </div>
+      {/* TODO: Re-enable when claimed artists set their own price tier. */}
+      <div className="hidden space-y-2">
+        <Label>Price Range</Label>
+        <ToggleGroup
+          type="multiple"
+          variant="outline"
+          value={filters.price}
+          onValueChange={(value) => onFilterChange({ ...filters, price: value })}
+          className="w-full"
+        >
+          <ToggleGroupItem value="low" className="w-1/3 text-xs px-2">$</ToggleGroupItem>
+          <ToggleGroupItem value="medium" className="w-1/3 text-xs px-2">$$</ToggleGroupItem>
+          <ToggleGroupItem value="high" className="w-1/3 text-xs px-2">$$$</ToggleGroupItem>
+        </ToggleGroup>
+      </div>
 
-        <div className="space-y-2">
-          <Label>Minimum Rating</Label>
-          <Slider
-            min={0}
-            max={5}
-            step={0.1}
-            value={[filters.rating]}
-            onValueChange={(value) => onFilterChange({ ...filters, rating: value[0] })}
+      <FilterGroup label="Minimum rating">
+        <Slider
+          min={0}
+          max={5}
+          step={0.1}
+          value={[filters.rating]}
+          onValueChange={(value) => onFilterChange({ ...filters, rating: value[0] })}
+          aria-label="Minimum rating"
+        />
+        <p className="text-right text-sm tabular-nums text-ink-muted">{filters.rating.toFixed(1)} stars and up</p>
+      </FilterGroup>
+
+      <FilterGroup label="Sort by">
+        <Select
+          value={filters.sortBy}
+          onValueChange={(value) =>
+            onFilterChange({ ...filters, sortBy: value as "rating" | "review_count" | "name" })
+          }
+        >
+          <SelectTrigger className={FIELD_CLASS} aria-label="Sort by">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="rating">Best rated</SelectItem>
+            <SelectItem value="review_count">Most reviewed</SelectItem>
+            <SelectItem value="name">A to Z</SelectItem>
+          </SelectContent>
+        </Select>
+      </FilterGroup>
+
+      {showAvailableNow && (
+        <div className="flex min-h-11 items-center justify-between">
+          <Label htmlFor="available-now" className="text-sm font-semibold text-ink">Available now</Label>
+          <Switch
+            id="available-now"
+            checked={filters.availableNow}
+            onCheckedChange={(checked) => onFilterChange({ ...filters, availableNow: checked })}
           />
-          <div className="text-xs text-muted-foreground text-right">{filters.rating.toFixed(1)} stars & up</div>
         </div>
+      )}
 
-        <div className="space-y-1.5">
-          <Label className="text-xs text-muted-foreground">Sort by</Label>
-          <Select
-            value={filters.sortBy}
-            onValueChange={(value) =>
-              onFilterChange({ ...filters, sortBy: value as "rating" | "review_count" | "name" })
-            }
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="rating">Best Rated</SelectItem>
-              <SelectItem value="review_count">Most Reviewed</SelectItem>
-              <SelectItem value="name">A–Z</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        {showAvailableNow && (
-          <div className="flex items-center justify-between">
-            <Label htmlFor="available-now">Available Now</Label>
-            <Switch
-              id="available-now"
-              checked={filters.availableNow}
-              onCheckedChange={(checked) => onFilterChange({ ...filters, availableNow: checked })}
-            />
-          </div>
-        )}
-
-        {hasActiveFilters && (
-          <button
-            className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors w-full text-left"
-            onClick={() => {
-              setNearMeActive(false)
-              setLocationError(false)
-              onFilterChange({
-                styles: [],
-                price: [],
-                rating: 0,
-                availableNow: false,
-                query: "",
-                city: "",
-                state: "",
-                zip: "",
-                sortBy: "rating",
-                radiusMiles: 25,
-              })
-            }}
-          >
-            Clear all filters
-          </button>
-        )}
-
-      </CardContent>
-    </Card>
+      {hasActiveFilters && (
+        <button
+          className="min-h-11 text-[15px] font-semibold text-navy underline underline-offset-2 hover:no-underline"
+          onClick={() => {
+            setNearMeActive(false)
+            setLocationError(false)
+            onFilterChange({
+              styles: [],
+              price: [],
+              rating: 0,
+              availableNow: false,
+              query: "",
+              city: "",
+              state: "",
+              zip: "",
+              sortBy: "rating",
+              radiusMiles: 25,
+            })
+          }}
+        >
+          Clear all filters
+        </button>
+      )}
+    </div>
   )
 }

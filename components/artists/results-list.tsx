@@ -1,8 +1,8 @@
 "use client"
 
-import { ArtistCard, ArtistCardSkeleton } from "./artist-card"
-import { Button } from "@/components/ui/button"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { ArtistPlateCard, ArtistPlateGrid, ArtistPlateSkeleton } from "./artist-plate-card"
+import { EmptyBox } from "@/components/artist-profile/profile-sections"
+import { Pagination } from "@/components/listings/pagination"
 import type { Artist } from "@/types/artist"
 
 interface ResultsListProps {
@@ -27,68 +27,34 @@ export function ResultsList({
   onPageChange,
   emptyMessage,
 }: ResultsListProps) {
-  const totalPages = Math.ceil(totalCount / pageSize)
-  const firstItem = page * pageSize + 1
-  const lastItem = Math.min((page + 1) * pageSize, totalCount)
-
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <ArtistCardSkeleton key={i} />
+      <ArtistPlateGrid>
+        {Array.from({ length: 8 }).map((_, i) => (
+          <ArtistPlateSkeleton key={i} />
         ))}
-      </div>
+      </ArtistPlateGrid>
     )
   }
 
   if (artists.length === 0) {
     return (
-      <div className="text-center py-12">
-        <h3 className="text-xl font-semibold">No Artists Found</h3>
-        <p className="text-muted-foreground mt-2">{emptyMessage ?? "Try adjusting your filters to find more results."}</p>
-      </div>
+      <EmptyBox title="No artists found.">
+        {emptyMessage ?? "Try a nearby city, a different style or fewer filters."}
+      </EmptyBox>
     )
   }
 
   return (
-    <div className="space-y-6">
-      <div className="text-sm text-muted-foreground">
-        Showing {firstItem}–{lastItem} of {totalCount.toLocaleString()} artists
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div>
+      <ArtistPlateGrid>
         {artists.map((artist) => (
-          <ArtistCard key={artist.id} artist={artist} distance={distancesById?.[artist.id]} />
+          <li key={artist.id} className="min-w-0">
+            <ArtistPlateCard artist={artist} showShop distance={distancesById?.[artist.id]} />
+          </li>
         ))}
-      </div>
-
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-3 pt-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => { onPageChange(page - 1); window.scrollTo({ top: 0, behavior: "smooth" }) }}
-            disabled={page === 0}
-          >
-            <ChevronLeft className="w-4 h-4" />
-            Previous
-          </Button>
-
-          <span className="text-sm text-muted-foreground px-2">
-            Page {page + 1} of {totalPages}
-          </span>
-
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => { onPageChange(page + 1); window.scrollTo({ top: 0, behavior: "smooth" }) }}
-            disabled={page >= totalPages - 1}
-          >
-            Next
-            <ChevronRight className="w-4 h-4" />
-          </Button>
-        </div>
-      )}
+      </ArtistPlateGrid>
+      <Pagination page={page} totalPages={Math.ceil(totalCount / pageSize)} onPageChange={onPageChange} />
     </div>
   )
 }

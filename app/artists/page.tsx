@@ -3,8 +3,8 @@ import type { Metadata } from "next"
 import { HeaderSkeleton } from "@/components/layout/header-skeleton"
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
+import { ListingHeader } from "@/components/listings/listing-header"
 import { ArtistSearchInterface } from "@/components/artists/artist-search-interface"
-import { FinderCta } from "@/components/layout/finder-cta"
 import { getClaimedArtistCount } from "@/lib/supabase/claimed"
 
 export const metadata: Metadata = {
@@ -25,17 +25,16 @@ export default async function ArtistsPage() {
         <Header />
       </Suspense>
       <main className="flex-1 bg-background">
-        <div className="container mx-auto px-4 py-8 md:py-12">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">Find Your Artist</h1>
-            <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground">
-              Filter by style, location, and availability to discover the perfect artist for your vision.
-            </p>
-          </div>
-          <div className="max-w-2xl mx-auto mb-10">
-            <FinderCta />
-          </div>
-          <Suspense fallback={<div className="h-96 flex items-center justify-center text-muted-foreground">Loading artists…</div>}>
+        <div className="mx-auto max-w-[1344px] px-4 py-8 sm:px-6 lg:py-14">
+          <Suspense
+            fallback={
+              // Server HTML keeps the h1; the client header adds the place and count.
+              <>
+                <ListingHeader title="Tattoo artists" />
+                <div className="flex h-96 items-center justify-center text-ink-muted">Loading artists…</div>
+              </>
+            }
+          >
             <ArtistSearchInterface showAvailableNow={showAvailableNow} />
           </Suspense>
         </div>

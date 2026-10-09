@@ -103,7 +103,12 @@ export async function getShops(
     // Sorting
     const sortCol = filters.sortBy ?? "rating"
     const sortMap: Record<string, string> = { rating: "rating", review_count: "review_count", name: "name" }
-    query = query.order(sortMap[sortCol], { ascending: sortCol === "name" })
+    // Name and id break ties so pages don't overlap.
+    query = query
+      // Unrated shops (null) last, not first as Postgres puts them in descending order.
+      .order(sortMap[sortCol], { ascending: sortCol === "name", nullsFirst: false })
+      .order("name", { ascending: true })
+      .order("id", { ascending: true })
 
     // Pagination — only applied when the caller explicitly passes a page number
     if (filters.page !== undefined) {

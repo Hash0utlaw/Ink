@@ -5,9 +5,15 @@ import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { ShopFilterSidebar } from "./shop-filter-sidebar"
 import { ShopResultsList } from "./shop-results-list"
-import { X } from "lucide-react"
 import type { Shop } from "@/types/shop"
 import { styleLabel, toStyleSlugs } from "@/lib/styles"
+import { formatLocation } from "@/lib/parse-location"
+import { FinderCta } from "@/components/layout/finder-cta"
+import { FilterDrawer } from "@/components/listings/filter-drawer"
+import { ActiveFilter } from "@/components/listings/filter-controls"
+import { ListingHeader, countLabel } from "@/components/listings/listing-header"
+
+const PAGE_SIZE = 24
 
 type Filters = {
   styles: string[]
@@ -53,6 +59,7 @@ export function ShopSearchInterface() {
   const searchParams = useSearchParams()
 
   const [filters, setFilters] = useState<Filters>(() => filtersFromParams(searchParams))
+  const [page, setPage] = useState(0)
   const [filteredShops, setFilteredShops] = useState<Shop[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [totalCount, setTotalCount] = useState(0)
@@ -62,6 +69,7 @@ export function ShopSearchInterface() {
   const handleFilterChange = useCallback(
     (newFilters: Filters) => {
       setFilters(newFilters)
+      setPage(0)
       const params = new URLSearchParams()
       if (newFilters.styles.length > 0) params.set("styles", newFilters.styles.join(","))
       if (newFilters.rating > 0) params.set("rating", newFilters.rating.toString())
@@ -123,6 +131,7 @@ export function ShopSearchInterface() {
       if (filters.city) params.set("city", filters.city)
       if (filters.query) params.set("query", filters.query)
       if (filters.sortBy !== 'rating') params.set("sortBy", filters.sortBy)
+      params.set("page", String(page))
 
       try {
         const response = await fetch(`/api/shops?${params.toString()}`)
@@ -143,7 +152,7 @@ export function ShopSearchInterface() {
     }
 
     fetchShops()
-  }, [filters])
+  }, [filters, page])
 
   // Active filter pills helpers
   const hasActiveFilters =
@@ -172,99 +181,81 @@ export function ShopSearchInterface() {
     else handleFilterChange({ ...filters, [key]: '' })
   }
 
+  const place = nearMeCoords ? "" : formatLocation({ zip: filters.zip.trim(), city: filters.city.trim(), state: filters.state })
+  const activeCount =
+    [filters.query, filters.zip, filters.state, filters.city].filter(Boolean).length +
+    (filters.rating > 0 ? 1 : 0) +
+    (filters.acceptsWalkIns ? 1 : 0) +
+    (nearMeCoords ? 1 : 0) +
+    filters.styles.length
+
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-      <div className="lg:col-span-1">
-        <ShopFilterSidebar
-          filters={filters}
-          onFilterChange={(f) => handleFilterChange(f as Filters)}
-          onNearMe={handleNearMe}
-        />
-      </div>
-      <div className="lg:col-span-3 space-y-8">
-        <Link
-          href="/map"
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors"
-        >
-          View shops on the map →
-        </Link>
+    <div>
+      <ListingHeader
+        title="Tattoo shops"
+        place={place}
+        suffix={nearMeCoords ? "near you" : undefined}
+        countLine={isLoading ? null : countLabel(totalCount, "shop")}
+      >
+        <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2">
+          <Link href="/map" className="text-[15px] font-semibold text-navy underline underline-offset-2 hover:no-underline">
+            View shops on the map
+          </Link>
+          <FinderCta variant="inline" />
+        </div>
+      </ListingHeader>
 
-        {/* Active filter pills */}
-        {hasActiveFilters && (
-          <div className="flex flex-wrap items-center gap-2">
-            {filters.query && (
-              <span className="bg-secondary text-primary border border-ink text-xs px-2.5 py-1 rounded-lg flex items-center gap-1">
-                {filters.query}
-                <button onClick={() => clearFilter('query')} aria-label="Remove query filter"><X className="w-3 h-3" /></button>
-              </span>
-            )}
-            {filters.zip && (
-              <span className="bg-secondary text-primary border border-ink text-xs px-2.5 py-1 rounded-lg flex items-center gap-1">
-                ZIP: {filters.zip}
-                <button onClick={() => clearFilter('zip')} aria-label="Remove ZIP filter"><X className="w-3 h-3" /></button>
-              </span>
-            )}
-            {filters.state && (
-              <span className="bg-secondary text-primary border border-ink text-xs px-2.5 py-1 rounded-lg flex items-center gap-1">
-                {filters.state}
-                <button onClick={() => clearFilter('state')} aria-label="Remove state filter"><X className="w-3 h-3" /></button>
-              </span>
-            )}
-            {filters.city && (
-              <span className="bg-secondary text-primary border border-ink text-xs px-2.5 py-1 rounded-lg flex items-center gap-1">
-                {filters.city}
-                <button onClick={() => clearFilter('city')} aria-label="Remove city filter"><X className="w-3 h-3" /></button>
-              </span>
-            )}
-            {filters.rating > 0 && (
-              <span className="bg-secondary text-primary border border-ink text-xs px-2.5 py-1 rounded-lg flex items-center gap-1">
-                {filters.rating}+ stars
-                <button onClick={() => clearFilter('rating')} aria-label="Remove rating filter"><X className="w-3 h-3" /></button>
-              </span>
-            )}
-            {filters.acceptsWalkIns && (
-              <span className="bg-secondary text-primary border border-ink text-xs px-2.5 py-1 rounded-lg flex items-center gap-1">
-                Walk-ins only
-                <button onClick={() => clearFilter('acceptsWalkIns')} aria-label="Remove walk-ins filter"><X className="w-3 h-3" /></button>
-              </span>
-            )}
-            {nearMeCoords && (
-              <span className="bg-secondary text-primary border border-ink text-xs px-2.5 py-1 rounded-lg flex items-center gap-1">
-                {filters.radiusMiles} mi radius
-                <button onClick={() => clearFilter('nearMe')} aria-label="Remove near me filter"><X className="w-3 h-3" /></button>
-              </span>
-            )}
-            {filters.styles.map((style) => (
-              <span key={style} className="bg-secondary text-primary border border-ink text-xs px-2.5 py-1 rounded-lg flex items-center gap-1">
-                {styleLabel(style) ?? style}
-                <button onClick={() => clearFilter(`style:${style}` as any)} aria-label={`Remove ${styleLabel(style) ?? style} filter`}><X className="w-3 h-3" /></button>
-              </span>
-            ))}
-            <button
-              className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors ml-auto"
-              onClick={() => {
-                setNearMeCoords(null)
-                setDistancesById({})
-                handleFilterChange(DEFAULT_FILTERS)
-              }}
-            >
-              Clear all
-            </button>
-          </div>
-        )}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[280px_minmax(0,1fr)] lg:gap-10">
+        <aside aria-label="Filters" className="lg:sticky lg:top-20 lg:self-start">
+          <FilterDrawer
+            resultLabel={isLoading ? null : `Show ${countLabel(totalCount, "result")}`}
+            activeCount={activeCount}
+          >
+            <ShopFilterSidebar
+              filters={filters}
+              onFilterChange={(f) => handleFilterChange(f as Filters)}
+              onNearMe={handleNearMe}
+            />
+          </FilterDrawer>
+        </aside>
 
-        {/* Result count */}
-        {!isLoading && (
-          <p className="text-sm text-muted-foreground -mt-4">
-            Showing {filteredShops.length} of {totalCount} shops
-          </p>
-        )}
+        <div className="min-w-0 space-y-6">
+          {hasActiveFilters && (
+            <div className="flex flex-wrap items-center gap-2">
+              {filters.query && <ActiveFilter label={filters.query} onRemove={() => clearFilter('query')} />}
+              {filters.zip && <ActiveFilter label={`ZIP ${filters.zip}`} onRemove={() => clearFilter('zip')} />}
+              {filters.state && <ActiveFilter label={filters.state} onRemove={() => clearFilter('state')} />}
+              {filters.city && <ActiveFilter label={filters.city} onRemove={() => clearFilter('city')} />}
+              {filters.rating > 0 && <ActiveFilter label={`${filters.rating}+ stars`} onRemove={() => clearFilter('rating')} />}
+              {filters.acceptsWalkIns && <ActiveFilter label="Walk-ins only" onRemove={() => clearFilter('acceptsWalkIns')} />}
+              {nearMeCoords && <ActiveFilter label={`Within ${filters.radiusMiles} mi`} onRemove={() => clearFilter('nearMe')} />}
+              {filters.styles.map((style) => (
+                <ActiveFilter key={style} label={styleLabel(style) ?? style} onRemove={() => clearFilter(`style:${style}`)} />
+              ))}
+              <button
+                className="ml-auto min-h-9 text-[15px] font-semibold text-navy underline underline-offset-2 hover:no-underline"
+                onClick={() => {
+                  setNearMeCoords(null)
+                  setDistancesById({})
+                  handleFilterChange(DEFAULT_FILTERS)
+                }}
+              >
+                Clear all
+              </button>
+            </div>
+          )}
 
-        <ShopResultsList
-          shops={filteredShops}
-          isLoading={isLoading}
-          distancesById={nearMeCoords ? distancesById : undefined}
-        />
+          <ShopResultsList
+            shops={filteredShops}
+            isLoading={isLoading}
+            distancesById={nearMeCoords ? distancesById : undefined}
+            emptyMessage={place ? `No shops found near ${place}. Try a nearby city or a different style.` : undefined}
+            // Near me loads every result at once, so it has no pages.
+            page={page}
+            totalPages={nearMeCoords ? 1 : Math.ceil(totalCount / PAGE_SIZE)}
+            onPageChange={nearMeCoords ? undefined : setPage}
+          />
+        </div>
       </div>
     </div>
   )
