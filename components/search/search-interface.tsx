@@ -9,6 +9,7 @@ import { ShopResultsList } from "@/components/shops/shop-results-list"
 import type { Artist } from "@/types/artist"
 import type { Shop } from "@/types/shop"
 import { toStyleSlugs } from "@/lib/styles"
+import { formatLocation, parseLocation } from "@/lib/parse-location"
 
 type Filters = {
   styles: string[]
@@ -24,6 +25,18 @@ type Filters = {
 }
 
 function filtersFromParams(params: URLSearchParams): Filters {
+  // zip / city / state from the URL. Old links and the homepage SearchAction carry
+  // only ?q=<place>, which is read as a location (never as a name search).
+  let place = {
+    zip: params.get("zip") ?? "",
+    city: params.get("city") ?? "",
+    state: (params.get("state") ?? "").toUpperCase(),
+  }
+  const q = params.get("q") ?? ""
+  if (!place.zip && !place.city && !place.state && q) {
+    const parsed = parseLocation(q)
+    place = { zip: parsed?.zip ?? "", city: parsed?.city ?? "", state: parsed?.state ?? "" }
+  }
   return {
     // Slugs; old links may carry names ("Fine Line") — mapped to slugs.
     styles: toStyleSlugs(params.get("styles")?.split(",").filter(Boolean) ?? []),
@@ -32,9 +45,7 @@ function filtersFromParams(params: URLSearchParams): Filters {
     rating: Number(params.get("rating")) || 0,
     availableNow: params.get("availableNow") === "true",
     query: params.get("query") ?? "",
-    city: "",
-    state: "",
-    zip: "",
+    ...place,
     sortBy: "rating",
     radiusMiles: 25,
   }
@@ -43,7 +54,6 @@ function filtersFromParams(params: URLSearchParams): Filters {
 export function SearchInterface() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const q = searchParams.get("q") ?? ""
 
   const [filters, setFilters] = useState<Filters>(() => filtersFromParams(searchParams))
   const [artists, setArtists] = useState<Artist[]>([])
@@ -55,14 +65,17 @@ export function SearchInterface() {
     (newFilters: Filters) => {
       setFilters(newFilters)
       const params = new URLSearchParams()
-      if (q) params.set("q", q)
+      if (newFilters.zip) params.set("zip", newFilters.zip)
+      if (newFilters.city) params.set("city", newFilters.city)
+      if (newFilters.state) params.set("state", newFilters.state)
+      if (newFilters.query) params.set("query", newFilters.query)
       if (newFilters.styles.length > 0) params.set("styles", newFilters.styles.join(","))
       if (newFilters.price.length > 0) params.set("price", newFilters.price.join(","))
       if (newFilters.rating > 0) params.set("rating", newFilters.rating.toString())
       if (newFilters.availableNow) params.set("availableNow", "true")
       router.replace(`/search?${params.toString()}`, { scroll: false })
     },
-    [router, q],
+    [router],
   )
 
   useEffect(() => {
@@ -75,14 +88,22 @@ export function SearchInterface() {
       if (filters.price.length > 0) artistParams.set("price", filters.price.join(","))
       if (filters.rating > 0) artistParams.set("rating", filters.rating.toString())
       if (filters.availableNow) artistParams.set("availableNow", "true")
-      if (q) artistParams.set("q", q)
 
       // Shop params — map artist-centric keys to shop equivalents
       const shopParams = new URLSearchParams()
       if (filters.styles.length > 0) shopParams.set("styles", filters.styles.join(","))
       if (filters.rating > 0) shopParams.set("rating", filters.rating.toString())
       if (filters.availableNow) shopParams.set("acceptsWalkIns", "true")
-      if (q) shopParams.set("query", q)
+
+      // Location and name filters go to both APIs. City is matched exactly when a
+      // state is given too, so "Charlotte, NC" doesn't include Port Charlotte.
+      for (const p of [artistParams, shopParams]) {
+        if (filters.zip) p.set("zip", filters.zip.trim())
+        if (filters.city) p.set("city", filters.city.trim())
+        if (filters.state) p.set("state", filters.state)
+        if (filters.city && filters.state) p.set("exactCity", "1")
+        if (filters.query) p.set("query", filters.query.trim())
+      }
 
       try {
         const [artistsRes, shopsRes] = await Promise.all([
@@ -102,7 +123,9 @@ export function SearchInterface() {
     }
 
     fetchAll()
-  }, [filters, q])
+  }, [filters])
+
+  const place = formatLocation({ zip: filters.zip.trim(), city: filters.city.trim(), state: filters.state })
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
@@ -111,9 +134,9 @@ export function SearchInterface() {
       </div>
 
       <div className="lg:col-span-3 space-y-6">
-        {q && (
+        {place && (
           <p className="text-sm text-muted-foreground">
-            Results for <span className="font-semibold text-foreground">"{q}"</span>
+            Results near <span className="font-semibold text-foreground">{place}</span>
           </p>
         )}
 
@@ -135,11 +158,16 @@ export function SearchInterface() {
               totalCount={artists.length}
               pageSize={artists.length || 24}
               onPageChange={() => {}}
+              emptyMessage={place ? `No artists found near ${place}. Try a nearby city or a different style.` : undefined}
             />
           </TabsContent>
 
           <TabsContent value="shops" className="mt-6">
-            <ShopResultsList shops={shops} isLoading={isLoading} />
+            <ShopResultsList
+              shops={shops}
+              isLoading={isLoading}
+              emptyMessage={place ? `No shops found near ${place}. Try a nearby city or a different style.` : undefined}
+            />
           </TabsContent>
         </Tabs>
       </div>

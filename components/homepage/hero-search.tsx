@@ -6,7 +6,8 @@ import { useRouter } from "next/navigation"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/use-toast"
-import { STATE_NAME_TO_ABBR, STATE_ABBR_TO_NAME, stateAbbrToSlug } from "@/lib/utils/states"
+import { stateAbbrToSlug } from "@/lib/utils/states"
+import { parseLocation } from "@/lib/parse-location"
 import { STYLES } from "@/lib/styles"
 import { HOME_NEAR_KEY } from "./home-location"
 
@@ -30,8 +31,7 @@ export function HeroSearch({ shopCount, artistCount }: HeroSearchProps) {
   const [query, setQuery] = useState("")
   const [style, setStyle] = useState("")
 
-  // The routes and params below are the ones the previous hero used; a chosen
-  // style is added as ?styles=<slug> where the destination already reads it.
+  // A chosen style is added as ?styles=<slug>.
   const withStyle = (path: string) => {
     if (!style) return path
     return `${path}${path.includes("?") ? "&" : "?"}styles=${encodeURIComponent(style)}`
@@ -39,33 +39,25 @@ export function HeroSearch({ shopCount, artistCount }: HeroSearchProps) {
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault()
-    const q = query.trim()
+    const place = parseLocation(query)
 
-    if (!q) {
+    if (!place) {
       router.push(withStyle("/search"))
       return
     }
 
-    if (/^\d{5}$/.test(q)) {
-      router.push(withStyle(`/shops?zip=${q}`))
+    // A state on its own goes to the state's shop page, unless a style is chosen:
+    // that page has no style filter, so search the state instead.
+    if (place.state && !place.city && !place.zip && !style) {
+      router.push(`/tattoo-shops/${stateAbbrToSlug(place.state)}`)
       return
     }
 
-    if (q.length === 2) {
-      const abbr = STATE_ABBR_TO_NAME[q.toUpperCase()] ? q.toUpperCase() : null
-      if (abbr) {
-        router.push(`/tattoo-shops/${stateAbbrToSlug(abbr)}`)
-        return
-      }
-    } else {
-      const abbr = STATE_NAME_TO_ABBR[q.toLowerCase()]
-      if (abbr) {
-        router.push(`/tattoo-shops/${stateAbbrToSlug(abbr)}`)
-        return
-      }
-    }
-
-    router.push(withStyle(`/search?q=${encodeURIComponent(q)}`))
+    const params = new URLSearchParams()
+    if (place.zip) params.set("zip", place.zip)
+    if (place.city) params.set("city", place.city)
+    if (place.state) params.set("state", place.state)
+    router.push(withStyle(`/search?${params.toString()}`))
   }
 
   function handleNearMe() {

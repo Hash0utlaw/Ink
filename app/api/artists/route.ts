@@ -16,6 +16,7 @@ export async function GET(request: Request) {
     const availableNow = searchParams.get("availableNow") === "true"
     const query = searchParams.get("query") ?? undefined
     const city = searchParams.get("city") ?? undefined
+    const exactCity = searchParams.get("exactCity") === "1"
     const state = searchParams.get("state") ?? undefined
     const zip = searchParams.get("zip") ?? undefined
     const sortByRaw = searchParams.get("sortBy")
@@ -32,6 +33,7 @@ export async function GET(request: Request) {
       availableNow: availableNow || undefined,
       query,
       city,
+      exactCity: exactCity || undefined,
       state,
       zip,
       sortBy,

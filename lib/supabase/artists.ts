@@ -9,8 +9,10 @@ export type ArtistFilters = {
   availableNow?: boolean
   query?: string
   city?: string
+  /** Match city exactly (case-insensitive) instead of partially; the search page sets it when city and state are both given. */
+  exactCity?: boolean
   state?: string
-  zip?: string
+  zip?: string // artists have no ZIP column; matched on their shop's ZIP
   sortBy?: "rating" | "review_count" | "name"
   page?: number
   pageSize?: number
@@ -20,6 +22,15 @@ export type ArtistFilters = {
 // specialties (text[]), styles (text[] of lib/styles.ts slugs), city, state, hourly_rate, years_experience,
 // instagram_handle, website_url, avatar_url, is_available, is_verified, is_active,
 // rating, review_count, created_at, updated_at, is_claimed, source
+/**
+ * ILIKE pattern for a city filter. Partial by default ("charl" finds Charlotte);
+ * exact, with LIKE wildcards escaped, so "Charlotte" never matches Port Charlotte.
+ */
+export function cityPattern(city: string, exact?: boolean): string {
+  const c = city.trim()
+  return exact ? c.replace(/[\\%_]/g, "\\$&") : `%${c}%`
+}
+
 export function rowToArtist(row: Record<string, unknown>): Artist {
   const shop = row.shops
     ? (Array.isArray(row.shops)
@@ -68,7 +79,12 @@ export async function getArtists(
 ): Promise<{ data: Artist[]; count: number; error: string | null }> {
   try {
     const supabase = createClient()
-    let query = supabase.from("artists").select("*", { count: "exact", head: false }).eq("is_active", true)
+    const zip = filters.zip?.trim()
+    const columns: string = zip ? "*, shops!inner(zip)" : "*"
+    let query = supabase
+      .from("artists")
+      .select(columns, { count: "exact", head: false })
+      .eq("is_active", true)
 
     // Slugs, or old style names from URLs ("Fine Line") mapped to slugs.
     const styles = toStyleSlugs(filters.styles ?? [])
@@ -89,13 +105,13 @@ export async function getArtists(
       query = query.ilike("display_name", `%${filters.query.trim()}%`)
     }
     if (filters.city) {
-      query = query.ilike("city", `%${filters.city.trim()}%`)
+      query = query.ilike("city", cityPattern(filters.city, filters.exactCity))
     }
     if (filters.state) {
       query = query.eq("state", filters.state.toUpperCase())
     }
-    if (filters.zip) {
-      query = query.eq("zip", filters.zip.trim())
+    if (zip) {
+      query = query.eq("shops.zip", zip)
     }
 
     const sortCol = filters.sortBy ?? "display_name"
@@ -110,7 +126,7 @@ export async function getArtists(
     const { data, count, error } = await query
     if (error) return { data: [], count: 0, error: error.message }
     return {
-      data: (data ?? []).map((row: Record<string, unknown>) => rowToArtist(row)),
+      data: ((data ?? []) as unknown as Record<string, unknown>[]).map((row) => rowToArtist(row)),
       count: count ?? 0,
       error: null,
     }

@@ -15,6 +15,7 @@ export async function GET(request: Request) {
     const zip = searchParams.get("zip") ?? undefined
     const state = searchParams.get("state") ?? undefined
     const city = searchParams.get("city") ?? undefined
+    const exactCity = searchParams.get("exactCity") === "1"
     const query = searchParams.get("query") ?? undefined
     const sortByRaw = searchParams.get("sortBy")
     const validSortBy = ["rating", "review_count", "name"] as const
@@ -30,6 +31,7 @@ export async function GET(request: Request) {
       zip,
       state,
       city,
+      exactCity: exactCity || undefined,
       query,
       sortBy,
       page,
