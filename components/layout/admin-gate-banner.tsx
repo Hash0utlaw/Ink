@@ -12,10 +12,19 @@ export function AdminGateBanner() {
     setShow(document.cookie.split("; ").some((c) => c === `${GATE_ADMIN_COOKIE}=1`))
   }, [])
 
+  // Full-height pages (/map) subtract this so the banner never adds a scroll.
+  useEffect(() => {
+    if (!show) return
+    document.documentElement.style.setProperty("--admin-banner-h", "28px")
+    return () => {
+      document.documentElement.style.removeProperty("--admin-banner-h")
+    }
+  }, [show])
+
   if (!show) return null
 
   return (
-    <div className="w-full bg-card px-4 py-1.5 text-center text-xs font-medium text-foreground">
+    <div className="flex h-7 w-full items-center justify-center bg-card px-4 text-center text-xs font-medium text-foreground">
       Coming-soon mode is on — only admins can see the site.
     </div>
   )

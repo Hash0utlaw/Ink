@@ -331,8 +331,10 @@ export function MapInterface() {
     setMapStyle(style)
   }, [])
 
+  // Fills the screen below the admin banner (the only bar /map shows; it sets
+  // --admin-banner-h while visible). dvh tracks mobile browser chrome.
   return (
-    <div className="relative h-[calc(100vh-4rem)] flex">
+    <div className="relative flex h-[calc(100dvh-var(--admin-banner-h,0px))]">
       {/* Sidebar */}
       <MapSidebar
         isOpen={sidebarOpen}

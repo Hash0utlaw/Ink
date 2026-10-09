@@ -90,7 +90,7 @@ export function LocationDetails({ location, pinNumber, onClose }: LocationDetail
         {ratingLine(location.rating, location.reviewCount)}
         {location.distance != null &&
           `, ${location.distance < 1 ? `${(location.distance * 5280).toFixed(0)} ft` : `${location.distance.toFixed(1)} mi`} away`}
-        {location.isOpen && <span className="font-semibold text-bottle-green">. Open now</span>}
+        {location.isOpen && <span className="font-semibold text-bottle-green">. Walk-ins welcome</span>}
       </p>
 
       {badges.length > 0 && (

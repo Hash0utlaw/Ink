@@ -95,7 +95,7 @@ export function MapFilters({ filters, onFilterChange }: MapFiltersProps) {
             </Chip>
           ))}
           <Chip active={filters.availableNow} onClick={() => onFilterChange({ availableNow: !filters.availableNow })}>
-            Open now
+            Walk-ins welcome
           </Chip>
         </div>
       </Section>
