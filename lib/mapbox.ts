@@ -59,6 +59,33 @@ export function calculateDistance(coord1: [number, number], coord2: [number, num
   return R * c
 }
 
+/**
+ * A US city, ZIP or state for the map search: its centre, name ("Charlotte")
+ * and Mapbox type ("place", "postcode", "region", ...). Null when Mapbox has no such place.
+ */
+export async function geocodePlace(
+  query: string,
+): Promise<{ center: [number, number]; name: string; type: string } | null> {
+  try {
+    const params = new URLSearchParams({
+      access_token: mapboxConfig.accessToken,
+      country: "us",
+      types: "postcode,place,locality,district,region",
+      limit: "1",
+    })
+    const response = await fetch(
+      `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?${params}`,
+    )
+    if (!response.ok) throw new Error("Geocoding request failed")
+    const feature = (await response.json()).features?.[0]
+    if (!feature) return null
+    return { center: feature.center, name: String(feature.text ?? ""), type: String(feature.place_type?.[0] ?? "") }
+  } catch (error) {
+    console.warn("Geocoding error:", error)
+    return null
+  }
+}
+
 export async function geocodeAddress(address: string): Promise<[number, number] | null> {
   try {
     const response = await fetch(

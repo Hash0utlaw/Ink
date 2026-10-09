@@ -157,7 +157,7 @@ export function MapSidebar({
             Filters
             {activeFilterCount > 0 && <span className="tabular-nums">({activeFilterCount})</span>}
           </button>
-          {filters.searchQuery && (
+          {(filters.searchQuery || place) && (
             <button
               type="button"
               onClick={() => {

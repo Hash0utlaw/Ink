@@ -8,7 +8,7 @@ import { List } from "lucide-react"
 import type { MapboxLocation, MapStyle } from "@/lib/mapbox"
 import { NeatlineFrame } from "@/components/brand/neatline-frame"
 import { cn } from "@/lib/utils"
-import { calculateDistance, getCurrentLocation, geocodeAddress, mapboxConfig } from "@/lib/mapbox"
+import { calculateDistance, getCurrentLocation, geocodePlace, mapboxConfig } from "@/lib/mapbox"
 import { useToast } from "@/components/ui/use-toast"
 import { styleLabels } from "@/lib/styles"
 import { formatLocation, parseLocation } from "@/lib/parse-location"
@@ -262,24 +262,38 @@ export function MapInterface() {
     [numberedKey]
   )
 
-  // Handle search
+  // Search: a place moves the map there and leaves the list unfiltered; any
+  // other text (a shop name, a style) filters the list in view by name,
+  // address and style without moving the map.
   const handleSearch = useCallback(async (query: string) => {
-    setFilters((prev) => ({ ...prev, searchQuery: query }))
+    const text = query.trim()
     setSearchedPlace(null)
+    if (!text) {
+      setFilters((prev) => ({ ...prev, searchQuery: "" }))
+      return
+    }
 
-    if (query.trim()) {
-      try {
-        const coords = await geocodeAddress(query)
-        if (coords) {
-          setMapCenter(coords)
-          setMapZoom(14)
-          // The heading shows the parsed place ("charlotte nc" → "Charlotte, NC").
-          const parsed = parseLocation(query)
-          setSearchedPlace((parsed && formatLocation(parsed)) || query.trim())
-        }
-      } catch (error) {
-        console.warn("Geocoding failed:", error)
+    // With a ZIP or a state it's a place. A city alone ("Charlotte") counts only
+    // when Mapbox knows a US city by exactly that name, so "Black Cloud" stays text.
+    const parsed = parseLocation(text)
+    let place: Awaited<ReturnType<typeof geocodePlace>> = null
+    if (parsed && (parsed.zip || parsed.state)) {
+      place = await geocodePlace(text)
+    } else if (parsed?.city) {
+      const hit = await geocodePlace(text)
+      if (hit && ["place", "locality"].includes(hit.type) && hit.name.toLowerCase() === parsed.city.toLowerCase()) {
+        place = hit
       }
+    }
+
+    if (place && parsed) {
+      setFilters((prev) => ({ ...prev, searchQuery: "" }))
+      setMapCenter(place.center)
+      setMapZoom(14)
+      // The heading shows the parsed place ("charlotte nc" → "Charlotte, NC").
+      setSearchedPlace(formatLocation(parsed) || text)
+    } else {
+      setFilters((prev) => ({ ...prev, searchQuery: text }))
     }
   }, [])
 
