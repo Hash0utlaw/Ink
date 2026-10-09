@@ -7,8 +7,9 @@ import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { MapPin } from "@/components/brand/map-pin"
 import { StyleBadge } from "@/components/brand/style-badge"
+import { Plate } from "@/components/brand/plate"
 import { MapFilters } from "./map-filters"
-import type { MapboxLocation } from "@/lib/mapbox"
+import { locationKindLabel, type MapboxLocation } from "@/lib/mapbox"
 import { styleEntries } from "@/lib/styles"
 import { cn } from "@/lib/utils"
 
@@ -231,11 +232,12 @@ export function MapSidebar({
                       )}
                     >
                       {number != null && <MapPin number={number} selected={selected} />}
+                      {location.type === "artist" && (
+                        <Plate alt="" name={location.name} primaryStyle={location.styles[0]} size={40} />
+                      )}
                       <span className="block min-w-0 flex-1">
                         <span className="block font-heading text-[21px] leading-tight text-ink">{location.name}</span>
-                        {location.type === "artist" && (
-                          <span className="block text-[13px] text-ink-muted">Artist</span>
-                        )}
+                        <span className="block text-[13px] text-ink-muted">{locationKindLabel(location)}</span>
                         {location.address && (
                           <span className="mt-1 block text-[15px] text-ink">{location.address}</span>
                         )}

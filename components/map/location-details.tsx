@@ -2,10 +2,11 @@
 
 import Link from "next/link"
 import { Share2, X } from "lucide-react"
-import type { MapboxLocation } from "@/lib/mapbox"
+import { locationKindLabel, type MapboxLocation } from "@/lib/mapbox"
 import { styleEntries } from "@/lib/styles"
 import { StyleBadge } from "@/components/brand/style-badge"
 import { MapPin } from "@/components/brand/map-pin"
+import { Plate } from "@/components/brand/plate"
 import { useToast } from "@/components/ui/use-toast"
 
 interface LocationDetailsProps {
@@ -61,9 +62,12 @@ export function LocationDetails({ location, pinNumber, onClose }: LocationDetail
     >
       <div className="flex items-start gap-3">
         <MapPin number={pinNumber ?? ""} selected className="mt-0.5" />
+        {location.type === "artist" && (
+          <Plate alt="" name={location.name} primaryStyle={location.styles[0]} size={40} />
+        )}
         <div className="min-w-0 flex-1">
           <h2 className="font-heading text-[22px] leading-[1.15] text-ink text-balance">{location.name}</h2>
-          {location.type === "artist" && <p className="text-[13px] text-ink-muted">Artist</p>}
+          <p className="text-[13px] text-ink-muted">{locationKindLabel(location)}</p>
         </div>
         <div className="-mr-2 -mt-2 flex shrink-0">
           <button

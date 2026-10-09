@@ -12,12 +12,20 @@ export interface MapboxLocation {
   styles: string[]
   priceRange: "low" | "medium" | "high"
   distance?: number // in miles
+  /** Artists only: the shop they work at, when known. */
+  shopName?: string
   // Optional enrichment fields
   description?: string
   website?: string
   hours?: Record<string, string>
   phone?: string
   instagram?: string
+}
+
+/** "Shop", "Artist at Ink Co." or "Artist": the muted line under a map list name. */
+export function locationKindLabel(location: Pick<MapboxLocation, "type" | "shopName">): string {
+  if (location.type === "shop") return "Shop"
+  return location.shopName ? `Artist at ${location.shopName}` : "Artist"
 }
 
 export interface MapboxConfig {
