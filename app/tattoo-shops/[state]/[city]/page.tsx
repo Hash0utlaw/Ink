@@ -2,19 +2,15 @@ import { notFound } from "next/navigation"
 import { Suspense } from "react"
 import type { Metadata } from "next"
 import Link from "next/link"
-import Image from "next/image"
 import { Header } from "@/components/layout/header"
 import { HeaderSkeleton } from "@/components/layout/header-skeleton"
 import { Footer } from "@/components/layout/footer"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Star, MapPin, Phone, Globe, ChevronRight } from "lucide-react"
 import { getShopsForCity } from "@/lib/supabase/seo"
 import { STATE_ABBR_TO_NAME, stateAbbrToSlug, cityToSlug } from "@/lib/utils/states"
 import { FinderCta } from "@/components/layout/finder-cta"
-import type { Shop } from "@/types/shop"
-import { safeImageSrc } from "@/lib/utils/safe-image"
-import { styleLabels } from "@/lib/styles"
+import { ShopRow, ShopRowList } from "@/components/shops/shop-row"
+import { ListingHeader, countLabel } from "@/components/listings/listing-header"
+import { Pagination } from "@/components/listings/pagination"
 
 import { canonicalUrl, jsonLdHtml } from "@/lib/seo"
 export const dynamic = "force-dynamic"
@@ -39,58 +35,6 @@ export async function generateMetadata({
       alternates: { canonical: canonicalUrl(`/tattoo-shops/${stateAbbrToSlug(stateAbbr)}/${cityToSlug(cityName)}`) },
     }),
   }
-}
-
-function ShopCard({ shop, priority = false }: { shop: Shop; priority?: boolean }) {
-  return (
-    <Link
-      href={`/shops/${shop.id}`}
-      className="group flex flex-col rounded-lg border border-border/50 bg-card overflow-hidden hover:border-ink transition-all"
-    >
-      {shop.coverImageUrl ? (
-        <div className="relative h-36 overflow-hidden bg-muted">
-          <Image
-            src={safeImageSrc(shop.coverImageUrl)}
-            alt={shop.name}
-            fill
-            className="object-cover transition-transform duration-300"
-            priority={priority}
-          />
-        </div>
-      ) : (
-        <div className="h-36 flex items-center justify-center">
-          <MapPin className="w-8 h-8 text-muted-foreground/30" />
-        </div>
-      )}
-
-      <div className="p-4 space-y-2 flex-1">
-        <div className="flex items-start justify-between gap-2">
-          <h3 className="font-bold text-sm leading-tight">{shop.name}</h3>
-          {shop.rating > 0 && (
-            <div className="flex items-center gap-0.5 shrink-0">
-              <Star className="w-3.5 h-3.5 text-flash-yellow fill-flash-yellow" />
-              <span className="text-xs font-semibold">{shop.rating.toFixed(1)}</span>
-              <span className="text-xs text-muted-foreground">({shop.reviewCount})</span>
-            </div>
-          )}
-        </div>
-
-        {shop.location.address && (
-          <p className="text-xs text-muted-foreground line-clamp-1">{shop.location.address}</p>
-        )}
-
-        <div className="flex items-center gap-2 flex-wrap">
-          {shop.acceptsWalkIns && (
-            <Badge variant="secondary" className="text-xs">Walk-ins welcome</Badge>
-          )}
-          {styleLabels(shop.styles).slice(0, 3).map((label) => (
-            <Badge key={label} variant="outline" className="text-xs">{label}</Badge>
-          ))}
-          {shop.styles.length > 3 && <Badge variant="outline" className="text-xs">+{shop.styles.length - 3}</Badge>}
-        </div>
-      </div>
-    </Link>
-  )
 }
 
 export default async function CityPage({
@@ -156,52 +100,52 @@ export default async function CityPage({
       </Suspense>
 
       <main className="flex-1">
-        {/* Breadcrumb */}
-        <div className="border-b border-border/50 bg-muted/30">
-          <div className="container mx-auto px-4 py-3 text-sm text-muted-foreground flex items-center gap-1.5">
-            <Link href="/tattoo-shops" className="hover:text-foreground transition-colors">All States</Link>
-            <ChevronRight className="w-3.5 h-3.5" />
-            <Link href={`/tattoo-shops/${stateSlug}`} className="hover:text-foreground transition-colors">{stateName}</Link>
-            <ChevronRight className="w-3.5 h-3.5" />
-            <span className="text-foreground">{cityName}</span>
-          </div>
-        </div>
+        <div className="mx-auto max-w-[1344px] px-4 py-8 sm:px-6 lg:py-14">
+          <nav aria-label="Breadcrumb" className="mb-6 text-[13px] text-ink-muted lg:mb-8">
+            <ol className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
+              <li>
+                <Link href="/tattoo-shops" className="underline-offset-2 hover:text-ink hover:underline">
+                  All states
+                </Link>
+              </li>
+              <li aria-hidden="true">/</li>
+              <li>
+                <Link href={`/tattoo-shops/${stateSlug}`} className="underline-offset-2 hover:text-ink hover:underline">
+                  {stateName}
+                </Link>
+              </li>
+              <li aria-hidden="true">/</li>
+              <li aria-current="page" className="text-ink">
+                {cityName}
+              </li>
+            </ol>
+          </nav>
 
-        {/* Hero */}
-        <div className="border-b border-border/50 bg-muted/30">
-          <div className="container mx-auto px-4 py-8">
-            <h1 className="text-3xl md:text-4xl font-extrabold mb-2">
-              Tattoo Shops in {cityName}, {stateAbbr}
-            </h1>
-            <p className="text-muted-foreground">
-              {count.toLocaleString()} studios · {stateName}
-            </p>
-          </div>
-        </div>
-
-        <div className="container mx-auto px-4 py-8 space-y-8">
-          <FinderCta />
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {shops.map((shop, i) => (
-              <ShopCard key={shop.id} shop={shop} priority={i === 0} />
-            ))}
-          </div>
-
-          {count > 24 && (
-            <div className="flex justify-center gap-3 pt-4">
-              {page > 0 && (
-                <Button variant="outline" asChild>
-                  <Link href={`/tattoo-shops/${params.state}/${params.city}?page=${page - 1}`}>← Previous</Link>
-                </Button>
-              )}
-              {(page + 1) * 24 < count && (
-                <Button variant="outline" asChild>
-                  <Link href={`/tattoo-shops/${params.state}/${params.city}?page=${page + 1}`}>Next →</Link>
-                </Button>
-              )}
+          <ListingHeader
+            title="Tattoo shops"
+            suffix={
+              <>
+                in <span className="font-place italic">{cityName}, {stateAbbr}</span>
+              </>
+            }
+            countLine={countLabel(count, "shop")}
+          >
+            <div className="mt-3">
+              <FinderCta variant="inline" />
             </div>
-          )}
+          </ListingHeader>
+
+          <ShopRowList>
+            {shops.map((shop) => (
+              <ShopRow key={shop.id} shop={shop} />
+            ))}
+          </ShopRowList>
+
+          <Pagination
+            page={page}
+            totalPages={Math.ceil(count / 24)}
+            hrefFor={(p) => `/tattoo-shops/${params.state}/${params.city}?page=${p}`}
+          />
         </div>
       </main>
 

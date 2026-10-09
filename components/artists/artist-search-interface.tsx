@@ -6,9 +6,13 @@ import Link from "next/link"
 import { FilterSidebar } from "./filter-sidebar"
 import type { ArtistFilterValues } from "./filter-sidebar"
 import { ResultsList } from "./results-list"
-import { X } from "lucide-react"
 import type { Artist } from "@/types/artist"
 import { styleLabel, toStyleSlugs } from "@/lib/styles"
+import { formatLocation } from "@/lib/parse-location"
+import { FinderCta } from "@/components/layout/finder-cta"
+import { FilterDrawer } from "@/components/listings/filter-drawer"
+import { ActiveFilter } from "@/components/listings/filter-controls"
+import { ListingHeader, countLabel } from "@/components/listings/listing-header"
 
 const DEFAULT_FILTERS: ArtistFilterValues = {
   styles: [],
@@ -105,7 +109,8 @@ export function ArtistSearchInterface({ showAvailableNow = false }: { showAvaila
       if (filters.city) params.set("city", filters.city)
       if (filters.state) params.set("state", filters.state)
       if (filters.zip) params.set("zip", filters.zip)
-      if (filters.sortBy !== "rating") params.set("sortBy", filters.sortBy)
+      // Always sent: without it the API sorts A to Z, not by rating. The page URL still omits the default.
+      params.set("sortBy", filters.sortBy)
       params.set("page", String(page))
 
       try {
@@ -161,104 +166,86 @@ export function ArtistSearchInterface({ showAvailableNow = false }: { showAvaila
   }
 
   const priceLabel: Record<string, string> = { low: "$", medium: "$$", high: "$$$" }
+  const place = nearMeCoords ? "" : formatLocation({ zip: filters.zip.trim(), city: filters.city.trim(), state: filters.state })
+  const activeCount =
+    [filters.query, filters.zip, filters.state, filters.city].filter(Boolean).length +
+    (filters.rating > 0 ? 1 : 0) +
+    (filters.availableNow ? 1 : 0) +
+    (nearMeCoords ? 1 : 0) +
+    filters.styles.length +
+    filters.price.length
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-      <div className="lg:col-span-1">
-        <FilterSidebar filters={filters} onFilterChange={handleFilterChange} onNearMe={handleNearMe} showAvailableNow={showAvailableNow} />
-      </div>
-      <div className="lg:col-span-3 space-y-8">
-        <Link
-          href="/map"
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors"
-        >
-          View artists on the map →
-        </Link>
+    <div>
+      <ListingHeader
+        title="Tattoo artists"
+        place={place}
+        suffix={nearMeCoords ? "near you" : undefined}
+        countLine={isLoading ? null : countLabel(totalCount, "artist")}
+      >
+        <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2">
+          <Link href="/map" className="text-[15px] font-semibold text-navy underline underline-offset-2 hover:no-underline">
+            View artists on the map
+          </Link>
+          <FinderCta variant="inline" />
+        </div>
+      </ListingHeader>
 
-        {hasActiveFilters && (
-          <div className="flex flex-wrap items-center gap-2">
-            {filters.query && (
-              <span className="bg-secondary text-primary border border-ink text-xs px-2.5 py-1 rounded-lg flex items-center gap-1">
-                {filters.query}
-                <button onClick={() => clearFilter("query")} aria-label="Remove query filter"><X className="w-3 h-3" /></button>
-              </span>
-            )}
-            {filters.zip && (
-              <span className="bg-secondary text-primary border border-ink text-xs px-2.5 py-1 rounded-lg flex items-center gap-1">
-                ZIP: {filters.zip}
-                <button onClick={() => clearFilter("zip")} aria-label="Remove ZIP filter"><X className="w-3 h-3" /></button>
-              </span>
-            )}
-            {filters.state && (
-              <span className="bg-secondary text-primary border border-ink text-xs px-2.5 py-1 rounded-lg flex items-center gap-1">
-                {filters.state}
-                <button onClick={() => clearFilter("state")} aria-label="Remove state filter"><X className="w-3 h-3" /></button>
-              </span>
-            )}
-            {filters.city && (
-              <span className="bg-secondary text-primary border border-ink text-xs px-2.5 py-1 rounded-lg flex items-center gap-1">
-                {filters.city}
-                <button onClick={() => clearFilter("city")} aria-label="Remove city filter"><X className="w-3 h-3" /></button>
-              </span>
-            )}
-            {filters.rating > 0 && (
-              <span className="bg-secondary text-primary border border-ink text-xs px-2.5 py-1 rounded-lg flex items-center gap-1">
-                {filters.rating}+ stars
-                <button onClick={() => clearFilter("rating")} aria-label="Remove rating filter"><X className="w-3 h-3" /></button>
-              </span>
-            )}
-            {filters.availableNow && (
-              <span className="bg-secondary text-primary border border-ink text-xs px-2.5 py-1 rounded-lg flex items-center gap-1">
-                Available now
-                <button onClick={() => clearFilter("availableNow")} aria-label="Remove availability filter"><X className="w-3 h-3" /></button>
-              </span>
-            )}
-            {nearMeCoords && (
-              <span className="bg-secondary text-primary border border-ink text-xs px-2.5 py-1 rounded-lg flex items-center gap-1">
-                {filters.radiusMiles} mi radius
-                <button onClick={() => clearFilter("nearMe")} aria-label="Remove near me filter"><X className="w-3 h-3" /></button>
-              </span>
-            )}
-            {filters.price.map((tier) => (
-              <span key={tier} className="bg-secondary text-primary border border-ink text-xs px-2.5 py-1 rounded-lg flex items-center gap-1">
-                {priceLabel[tier] ?? tier}
-                <button onClick={() => clearFilter(`price:${tier}` as any)} aria-label={`Remove ${tier} price filter`}><X className="w-3 h-3" /></button>
-              </span>
-            ))}
-            {filters.styles.map((style) => (
-              <span key={style} className="bg-secondary text-primary border border-ink text-xs px-2.5 py-1 rounded-lg flex items-center gap-1">
-                {styleLabel(style) ?? style}
-                <button onClick={() => clearFilter(`style:${style}` as any)} aria-label={`Remove ${styleLabel(style) ?? style} filter`}><X className="w-3 h-3" /></button>
-              </span>
-            ))}
-            <button
-              className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors ml-auto"
-              onClick={() => {
-                setNearMeCoords(null)
-                setDistancesById({})
-                handleFilterChange(DEFAULT_FILTERS)
-              }}
-            >
-              Clear all
-            </button>
-          </div>
-        )}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[280px_minmax(0,1fr)] lg:gap-10">
+        <aside aria-label="Filters" className="lg:sticky lg:top-20 lg:self-start">
+          <FilterDrawer
+            resultLabel={isLoading ? null : `Show ${countLabel(totalCount, "result")}`}
+            activeCount={activeCount}
+          >
+            <FilterSidebar filters={filters} onFilterChange={handleFilterChange} onNearMe={handleNearMe} showAvailableNow={showAvailableNow} />
+          </FilterDrawer>
+        </aside>
 
-        {!isLoading && (
-          <p className="text-sm text-muted-foreground -mt-4">
-            Showing {filteredArtists.length} of {totalCount} artists
-          </p>
-        )}
+        <div className="min-w-0 space-y-6">
+          {hasActiveFilters && (
+            <div className="flex flex-wrap items-center gap-2">
+              {filters.query && <ActiveFilter label={filters.query} onRemove={() => clearFilter("query")} />}
+              {filters.zip && <ActiveFilter label={`ZIP ${filters.zip}`} onRemove={() => clearFilter("zip")} />}
+              {filters.state && <ActiveFilter label={filters.state} onRemove={() => clearFilter("state")} />}
+              {filters.city && <ActiveFilter label={filters.city} onRemove={() => clearFilter("city")} />}
+              {filters.rating > 0 && <ActiveFilter label={`${filters.rating}+ stars`} onRemove={() => clearFilter("rating")} />}
+              {filters.availableNow && <ActiveFilter label="Available now" onRemove={() => clearFilter("availableNow")} />}
+              {nearMeCoords && <ActiveFilter label={`Within ${filters.radiusMiles} mi`} onRemove={() => clearFilter("nearMe")} />}
+              {filters.price.map((tier) => (
+                <ActiveFilter key={tier} label={priceLabel[tier] ?? tier} onRemove={() => clearFilter(`price:${tier}`)} />
+              ))}
+              {filters.styles.map((style) => (
+                <ActiveFilter key={style} label={styleLabel(style) ?? style} onRemove={() => clearFilter(`style:${style}`)} />
+              ))}
+              <button
+                className="ml-auto min-h-9 text-[15px] font-semibold text-navy underline underline-offset-2 hover:no-underline"
+                onClick={() => {
+                  setNearMeCoords(null)
+                  setDistancesById({})
+                  handleFilterChange(DEFAULT_FILTERS)
+                }}
+              >
+                Clear all
+              </button>
+            </div>
+          )}
 
-        <ResultsList
-          artists={filteredArtists}
-          isLoading={isLoading}
-          distancesById={nearMeCoords ? distancesById : undefined}
-          page={page}
-          totalCount={totalCount}
-          pageSize={24}
-          onPageChange={setPage}
-        />
+          <ResultsList
+            artists={filteredArtists}
+            isLoading={isLoading}
+            distancesById={nearMeCoords ? distancesById : undefined}
+            page={page}
+            totalCount={totalCount}
+            // Near me loads every result at once, so it has a single page.
+            pageSize={nearMeCoords ? Math.max(totalCount, 1) : 24}
+            onPageChange={setPage}
+            emptyMessage={
+              place
+                ? `No artists found near ${place}. Try a nearby city or a different style.`
+                : undefined
+            }
+          />
+        </div>
       </div>
     </div>
   )
