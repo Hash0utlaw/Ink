@@ -4,7 +4,10 @@ import { useState, useEffect, useCallback, useMemo, useRef } from "react"
 import { MapboxMap, type MapBounds } from "./mapbox-map"
 import { MapSidebar } from "./map-sidebar"
 import { LocationDetails } from "./location-details"
-import type { MapboxLocation } from "@/lib/mapbox"
+import { List } from "lucide-react"
+import type { MapboxLocation, MapStyle } from "@/lib/mapbox"
+import { NeatlineFrame } from "@/components/brand/neatline-frame"
+import { cn } from "@/lib/utils"
 import { calculateDistance, getCurrentLocation, geocodeAddress, mapboxConfig } from "@/lib/mapbox"
 import { useToast } from "@/components/ui/use-toast"
 import { styleLabels } from "@/lib/styles"
@@ -24,6 +27,13 @@ interface MapFilters {
 // /api/map/details only for the top MAX_CARDS pins in view (sidebar) or a
 // clicked pin (LocationDetails).
 const MAX_CARDS = 100
+// The first PIN_NUMBERS list rows are numbered, with the same number on their map pin.
+const PIN_NUMBERS = 9
+
+const MAP_STYLE_OPTIONS: { value: MapStyle; label: string }[] = [
+  { value: "chart", label: "Map" },
+  { value: "satellite", label: "Satellite" },
+]
 
 type Pin = [string, number, number, number, string?] // id, lat, lng, rating, primary style slug
 
@@ -79,7 +89,9 @@ export function MapInterface() {
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null)
   const [mapCenter, setMapCenter] = useState<[number, number]>([-98.5795, 39.8283])
   const [mapZoom, setMapZoom] = useState(4)
-  const [mapStyle, setMapStyle] = useState("dark")
+  const [mapStyle, setMapStyle] = useState<MapStyle>("chart")
+  // The query, when it geocoded to a place (for the sidebar heading).
+  const [searchedPlace, setSearchedPlace] = useState<string | null>(null)
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [loading, setLoading] = useState(true)
   const [dataError, setDataError] = useState<string | null>(null)
@@ -230,9 +242,25 @@ export function MapInterface() {
     })
   }, [cards, filters.priceRange, filters.availableNow, filters.searchQuery])
 
+  // The sidebar list, best rated first; its first rows are numbered on the map.
+  const listed = useMemo(
+    () => [...filteredCards].sort((a, b) => b.rating - a.rating).slice(0, MAX_CARDS),
+    [filteredCards]
+  )
+  // Keyed on the ids so the map only re-sets its data when the numbering changes.
+  const numberedKey = listed
+    .slice(0, PIN_NUMBERS)
+    .map((location) => location.id)
+    .join(",")
+  const pinNumbers = useMemo(
+    () => new Map(numberedKey ? numberedKey.split(",").map((id, i) => [id, i + 1]) : []),
+    [numberedKey]
+  )
+
   // Handle search
   const handleSearch = useCallback(async (query: string) => {
     setFilters((prev) => ({ ...prev, searchQuery: query }))
+    setSearchedPlace(null)
 
     if (query.trim()) {
       try {
@@ -240,6 +268,7 @@ export function MapInterface() {
         if (coords) {
           setMapCenter(coords)
           setMapZoom(14)
+          setSearchedPlace(query.trim())
         }
       } catch (error) {
         console.warn("Geocoding failed:", error)
@@ -298,17 +327,21 @@ export function MapInterface() {
   )
 
   // Handle map style change
-  const handleMapStyleChange = useCallback((style: string) => {
+  const handleMapStyleChange = useCallback((style: MapStyle) => {
     setMapStyle(style)
   }, [])
 
+  // Fills the screen below the admin banner (the only bar /map shows; it sets
+  // --admin-banner-h while visible). dvh tracks mobile browser chrome.
   return (
-    <div className="relative h-[calc(100vh-4rem)] flex">
+    <div className="relative flex h-[calc(100dvh-var(--admin-banner-h,0px))]">
       {/* Sidebar */}
       <MapSidebar
         isOpen={sidebarOpen}
         onToggle={() => setSidebarOpen(!sidebarOpen)}
-        locations={filteredCards}
+        locations={listed}
+        pinNumbers={pinNumbers}
+        place={searchedPlace}
         totals={inView}
         selectedLocation={selectedLocation}
         onLocationSelect={handleLocationSelect}
@@ -320,43 +353,66 @@ export function MapInterface() {
         dataError={dataError}
       />
 
-      {/* Map */}
-      <div className="flex-1 relative">
-        <MapboxMap
-          accessToken={mapboxConfig.accessToken}
-          locations={mapPins}
-          selectedLocation={selectedLocation}
-          onLocationSelect={handleLocationSelect}
-          center={mapCenter}
-          zoom={mapZoom}
-          style={mapStyle as keyof typeof import("@/lib/mapbox").mapStyles}
-          onMoveEnd={handleMoveEnd}
-          onMapLoad={handleMapLoad}
-          className="w-full h-full"
-        />
-
-        {/* Map Controls */}
-        <div className="absolute top-4 right-4 flex flex-col gap-2 z-30">
-          <select
-            value={mapStyle}
-            onChange={(e) => handleMapStyleChange(e.target.value)}
-            className="px-3 py-2 bg-card border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"
-          >
-            <option value="streets">Streets</option>
-            <option value="satellite">Satellite</option>
-            <option value="light">Light</option>
-            <option value="dark">Dark</option>
-          </select>
-        </div>
-
-        {/* Location Details Modal */}
-        {selectedLocation && (
-          <LocationDetails
-            location={selectedLocation}
-            isOpen={!!selectedLocation}
-            onClose={() => setSelectedLocation(null)}
+      {/* Map: inside the neatline frame from 1024px, edge to edge below */}
+      <div className="relative min-w-0 flex-1 bg-paper lg:p-4">
+        <NeatlineFrame desktopOnly className="h-full">
+          <MapboxMap
+            accessToken={mapboxConfig.accessToken}
+            locations={mapPins}
+            selectedLocation={selectedLocation}
+            onLocationSelect={handleLocationSelect}
+            center={mapCenter}
+            zoom={mapZoom}
+            style={mapStyle}
+            pinNumbers={pinNumbers}
+            onMoveEnd={handleMoveEnd}
+            onMapLoad={handleMapLoad}
+            className="w-full h-full"
           />
-        )}
+
+          {/* List toggle. On mobile the open list covers the map and has its own "Show map" button. */}
+          <button
+            type="button"
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            aria-expanded={sidebarOpen}
+            className="absolute left-4 top-4 z-20 inline-flex min-h-11 items-center gap-2 rounded-lg border-1.5 border-ink bg-vellum px-3 text-[15px] font-semibold text-ink hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <List className="h-4 w-4" aria-hidden="true" />
+            {sidebarOpen ? "Hide list" : "Show list"}
+          </button>
+
+          {/* Base map toggle */}
+          <div
+            role="group"
+            aria-label="Map style"
+            className="absolute right-4 top-4 z-20 flex overflow-hidden rounded-lg border-1.5 border-ink bg-vellum"
+          >
+            {MAP_STYLE_OPTIONS.map(({ value, label }, i) => (
+              <button
+                key={value}
+                type="button"
+                aria-pressed={mapStyle === value}
+                onClick={() => handleMapStyleChange(value)}
+                className={cn(
+                  "min-h-11 px-3 text-[15px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
+                  i > 0 && "border-l-1.5 border-ink",
+                  mapStyle === value ? "bg-ink text-vellum" : "text-ink hover:bg-secondary"
+                )}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          {/* Selected shop, docked bottom-left (bottom on mobile) */}
+          {selectedLocation && (
+            <LocationDetails
+              location={selectedLocation}
+              pinNumber={pinNumbers.get(selectedLocation.id)}
+              onClose={() => setSelectedLocation(null)}
+            />
+          )}
+        </NeatlineFrame>
       </div>
     </div>
   )
