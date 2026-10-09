@@ -1,44 +1,41 @@
 "use client"
 
-import { useState } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Card, CardContent } from "@/components/ui/card"
+import Link from "next/link"
+import { Share2, X } from "lucide-react"
 import type { MapboxLocation } from "@/lib/mapbox"
-import { MapPin, Phone, Globe, Clock, Star, Heart, Share2, Navigation, Calendar, MessageCircle, X } from "lucide-react"
 import { styleEntries } from "@/lib/styles"
 import { StyleBadge } from "@/components/brand/style-badge"
+import { MapPin } from "@/components/brand/map-pin"
+import { useToast } from "@/components/ui/use-toast"
 
 interface LocationDetailsProps {
   location: MapboxLocation
-  isOpen: boolean
+  /** The location's list/pin number, if it has one. */
+  pinNumber?: number
   onClose: () => void
 }
 
-export function LocationDetails({ location, isOpen, onClose }: LocationDetailsProps) {
-  const [isFavorited, setIsFavorited] = useState(false)
+function ratingLine(rating: number, reviewCount: number) {
+  if (rating <= 0) return "No reviews yet"
+  const reviews = `${reviewCount.toLocaleString("en-US")} ${reviewCount === 1 ? "review" : "reviews"}`
+  return reviewCount > 0 ? `Rated ${rating.toFixed(1)} from ${reviews}` : `Rated ${rating.toFixed(1)}`
+}
 
-  const portfolioImages = [
-    location.image || "/tattoo-portfolio.jpg",
-    "/fine-line-tattoo.jpg",
-    "/botanical-tattoo.jpg",
-    "/japanese-dragon-tattoo.png",
-  ]
+// "shop-<uuid>" → "/shops/<uuid>", "artist-<uuid>" → "/artists/<uuid>"
+function profileHref(location: MapboxLocation) {
+  const raw = location.id.slice(location.id.indexOf("-") + 1)
+  return location.type === "shop" ? `/shops/${raw}` : `/artists/${raw}`
+}
 
-  const handleBook = () => {
-    console.log("Book appointment with", location.name)
-  }
+const LINK = "font-semibold text-navy underline underline-offset-2 hover:no-underline"
 
-  const handleMessage = () => {
-    console.log("Message", location.name)
-  }
-
-  const handleGetDirections = () => {
-    const [lng, lat] = location.coordinates
-    const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`
-    window.open(url, "_blank")
-  }
+/** The selected pin's card, docked bottom-left of the map (full width at the bottom on mobile). */
+export function LocationDetails({ location, pinNumber, onClose }: LocationDetailsProps) {
+  const { toast } = useToast()
+  const [lng, lat] = location.coordinates
+  const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`
+  const badges = styleEntries(location.styles).slice(0, 3)
+  const hours = Object.entries(location.hours ?? {})
 
   const handleShare = async () => {
     if (navigator.share) {
@@ -52,208 +49,89 @@ export function LocationDetails({ location, isOpen, onClose }: LocationDetailsPr
         console.log("Error sharing:", error)
       }
     } else {
-      navigator.clipboard.writeText(window.location.href)
+      await navigator.clipboard.writeText(window.location.href)
+      toast({ description: "Link copied" })
     }
   }
 
-  const handleFavorite = () => {
-    setIsFavorited(!isFavorited)
-  }
-
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-2">
-                <DialogTitle className="text-2xl font-bold text-foreground">{location.name}</DialogTitle>
-                <Badge variant={location.type === "artist" ? "default" : "secondary"} className="text-sm">
-                  {location.type}
-                </Badge>
-              </div>
-              <div className="flex items-center gap-2 mb-3">
-                <div className="flex items-center">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Star
-                      key={i}
-                      className={`w-5 h-5 ${
-                        i < Math.floor(location.rating) ? "fill-flash-yellow text-flash-yellow" : "text-border"
-                      }`}
-                    />
-                  ))}
-                </div>
-                <span className="text-lg font-semibold">{location.rating}</span>
-                <span className="text-muted-foreground">({location.reviewCount} reviews)</span>
-              </div>
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <MapPin className="w-5 h-5" />
-                <span className="text-lg">{location.address}</span>
-                {location.distance && (
-                  <span className="text-muted-foreground">
-                    •{" "}
-                    {location.distance < 1
-                      ? `${(location.distance * 5280).toFixed(0)} ft away`
-                      : `${location.distance.toFixed(1)} mi away`}
-                  </span>
-                )}
-              </div>
-            </div>
-            <Button variant="ghost" size="sm" onClick={onClose} className="text-muted-foreground hover:text-foreground">
-              <X className="w-5 h-5" />
-            </Button>
-          </div>
-        </DialogHeader>
-
-        <div className="space-y-8">
-          {/* Portfolio Gallery */}
-          <Card>
-            <CardContent className="p-6">
-              <h3 className="text-xl font-semibold mb-4">Portfolio</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {portfolioImages.map((image, index) => (
-                  <div key={index} className="aspect-square">
-                    <img
-                      src={image || "/placeholder.svg"}
-                      alt={`${location.name} portfolio ${index + 1}`}
-                      className="w-full h-full object-cover rounded-lg transition-transform cursor-pointer"
-                    />
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Description */}
-          <Card>
-            <CardContent className="p-6">
-              <h3 className="text-xl font-semibold mb-3">About</h3>
-              <p className="text-muted-foreground leading-relaxed">{location.description}</p>
-            </CardContent>
-          </Card>
-
-          {/* Styles */}
-          {location.styles.length > 0 && (
-            <Card>
-              <CardContent className="p-6">
-                <h3 className="text-xl font-semibold mb-4">Styles</h3>
-                <div className="flex flex-wrap gap-2">
-                  {styleEntries(location.styles).map(({ slug, label }) => (
-                    <StyleBadge key={slug} slug={slug} label={label} className="text-sm py-1 px-3" />
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Contact & Hours */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Contact Info */}
-            <Card>
-              <CardContent className="p-6">
-                <h3 className="text-xl font-semibold mb-4">Contact</h3>
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3">
-                    <Phone className="w-5 h-5 text-muted-foreground" />
-                    <span className="text-lg">(555) 123-4567</span>
-                  </div>
-                  {location.website && (
-                    <div className="flex items-center gap-3">
-                      <Globe className="w-5 h-5 text-muted-foreground" />
-                      <a
-                        href={location.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-burgundy-600 hover:underline text-lg"
-                      >
-                        Visit Website
-                      </a>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Hours */}
-            <Card>
-              <CardContent className="p-6">
-                <h3 className="text-xl font-semibold mb-4">Hours</h3>
-                <div className="space-y-2">
-                  {Object.entries(location.hours ?? {}).map(([day, hours]) => (
-                    <div key={day} className="flex justify-between">
-                      <span className="capitalize font-medium">{day}</span>
-                      <span className="text-muted-foreground">{hours}</span>
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-4">
-                  <Badge variant={location.isOpen ? "default" : "secondary"} className="text-sm">
-                    <Clock className="w-4 h-4 mr-2" />
-                    {location.isOpen ? "Open Now" : "Closed"}
-                  </Badge>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Price Range */}
-          <Card>
-            <CardContent className="p-6">
-              <h3 className="text-xl font-semibold mb-4">Pricing</h3>
-              <div className="flex items-center gap-3">
-                <span className="text-muted-foreground">Price Range:</span>
-                <div className="flex">
-                  {Array.from({ length: 3 }).map((_, i) => (
-                    <span
-                      key={i}
-                      className={`text-xl ${
-                        i < (location.priceRange === "low" ? 1 : location.priceRange === "medium" ? 2 : 3)
-                          ? "text-success"
-                          : "text-muted-foreground"
-                      }`}
-                    >
-                      $
-                    </span>
-                  ))}
-                </div>
-                <span className="text-muted-foreground capitalize">({location.priceRange})</span>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Action Buttons */}
-          <Card>
-            <CardContent className="p-6">
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-                <Button onClick={handleBook} className="col-span-2 md:col-span-2">
-                  <Calendar className="w-4 h-4 mr-2" />
-                  Book Appointment
-                </Button>
-                <Button variant="outline" onClick={handleMessage}>
-                  <MessageCircle className="w-4 h-4 mr-2" />
-                  Message
-                </Button>
-                <Button variant="outline" onClick={handleGetDirections}>
-                  <Navigation className="w-4 h-4 mr-2" />
-                  Directions
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={handleFavorite}
-                  className={isFavorited ? "text-destructive border-destructive" : ""}
-                >
-                  <Heart className={`w-4 h-4 mr-2 ${isFavorited ? "fill-current" : ""}`} />
-                  {isFavorited ? "Saved" : "Save"}
-                </Button>
-              </div>
-              <Button variant="outline" onClick={handleShare} className="w-full mt-3 bg-transparent">
-                <Share2 className="w-4 h-4 mr-2" />
-                Share Location
-              </Button>
-            </CardContent>
-          </Card>
+    <section
+      aria-label={`Selected: ${location.name}`}
+      className="absolute inset-x-2 bottom-[84px] z-20 max-h-[60%] overflow-y-auto rounded-lg border-2 border-ink bg-vellum p-4 scrollbar-ink sm:inset-x-4 lg:bottom-11 lg:left-4 lg:right-auto lg:w-[380px]"
+    >
+      <div className="flex items-start gap-3">
+        <MapPin number={pinNumber ?? ""} selected className="mt-0.5" />
+        <div className="min-w-0 flex-1">
+          <h2 className="font-heading text-[22px] leading-[1.15] text-ink text-balance">{location.name}</h2>
+          {location.type === "artist" && <p className="text-[13px] text-ink-muted">Artist</p>}
         </div>
-      </DialogContent>
-    </Dialog>
+        <div className="-mr-2 -mt-2 flex shrink-0">
+          <button
+            type="button"
+            onClick={handleShare}
+            aria-label="Share"
+            className="flex h-11 w-11 items-center justify-center rounded-lg text-ink hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <Share2 className="h-[18px] w-[18px]" />
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            className="flex h-11 w-11 items-center justify-center rounded-lg text-ink hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+      </div>
+
+      {location.address && <p className="mt-2 text-[15px] text-ink">{location.address}</p>}
+      <p className="mt-1 text-[15px] tabular-nums text-ink-muted">
+        {ratingLine(location.rating, location.reviewCount)}
+        {location.distance != null &&
+          `, ${location.distance < 1 ? `${(location.distance * 5280).toFixed(0)} ft` : `${location.distance.toFixed(1)} mi`} away`}
+        {location.isOpen && <span className="font-semibold text-bottle-green">. Open now</span>}
+      </p>
+
+      {badges.length > 0 && (
+        <div className="mt-2.5 flex flex-wrap gap-1.5">
+          {badges.map(({ slug, label }) => (
+            <StyleBadge key={slug} slug={slug} label={label} />
+          ))}
+        </div>
+      )}
+
+      {location.description && (
+        <p className="mt-3 line-clamp-3 text-pretty text-[15px] leading-[1.55] text-ink">{location.description}</p>
+      )}
+
+      {hours.length > 0 && (
+        <details className="mt-3 text-[15px] text-ink">
+          <summary className="cursor-pointer font-semibold">Hours</summary>
+          <dl className="mt-2 space-y-1">
+            {hours.map(([day, value]) => (
+              <div key={day} className="flex justify-between gap-4">
+                <dt className="capitalize">{day}</dt>
+                <dd className="text-ink-muted">{value}</dd>
+              </div>
+            ))}
+          </dl>
+        </details>
+      )}
+
+      <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-[15px]">
+        <Link href={profileHref(location)} className={LINK}>
+          {location.type === "shop" ? "View shop" : "View artist"}
+        </Link>
+        <a href={directionsUrl} target="_blank" rel="noopener noreferrer" className={LINK}>
+          Get directions
+        </a>
+        {location.website && (
+          <a href={location.website} target="_blank" rel="noopener noreferrer" className={LINK}>
+            Website
+          </a>
+        )}
+      </div>
+    </section>
   )
 }

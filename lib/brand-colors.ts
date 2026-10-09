@@ -12,6 +12,8 @@ export const MAP_COLORS = {
   flashRed: "#B3261E",
   flashYellow: "#D9A426",
   bottleGreen: "#2F6B4F",
+  // Only for numbers on a flash-red (selected) pin.
+  white: "#FFFFFF",
 } as const
 
 export type MapColor = keyof typeof MAP_COLORS

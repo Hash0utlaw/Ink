@@ -1,23 +1,28 @@
 "use client"
 
 import type React from "react"
-import { useMemo, useState } from "react"
-import { Search, MapPin, Filter, ChevronLeft, ChevronRight, Loader2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { useState } from "react"
+import { Loader2, LocateFixed, SlidersHorizontal } from "lucide-react"
 import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { MapPin } from "@/components/brand/map-pin"
+import { StyleBadge } from "@/components/brand/style-badge"
 import { MapFilters } from "./map-filters"
 import type { MapboxLocation } from "@/lib/mapbox"
-import { Star } from "lucide-react"
-import { styleLabels } from "@/lib/styles"
+import { styleEntries } from "@/lib/styles"
+import { cn } from "@/lib/utils"
 
 const MAX_CARDS = 100
 
 interface MapSidebarProps {
   isOpen: boolean
   onToggle: () => void
+  /** Already sorted best rated first and capped at MAX_CARDS (map-interface.tsx). */
   locations: MapboxLocation[]
+  /** Location id → number shown on the row and on its map pin. */
+  pinNumbers: Map<string, number>
+  /** The searched place, when the search geocoded to one. */
+  place: string | null
   // Shop/artist pins currently in view (after filters); falls back to locations.length.
   totals?: { shops: number; artists: number } | null
   selectedLocation: MapboxLocation | null
@@ -30,10 +35,24 @@ interface MapSidebarProps {
   dataError?: string | null
 }
 
+const plural = (n: number, one: string, many: string) => `${n.toLocaleString("en-US")} ${n === 1 ? one : many}`
+
+function ratingLine(rating: number, reviewCount: number) {
+  if (rating <= 0) return "No reviews yet"
+  return reviewCount > 0
+    ? `Rated ${rating.toFixed(1)} from ${plural(reviewCount, "review", "reviews")}`
+    : `Rated ${rating.toFixed(1)}`
+}
+
+const SECONDARY_BUTTON =
+  "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border-1.5 border-ink bg-vellum px-3 text-[15px] font-semibold text-ink hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+
 export function MapSidebar({
   isOpen,
   onToggle,
   locations,
+  pinNumbers,
+  place,
   totals,
   selectedLocation,
   onLocationSelect,
@@ -52,257 +71,200 @@ export function MapSidebar({
     onSearch(searchQuery)
   }
 
-  // The map clusters every pin; the list only renders the top-rated
-  // MAX_CARDS (map-interface already sends at most that many).
-  const visibleLocations = useMemo(
-    () => [...locations].sort((a, b) => b.rating - a.rating).slice(0, MAX_CARDS),
-    [locations]
-  )
-
-  // [count, noun] pairs for the label, e.g. "1,240 shops · 310 artists in view".
-  const countParts: [number, string][] = totals
+  // [count, noun] pairs for the count line, e.g. "1,240 shops and 310 artists".
+  const countParts: [number, string, string][] = totals
     ? ([
-        filters.locationType !== "artist" ? [totals.shops, totals.shops === 1 ? "shop" : "shops"] : null,
-        filters.locationType !== "shop" ? [totals.artists, totals.artists === 1 ? "artist" : "artists"] : null,
-      ].filter(Boolean) as [number, string][])
-    : [[locations.length, locations.length === 1 ? "location" : "locations"]]
+        filters.locationType !== "artist" ? [totals.shops, "shop", "shops"] : null,
+        filters.locationType !== "shop" ? [totals.artists, "artist", "artists"] : null,
+      ].filter(Boolean) as [number, string, string][])
+    : [[locations.length, "shop", "shops"]]
 
   const inViewTotal = countParts.reduce((sum, [n]) => sum + n, 0)
+  const countText = countParts.map(([n, one, many]) => plural(n, one, many)).join(" and ")
 
-  const handleLocationClick = (location: MapboxLocation) => {
-    onLocationSelect(location)
-  }
+  const activeFilterCount =
+    (filters.locationType !== "all" ? 1 : 0) +
+    filters.styles.length +
+    filters.priceRange.length +
+    (filters.rating > 0 ? 1 : 0) +
+    (filters.availableNow ? 1 : 0)
 
   return (
-    <>
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={onToggle}
-        className="absolute top-6 left-6 z-50 sidebar-toggle rounded-full w-10 h-10 p-0 bg-transparent"
-      >
-        {isOpen ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-      </Button>
+    /*
+      Mobile: an overlay that floats on top of the map (fixed, taken out of
+      flex flow entirely) so the map is always full-width underneath it.
+      md+: rejoins the flex row as a fixed 420px side panel.
+    */
+    <div
+      className={cn(
+        "flex flex-col overflow-hidden bg-paper transition-all duration-300 ease-out",
+        "fixed inset-y-0 left-0 z-40 md:relative md:inset-auto md:z-30",
+        isOpen ? "w-full max-w-[420px] border-r-1.5 border-ink opacity-100 md:w-[420px]" : "pointer-events-none w-0 opacity-0"
+      )}
+    >
+      <div className="shrink-0 px-4 pb-4 pt-5 sm:px-6">
+        <div className="flex items-start justify-between gap-3">
+          <h1 className="font-heading text-[26px] leading-[1.15] text-ink text-balance">
+            {place ? (
+              <>
+                Tattoo shops near <span className="font-place italic">{place}</span>
+              </>
+            ) : (
+              "Tattoo shops on the map"
+            )}
+          </h1>
+          {/* Mobile only: the open list covers the map. */}
+          <button type="button" onClick={onToggle} className={cn(SECONDARY_BUTTON, "shrink-0 md:hidden")}>
+            Show map
+          </button>
+        </div>
 
-      {/*
-        Mobile: an overlay that floats on top of the map (fixed, taken out of
-        flex flow entirely) so the map is always full-width underneath it.
-        md+: rejoins the flex row as a fixed 420px side panel, unchanged from
-        the original desktop layout.
-      */}
-      <div
-        className={`
-        sidebar-modern flex flex-col transition-all duration-500 ease-out
-        fixed inset-y-0 left-0 z-40 md:relative md:inset-auto md:z-30
-        ${isOpen ? "w-full max-w-[420px] md:w-[420px]" : "w-0"}
-        ${isOpen ? "opacity-100" : "opacity-0 pointer-events-none"}
-      `}
-      >
-        <div className="sidebar-header p-8">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h1 className="text-2xl font-bold text-foreground tracking-tight">Discover</h1>
-              <p className="text-sm text-muted-foreground mt-1">Find your perfect tattoo artist</p>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowFilters(!showFilters)}
-              className={`sidebar-button rounded-full w-10 h-10 p-0 ${showFilters ? "bg-secondary text-primary" : ""}`}
+        <form onSubmit={handleSearch} className="mt-4">
+          <label htmlFor="map-search" className="mb-1.5 block text-[15px] font-semibold text-ink">
+            Search by place or name
+          </label>
+          <div className="flex gap-2">
+            <Input
+              id="map-search"
+              type="text"
+              placeholder="City, ZIP or shop name"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="h-11 flex-1 border-1.5 border-ink bg-white text-base"
+            />
+            <button
+              type="submit"
+              className="min-h-11 rounded-lg border-1.5 border-ink bg-flash-red px-4 text-[15px] font-semibold text-white hover:bg-flash-red/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
-              <Filter className="w-4 h-4" />
-            </Button>
+              Search
+            </button>
           </div>
+        </form>
 
-          <form onSubmit={handleSearch} className="space-y-4">
-            <div className="sidebar-search p-4">
-              <div className="flex items-center gap-3">
-                <Search className="text-muted-foreground w-5 h-5 flex-shrink-0" />
-                <Input
-                  type="text"
-                  placeholder="Search artists, shops, or styles..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="border-0 bg-transparent p-0 text-foreground placeholder:text-muted-foreground focus-visible:ring-0 text-base"
-                />
-              </div>
-            </div>
-
-            <Button
+        <div className="mt-3 flex flex-wrap gap-2">
+          <button type="button" onClick={onCurrentLocation} className={SECONDARY_BUTTON}>
+            <LocateFixed className="h-4 w-4" aria-hidden="true" />
+            Use my location
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowFilters(!showFilters)}
+            aria-expanded={showFilters}
+            className={cn(SECONDARY_BUTTON, showFilters && "bg-ink text-vellum hover:bg-ink")}
+          >
+            <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
+            Filters
+            {activeFilterCount > 0 && <span className="tabular-nums">({activeFilterCount})</span>}
+          </button>
+          {filters.searchQuery && (
+            <button
               type="button"
-              variant="outline"
-              onClick={onCurrentLocation}
-              className="sidebar-button w-full h-12 text-foreground font-medium bg-transparent"
+              onClick={() => {
+                setSearchQuery("")
+                onSearch("")
+              }}
+              className="min-h-11 px-1 text-[15px] font-semibold text-navy underline underline-offset-2 hover:no-underline"
             >
-              <MapPin className="w-4 h-4 mr-3" />
-              Use Current Location
-            </Button>
-          </form>
-
-          {showFilters && (
-            <div className="mt-8 sidebar-filter-section">
-              <MapFilters filters={filters} onFilterChange={onFilterChange} />
-            </div>
+              Clear search
+            </button>
           )}
         </div>
 
-        <div className="flex-1 flex flex-col min-h-0">
-          <div className="px-8 py-4 border-b border-border/30">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                {loading ? (
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    <span className="text-sm font-medium">Loading...</span>
-                  </div>
-                ) : (
-                  <span className="text-sm text-muted-foreground">
-                    {countParts.map(([n, noun], i) => (
-                      <span key={noun}>
-                        {i > 0 && " · "}
-                        <span className="font-semibold text-foreground">{n.toLocaleString()}</span> {noun}
-                      </span>
-                    ))}{" "}
-                    {totals ? "in view" : "found"}
-                  </span>
-                )}
-              </div>
-              {filters.searchQuery && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setSearchQuery("")
-                    onSearch("")
-                  }}
-                  className="text-xs text-muted-foreground hover:text-foreground h-auto p-2"
-                >
-                  Clear search
-                </Button>
-              )}
-            </div>
-            {dataError && <p className="text-sm text-muted-foreground mt-2">{dataError}</p>}
+        {showFilters && (
+          <div className="mt-4 max-h-[45vh] overflow-y-auto border-t border-rule pt-4 scrollbar-ink">
+            <MapFilters filters={filters} onFilterChange={onFilterChange} />
           </div>
+        )}
 
-          <ScrollArea className="flex-1 scrollbar-ink">
-            <div className="p-6 space-y-4">
-              {loading ? (
-                Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className="sidebar-card p-6 animate-pulse">
-                    <div className="flex items-start gap-4">
-                      <div className="w-20 h-20 bg-muted rounded-lg"></div>
-                      <div className="flex-1 space-y-3">
-                        <div className="h-5 bg-muted rounded-lg w-3/4"></div>
-                        <div className="h-4 bg-muted rounded-lg w-1/2"></div>
-                        <div className="h-4 bg-muted rounded-lg w-2/3"></div>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              ) : locations.length === 0 ? (
-                !dataError && (
-                  <div className="text-center py-16">
-                    <div className="text-muted-foreground mb-6">
-                      <MapPin className="w-16 h-16 mx-auto opacity-40" />
-                    </div>
-                    <h3 className="text-xl font-semibold text-foreground mb-3">No shops found in this area</h3>
-                    <p className="text-muted-foreground leading-relaxed">
-                      Try adjusting your filters or search terms to discover more artists and shops
-                    </p>
-                  </div>
-                )
-              ) : (
-                visibleLocations.map((location) => (
-                  <div
-                    key={location.id}
-                    onClick={() => handleLocationClick(location)}
-                    className={`
-                    modern-location-card p-6 group
-                    ${selectedLocation?.id === location.id ? "modern-location-card-selected" : ""}
-                  `}
-                  >
-                    <div className="flex items-start gap-5">
-                      <img
-                        src={location.image || "/placeholder.svg?height=80&width=80&query=tattoo shop"}
-                        alt={location.name}
-                        className="w-20 h-20 location-card-image"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between mb-3">
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-foreground text-lg truncate mb-1">{location.name}</h3>
-                            <div className="flex items-center gap-2">
-                              <Badge
-                                variant={location.type === "artist" ? "default" : "secondary"}
-                                className="text-xs font-medium"
-                              >
-                                {location.type}
-                              </Badge>
-                              <span
-                                className={`text-xs font-medium px-2 py-1 rounded-lg ${
-                                  location.isOpen
-                                    ? "bg-success text-success-foreground"
-                                    : "bg-destructive text-destructive-foreground"
-                                }`}
-                              >
-                                {location.isOpen ? "Open" : "Closed"}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-2 mb-3">
-                          <div className="flex items-center">
-                            {Array.from({ length: 5 }).map((_, i) => (
-                              <Star
-                                key={i}
-                                className={`w-4 h-4 ${
-                                  i < Math.floor(location.rating) ? "fill-flash-yellow text-flash-yellow" : "text-border"
-                                }`}
-                              />
-                            ))}
-                          </div>
-                          <span className="text-sm font-semibold text-foreground">{location.rating}</span>
-                          <span className="text-sm text-muted-foreground">({location.reviewCount})</span>
-                        </div>
-
-                        <p className="text-sm text-muted-foreground mb-4 line-clamp-1">{location.address}</p>
-
-                        <div className="flex items-center justify-between">
-                          <div className="flex flex-wrap gap-2">
-                            {styleLabels(location.styles).slice(0, 2).map((label) => (
-                              <Badge key={label} variant="outline" className="text-xs filter-badge">
-                                {label}
-                              </Badge>
-                            ))}
-                            {location.styles.length > 2 && (
-                              <Badge variant="outline" className="text-xs filter-badge">
-                                +{location.styles.length - 2}
-                              </Badge>
-                            )}
-                          </div>
-                          {location.distance && (
-                            <span className="text-xs text-muted-foreground font-medium">
-                              {location.distance < 1
-                                ? `${(location.distance * 5280).toFixed(0)} ft`
-                                : `${location.distance.toFixed(1)} mi`}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
-              {!loading && inViewTotal > MAX_CARDS && (
-                <p className="text-sm text-muted-foreground text-center">
-                  Showing {visibleLocations.length} of {inViewTotal.toLocaleString()} — zoom in to see more
-                </p>
-              )}
-            </div>
-          </ScrollArea>
+        <div className="mt-4 text-[15px] text-ink-muted">
+          {loading ? (
+            <span className="flex items-center gap-2">
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              Loading...
+            </span>
+          ) : (
+            <p className="tabular-nums text-pretty">
+              {countText} {totals ? "on this part of the map." : "found."}
+              {totals && inViewTotal > MAX_CARDS && " Zoom in to see more."}
+            </p>
+          )}
+          {dataError && <p className="mt-1 text-flash-red">{dataError}</p>}
         </div>
       </div>
-    </>
+
+      <ScrollArea className="min-h-0 flex-1 scrollbar-ink">
+        <div className="px-4 pb-6 sm:px-6">
+          {loading ? (
+            <ul className="border-t border-rule">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <li key={i} className="animate-pulse space-y-2 border-b border-rule py-5">
+                  <div className="h-5 w-3/4 rounded-lg bg-muted" />
+                  <div className="h-4 w-1/2 rounded-lg bg-muted" />
+                  <div className="h-4 w-2/3 rounded-lg bg-muted" />
+                </li>
+              ))}
+            </ul>
+          ) : locations.length === 0 ? (
+            !dataError && (
+              <div className="rounded-lg border-1.5 border-ink bg-vellum p-4">
+                <p className="font-semibold text-ink">No shops on this part of the map</p>
+                <p className="mt-1 text-[15px] text-ink-muted">
+                  Zoom out, move the map, or clear some filters to see more.
+                </p>
+              </div>
+            )
+          ) : (
+            <ul className="border-t border-rule">
+              {locations.map((location) => {
+                const number = pinNumbers.get(location.id)
+                const selected = selectedLocation?.id === location.id
+                const badges = styleEntries(location.styles).slice(0, 3)
+                return (
+                  <li key={location.id} className="border-b border-rule">
+                    <button
+                      type="button"
+                      onClick={() => onLocationSelect(location)}
+                      aria-current={selected ? "true" : undefined}
+                      className={cn(
+                        "flex w-full gap-3 rounded-lg border-1.5 px-3 py-4 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                        selected ? "border-ink bg-vellum" : "border-transparent hover:bg-secondary"
+                      )}
+                    >
+                      {number != null && <MapPin number={number} selected={selected} />}
+                      <span className="block min-w-0 flex-1">
+                        <span className="block font-heading text-[21px] leading-tight text-ink">{location.name}</span>
+                        {location.type === "artist" && (
+                          <span className="block text-[13px] text-ink-muted">Artist</span>
+                        )}
+                        {location.address && (
+                          <span className="mt-1 block text-[15px] text-ink">{location.address}</span>
+                        )}
+                        <span className="mt-1 block text-[15px] tabular-nums text-ink-muted">
+                          {ratingLine(location.rating, location.reviewCount)}
+                          {location.distance != null &&
+                            `, ${
+                              location.distance < 1
+                                ? `${(location.distance * 5280).toFixed(0)} ft`
+                                : `${location.distance.toFixed(1)} mi`
+                            } away`}
+                          {location.isOpen && <span className="font-semibold text-bottle-green">. Open now</span>}
+                        </span>
+                        {badges.length > 0 && (
+                          <span className="mt-2.5 flex flex-wrap gap-1.5">
+                            {badges.map(({ slug, label }) => (
+                              <StyleBadge key={slug} slug={slug} label={label} />
+                            ))}
+                          </span>
+                        )}
+                      </span>
+                    </button>
+                  </li>
+                )
+              })}
+            </ul>
+          )}
+        </div>
+      </ScrollArea>
+    </div>
   )
 }

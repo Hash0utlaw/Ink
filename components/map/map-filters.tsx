@@ -1,13 +1,10 @@
 "use client"
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
+import type { ReactNode } from "react"
 import { Slider } from "@/components/ui/slider"
-import { Badge } from "@/components/ui/badge"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-import { Plus, Minus } from "lucide-react"
+import { StyleSymbol } from "@/components/brand/style-symbol"
 import { STYLES } from "@/lib/styles"
+import { cn } from "@/lib/utils"
 
 interface MapFiltersProps {
   filters: {
@@ -21,53 +18,50 @@ interface MapFiltersProps {
   onFilterChange: (filters: any) => void
 }
 
+const LOCATION_TYPES: { value: "all" | "artist" | "shop"; label: string }[] = [
+  { value: "all", label: "All" },
+  { value: "shop", label: "Shops" },
+  { value: "artist", label: "Artists" },
+]
+
+const PRICE_RANGES = [
+  { value: "low", label: "Low ($)" },
+  { value: "medium", label: "Medium ($$)" },
+  { value: "high", label: "High ($$$)" },
+]
+
+/** Filter chip: the StyleBadge look; active is ink with vellum text. */
+function Chip({ active, onClick, children }: { active: boolean; onClick: () => void; children: ReactNode }) {
+  return (
+    <button
+      type="button"
+      aria-pressed={active}
+      onClick={onClick}
+      className={cn(
+        "inline-flex min-h-11 items-center gap-1.5 rounded-lg border-1.5 border-ink px-2.5 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
+        active ? "bg-ink text-vellum" : "bg-vellum text-ink hover:bg-secondary"
+      )}
+    >
+      {children}
+    </button>
+  )
+}
+
+function Section({ title, aside, children }: { title: string; aside?: ReactNode; children: ReactNode }) {
+  return (
+    <fieldset>
+      <legend className="flex w-full items-baseline justify-between text-sm font-semibold text-ink">
+        {title}
+        {aside && <span className="font-normal tabular-nums text-ink-muted">{aside}</span>}
+      </legend>
+      <div className="mt-2">{children}</div>
+    </fieldset>
+  )
+}
 
 export function MapFilters({ filters, onFilterChange }: MapFiltersProps) {
-  const [openSections, setOpenSections] = useState({
-    type: true,
-    styles: false,
-    price: false,
-    rating: false,
-    distance: false,
-    availability: false,
-  })
-
-  const toggleSection = (section: keyof typeof openSections) => {
-    setOpenSections((prev) => ({
-      ...prev,
-      [section]: !prev[section],
-    }))
-  }
-
-  const handleLocationTypeChange = (type: "all" | "artist" | "shop") => {
-    onFilterChange({ locationType: type })
-  }
-
-  const handleStyleToggle = (style: string) => {
-    const newStyles = filters.styles.includes(style)
-      ? filters.styles.filter((s) => s !== style)
-      : [...filters.styles, style]
-    onFilterChange({ styles: newStyles })
-  }
-
-  const handlePriceRangeToggle = (range: string) => {
-    const newPriceRange = filters.priceRange.includes(range)
-      ? filters.priceRange.filter((r) => r !== range)
-      : [...filters.priceRange, range]
-    onFilterChange({ priceRange: newPriceRange })
-  }
-
-  const handleRatingChange = (rating: number[]) => {
-    onFilterChange({ rating: rating[0] })
-  }
-
-  const handleRadiusChange = (radius: number[]) => {
-    onFilterChange({ radius: radius[0] })
-  }
-
-  const handleAvailabilityToggle = () => {
-    onFilterChange({ availableNow: !filters.availableNow })
-  }
+  const toggle = (list: string[], value: string) =>
+    list.includes(value) ? list.filter((v) => v !== value) : [...list, value]
 
   const clearAllFilters = () => {
     onFilterChange({
@@ -88,220 +82,93 @@ export function MapFilters({ filters, onFilterChange }: MapFiltersProps) {
     filters.availableNow
 
   return (
-    <div className="space-y-6">
-      {hasActiveFilters && (
-        <div className="flex justify-between items-center pb-4 border-b border-sidebar-border/30">
-          <span className="text-sm font-semibold text-sidebar-text-primary">Active Filters</span>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={clearAllFilters}
-            className="text-xs text-sidebar-text-secondary hover:text-sidebar-text-primary h-auto p-2"
-          >
-            Clear All
-          </Button>
-        </div>
-      )}
-
-      {/* Location Type */}
-      <Collapsible open={openSections.type} onOpenChange={() => toggleSection("type")}>
-        <CollapsibleTrigger className="flex items-center justify-between w-full text-sm font-semibold text-sidebar-text-primary hover:text-primary transition-colors py-2">
-          Location Type
-          {openSections.type ? (
-            <Minus className="w-4 h-4 text-sidebar-text-secondary" />
-          ) : (
-            <Plus className="w-4 h-4 text-sidebar-text-secondary" />
-          )}
-        </CollapsibleTrigger>
-        <CollapsibleContent className="mt-4 space-y-3">
-          <div className="grid grid-cols-3 gap-2">
-            {["all", "artist", "shop"].map((type) => (
-              <Button
-                key={type}
-                variant={filters.locationType === type ? "default" : "outline"}
-                size="sm"
-                onClick={() => handleLocationTypeChange(type as "all" | "artist" | "shop")}
-                className="text-xs font-medium capitalize h-9"
-              >
-                {type === "all" ? "All" : type}
-              </Button>
-            ))}
-          </div>
-        </CollapsibleContent>
-      </Collapsible>
-
-      {/* Tattoo Styles */}
-      <Collapsible open={openSections.styles} onOpenChange={() => toggleSection("styles")}>
-        <CollapsibleTrigger className="flex items-center justify-between w-full text-sm font-semibold text-sidebar-text-primary hover:text-primary transition-colors py-2">
-          <div className="flex items-center gap-2">
-            Tattoo Styles
-            {filters.styles.length > 0 && (
-              <Badge variant="secondary" className="text-xs h-5 px-2">
-                {filters.styles.length}
-              </Badge>
-            )}
-          </div>
-          {openSections.styles ? (
-            <Minus className="w-4 h-4 text-sidebar-text-secondary" />
-          ) : (
-            <Plus className="w-4 h-4 text-sidebar-text-secondary" />
-          )}
-        </CollapsibleTrigger>
-        <CollapsibleContent className="mt-4">
-          <div className="grid grid-cols-2 gap-3 max-h-48 overflow-y-auto scrollbar-ink">
-            {STYLES.map((style) => (
-              <div key={style.slug} className="flex items-center space-x-3">
-                <Checkbox
-                  id={`map-style-${style.slug}`}
-                  checked={filters.styles.includes(style.slug)}
-                  onCheckedChange={() => handleStyleToggle(style.slug)}
-                  className="rounded"
-                />
-                <label htmlFor={`map-style-${style.slug}`} className="text-xs text-sidebar-text-primary cursor-pointer font-medium">
-                  {style.label}
-                </label>
-              </div>
-            ))}
-          </div>
-        </CollapsibleContent>
-      </Collapsible>
-
-      {/* Price Range */}
-      <Collapsible open={openSections.price} onOpenChange={() => toggleSection("price")}>
-        <CollapsibleTrigger className="flex items-center justify-between w-full text-sm font-semibold text-sidebar-text-primary hover:text-primary transition-colors py-2">
-          <div className="flex items-center gap-2">
-            Price Range
-            {filters.priceRange.length > 0 && (
-              <Badge variant="secondary" className="text-xs h-5 px-2">
-                {filters.priceRange.length}
-              </Badge>
-            )}
-          </div>
-          {openSections.price ? (
-            <Minus className="w-4 h-4 text-sidebar-text-secondary" />
-          ) : (
-            <Plus className="w-4 h-4 text-sidebar-text-secondary" />
-          )}
-        </CollapsibleTrigger>
-        <CollapsibleContent className="mt-4 space-y-3">
-          {["low", "medium", "high"].map((range) => (
-            <div key={range} className="flex items-center space-x-3">
-              <Checkbox
-                id={range}
-                checked={filters.priceRange.includes(range)}
-                onCheckedChange={() => handlePriceRangeToggle(range)}
-                className="rounded"
-              />
-              <label
-                htmlFor={range}
-                className="text-xs text-sidebar-text-primary cursor-pointer capitalize font-medium"
-              >
-                {range} ({range === "low" ? "$" : range === "medium" ? "$$" : "$$$"})
-              </label>
-            </div>
+    <div className="space-y-5">
+      <Section title="Show">
+        <div className="flex flex-wrap gap-1.5">
+          {LOCATION_TYPES.map(({ value, label }) => (
+            <Chip
+              key={value}
+              active={filters.locationType === value}
+              onClick={() => onFilterChange({ locationType: value })}
+            >
+              {label}
+            </Chip>
           ))}
-        </CollapsibleContent>
-      </Collapsible>
+          <Chip active={filters.availableNow} onClick={() => onFilterChange({ availableNow: !filters.availableNow })}>
+            Open now
+          </Chip>
+        </div>
+      </Section>
 
-      {/* Rating */}
-      <Collapsible open={openSections.rating} onOpenChange={() => toggleSection("rating")}>
-        <CollapsibleTrigger className="flex items-center justify-between w-full text-sm font-semibold text-sidebar-text-primary hover:text-primary transition-colors py-2">
-          <div className="flex items-center gap-2">
-            Minimum Rating
-            {filters.rating > 0 && (
-              <Badge variant="secondary" className="text-xs h-5 px-2">
-                {filters.rating}+
-              </Badge>
-            )}
-          </div>
-          {openSections.rating ? (
-            <Minus className="w-4 h-4 text-sidebar-text-secondary" />
-          ) : (
-            <Plus className="w-4 h-4 text-sidebar-text-secondary" />
-          )}
-        </CollapsibleTrigger>
-        <CollapsibleContent className="mt-4">
-          <div className="px-3 py-2">
-            <Slider
-              value={[filters.rating]}
-              onValueChange={handleRatingChange}
-              max={5}
-              min={0}
-              step={0.5}
-              className="w-full"
-            />
-            <div className="flex justify-between text-xs text-sidebar-text-secondary mt-3 font-medium">
-              <span>Any rating</span>
-              <span>{filters.rating}+ stars</span>
-            </div>
-          </div>
-        </CollapsibleContent>
-      </Collapsible>
+      <Section title="Styles" aside={filters.styles.length > 0 ? `${filters.styles.length} selected` : undefined}>
+        <div className="flex flex-wrap gap-1.5">
+          {STYLES.map((style) => {
+            const active = filters.styles.includes(style.slug)
+            return (
+              <Chip
+                key={style.slug}
+                active={active}
+                onClick={() => onFilterChange({ styles: toggle(filters.styles, style.slug) })}
+              >
+                {/* Vellum backing keeps ink symbols visible on an active (ink) chip. */}
+                <span className={cn("flex rounded-sm", active && "bg-vellum p-px")}>
+                  <StyleSymbol slug={style.slug} size={12} />
+                </span>
+                {style.label}
+              </Chip>
+            )
+          })}
+        </div>
+      </Section>
 
-      {/* Distance */}
-      <Collapsible open={openSections.distance} onOpenChange={() => toggleSection("distance")}>
-        <CollapsibleTrigger className="flex items-center justify-between w-full text-sm font-semibold text-sidebar-text-primary hover:text-primary transition-colors py-2">
-          <div className="flex items-center gap-2">
-            Distance
-            <Badge variant="secondary" className="text-xs h-5 px-2">
-              {filters.radius} mi
-            </Badge>
-          </div>
-          {openSections.distance ? (
-            <Minus className="w-4 h-4 text-sidebar-text-secondary" />
-          ) : (
-            <Plus className="w-4 h-4 text-sidebar-text-secondary" />
-          )}
-        </CollapsibleTrigger>
-        <CollapsibleContent className="mt-4">
-          <div className="px-3 py-2">
-            <Slider
-              value={[filters.radius]}
-              onValueChange={handleRadiusChange}
-              max={50}
-              min={1}
-              step={1}
-              className="w-full"
-            />
-            <div className="flex justify-between text-xs text-sidebar-text-secondary mt-3 font-medium">
-              <span>1 mile</span>
-              <span>{filters.radius} miles</span>
-            </div>
-          </div>
-        </CollapsibleContent>
-      </Collapsible>
+      <Section title="Price">
+        <div className="flex flex-wrap gap-1.5">
+          {PRICE_RANGES.map(({ value, label }) => (
+            <Chip
+              key={value}
+              active={filters.priceRange.includes(value)}
+              onClick={() => onFilterChange({ priceRange: toggle(filters.priceRange, value) })}
+            >
+              {label}
+            </Chip>
+          ))}
+        </div>
+      </Section>
 
-      {/* Availability */}
-      <Collapsible open={openSections.availability} onOpenChange={() => toggleSection("availability")}>
-        <CollapsibleTrigger className="flex items-center justify-between w-full text-sm font-semibold text-sidebar-text-primary hover:text-primary transition-colors py-2">
-          <div className="flex items-center gap-2">
-            Availability
-            {filters.availableNow && (
-              <Badge variant="secondary" className="text-xs h-5 px-2">
-                Open Now
-              </Badge>
-            )}
-          </div>
-          {openSections.availability ? (
-            <Minus className="w-4 h-4 text-sidebar-text-secondary" />
-          ) : (
-            <Plus className="w-4 h-4 text-sidebar-text-secondary" />
-          )}
-        </CollapsibleTrigger>
-        <CollapsibleContent className="mt-4">
-          <div className="flex items-center space-x-3">
-            <Checkbox
-              id="availableNow"
-              checked={filters.availableNow}
-              onCheckedChange={handleAvailabilityToggle}
-              className="rounded"
-            />
-            <label htmlFor="availableNow" className="text-xs text-sidebar-text-primary cursor-pointer font-medium">
-              Show only locations open now
-            </label>
-          </div>
-        </CollapsibleContent>
-      </Collapsible>
+      <Section title="Minimum rating" aside={filters.rating > 0 ? `${filters.rating}+` : "Any"}>
+        <Slider
+          value={[filters.rating]}
+          onValueChange={(value) => onFilterChange({ rating: value[0] })}
+          max={5}
+          min={0}
+          step={0.5}
+          aria-label="Minimum rating"
+          className="py-3"
+        />
+      </Section>
+
+      <Section title="Distance from you" aside={`${filters.radius} mi`}>
+        <Slider
+          value={[filters.radius]}
+          onValueChange={(value) => onFilterChange({ radius: value[0] })}
+          max={50}
+          min={1}
+          step={1}
+          aria-label="Distance from you"
+          className="py-3"
+        />
+        <p className="text-[13px] text-ink-muted">Applies after you use your location.</p>
+      </Section>
+
+      {hasActiveFilters && (
+        <button
+          type="button"
+          onClick={clearAllFilters}
+          className="min-h-11 text-[15px] font-semibold text-navy underline underline-offset-2 hover:no-underline"
+        >
+          Clear all filters
+        </button>
+      )}
     </div>
   )
 }

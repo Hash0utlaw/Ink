@@ -147,45 +147,48 @@
     @apply bg-primary text-primary-foreground hover:bg-primary/90 font-medium px-8 py-4 rounded-lg transition-all duration-300 hover:scale-105;
   }
 
-  /* Modern sidebar components inspired by design inspiration */
-  .sidebar-modern {
-    @apply bg-background border-r border-border;
+  /* Map controls (components/map/mapbox-map.tsx). Mapbox's own CSS loads
+     after this file, so every rule is scoped under .tm-map to win. */
+  .tm-map .mapboxgl-ctrl-top-right {
+    /* Leaves room for the Map / Satellite toggle above the zoom buttons. */
+    top: 54px;
+    right: 6px;
   }
 
-  .sidebar-header {
-    @apply border-b border-border/50 bg-background/80;
+  .tm-map .mapboxgl-ctrl-group {
+    background: hsl(var(--vellum));
+    border: 1.5px solid hsl(var(--ink));
+    border-radius: var(--radius);
+    box-shadow: none;
+    overflow: hidden;
   }
 
-  .modern-location-card {
-    @apply bg-card border border-border/50 rounded-lg hover:border-ink hover:bg-muted/50 transition-all duration-300 cursor-pointer;
+  .tm-map .mapboxgl-ctrl-group button {
+    width: 44px;
+    height: 44px;
   }
 
-  .modern-location-card-selected {
-    @apply border-ink bg-secondary;
+  .tm-map .mapboxgl-ctrl-group button + button {
+    border-top: 1px solid hsl(var(--rule));
   }
 
-  .sidebar-filter-section {
-    @apply bg-muted/30 border border-border/30 rounded-lg p-4;
+  .tm-map .mapboxgl-ctrl-group button:not(:disabled):hover {
+    background-color: hsl(var(--secondary));
   }
 
-  .sidebar-search {
-    @apply bg-card border border-border/50 rounded-lg focus-within:border-ink focus-within:ring-1 focus-within:ring-ring transition-all duration-200;
+  .tm-map .mapboxgl-ctrl-group button:focus-visible {
+    box-shadow: inset 0 0 0 2px hsl(var(--ring));
   }
 
-  .sidebar-button {
-    @apply bg-card hover:bg-muted/50 border border-border/50 text-foreground hover:border-ink rounded-lg transition-all duration-200;
-  }
-
-  .sidebar-toggle {
-    @apply bg-card border border-border/50 hover:bg-muted/50 transition-all duration-300;
-  }
-
-  .location-card-image {
-    @apply rounded-lg object-cover transition-transform duration-300;
-  }
-
-  .filter-badge {
-    @apply bg-secondary text-primary border-ink hover:bg-secondary transition-colors duration-200;
+  .tm-map .mapboxgl-ctrl-scale {
+    background: hsl(var(--vellum));
+    border: 1.5px solid hsl(var(--ink));
+    border-radius: var(--radius);
+    color: hsl(var(--ink));
+    font-family: var(--font-sans), sans-serif;
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+    padding: 1px 6px;
   }
 }
 

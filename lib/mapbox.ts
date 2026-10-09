@@ -128,9 +128,11 @@ export const defaultMapConfig = {
   zoom: 4,
 }
 
+// "chart" is the flash-chart style (a custom Mapbox Studio style set via
+// NEXT_PUBLIC_MAPBOX_STYLE_URL); light-v11 stands in until it's configured.
 export const mapStyles = {
-  streets: "mapbox://styles/mapbox/streets-v12",
+  chart: process.env.NEXT_PUBLIC_MAPBOX_STYLE_URL || "mapbox://styles/mapbox/light-v11",
   satellite: "mapbox://styles/mapbox/satellite-v9",
-  light: "mapbox://styles/mapbox/light-v11",
-  dark: "mapbox://styles/mapbox/dark-v11",
 } as const
+
+export type MapStyle = keyof typeof mapStyles

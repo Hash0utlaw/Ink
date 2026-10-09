@@ -3,7 +3,6 @@
 import type React from "react"
 
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { geocodeAddress } from "@/lib/mapbox"
 import { Search, MapPin, Loader2 } from "lucide-react"
@@ -42,23 +41,23 @@ export function SearchBar({ onSearch, onCurrentLocation, placeholder = "Search..
           placeholder={placeholder}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="pl-10 pr-4"
+          aria-label={placeholder}
+          className="h-11 border-1.5 border-ink bg-white pl-10 pr-10 text-base"
         />
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-ink-muted" />
         {isLoading && (
-          <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground animate-spin" />
+          <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-ink-muted animate-spin" />
         )}
       </form>
 
-      <Button
-        variant="outline"
-        size="sm"
+      <button
+        type="button"
         onClick={onCurrentLocation}
-        className="w-full justify-start text-sm bg-transparent"
+        className="inline-flex min-h-11 w-full items-center gap-2 rounded-lg border-1.5 border-ink bg-vellum px-3 text-[15px] font-semibold text-ink hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
-        <MapPin className="w-4 h-4 mr-2" />
-        Use Current Location
-      </Button>
+        <MapPin className="h-4 w-4" aria-hidden="true" />
+        Use my location
+      </button>
     </div>
   )
 }

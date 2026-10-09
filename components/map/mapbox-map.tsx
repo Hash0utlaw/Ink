@@ -1,7 +1,8 @@
 "use client"
 
 import { useEffect, useRef, useState, useCallback } from "react"
-import { type MapboxLocation, defaultMapConfig, mapStyles } from "@/lib/mapbox"
+import { type MapboxLocation, type MapStyle, defaultMapConfig, mapStyles } from "@/lib/mapbox"
+import { MAP_COLORS } from "@/lib/brand-colors"
 
 // Some scraped locations have missing/malformed coordinates. Mapbox's
 // LngLatBounds.extend() accepts them silently but throws later inside
@@ -25,11 +26,33 @@ const MAPBOX_GL_VERSION = "3.0.1"
 
 const LOCATIONS_SOURCE_ID = "locations"
 
+const SELECTED = ["boolean", ["feature-state", "selected"], false]
+const NUMBERED = ["has", "num"]
+
+// Cluster counts and pin numbers use Libre Franklin SemiBold when the base
+// style ships it (the custom flash-chart style), else a font every Mapbox
+// style can serve. A font stack naming a font the style lacks fails to load.
+// The selected pin is redrawn above the rest (artists often share their
+// shop's coordinates, so pins stack). Clustered points never match.
+const selectedFilter = (id: string | null) => ["==", ["get", "lid"], id ?? ""]
+
+function labelFont(m: any): string[] {
+  const layers: any[] = m.getStyle()?.layers ?? []
+  const hasFranklin = layers.some((l) => {
+    const font = l.layout?.["text-font"]
+    return Array.isArray(font) && font.includes("Libre Franklin SemiBold")
+  })
+  return [hasFranklin ? "Libre Franklin SemiBold" : "Open Sans Semibold", "Arial Unicode MS Bold"]
+}
+
 interface LocationFeature {
   type: "Feature"
   id: string
   geometry: { type: "Point"; coordinates: [number, number] }
-  properties: { color: string; locType: "shop" | "artist" }
+  // num: 1–9 for the first rows of the sidebar list, shown on the pin.
+  // lid duplicates id: Mapbox drops non-integer feature ids, so the source
+  // promotes lid instead (feature-state and click lookups need it).
+  properties: { lid: string; locType: "shop" | "artist"; num?: number }
 }
 interface LocationFeatureCollection {
   type: "FeatureCollection"
@@ -50,7 +73,9 @@ interface MapboxMapProps {
   onLocationSelect: (location: MapboxLocation | null) => void
   center?: [number, number]
   zoom?: number
-  style?: keyof typeof mapStyles
+  style?: MapStyle
+  /** Location id → list number (1–9) to draw on that pin. */
+  pinNumbers?: Map<string, number>
   onMapLoad?: (map: any) => void
   onMoveEnd?: (bounds: MapBounds) => void
   className?: string
@@ -63,7 +88,8 @@ export function MapboxMap({
   onLocationSelect,
   center = defaultMapConfig.center,
   zoom = defaultMapConfig.zoom,
-  style = "dark",
+  style = "chart",
+  pinNumbers,
   onMapLoad,
   onMoveEnd,
   className = "",
@@ -130,27 +156,6 @@ export function MapboxMap({
     loadMapbox()
   }, [loadMapbox])
 
-  // Colors a location by its primary style slug (lib/styles.ts) — used as a
-  // GeoJSON feature property so the "unclustered-point" layer's paint
-  // expression can read it, instead of setting inline DOM styles per marker.
-  const getStyleColor = useCallback((styles: string[]): string => {
-    const STYLE_COLORS: Record<string, string> = {
-      traditional:       "#e85d04",
-      "neo-traditional": "#f59e0b",
-      japanese:          "#7b2d8b",
-      realism:           "#16a34a",
-      "black-and-grey":  "#57534e",
-      "fine-line":       "#0ea5e9",
-      blackwork:         "#1c1917",
-      illustrative:      "#d97706",
-      watercolor:        "#ec4899",
-      geometric:         "#6366f1",
-      portrait:          "#0891b2",
-      tribal:            "#92400e",
-    }
-    return STYLE_COLORS[styles[0] ?? ""] ?? "#8B1538" // app accent fallback
-  }, [])
-
   // Ensures the clustered source + layers exist, (re-)attaches to it after a
   // style swap (setStyle removes every custom source/layer, since it's not
   // part of the new style's own JSON), and repopulates it with the latest
@@ -164,21 +169,39 @@ export function MapboxMap({
       m.addSource(LOCATIONS_SOURCE_ID, {
         type: "geojson",
         data: geojsonRef.current,
+        promoteId: "lid",
         cluster: true,
         clusterMaxZoom: 14,
         clusterRadius: 50,
       })
 
+      const font = labelFont(m)
+
+      // Clusters are flash-yellow seals with a double ink ring: the outer
+      // circle carries the 2.5px stroke, "clusters-ring" the inner 1.2px one.
       m.addLayer({
         id: "clusters",
         type: "circle",
         source: LOCATIONS_SOURCE_ID,
         filter: ["has", "point_count"],
         paint: {
-          "circle-color": ["step", ["get", "point_count"], "#8B1538", 25, "#6b1029", 100, "#4a0b1d"],
-          "circle-radius": ["step", ["get", "point_count"], 16, 25, 22, 100, 28],
-          "circle-stroke-width": 2,
-          "circle-stroke-color": "#ffffff",
+          "circle-color": MAP_COLORS.flashYellow,
+          "circle-radius": ["step", ["get", "point_count"], 20, 25, 24, 100, 28],
+          "circle-stroke-width": 2.5,
+          "circle-stroke-color": MAP_COLORS.ink,
+        },
+      })
+
+      m.addLayer({
+        id: "clusters-ring",
+        type: "circle",
+        source: LOCATIONS_SOURCE_ID,
+        filter: ["has", "point_count"],
+        paint: {
+          "circle-opacity": 0,
+          "circle-radius": ["step", ["get", "point_count"], 16, 25, 20, 100, 24],
+          "circle-stroke-width": 1.2,
+          "circle-stroke-color": MAP_COLORS.ink,
         },
       })
 
@@ -189,27 +212,73 @@ export function MapboxMap({
         filter: ["has", "point_count"],
         layout: {
           "text-field": ["get", "point_count_abbreviated"],
-          "text-size": 12,
+          "text-font": font,
+          "text-size": 13,
+          "text-allow-overlap": true,
         },
-        paint: { "text-color": "#ffffff" },
+        paint: { "text-color": MAP_COLORS.ink },
       })
 
+      // Pins: small vellum dots; numbered pins (the list's first 9) are
+      // larger so the number fits. Selected: flash red.
       m.addLayer({
         id: "unclustered-point",
         type: "circle",
         source: LOCATIONS_SOURCE_ID,
         filter: ["!", ["has", "point_count"]],
-        paint: {
-          "circle-color": ["get", "color"],
-          "circle-radius": [
-            "case",
-            ["boolean", ["feature-state", "selected"], false], 14,
-            ["==", ["get", "locType"], "shop"], 10,
-            8,
-          ],
-          "circle-stroke-width": ["case", ["boolean", ["feature-state", "selected"], false], 3, 1.5],
-          "circle-stroke-color": "#ffffff",
+        layout: {
+          "circle-sort-key": ["case", NUMBERED, ["-", 10, ["get", "num"]], 0],
         },
+        paint: {
+          "circle-color": ["case", SELECTED, MAP_COLORS.flashRed, MAP_COLORS.vellum],
+          "circle-radius": ["case", NUMBERED, ["case", SELECTED, 15, 13], ["case", SELECTED, 10, 7]],
+          "circle-stroke-width": ["case", SELECTED, 2.5, 2],
+          "circle-stroke-color": MAP_COLORS.ink,
+        },
+      })
+
+      m.addLayer({
+        id: "pin-number",
+        type: "symbol",
+        source: LOCATIONS_SOURCE_ID,
+        filter: ["all", ["!", ["has", "point_count"]], NUMBERED],
+        layout: {
+          "text-field": ["to-string", ["get", "num"]],
+          "text-font": font,
+          "text-size": 13,
+          "text-allow-overlap": true,
+          "text-ignore-placement": true,
+        },
+        paint: { "text-color": ["case", SELECTED, MAP_COLORS.white, MAP_COLORS.ink] },
+      })
+
+      const selectedId = previousSelectedIdRef.current
+      m.addLayer({
+        id: "selected-point",
+        type: "circle",
+        source: LOCATIONS_SOURCE_ID,
+        filter: selectedFilter(selectedId),
+        paint: {
+          "circle-color": MAP_COLORS.flashRed,
+          "circle-radius": ["case", NUMBERED, 15, 10],
+          "circle-stroke-width": 2.5,
+          "circle-stroke-color": MAP_COLORS.ink,
+        },
+      })
+
+      m.addLayer({
+        id: "selected-number",
+        type: "symbol",
+        source: LOCATIONS_SOURCE_ID,
+        filter: ["all", selectedFilter(selectedId), NUMBERED],
+        layout: {
+          "text-field": ["to-string", ["get", "num"]],
+          "text-font": font,
+          "text-size": 13,
+          "text-allow-overlap": true,
+          "text-ignore-placement": true,
+        },
+        paint: { "text-color": MAP_COLORS.white },
       })
 
       // Invisible, larger-radius layer purely for hit-testing. The visible
@@ -292,8 +361,10 @@ export function MapboxMap({
       zoom,
     })
 
-    // Add navigation controls
-    map.current.addControl(new window.mapboxgl.NavigationControl(), "top-right")
+    // Zoom buttons (no compass) and the scale bar; restyled in globals.css
+    // under .tm-map. The default attribution control stays as is.
+    map.current.addControl(new window.mapboxgl.NavigationControl({ showCompass: false }), "top-right")
+    map.current.addControl(new window.mapboxgl.ScaleControl({ unit: "imperial" }), "bottom-right")
 
     // Add geolocate control
     map.current.addControl(
@@ -401,27 +472,38 @@ export function MapboxMap({
 
   // Sync locations -> GeoJSON source. Cheap even at thousands of points,
   // since it's one setData() call rather than tearing down/rebuilding a DOM
-  // marker per location.
+  // marker per location. Pin numbers are a feature property (symbol layout
+  // can't read feature-state), so a new list order also re-sets the data.
   useEffect(() => {
     const byId = new Map<string, MapboxLocation>()
     const features: LocationFeature[] = []
     for (const location of locations) {
       if (!isValidCoordinate(location.coordinates)) continue
       byId.set(location.id, location)
+      // Only numbered pins get "num" — the layers test it with ["has", "num"].
+      const num = pinNumbers?.get(location.id)
       features.push({
         type: "Feature",
         id: location.id,
         geometry: { type: "Point", coordinates: location.coordinates },
-        properties: { color: getStyleColor(location.styles), locType: location.type },
+        properties: num
+          ? { lid: location.id, locType: location.type, num }
+          : { lid: location.id, locType: location.type },
       })
     }
     locationsByIdRef.current = byId
     geojsonRef.current = { type: "FeatureCollection", features }
 
     if (map.current && mapLoaded) {
-      map.current.getSource(LOCATIONS_SOURCE_ID)?.setData(geojsonRef.current)
+      const source = map.current.getSource(LOCATIONS_SOURCE_ID)
+      source?.setData(geojsonRef.current)
+      // setData can drop feature-state; keep the selected pin red.
+      const selectedId = previousSelectedIdRef.current
+      if (source && selectedId && byId.has(selectedId)) {
+        map.current.setFeatureState({ source: LOCATIONS_SOURCE_ID, id: selectedId }, { selected: true })
+      }
     }
-  }, [locations, mapLoaded, getStyleColor])
+  }, [locations, pinNumbers, mapLoaded])
 
   // Highlight the selected point via Mapbox feature-state instead of
   // mutating a per-marker DOM element (there are no more per-marker elements).
@@ -436,6 +518,12 @@ export function MapboxMap({
       } catch {
         // feature may no longer be in the currently-loaded viewport slice
       }
+    }
+
+    const id = selectedLocation?.id ?? null
+    if (m.getLayer("selected-point")) {
+      m.setFilter("selected-point", selectedFilter(id))
+      m.setFilter("selected-number", ["all", selectedFilter(id), NUMBERED])
     }
 
     if (selectedLocation) {
@@ -463,18 +551,18 @@ export function MapboxMap({
   }, [])
 
   return (
-    <div className={`relative w-full h-full ${className}`}>
+    <div className={`tm-map relative w-full h-full ${className}`}>
       <div ref={mapContainer} className="w-full h-full" />
 
       {/* Error and loading overlays are mutually exclusive — error takes priority */}
       {loadError ? (
-        <div className="absolute inset-0 bg-gray-100 flex items-center justify-center">
-          <div className="text-center">
-            <p className="text-sm text-gray-600">{loadError}</p>
-            <p className="text-xs text-gray-500 mt-1">Try refreshing, or check back shortly</p>
+        <div className="absolute inset-0 flex items-center justify-center bg-paper px-4">
+          <div className="max-w-sm rounded-lg border-1.5 border-ink bg-vellum p-5 text-center">
+            <p className="font-semibold text-ink">{loadError}</p>
+            <p className="mt-1 text-sm text-ink-muted">Try refreshing, or check back shortly</p>
             <button
               onClick={handleRetry}
-              className="mt-3 bg-white hover:bg-gray-50 border border-gray-300 rounded-md px-3 py-2 text-sm font-medium text-gray-700 shadow-sm transition-colors"
+              className="mt-4 min-h-11 rounded-lg border-1.5 border-ink bg-vellum px-4 text-[15px] font-semibold text-ink hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               Retry
             </button>
@@ -482,23 +570,23 @@ export function MapboxMap({
         </div>
       ) : (
         (!mapLoaded || !mapboxLoaded) && (
-          <div className="absolute inset-0 bg-gray-100 flex items-center justify-center">
+          <div className="absolute inset-0 flex items-center justify-center bg-paper">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-burgundy-500 mx-auto mb-2"></div>
-              <p className="text-sm text-gray-600">{!mapboxLoaded ? "Loading Mapbox..." : "Loading map..."}</p>
+              <div className="mx-auto mb-2 h-8 w-8 animate-spin rounded-full border-2 border-rule border-t-ink"></div>
+              <p className="text-sm text-ink-muted">{!mapboxLoaded ? "Loading Mapbox..." : "Loading map..."}</p>
             </div>
           </div>
         )
       )}
 
-      {/* Map controls overlay */}
-      <div className="absolute top-4 left-4 z-10">
+      {/* Sits below the list toggle that map-interface.tsx puts at top-4 left-4. */}
+      <div className="absolute left-4 top-[68px] z-10">
         <button
           onClick={fitBounds}
-          className="bg-white hover:bg-gray-50 border border-gray-300 rounded-md px-3 py-2 text-sm font-medium text-gray-700 shadow-sm transition-colors"
+          className="min-h-11 rounded-lg border-1.5 border-ink bg-vellum px-3 text-[15px] font-semibold text-ink hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
           disabled={!mapLoaded || !mapboxLoaded}
         >
-          Show All
+          Show all
         </button>
       </div>
     </div>
