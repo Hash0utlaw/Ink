@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { CheckCircle2, Loader2 } from "lucide-react"
 import type { Artist } from "@/types/artist"
+import { requestFormNote, requestSentMessage } from "@/lib/request-copy"
 
 export interface BookingFormData {
   name: string
@@ -26,9 +27,8 @@ interface InfoSidebarProps {
 
 const SIZE_OPTIONS = ["Small", "Medium", "Large", "Full Sleeve"]
 
-// `artist` stays in the props for callers; the shop details it fed now live
-// in the profile's "Where to find" section.
 export function InfoSidebar({
+  artist,
   onBookingSubmit,
   isSubmitting = false,
   submitSuccess = false,
@@ -56,6 +56,7 @@ export function InfoSidebar({
     </div>
   )
   const INPUT = "h-11 border-1.5 border-ink bg-white text-base"
+  const copy = { name: artist.name, shopName: artist.shopName, hasAccount: artist.hasAccount }
 
   return (
     <div className="lg:sticky lg:top-6">
@@ -68,7 +69,7 @@ export function InfoSidebar({
             <div className="flex flex-col items-center gap-3 py-8 text-center">
               <CheckCircle2 className="h-12 w-12 text-bottle-green" aria-hidden="true" />
               <p className="text-lg font-semibold text-ink">Request sent</p>
-              <p className="text-[15px] text-ink-muted">The artist will respond within 24 hours.</p>
+              <p className="text-[15px] text-ink-muted text-pretty">{requestSentMessage(copy)}</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -154,7 +155,7 @@ export function InfoSidebar({
               </Button>
 
               <p className="text-center text-[13px] text-ink-muted">
-                Free to request, no payment and no commitment. The artist will confirm within 24 hours.
+                {requestFormNote(copy)}
               </p>
             </div>
           )}

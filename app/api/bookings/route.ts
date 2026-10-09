@@ -5,7 +5,8 @@ import { createAdminClient } from "@/utils/supabase/admin"
 import { ADMIN_NOTIFY_EMAIL, FROM_EMAIL, REPLY_TO } from "@/lib/site-config"
 import { escapeHtml } from "@/lib/escape-html"
 import { hoursAgo, isNonEmptyString, isValidEmail } from "@/lib/validation"
-import { buildIntroAlertEmail, INTRO_SHOP_COLUMNS, type IntroArtist, type IntroRequest } from "@/lib/intro-outreach"
+import { buildIntroAlertEmail, INTRO_SHOP_COLUMNS, introShop, type IntroArtist, type IntroRequest } from "@/lib/intro-outreach"
+import { requestNextStep } from "@/lib/request-copy"
 
 export const dynamic = "force-dynamic"
 
@@ -171,21 +172,29 @@ export async function POST(request: Request) {
       }
     }
 
+    // Same next step as the form (lib/request-copy.ts); no response-time promises.
+    const nextStep = escapeHtml(
+      requestNextStep({ name: artistName, shopName: introShop(artistRow)?.name, hasAccount: false }),
+    )
     const clientEmailContent = artistNotified
       ? {
           subject: `Your request was sent to ${artistName}`,
           html: `<p>Hi ${safe.clientName},</p>
                  <p>Your booking request has been sent to <strong>${safe.artistName}</strong>.</p>
-                 <p>They will review your request and get back to you within 24 hours.</p>`,
+                 <p>They'll review it and get back to you.</p>`,
         }
-      : {
-          subject: `We received your request for ${artistName}`,
-          html: `<p>Hi ${safe.clientName},</p>
-                 <p>Thanks for your interest in <strong>${safe.artistName}</strong> — we've saved your request.</p>
-                 <p>${safe.artistName} hasn't claimed their TattooMaps profile yet, so we're reaching out to
-                 personally invite them to respond. We'll email you the moment they do.</p>
-                 <p>Thanks for your patience!</p>`,
-        }
+      : isUnclaimed
+        ? {
+            subject: `We received your request for ${artistName}`,
+            html: `<p>Hi ${safe.clientName},</p>
+                   <p>Thanks for your interest in <strong>${safe.artistName}</strong>. We've saved your request.</p>
+                   <p>${safe.artistName} hasn't claimed their TattooMaps page yet. ${nextStep}</p>`,
+          }
+        : {
+            subject: `We received your request for ${artistName}`,
+            html: `<p>Hi ${safe.clientName},</p>
+                   <p>Thanks for your interest in <strong>${safe.artistName}</strong>. We've saved your request.</p>`,
+          }
 
     const { data: clientData } = await resend.emails.send({
       from: fromAddress,
