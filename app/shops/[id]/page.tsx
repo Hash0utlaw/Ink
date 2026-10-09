@@ -12,11 +12,13 @@ import { getReviewsForShop } from "@/lib/supabase/reviews"
 import type { Shop } from "@/types/shop"
 import type { ArtistShop } from "@/lib/supabase/artists"
 import { ShopHeader } from "@/components/shop-profile/shop-header"
+import { ProfileCover } from "@/components/brand/profile-cover"
+import { uploadedImageSrc } from "@/lib/utils/safe-image"
 import { ShopArtists } from "@/components/shop-profile/shop-artists"
 import { NearbyShops } from "@/components/shop-profile/nearby-shops"
 import { WhereToFind } from "@/components/artist-profile/where-to-find"
 import { ProfileSection, ReviewList } from "@/components/artist-profile/profile-sections"
-import { cityToSlug, stateAbbrToSlug } from "@/lib/utils/states"
+import { STATE_ABBR_TO_NAME, cityToSlug, stateAbbrToSlug } from "@/lib/utils/states"
 import { shopHasNameTwin } from "@/lib/supabase/seo"
 import { canonicalUrl, jsonLdHtml, metaDescription, withoutEmpty } from "@/lib/seo"
 
@@ -141,7 +143,7 @@ export default async function ShopProfilePage({ params }: { params: { id: string
                 <li aria-hidden="true">/</li>
                 <li>
                   <Link href={`/tattoo-shops/${stateSlug}`} className="underline-offset-2 hover:text-ink hover:underline">
-                    {shop.location.state}
+                    {STATE_ABBR_TO_NAME[shop.location.state] ?? shop.location.state}
                   </Link>
                 </li>
                 <li aria-hidden="true">/</li>
@@ -168,6 +170,9 @@ export default async function ShopProfilePage({ params }: { params: { id: string
               </p>
             </div>
           )}
+          <div className="mb-5 lg:mb-0">
+            <ProfileCover src={uploadedImageSrc(shop.coverImageUrl)} alt={`${shop.name}'s cover image`} />
+          </div>
           <ShopHeader shop={shop} initialSaved={isSaved} />
           <div className="mt-14 space-y-14 lg:mt-20 lg:space-y-20">
             <ShopArtists shopName={shop.name} artists={residentArtists} />

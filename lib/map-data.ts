@@ -26,6 +26,7 @@ export interface Bounds {
 // Pure, so client components can import it from lib/format-address directly.
 export { formatMapAddress } from "@/lib/format-address"
 import { formatMapAddress } from "@/lib/format-address"
+import { displayName } from "@/lib/display-name"
 
 export function shopToMapLocation(row: Record<string, unknown>, distanceMi?: number): MapboxLocation | null {
   const lat = Number(row.latitude ?? 0)
@@ -34,7 +35,7 @@ export function shopToMapLocation(row: Record<string, unknown>, distanceMi?: num
   const hours = (row.hours as Record<string, string>) ?? {}
   return {
     id: `shop-${row.id}`,
-    name: String(row.name ?? ""),
+    name: displayName(String(row.name ?? "")),
     type: "shop",
     coordinates: [lng, lat],
     address: formatMapAddress(row.address, row.city, row.state, row.zip),
@@ -62,14 +63,14 @@ export function artistRowToMapLocation(row: Record<string, unknown>): MapboxLoca
   if (!lat || !lng) return null
   return {
     id: `artist-${row.id}`,
-    name: String(row.display_name ?? ""),
+    name: displayName(String(row.display_name ?? "")),
     type: "artist",
     coordinates: [lng, lat],
     // An artist's pin is their shop, so the shop's address (else the artist's city).
     address: shopJoin?.address
       ? formatMapAddress(shopJoin.address, shopJoin.city, shopJoin.state, shopJoin.zip)
       : formatMapAddress("", row.city, row.state, ""),
-    shopName: String(shopJoin?.name ?? "") || undefined,
+    shopName: displayName(String(shopJoin?.name ?? "")) || undefined,
     rating: Number(row.rating ?? 0),
     reviewCount: Number(row.review_count ?? 0),
     image: String(row.avatar_url ?? "") || undefined,

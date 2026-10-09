@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import type { Artist } from "@/types/artist"
-import { ArtistPlateCard, ArtistPlateGrid } from "@/components/artists/artist-plate-card"
+import { ArtistList, photosFirst } from "@/components/artists/artist-list"
 import { EmptyBox, ProfileSection } from "@/components/artist-profile/profile-sections"
 
 const INITIAL = 12
@@ -12,10 +12,11 @@ function byRatingThenName(a: Artist, b: Artist) {
   return b.rating - a.rating || a.name.localeCompare(b.name, "en", { sensitivity: "base" })
 }
 
-/** The shop's artists as plates: the first 12, then "Show all {n} artists" in place. */
+/** The shop's artists, photos first: the first 12, then "Show all {n} artists" in place. */
 export function ShopArtists({ shopName, artists }: { shopName: string; artists: Artist[] }) {
   const [expanded, setExpanded] = useState(false)
-  const sorted = [...artists].sort(byRatingThenName)
+  // Photo plates lead (no-photo artists show as rows below them), each best rated then A to Z.
+  const sorted = photosFirst([...artists].sort(byRatingThenName))
   const shown = expanded ? sorted : sorted.slice(0, INITIAL)
 
   return (
@@ -32,13 +33,7 @@ export function ShopArtists({ shopName, artists }: { shopName: string; artists: 
         <EmptyBox title="No artists listed yet.">If you work here, claim this shop to add your team.</EmptyBox>
       ) : (
         <>
-          <ArtistPlateGrid>
-            {shown.map((artist) => (
-              <li key={artist.id} className="min-w-0">
-                <ArtistPlateCard artist={artist} />
-              </li>
-            ))}
-          </ArtistPlateGrid>
+          <ArtistList artists={shown} />
           {sorted.length > shown.length && (
             <button
               type="button"

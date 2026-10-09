@@ -2,52 +2,9 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import { Plate } from "@/components/brand/plate"
-import { StyleBadge } from "@/components/brand/style-badge"
 import type { Artist } from "@/types/artist"
-import { styleEntries } from "@/lib/styles"
-import { safeImageSrc } from "@/lib/utils/safe-image"
+import { ArtistList } from "@/components/artists/artist-list"
 import { clearHomeLocation, readHomeLocation } from "./home-location"
-
-function photoOrNull(url: string): string | null {
-  const src = safeImageSrc(url)
-  return src === "/placeholder.svg" ? null : src
-}
-
-function ArtistPlateCard({ artist }: { artist: Artist }) {
-  const { city, state } = artist.location
-  const badges = styleEntries(artist.styles).slice(0, 2)
-  return (
-    <li>
-      <Link href={`/artists/${artist.id}`} className="group block">
-        <Plate
-          fluid
-          sizes="(min-width: 1024px) 200px, (min-width: 768px) 30vw, 45vw"
-          src={photoOrNull(artist.avatarUrl)}
-          alt={artist.name}
-          name={artist.name}
-          primaryStyle={artist.styles[0]}
-        />
-        <h3 className="mt-3 font-heading text-[20px] leading-tight text-ink group-hover:underline">{artist.name}</h3>
-        {(artist.shopName || city) && (
-          <p className="mt-1 text-sm text-ink-muted">
-            {artist.shopName}
-            {artist.shopName && city ? ", " : ""}
-            {city && <span className="font-place italic">{city}</span>}
-            {city && state ? `, ${state}` : ""}
-          </p>
-        )}
-        {badges.length > 0 && (
-          <div className="mt-2 flex flex-wrap gap-1.5">
-            {badges.map(({ slug, label }) => (
-              <StyleBadge key={slug} slug={slug} label={label} />
-            ))}
-          </div>
-        )}
-      </Link>
-    </li>
-  )
-}
 
 interface Nearby {
   city: string
@@ -106,11 +63,13 @@ export function TopArtists({ artists }: { artists: Artist[] }) {
           </Link>
         )}
       </div>
-      <ul className="grid grid-cols-2 gap-x-5 gap-y-8 md:grid-cols-3 lg:grid-cols-6">
-        {shown.map((artist) => (
-          <ArtistPlateCard key={artist.id} artist={artist} />
-        ))}
-      </ul>
+      {/* Photos as plates, artists without one as rows below. */}
+      <ArtistList
+        artists={shown}
+        showShop
+        plateGridClassName="grid grid-cols-2 gap-x-5 gap-y-8 md:grid-cols-3 lg:grid-cols-6"
+        plateSizes="(min-width: 1024px) 200px, (min-width: 768px) 30vw, 45vw"
+      />
     </section>
   )
 }

@@ -3,6 +3,7 @@ import type { Shop } from "@/types/shop"
 import { cache } from "react"
 import { STATE_ABBR_TO_NAME, stateSlugToAbbr, citySlugToName, groupCitiesBySlug, type CityGroup } from "@/lib/utils/states"
 import { SHOP_STYLES_EMBED, shopStylesFromRow } from "./shop-styles"
+import { displayName } from "@/lib/display-name"
 
 // States with shop counts, most shops first. Counted exactly like each state
 // page (the sum of getCitiesForState): listed shops with a known state and a
@@ -148,7 +149,7 @@ function rowToShopMinimal(row: Record<string, unknown>): Shop {
   return {
     id: String(row.id ?? ""),
     slug: String(row.slug ?? ""),
-    name: String(row.name ?? ""),
+    name: displayName(String(row.name ?? "")),
     logoUrl: String(row.logo_url ?? ""),
     coverImageUrl: String(row.cover_image_url ?? ""),
     rating: Number(row.rating ?? 0),
@@ -209,6 +210,17 @@ function likeExact(value: string): string {
   return value.replace(/[\\%_]/g, (ch) => `\\${ch}`)
 }
 
+// Names arrive display-formatted ("Foo Inc." for a stored "Foo inc"), so match the
+// stored name loosely on its last word and compare display names afterwards.
+function namePattern(name: string): string {
+  const head = name.match(/^(.*[\s,])\S+$/)?.[1]
+  return head ? `${likeExact(head)}%` : likeExact(name)
+}
+
+function sameDisplayName(a: unknown, b: string): boolean {
+  return displayName(String(a ?? "")).toLowerCase() === b.toLowerCase()
+}
+
 // True when another listed shop has the same name, city and state — its page
 // title then adds the street address so titles stay unique.
 export async function shopHasNameTwin(shop: Pick<Shop, "id" | "name" | "location">): Promise<boolean> {
@@ -216,15 +228,15 @@ export async function shopHasNameTwin(shop: Pick<Shop, "id" | "name" | "location
     const supabase = createClient()
     let q = supabase
       .from("shops")
-      .select("id", { count: "exact", head: true })
+      .select("name")
       .eq("is_active", true)
       .eq("possibly_closed", false)
-      .ilike("name", likeExact(shop.name))
+      .ilike("name", namePattern(shop.name))
       .neq("id", shop.id)
     q = shop.location.city ? q.ilike("city", likeExact(shop.location.city)) : q.or("city.is.null,city.eq.")
     q = shop.location.state ? q.eq("state", shop.location.state) : q.or("state.is.null,state.eq.")
-    const { count } = await q
-    return (count ?? 0) > 0
+    const { data } = await q.limit(50)
+    return (data ?? []).some((row: { name: string | null }) => sameDisplayName(row.name, shop.name))
   } catch {
     return false
   }
@@ -237,14 +249,14 @@ export async function artistHasNameTwin(artist: { id: string; name: string; city
     const supabase = createClient()
     let q = supabase
       .from("artists")
-      .select("id", { count: "exact", head: true })
+      .select("display_name")
       .eq("is_active", true)
-      .ilike("display_name", likeExact(artist.name))
+      .ilike("display_name", namePattern(artist.name))
       .neq("id", artist.id)
     q = artist.city ? q.ilike("city", likeExact(artist.city)) : q.or("city.is.null,city.eq.")
     q = artist.state ? q.eq("state", artist.state) : q.or("state.is.null,state.eq.")
-    const { count } = await q
-    return (count ?? 0) > 0
+    const { data } = await q.limit(50)
+    return (data ?? []).some((row: { display_name: string | null }) => sameDisplayName(row.display_name, artist.name))
   } catch {
     return false
   }

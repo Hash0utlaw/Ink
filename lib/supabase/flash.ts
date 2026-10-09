@@ -1,5 +1,6 @@
 import { createClient } from "@/utils/supabase/server"
 import { toStyleSlugs } from "@/lib/styles"
+import { displayName } from "@/lib/display-name"
 
 export interface FlashListing {
   id: string
@@ -39,7 +40,7 @@ function rowToFlash(row: Record<string, unknown>): FlashListing {
   return {
     id: String(row.id ?? ""),
     artistId: String(row.artist_id ?? ""),
-    artistName: String(artist?.display_name ?? ""),
+    artistName: displayName(String(artist?.display_name ?? "")),
     artistHandle: String(artist?.handle ?? ""),
     artistAvatar: String(artist?.avatar_url ?? ""),
     title: String(row.title ?? ""),

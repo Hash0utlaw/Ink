@@ -31,6 +31,8 @@ export interface Artist {
     lng: number
   }
   avatarUrl: string
+  /** artists.cover_image_url; owner uploads only (column added 2026-10-09). */
+  coverImageUrl?: string
   portfolioImages: string[]
   previewImages: string[]
   isAvailable: boolean

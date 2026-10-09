@@ -26,3 +26,17 @@ export function safeImageSrc(url: string | null | undefined): string {
     return "/placeholder.svg"
   }
 }
+
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? ""
+
+/** Public URL prefix for files in the "portfolio" storage bucket. */
+export const PORTFOLIO_PUBLIC_PREFIX = `${SUPABASE_URL}/storage/v1/object/public/portfolio/`
+
+/**
+ * The URL only when it's a file an owner uploaded to our storage. Scraped cover
+ * photos (Google, Street View) have expired and return 403, so covers use this.
+ */
+export function uploadedImageSrc(url: string | null | undefined): string | null {
+  if (!url || !SUPABASE_URL) return null
+  return url.startsWith(PORTFOLIO_PUBLIC_PREFIX) ? url : null
+}

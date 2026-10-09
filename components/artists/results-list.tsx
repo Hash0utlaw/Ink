@@ -1,6 +1,7 @@
 "use client"
 
-import { ArtistPlateCard, ArtistPlateGrid, ArtistPlateSkeleton } from "./artist-plate-card"
+import { ArtistPlateGrid, ArtistPlateSkeleton } from "./artist-plate-card"
+import { ArtistList } from "./artist-list"
 import { EmptyBox } from "@/components/artist-profile/profile-sections"
 import { Pagination } from "@/components/listings/pagination"
 import type { Artist } from "@/types/artist"
@@ -47,13 +48,7 @@ export function ResultsList({
 
   return (
     <div>
-      <ArtistPlateGrid>
-        {artists.map((artist) => (
-          <li key={artist.id} className="min-w-0">
-            <ArtistPlateCard artist={artist} showShop distance={distancesById?.[artist.id]} />
-          </li>
-        ))}
-      </ArtistPlateGrid>
+      <ArtistList artists={artists} showShop distancesById={distancesById} />
       <Pagination page={page} totalPages={Math.ceil(totalCount / pageSize)} onPageChange={onPageChange} />
     </div>
   )
