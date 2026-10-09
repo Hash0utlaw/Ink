@@ -1,7 +1,7 @@
 import { createClient } from "@/utils/supabase/server"
 import type { Shop } from "@/types/shop"
 import type { Artist, Review } from "@/types/artist"
-import { rowToArtist } from "./artists"
+import { cityPattern, rowToArtist } from "./artists"
 import { matchStyleSlugs, toStyleSlugs } from "@/lib/styles"
 import { SHOP_STYLES_EMBED, fetchShopStyles, shopStylesFromRow } from "./shop-styles"
 
@@ -15,6 +15,7 @@ export type ShopFilters = {
   zip?: string         // exact match: WHERE zip = $1
   state?: string       // exact: WHERE state = $1 (2-letter code)
   city?: string        // partial: WHERE city ILIKE '%$1%'
+  exactCity?: boolean  // with city: WHERE city ILIKE '$1' (case-insensitive exact)
   query?: string       // name search: WHERE name ILIKE '%$1%'
   sortBy?: 'rating' | 'review_count' | 'name'
   minReviewCount?: number // WHERE review_count >= $1 (homepage top-rated list)
@@ -88,7 +89,7 @@ export async function getShops(
       query = query.eq("state", filters.state.toUpperCase())
     }
     if (filters.city) {
-      query = query.ilike("city", `%${filters.city.trim()}%`)
+      query = query.ilike("city", cityPattern(filters.city, filters.exactCity))
     }
     if (filters.query) {
       query = query.ilike("name", `%${filters.query.trim()}%`)

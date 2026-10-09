@@ -13,6 +13,8 @@ interface ResultsListProps {
   totalCount: number
   pageSize: number
   onPageChange: (page: number) => void
+  /** Replaces the default empty-state line, e.g. for a location search. */
+  emptyMessage?: string
 }
 
 export function ResultsList({
@@ -23,6 +25,7 @@ export function ResultsList({
   totalCount,
   pageSize,
   onPageChange,
+  emptyMessage,
 }: ResultsListProps) {
   const totalPages = Math.ceil(totalCount / pageSize)
   const firstItem = page * pageSize + 1
@@ -42,7 +45,7 @@ export function ResultsList({
     return (
       <div className="text-center py-12">
         <h3 className="text-xl font-semibold">No Artists Found</h3>
-        <p className="text-muted-foreground mt-2">Try adjusting your filters to find more results.</p>
+        <p className="text-muted-foreground mt-2">{emptyMessage ?? "Try adjusting your filters to find more results."}</p>
       </div>
     )
   }

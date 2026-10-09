@@ -5,9 +5,11 @@ interface ShopResultsListProps {
   shops: Shop[]
   isLoading: boolean
   distancesById?: Record<string, number>
+  /** Replaces the default empty-state line, e.g. for a location search. */
+  emptyMessage?: string
 }
 
-export function ShopResultsList({ shops, isLoading, distancesById }: ShopResultsListProps) {
+export function ShopResultsList({ shops, isLoading, distancesById, emptyMessage }: ShopResultsListProps) {
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -22,7 +24,7 @@ export function ShopResultsList({ shops, isLoading, distancesById }: ShopResults
     return (
       <div className="text-center py-12">
         <h3 className="text-xl font-semibold">No Shops Found</h3>
-        <p className="text-muted-foreground mt-2">Try adjusting your filters to find more results.</p>
+        <p className="text-muted-foreground mt-2">{emptyMessage ?? "Try adjusting your filters to find more results."}</p>
       </div>
     )
   }
