@@ -51,7 +51,7 @@ function filtersFromParams(params: URLSearchParams): Filters {
   }
 }
 
-export function SearchInterface() {
+export function SearchInterface({ showAvailableNow = false }: { showAvailableNow?: boolean }) {
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -130,7 +130,7 @@ export function SearchInterface() {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
       <div className="lg:col-span-1">
-        <FilterSidebar filters={filters} onFilterChange={handleFilterChange} />
+        <FilterSidebar filters={filters} onFilterChange={handleFilterChange} showAvailableNow={showAvailableNow} />
       </div>
 
       <div className="lg:col-span-3 space-y-6">

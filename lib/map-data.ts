@@ -83,7 +83,8 @@ export function artistRowToMapLocation(row: Record<string, unknown>): MapboxLoca
     rating: Number(row.rating ?? 0),
     reviewCount: Number(row.review_count ?? 0),
     image: String(row.avatar_url ?? "") || undefined,
-    isOpen: Boolean(row.is_available ?? false),
+    // Availability is only real for claimed artists (it defaults to on).
+    isOpen: Boolean(row.is_available ?? false) && Boolean(row.is_claimed ?? false),
     styles: Array.isArray(row.styles) ? sortStyleSlugs(row.styles as string[]) : [],
     priceRange: "medium",
     description: String(row.bio ?? "") || undefined,
@@ -95,7 +96,7 @@ export function artistRowToMapLocation(row: Record<string, unknown>): MapboxLoca
 // Only what the map pins, sidebar cards and LocationDetails read
 // (description/hours/website are shown in LocationDetails).
 export const ARTIST_JOIN_COLUMNS =
-  "id, display_name, city, state, rating, review_count, avatar_url, styles, is_available, bio, instagram_handle, website_url, shops!inner(latitude, longitude, name, address, city, state, zip)"
+  "id, display_name, city, state, rating, review_count, avatar_url, styles, is_available, is_claimed, bio, instagram_handle, website_url, shops!inner(latitude, longitude, name, address, city, state, zip)"
 export const SHOP_COLUMNS =
   "id, name, address, city, state, zip, latitude, longitude, rating, review_count, logo_url, cover_image_url, accepts_walk_ins, hours, description"
 // For the ≤100 shops in /api/map/details (sidebar cards + LocationDetails);

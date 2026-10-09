@@ -61,7 +61,7 @@ export function InfoSidebar({
     <div className="lg:sticky lg:top-6">
       <section aria-labelledby="request-form" className="rounded-lg border-2 border-ink bg-vellum p-5">
         <h2 id="request-form" className="font-heading text-[22px] leading-[1.15] text-ink">
-          Book an appointment
+          Request an intro
         </h2>
         <div className="mt-4">
           {submitSuccess ? (
@@ -149,7 +149,7 @@ export function InfoSidebar({
                     Sending...
                   </>
                 ) : (
-                  "Send booking request"
+                  "Send request"
                 )}
               </Button>
 
