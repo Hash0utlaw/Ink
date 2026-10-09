@@ -1,11 +1,10 @@
 "use client"
 
-import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useState, type ReactNode } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Clock, MapPin, CheckCircle2, Loader2, ShieldCheck, HeartHandshake, MessageCircle } from "lucide-react"
+import { CheckCircle2, Loader2 } from "lucide-react"
 import type { Artist } from "@/types/artist"
 
 export interface BookingFormData {
@@ -27,8 +26,9 @@ interface InfoSidebarProps {
 
 const SIZE_OPTIONS = ["Small", "Medium", "Large", "Full Sleeve"]
 
+// `artist` stays in the props for callers; the shop details it fed now live
+// in the profile's "Where to find" section.
 export function InfoSidebar({
-  artist,
   onBookingSubmit,
   isSubmitting = false,
   submitSuccess = false,
@@ -47,86 +47,99 @@ export function InfoSidebar({
     }
   }
 
+  const field = (id: string, label: string, input: ReactNode) => (
+    <div>
+      <label htmlFor={id} className="mb-1.5 block text-[15px] font-semibold text-ink">
+        {label}
+      </label>
+      {input}
+    </div>
+  )
+  const INPUT = "h-11 border-1.5 border-ink bg-white text-base"
+
   return (
-    <div className="space-y-8 sticky top-20">
-      <Card className="bg-muted/50 border-border/50">
-        <CardHeader>
-          <CardTitle>Book an Appointment</CardTitle>
-        </CardHeader>
-        <CardContent>
+    <div className="lg:sticky lg:top-6">
+      <section aria-labelledby="request-form" className="rounded-lg border-2 border-ink bg-vellum p-5">
+        <h2 id="request-form" className="font-heading text-[22px] leading-[1.15] text-ink">
+          Book an appointment
+        </h2>
+        <div className="mt-4">
           {submitSuccess ? (
             <div className="flex flex-col items-center gap-3 py-8 text-center">
-              <CheckCircle2 className="w-14 h-14 text-success" />
-              <p className="text-lg font-bold">Request Sent!</p>
-              <p className="text-sm text-muted-foreground">The artist will respond within 24 hours.</p>
+              <CheckCircle2 className="h-12 w-12 text-bottle-green" aria-hidden="true" />
+              <p className="text-lg font-semibold text-ink">Request sent</p>
+              <p className="text-[15px] text-ink-muted">The artist will respond within 24 hours.</p>
             </div>
           ) : (
             <div className="space-y-4">
-              <Input
-                placeholder="Full name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                disabled={isSubmitting}
-              />
-              <Input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                disabled={isSubmitting}
-              />
-              <Input
-                type="tel"
-                placeholder="Phone (optional)"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                disabled={isSubmitting}
-              />
-              <Input
-                type="date"
-                placeholder="Preferred date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                disabled={isSubmitting}
-              />
-              <Textarea
-                placeholder="Describe your idea..."
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                disabled={isSubmitting}
-                rows={3}
-              />
+              {field(
+                "booking-name",
+                "Full name",
+                <Input id="booking-name" className={INPUT} value={name} onChange={(e) => setName(e.target.value)} disabled={isSubmitting} />
+              )}
+              {field(
+                "booking-email",
+                "Email",
+                <Input id="booking-email" type="email" className={INPUT} value={email} onChange={(e) => setEmail(e.target.value)} disabled={isSubmitting} />
+              )}
+              {field(
+                "booking-phone",
+                "Phone (optional)",
+                <Input id="booking-phone" type="tel" className={INPUT} value={phone} onChange={(e) => setPhone(e.target.value)} disabled={isSubmitting} />
+              )}
+              {field(
+                "booking-date",
+                "Preferred date",
+                <Input id="booking-date" type="date" className={INPUT} value={date} onChange={(e) => setDate(e.target.value)} disabled={isSubmitting} />
+              )}
+              {field(
+                "booking-description",
+                "Describe your idea",
+                <Textarea
+                  id="booking-description"
+                  className="border-1.5 border-ink bg-white text-base"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  disabled={isSubmitting}
+                  rows={3}
+                />
+              )}
 
-              <div className="space-y-1.5">
-                <p className="text-sm font-medium">Size</p>
-                <div className="grid grid-cols-4 gap-2">
+              <fieldset>
+                <legend className="mb-1.5 text-[15px] font-semibold text-ink">Size</legend>
+                <div className="grid grid-cols-2 gap-1.5">
                   {SIZE_OPTIONS.map((option) => (
                     <button
                       key={option}
                       type="button"
                       onClick={() => setSize(option)}
                       disabled={isSubmitting}
-                      className={`rounded-md border px-2 py-1.5 text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
-                        size === option
-                          ? "border-ink bg-secondary text-primary"
-                          : "border-border bg-muted/30 text-muted-foreground hover:bg-muted/60"
+                      aria-pressed={size === option}
+                      className={`min-h-11 rounded-lg border-1.5 border-ink px-2 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                        size === option ? "bg-ink text-vellum" : "bg-vellum text-ink hover:bg-secondary"
                       }`}
                     >
                       {option}
                     </button>
                   ))}
                 </div>
-              </div>
+              </fieldset>
 
-              <Input
-                placeholder="Placement (e.g. left forearm)"
-                value={placement}
-                onChange={(e) => setPlacement(e.target.value)}
-                disabled={isSubmitting}
-              />
+              {field(
+                "booking-placement",
+                "Placement",
+                <Input
+                  id="booking-placement"
+                  placeholder="For example, left forearm"
+                  className={INPUT}
+                  value={placement}
+                  onChange={(e) => setPlacement(e.target.value)}
+                  disabled={isSubmitting}
+                />
+              )}
 
               <Button
-                className="w-full"
+                className="min-h-11 w-full rounded-lg border-1.5 border-ink bg-flash-red text-[15px] font-semibold text-white hover:bg-flash-red/90"
                 onClick={handleSubmit}
                 disabled={isSubmitting}
               >
@@ -136,71 +149,17 @@ export function InfoSidebar({
                     Sending...
                   </>
                 ) : (
-                  "Send Booking Request"
+                  "Send booking request"
                 )}
               </Button>
 
-              <p className="text-xs text-muted-foreground text-center">
-                No payment required. Artist will confirm within 24 hours.
+              <p className="text-center text-[13px] text-ink-muted">
+                Free to request, no payment and no commitment. The artist will confirm within 24 hours.
               </p>
             </div>
           )}
-        </CardContent>
-      </Card>
-
-      <div className="flex justify-between text-xs text-muted-foreground px-1">
-        <div className="flex items-center gap-1.5">
-          <ShieldCheck className="w-3.5 h-3.5 text-primary" />
-          <span>Free to Request</span>
         </div>
-        <div className="flex items-center gap-1.5">
-          <HeartHandshake className="w-3.5 h-3.5 text-primary" />
-          <span>No commitment</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <MessageCircle className="w-3.5 h-3.5 text-primary" />
-          <span>Direct response</span>
-        </div>
-      </div>
-
-      {(artist.shopName || artist.location.address || artist.location.city) && (
-        <Card className="bg-muted/50 border-border/50">
-          <CardHeader>
-            <CardTitle>Shop Info</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4 text-sm">
-            <div className="flex gap-3">
-              <MapPin className="w-4 h-4 mt-1 text-primary shrink-0" />
-              <div>
-                {artist.shopName && <p className="font-semibold">{artist.shopName}</p>}
-                {artist.location.address && (
-                  <p className="text-muted-foreground">{artist.location.address}</p>
-                )}
-                {(artist.location.city || artist.location.state) && (
-                  <p className="text-muted-foreground">
-                    {[artist.location.city, artist.location.state].filter(Boolean).join(", ")}
-                  </p>
-                )}
-              </div>
-            </div>
-            {Object.keys(artist.hours).length > 0 && (
-              <div className="flex gap-3">
-                <Clock className="w-4 h-4 mt-1 text-primary shrink-0" />
-                <div>
-                  <p className="font-semibold">Hours</p>
-                  <ul className="text-muted-foreground">
-                    {Object.entries(artist.hours).map(([day, hours]) => (
-                      <li key={day}>
-                        <span className="font-medium text-foreground">{day}:</span> {hours}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
+      </section>
     </div>
   )
 }

@@ -171,3 +171,17 @@ export const mapStyles = {
 } as const
 
 export type MapStyle = keyof typeof mapStyles
+
+/**
+ * A Mapbox Static Images URL for the chart style, centred on [lng, lat], with
+ * no marker (pages draw their own X on top). "mapbox://styles/{user}/{id}"
+ * becomes "styles/v1/{user}/{id}". Mapbox's logo and attribution stay on.
+ */
+export function staticMapUrl(
+  [lng, lat]: [number, number],
+  { zoom = 14, width = 800, height = 320 }: { zoom?: number; width?: number; height?: number } = {},
+): string {
+  const style = mapStyles.chart.replace(/^mapbox:\/\/styles\//, "")
+  const params = new URLSearchParams({ access_token: mapboxConfig.accessToken })
+  return `https://api.mapbox.com/styles/v1/${style}/static/${lng},${lat},${zoom},0/${width}x${height}@2x?${params}`
+}

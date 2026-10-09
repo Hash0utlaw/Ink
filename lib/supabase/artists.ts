@@ -43,6 +43,7 @@ export function rowToArtist(row: Record<string, unknown>): Artist {
     handle: String(row.handle ?? ""),
     name: String(row.display_name ?? ""),
     shopName: String(shop?.name ?? ""),
+    shopId: row.shop_id ? String(row.shop_id) : undefined,
     specialties: Array.isArray(row.specialties) ? (row.specialties as string[]) : [],
     styles: Array.isArray(row.styles) ? sortStyleSlugs(row.styles as string[]) : [],
     rating: Number(row.rating ?? 0),
@@ -226,6 +227,83 @@ export async function shopArtistRedirectPath(id: string): Promise<string | null>
     return match ? `/artists/${match.id}` : `/shops/${stub.shop_id}`
   } catch {
     return null
+  }
+}
+
+/** The artist's shop for the profile's "Where to find" section. Active shops only. */
+export type ArtistShop = {
+  id: string
+  name: string
+  address: string
+  city: string
+  state: string
+  zip: string
+  /** Null when the shop has no coordinates. */
+  coordinates: [number, number] | null
+  rating: number
+  reviewCount: number
+  hours: Record<string, string>
+}
+
+export async function getArtistShop(shopId: string): Promise<ArtistShop | null> {
+  try {
+    const supabase = createClient()
+    const { data, error } = await supabase
+      .from("shops")
+      .select("id, name, address, city, state, zip, latitude, longitude, rating, review_count, hours")
+      .eq("id", shopId)
+      .eq("is_active", true)
+      .maybeSingle()
+    if (error || !data) return null
+    const lat = Number(data.latitude ?? 0)
+    const lng = Number(data.longitude ?? 0)
+    return {
+      id: String(data.id),
+      name: String(data.name ?? ""),
+      address: String(data.address ?? ""),
+      city: String(data.city ?? ""),
+      state: String(data.state ?? ""),
+      zip: String(data.zip ?? ""),
+      coordinates: lat && lng ? [lng, lat] : null,
+      rating: Number(data.rating ?? 0),
+      reviewCount: Number(data.review_count ?? 0),
+      hours: (data.hours as Record<string, string>) ?? {},
+    }
+  } catch {
+    return null
+  }
+}
+
+/** Up to `limit` other active artists at a shop, best rated first, and how many active artists it has in all. */
+export async function getOtherShopArtists(
+  shopId: string,
+  excludeId: string,
+  limit = 4,
+): Promise<{ artists: { id: string; name: string; avatarUrl: string; styles: string[] }[]; total: number }> {
+  try {
+    const supabase = createClient()
+    const { data, count, error } = await supabase
+      .from("artists")
+      .select("id, display_name, avatar_url, styles", { count: "exact" })
+      .eq("shop_id", shopId)
+      .eq("is_active", true)
+      .neq("id", excludeId)
+      .order("rating", { ascending: false })
+      .order("id")
+      .limit(limit)
+    if (error || !data) return { artists: [], total: 0 }
+    return {
+      artists: data.map((row: Record<string, unknown>) => ({
+        id: String(row.id),
+        name: String(row.display_name ?? ""),
+        avatarUrl: String(row.avatar_url ?? ""),
+        styles: Array.isArray(row.styles) ? sortStyleSlugs(row.styles as string[]) : [],
+      })),
+      // Everyone at the shop, this artist included.
+      total: (count ?? 0) + 1,
+    }
+  } catch {
+    return { artists: [], total: 0 }
   }
 }
 
