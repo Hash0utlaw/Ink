@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Star, MapPin, Clock, Tag } from "lucide-react"
-import type { Artist, AvailabilityStatus, PriceTier } from "@/types/artist"
+import type { Artist, AvailabilityStatus } from "@/types/artist"
 import { SaveButton } from "@/components/saved/save-button"
 import { safeImageSrc } from "@/lib/utils/safe-image"
 import { styleEntries } from "@/lib/styles"
@@ -25,13 +25,6 @@ const AVAILABILITY_CONFIG: Record<AvailabilityStatus, { dot: string; label: stri
   next_week:             { dot: "bg-warning",  label: "Available next week", badge: "border-warning text-warning-foreground bg-warning" },
   one_to_two_months:     { dot: "bg-warning",  label: "Booked 1–2 months",  badge: "border-warning text-warning-foreground bg-warning" },
   not_taking_clients:    { dot: "bg-muted-foreground",   label: "Not taking clients",  badge: "border-border text-muted-foreground bg-muted" },
-}
-
-const PRICE_TIER_LABEL: Record<PriceTier, string> = {
-  budget:  "$",
-  mid:     "$$",
-  premium: "$$$",
-  luxury:  "$$$$",
 }
 
 export function ArtistCard({ artist, distance, initialSaved }: ArtistCardProps) {
@@ -77,16 +70,14 @@ export function ArtistCard({ artist, distance, initialSaved }: ArtistCardProps) 
         </Avatar>
 
         <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between gap-2">
+          {/* pr-12 keeps the name and distance clear of the save button (top-right). */}
+          <div className={`flex items-start justify-between gap-2 ${artist.isStub ? "" : "pr-12"}`}>
             <h3 className="font-bold text-base leading-tight truncate">{artist.name}</h3>
-            <div className="flex items-center gap-1.5 shrink-0">
-              {distance != null && (
-                <span className="text-xs px-2 py-0.5 rounded-lg bg-warning text-warning-foreground border border-warning whitespace-nowrap">
-                  {distance.toFixed(1)} mi
-                </span>
-              )}
-              <span className="text-xs font-semibold text-muted-foreground">{PRICE_TIER_LABEL[artist.priceTier]}</span>
-            </div>
+            {distance != null && (
+              <span className="text-xs px-2 py-0.5 rounded-lg bg-warning text-warning-foreground border border-warning whitespace-nowrap shrink-0">
+                {distance.toFixed(1)} mi
+              </span>
+            )}
           </div>
 
           {artist.shopName && (

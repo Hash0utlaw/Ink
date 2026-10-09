@@ -4,12 +4,14 @@ import type { Metadata } from "next"
 import { HeaderSkeleton } from "@/components/layout/header-skeleton"
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
-import { getArtistById, shopArtistRedirectPath } from "@/lib/supabase/artists"
+import { getArtistById, getArtistShop, getOtherShopArtists, shopArtistRedirectPath } from "@/lib/supabase/artists"
 import { getCurrentUserId } from "@/lib/supabase/users"
 import { getSavedIdsForUser } from "@/lib/supabase/saved"
 import { getReviewsForArtist } from "@/lib/supabase/reviews"
 import { ArtistHeader } from "@/components/artist-profile/artist-header"
-import { ProfileTabs } from "@/components/artist-profile/profile-tabs"
+import { ProfileSections } from "@/components/artist-profile/profile-sections"
+import { WhereToFind } from "@/components/artist-profile/where-to-find"
+import { AlsoAtShop } from "@/components/artist-profile/also-at-shop"
 import { BookingSection } from "@/components/artist-profile/booking-section"
 import { RecordVisit } from "@/components/artist-profile/record-visit"
 import { styleLabels } from "@/lib/styles"
@@ -23,7 +25,6 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
   const labels = styleLabels(artist.styles)
   const primaryStyle = labels[0] ?? "Tattoo"
   const loc = [artist.location.city, artist.location.state].filter(Boolean).join(", ")
-  const styleList = labels.length > 0 ? `${labels.slice(0, 3).join(", ")} ` : ""
   const coverImage = artist.portfolioImages?.[0] ?? artist.avatarUrl ?? "/opengraph-image"
 
   // Another active artist shares this name and city: add the (unique) handle so the title stays unique.
@@ -37,7 +38,8 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
   const at = artist.shopName ? ` at ${artist.shopName}` : ""
 
   return {
-    title: `${name} — ${styleList}Tattoo Artist${loc ? ` in ${loc}` : ""} | TattooMaps`,
+    // "{Name}, tattoo artist in {City}, {ST} | TattooMaps"
+    title: `${name}, tattoo artist${loc ? ` in ${loc}` : ""} | TattooMaps`,
     description: metaDescription(
       `Book ${name}, a ${primaryStyle.toLowerCase()} tattoo artist${at}${loc ? ` in ${loc}` : ""}. View portfolio, read reviews, and book your appointment on TattooMaps.`,
     ),
@@ -63,7 +65,11 @@ export default async function ArtistProfilePage({ params }: { params: { id: stri
   const userId = await getCurrentUserId()
   const savedIds = userId ? await getSavedIdsForUser(userId, "artist") : []
   const isSaved = savedIds.includes(artist.id)
-  const reviews = await getReviewsForArtist(artist.id)
+  const [reviews, shop, others] = await Promise.all([
+    getReviewsForArtist(artist.id),
+    artist.shopId ? getArtistShop(artist.shopId) : Promise.resolve(null),
+    artist.shopId ? getOtherShopArtists(artist.shopId, artist.id) : Promise.resolve({ artists: [], total: 0 }),
+  ])
 
   const loc = [artist.location.city, artist.location.state].filter(Boolean).join(", ")
   const jsonLd = {
@@ -106,7 +112,7 @@ export default async function ArtistProfilePage({ params }: { params: { id: stri
         <Header />
       </Suspense>
       <main className="flex-1 bg-background">
-        <div className="container mx-auto px-4 py-8 md:py-12">
+        <div className="mx-auto max-w-[1180px] px-4 py-8 sm:px-6 lg:py-14">
           <RecordVisit
             id={artist.id}
             name={artist.name}
@@ -114,15 +120,21 @@ export default async function ArtistProfilePage({ params }: { params: { id: stri
             avatarUrl={artist.avatarUrl}
             city={artist.location.city}
           />
-          <ArtistHeader artist={artist} initialSaved={isSaved} />
-          <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2">
-              <ProfileTabs artist={artist} reviews={reviews} />
-            </div>
-            <div className="lg:col-span-1">
-              <BookingSection artist={artist} />
-            </div>
+          <ArtistHeader artist={artist} initialSaved={isSaved} shopHref={shop ? `/shops/${shop.id}` : null} />
+          <div className="mt-14 grid grid-cols-1 gap-14 lg:mt-20 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-12">
+            <ProfileSections artist={artist} reviews={reviews} />
+            <BookingSection artist={artist} />
           </div>
+          {shop && (
+            <div className="mt-14 lg:mt-20">
+              <WhereToFind name={artist.name} shop={shop} />
+            </div>
+          )}
+          {shop && others.artists.length > 0 && (
+            <div className="mt-14 lg:mt-20">
+              <AlsoAtShop shopId={shop.id} artists={others.artists} total={others.total} />
+            </div>
+          )}
         </div>
       </main>
       <Footer />

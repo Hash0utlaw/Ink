@@ -8,6 +8,12 @@ const ALLOWED_IMAGE_HOSTS = new Set([
   "d1kq2dqeox7x40.cloudfront.net",
 ])
 
+/** The URL when next/image may load it, else null (callers show initials, never a placeholder). */
+export function allowedImageSrc(url: string | null | undefined): string | null {
+  const src = safeImageSrc(url)
+  return src === "/placeholder.svg" ? null : src
+}
+
 // next/image throws a hard error for any hostname not in remotePatterns.
 // Scraped image URLs can point anywhere, so validate before handing a URL
 // to next/image and fall back to a local placeholder rather than crashing.

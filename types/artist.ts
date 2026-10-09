@@ -15,6 +15,8 @@ export interface Artist {
   handle: string
   name: string
   shopName: string
+  /** artists.shop_id, when the artist is listed at a shop. */
+  shopId?: string
   /** Free-text tags as scraped/entered. Display and filtering use `styles`. */
   specialties: string[]
   /** Canonical style slugs from lib/styles.ts (artists.styles), in STYLES order. */

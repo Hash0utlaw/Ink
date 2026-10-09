@@ -1,91 +1,119 @@
 import Link from "next/link"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Star, Share2, Instagram, Globe, BadgeCheck } from "lucide-react"
+import { Share2, Instagram, Globe, BadgeCheck } from "lucide-react"
 import type { Artist } from "@/types/artist"
 import { SaveButton } from "@/components/saved/save-button"
 import { styleEntries } from "@/lib/styles"
 import { StyleBadge } from "@/components/brand/style-badge"
-import { initials } from "@/lib/initials"
+import { Plate } from "@/components/brand/plate"
+import { allowedImageSrc } from "@/lib/utils/safe-image"
+import { STATE_ABBR_TO_NAME } from "@/lib/utils/states"
 
+const PRIMARY =
+  "min-h-11 rounded-lg border-1.5 border-ink bg-flash-red px-5 text-[15px] font-semibold text-white hover:bg-flash-red/90"
+const SECONDARY =
+  "min-h-11 rounded-lg border-1.5 border-ink bg-vellum px-4 text-[15px] font-semibold text-ink hover:bg-secondary"
+const TEXT_LINK = "font-semibold text-navy underline underline-offset-2 hover:no-underline"
 
-export function ArtistHeader({ artist, initialSaved }: { artist: Artist; initialSaved?: boolean }) {
+interface ArtistHeaderProps {
+  artist: Artist
+  initialSaved?: boolean
+  /** The artist's shop page, when the shop is active. */
+  shopHref?: string | null
+}
+
+export function ArtistHeader({ artist, initialSaved, shopHref }: ArtistHeaderProps) {
   const igHandle = artist.instagramHandle?.replace(/^@/, "").trim()
   const websiteUrl = artist.websiteUrl?.trim()
   const showVerified = artist.hasAccount && artist.isVerified
+  const photo = allowedImageSrc(artist.avatarUrl)
+  const stateName = STATE_ABBR_TO_NAME[artist.location.state] ?? artist.location.state
+  const place = [artist.location.city, stateName].filter(Boolean).join(", ")
+  const claimHref = artist.handle ? `/claim?artist=${encodeURIComponent(artist.handle)}` : "/claim"
 
   return (
-    <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start">
-      <Avatar className="w-32 h-32 md:w-40 md:h-40 border-4 border-ink shrink-0">
-        <AvatarImage src={artist.avatarUrl || ""} alt={artist.name} />
-        <AvatarFallback className="text-4xl bg-vellum text-ink font-heading border-1.5 border-ink">
-          {initials(artist.name) || "?"}
-        </AvatarFallback>
-      </Avatar>
+    <div className="grid grid-cols-[128px_minmax(0,1fr)] items-start gap-x-4 gap-y-5 lg:grid-cols-[300px_minmax(0,1fr)] lg:gap-x-12">
+      <div className="lg:row-span-2">
+        <Plate
+          src={photo}
+          alt={photo ? `${artist.name}, tattoo artist` : `${artist.name} initials`}
+          name={artist.name}
+          primaryStyle={artist.styles[0]}
+          fluid
+          sizes="(min-width: 1024px) 300px, 128px"
+        />
+      </div>
 
-      <div className="flex-1 min-w-0">
-        <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">{artist.name}</h1>
-
+      <div className="min-w-0 lg:pt-2">
+        <h1 className="font-heading text-[32px] leading-[1.05] text-ink text-balance lg:text-[56px]">{artist.name}</h1>
         {artist.shopName && (
-          <p className="text-lg text-muted-foreground mt-1">at {artist.shopName}</p>
-        )}
-
-        {!artist.hasAccount && (
-          <p className="text-xs text-muted-foreground mt-1">
-            {artist.shopName ? `Listed from ${artist.shopName}'s website` : "Listed from public sources"} · Is this
-            you?{" "}
-            <Link
-              href={artist.handle ? `/claim?artist=${encodeURIComponent(artist.handle)}` : "/claim"}
-              className="underline hover:text-foreground transition-colors"
-            >
-              Claim this profile
-            </Link>
+          <p className="mt-2 text-base text-ink lg:text-[19px]">
+            Tattoo artist at{" "}
+            {shopHref ? (
+              <Link href={shopHref} className={TEXT_LINK}>
+                {artist.shopName}
+              </Link>
+            ) : (
+              artist.shopName
+            )}
           </p>
         )}
-
-        {(artist.rating > 0 || artist.isAvailable || showVerified) && (
-          <div className="flex items-center gap-4 mt-2">
-            {showVerified && (
-              <Badge variant="secondary" className="gap-1">
-                <BadgeCheck className="w-3.5 h-3.5" />
-                Verified
-              </Badge>
-            )}
+        {place && <p className="mt-1 font-place text-[17px] italic text-ink-muted lg:text-[19px]">{place}</p>}
+        {(artist.rating > 0 || showVerified || artist.isAvailable) && (
+          <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[15px] text-ink-muted">
             {artist.rating > 0 && (
-              <div className="flex items-center gap-1">
-                <Star className="w-5 h-5 text-flash-yellow fill-flash-yellow" />
-                <span className="text-lg font-bold">{artist.rating}</span>
-                <span className="text-sm text-muted-foreground">({artist.reviewCount} reviews)</span>
-              </div>
+              <span className="tabular-nums">
+                Rated {artist.rating.toFixed(1)}
+                {artist.reviewCount > 0 &&
+                  ` from ${artist.reviewCount} ${artist.reviewCount === 1 ? "review" : "reviews"}`}
+              </span>
             )}
-            {artist.isAvailable && (
-              <Badge variant="outline" className="border-success text-success">
-                Available for booking
-              </Badge>
+            {showVerified && (
+              <span className="inline-flex items-center gap-1 font-semibold text-ink">
+                <BadgeCheck className="h-4 w-4" aria-hidden="true" />
+                Verified
+              </span>
             )}
-          </div>
+            {artist.isAvailable && <span className="font-semibold text-bottle-green">Available for booking</span>}
+          </p>
         )}
+      </div>
 
+      <div className="col-span-2 min-w-0 space-y-5 lg:col-span-1 lg:col-start-2">
         {artist.styles.length > 0 && (
-          <div className="mt-4 flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-1.5">
             {styleEntries(artist.styles).map(({ slug, label }) => (
               <StyleBadge key={slug} slug={slug} label={label} />
             ))}
           </div>
         )}
 
+        <div className="flex flex-wrap gap-2">
+          {artist.isClaimed ? (
+            <Button className={PRIMARY} asChild>
+              <Link href={`/book/${artist.handle || artist.id}`}>Book now</Link>
+            </Button>
+          ) : (
+            <Button className={PRIMARY} asChild>
+              <Link href={`/book/${artist.handle || artist.id}?unclaimed=1`}>Request an intro</Link>
+            </Button>
+          )}
+          <SaveButton itemType="artist" itemId={artist.id} variant="full" initialSaved={initialSaved} className={SECONDARY} />
+          <Button variant="outline" size="icon" aria-label="Share" className={`${SECONDARY} w-11 px-0`}>
+            <Share2 className="h-4 w-4" />
+          </Button>
+        </div>
+
         {(igHandle || websiteUrl) && (
-          <div className="mt-3 flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-x-5 gap-y-2 text-[15px]">
             {igHandle && (
               <a
                 href={`https://instagram.com/${igHandle}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                className={`inline-flex items-center gap-1.5 ${TEXT_LINK}`}
               >
-                <Instagram className="w-4 h-4" />
-                @{igHandle}
+                <Instagram className="h-4 w-4" aria-hidden="true" />@{igHandle}
               </a>
             )}
             {websiteUrl && (
@@ -93,29 +121,23 @@ export function ArtistHeader({ artist, initialSaved }: { artist: Artist; initial
                 href={websiteUrl.startsWith("http") ? websiteUrl : `https://${websiteUrl}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                className={`inline-flex items-center gap-1.5 ${TEXT_LINK}`}
               >
-                <Globe className="w-4 h-4" />
+                <Globe className="h-4 w-4" aria-hidden="true" />
                 Website
               </a>
             )}
           </div>
         )}
-      </div>
 
-      <div className="flex gap-2 shrink-0">
-        <SaveButton itemType="artist" itemId={artist.id} variant="full" initialSaved={initialSaved} />
-        <Button variant="outline" size="icon">
-          <Share2 className="h-4 w-4" />
-        </Button>
-        {artist.isClaimed ? (
-          <Button className="bg-primary text-primary-foreground hover:bg-primary/90" asChild>
-            <Link href={`/book/${artist.handle || artist.id}`}>Book Now</Link>
-          </Button>
-        ) : (
-          <Button variant="outline" asChild>
-            <Link href={`/book/${artist.handle || artist.id}?unclaimed=1`}>Request an intro</Link>
-          </Button>
+        {!artist.hasAccount && (
+          <p className="max-w-prose text-[15px] leading-[1.55] text-ink-muted text-pretty">
+            {artist.name}&apos;s details come from public listings. If this is you,{" "}
+            <Link href={claimHref} className={TEXT_LINK}>
+              claim this page
+            </Link>{" "}
+            to add your work and answer requests yourself.
+          </p>
         )}
       </div>
     </div>
