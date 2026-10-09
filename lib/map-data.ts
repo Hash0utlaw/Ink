@@ -23,6 +23,20 @@ export interface Bounds {
   north: number
 }
 
+const escapeRegExp = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+
+/**
+ * "street, City, ST zip" for the map list and card. A stored address that
+ * already names the city (after a comma) or ends in a ZIP is shown as is.
+ */
+export function formatMapAddress(street: unknown, city: unknown, state: unknown, zip: unknown): string {
+  const [st, c, s, z] = [street, city, state, zip].map((v) => String(v ?? "").trim())
+  if (st && (/\b\d{5}(?:-\d{4})?(?:,?\s*(?:USA|United States))?$/i.test(st) || (c && new RegExp(`,\\s*${escapeRegExp(c)}\\b`, "i").test(st)))) {
+    return st
+  }
+  return [st, c, [s, z].filter(Boolean).join(" ")].filter(Boolean).join(", ")
+}
+
 export function shopToMapLocation(row: Record<string, unknown>, distanceMi?: number): MapboxLocation | null {
   const lat = Number(row.latitude ?? 0)
   const lng = Number(row.longitude ?? 0)
@@ -33,7 +47,7 @@ export function shopToMapLocation(row: Record<string, unknown>, distanceMi?: num
     name: String(row.name ?? ""),
     type: "shop",
     coordinates: [lng, lat],
-    address: [String(row.address ?? ""), String(row.city ?? "")].filter(Boolean).join(", "),
+    address: formatMapAddress(row.address, row.city, row.state, row.zip),
     rating: Number(row.rating ?? 0),
     reviewCount: Number(row.review_count ?? 0),
     image: String(row.logo_url ?? row.cover_image_url ?? "") || undefined,
@@ -61,7 +75,11 @@ export function artistRowToMapLocation(row: Record<string, unknown>): MapboxLoca
     name: String(row.display_name ?? ""),
     type: "artist",
     coordinates: [lng, lat],
-    address: [String(row.city ?? ""), String(row.state ?? "")].filter(Boolean).join(", "),
+    // An artist's pin is their shop, so the shop's address (else the artist's city).
+    address: shopJoin?.address
+      ? formatMapAddress(shopJoin.address, shopJoin.city, shopJoin.state, shopJoin.zip)
+      : formatMapAddress("", row.city, row.state, ""),
+    shopName: String(shopJoin?.name ?? "") || undefined,
     rating: Number(row.rating ?? 0),
     reviewCount: Number(row.review_count ?? 0),
     image: String(row.avatar_url ?? "") || undefined,
@@ -77,9 +95,9 @@ export function artistRowToMapLocation(row: Record<string, unknown>): MapboxLoca
 // Only what the map pins, sidebar cards and LocationDetails read
 // (description/hours/website are shown in LocationDetails).
 export const ARTIST_JOIN_COLUMNS =
-  "id, display_name, city, state, rating, review_count, avatar_url, styles, is_available, bio, instagram_handle, website_url, shops!inner(latitude, longitude)"
+  "id, display_name, city, state, rating, review_count, avatar_url, styles, is_available, bio, instagram_handle, website_url, shops!inner(latitude, longitude, name, address, city, state, zip)"
 export const SHOP_COLUMNS =
-  "id, name, address, city, latitude, longitude, rating, review_count, logo_url, cover_image_url, accepts_walk_ins, hours, description"
+  "id, name, address, city, state, zip, latitude, longitude, rating, review_count, logo_url, cover_image_url, accepts_walk_ins, hours, description"
 // For the ≤100 shops in /api/map/details (sidebar cards + LocationDetails);
 // the nationwide/bbox paths skip the embed to keep those pages light.
 export const SHOP_DETAIL_COLUMNS = `${SHOP_COLUMNS}, ${SHOP_STYLES_EMBED}`

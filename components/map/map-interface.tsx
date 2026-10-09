@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback, useMemo, useRef } from "react"
-import { MapboxMap, type MapBounds } from "./mapbox-map"
+import { MapboxMap, UNCLUSTERED_ZOOM, getViewBounds, type MapBounds } from "./mapbox-map"
 import { MapSidebar } from "./map-sidebar"
 import { LocationDetails } from "./location-details"
 import { List } from "lucide-react"
@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils"
 import { calculateDistance, getCurrentLocation, geocodeAddress, mapboxConfig } from "@/lib/mapbox"
 import { useToast } from "@/components/ui/use-toast"
 import { styleLabels } from "@/lib/styles"
+import { formatLocation, parseLocation } from "@/lib/parse-location"
 
 interface MapFilters {
   locationType: "all" | "artist" | "shop"
@@ -27,7 +28,9 @@ interface MapFilters {
 // /api/map/details only for the top MAX_CARDS pins in view (sidebar) or a
 // clicked pin (LocationDetails).
 const MAX_CARDS = 100
-// The first PIN_NUMBERS list rows are numbered, with the same number on their map pin.
+// The first PIN_NUMBERS list rows are numbered, with the same number on their
+// map pin. Only from UNCLUSTERED_ZOOM: below it a numbered pin could be
+// hidden inside a cluster seal.
 const PIN_NUMBERS = 9
 
 const MAP_STYLE_OPTIONS: { value: MapStyle; label: string }[] = [
@@ -161,9 +164,8 @@ export function MapInterface() {
     moveEndTimerRef.current = setTimeout(() => setBounds(next), 300)
   }, [])
 
-  const handleMapLoad = useCallback((map: { getBounds: () => any }) => {
-    const b = map.getBounds()
-    setBounds({ west: b.getWest(), south: b.getSouth(), east: b.getEast(), north: b.getNorth() })
+  const handleMapLoad = useCallback((map: any) => {
+    setBounds(getViewBounds(map))
   }, [])
 
   useEffect(() => {
@@ -248,10 +250,13 @@ export function MapInterface() {
     [filteredCards]
   )
   // Keyed on the ids so the map only re-sets its data when the numbering changes.
-  const numberedKey = listed
-    .slice(0, PIN_NUMBERS)
-    .map((location) => location.id)
-    .join(",")
+  const numbered = bounds != null && bounds.zoom >= UNCLUSTERED_ZOOM
+  const numberedKey = numbered
+    ? listed
+        .slice(0, PIN_NUMBERS)
+        .map((location) => location.id)
+        .join(",")
+    : ""
   const pinNumbers = useMemo(
     () => new Map(numberedKey ? numberedKey.split(",").map((id, i) => [id, i + 1]) : []),
     [numberedKey]
@@ -268,7 +273,9 @@ export function MapInterface() {
         if (coords) {
           setMapCenter(coords)
           setMapZoom(14)
-          setSearchedPlace(query.trim())
+          // The heading shows the parsed place ("charlotte nc" → "Charlotte, NC").
+          const parsed = parseLocation(query)
+          setSearchedPlace((parsed && formatLocation(parsed)) || query.trim())
         }
       } catch (error) {
         console.warn("Geocoding failed:", error)
