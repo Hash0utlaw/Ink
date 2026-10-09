@@ -196,6 +196,39 @@ export async function getArtistById(id: string): Promise<Artist | null> {
   }
 }
 
+/**
+ * Where an old /artists/<id> URL built from a shop_artists row id should go:
+ * the active artist at the same shop with the same name (case-insensitive),
+ * else that shop's page. Null when the id isn't a shop_artists row either.
+ */
+export async function shopArtistRedirectPath(id: string): Promise<string | null> {
+  try {
+    const supabase = createClient()
+    const { data: stub, error } = await supabase
+      .from("shop_artists")
+      .select("shop_id, name")
+      .eq("id", id)
+      .maybeSingle()
+    if (error || !stub?.shop_id) return null
+
+    const name = String(stub.name ?? "").trim().toLowerCase()
+    const { data: artists } = await supabase
+      .from("artists")
+      .select("id, display_name")
+      .eq("shop_id", stub.shop_id)
+      .eq("is_active", true)
+      .order("id")
+    const match = name
+      ? (artists ?? []).find(
+          (a: { display_name: string | null }) => String(a.display_name ?? "").trim().toLowerCase() === name
+        )
+      : undefined
+    return match ? `/artists/${match.id}` : `/shops/${stub.shop_id}`
+  } catch {
+    return null
+  }
+}
+
 export async function getArtistsByIds(ids: string[]): Promise<Artist[]> {
   if (ids.length === 0) return []
   try {

@@ -203,30 +203,22 @@ export async function getShopBySlug(slug: string): Promise<Shop | null> {
   }
 }
 
-// Looks up resident artists via the shop_artists join table.
-// shop_artists columns: id, shop_id, name, image_url, specialty, artist_profile_id
+// Resident artists: active artists whose artists.shop_id is this shop. Only when
+// there are none, falls back to stubs built from shop_artists rows
+// (columns: id, shop_id, name, image_url, specialty, artist_profile_id). Stubs
+// have no profile page, so they carry isStub and must not be linked.
 export async function getShopArtists(shopId: string): Promise<Artist[]> {
   try {
     const supabase = createClient()
 
-    // First try: artists linked via artist_profile_id → artists.id
-    const { data: links, error: linksError } = await supabase
-      .from("shop_artists")
-      .select("artist_profile_id")
+    const { data: artists, error: artistsError } = await supabase
+      .from("artists")
+      .select("*")
       .eq("shop_id", shopId)
-      .not("artist_profile_id", "is", null)
+      .eq("is_active", true)
 
-    if (!linksError && links && links.length > 0) {
-      const artistIds = (links as { artist_profile_id: string }[]).map((l) => l.artist_profile_id)
-      const { data: artists, error: artistsError } = await supabase
-        .from("artists")
-        .select("*")
-        .in("id", artistIds)
-        .eq("is_active", true)
-
-      if (!artistsError && artists && artists.length > 0) {
-        return artists.map((row: unknown) => rowToArtist(row as Record<string, unknown>))
-      }
+    if (!artistsError && artists && artists.length > 0) {
+      return artists.map((row: unknown) => rowToArtist(row as Record<string, unknown>))
     }
 
     // Fallback: return stub artists from shop_artists rows directly
@@ -260,6 +252,7 @@ export async function getShopArtists(shopId: string): Promise<Artist[]> {
       bio: "",
       reviews: [],
       hours: {},
+      isStub: true,
     }))
   } catch {
     return []

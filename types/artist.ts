@@ -48,4 +48,6 @@ export interface Artist {
   /** True when a TattooMaps account owns this profile (artists.user_id is set). */
   hasAccount?: boolean
   isVerified?: boolean
+  /** Built from a shop_artists row, not an artists profile: has no profile page to link to. */
+  isStub?: boolean
 }
