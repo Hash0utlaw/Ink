@@ -25,9 +25,12 @@ const Waves = ({ id, w, h, d, opacity, strokeWidth }: { id: string; w: number; h
   </defs>
 )
 
+/** Hero coastline in viewBox units (1200x560): absolute cubic segments only. */
+export const HERO_COAST =
+  "M620,600 C600,530 642,486 622,432 C604,380 650,350 660,300 C670,250 640,210 668,170 C694,134 730,150 760,120 C790,90 820,96 850,70 C880,44 940,58 980,40 C1030,18 1100,30 1210,20"
+
 function HeroChart({ waves, place, compassClassName }: { waves: string; place: string; compassClassName?: string }) {
-  const coast =
-    "M620,600 C600,530 642,486 622,432 C604,380 650,350 660,300 C670,250 640,210 668,170 C694,134 730,150 760,120 C790,90 820,96 850,70 C880,44 940,58 980,40 C1030,18 1100,30 1210,20"
+  const coast = HERO_COAST
   const roads = "M700,300 C780,290 860,300 1210,250 M880,600 C870,500 880,400 900,300 C910,230 960,150 1000,40"
   const river = "M1210,380 C1120,390 1080,350 1010,368 C940,386 920,450 850,468 C780,486 720,456 662,486 C646,494 636,502 630,512"
   const shops: [number, number][] = [

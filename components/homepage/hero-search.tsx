@@ -87,17 +87,17 @@ export function HeroSearch({ shopCount, artistCount }: HeroSearchProps) {
 
   const counts = shopCount > 0 && artistCount > 0
   return (
-    <div className="w-full rounded-lg border-2 border-ink bg-vellum p-5 sm:p-7 lg:max-w-[470px]">
-      <h1 className="text-balance font-heading text-[32px] leading-[1.08] text-ink md:text-[40px] lg:text-[48px]">
+    <div className="w-full rounded-lg border-2 border-ink bg-vellum p-5 sm:p-7 lg:max-w-[470px] lg:p-8">
+      <h1 className="text-balance font-heading text-[32px] leading-[1.08] text-ink md:text-[40px] xl:text-[44px]">
         Find a tattoo artist near you
       </h1>
-      <p className="mt-3 text-pretty text-base leading-[1.55] text-ink-muted">
+      <p className="mt-3 text-pretty text-base leading-[1.55] text-ink-muted lg:mt-4 lg:text-[17px]">
         {counts
           ? `Search ${roundedThousands(shopCount)} shops and ${roundedThousands(artistCount)} artists by place and style, then send a request straight to the artist. Free, with no booking fees.`
           : "Search shops and artists by place and style, then send a request straight to the artist. Free, with no booking fees."}
       </p>
 
-      <form onSubmit={handleSearch} className="mt-6 space-y-4">
+      <form onSubmit={handleSearch} className="mt-6 space-y-4 lg:mt-4">
         <div>
           <label htmlFor="hero-where" className="mb-1.5 block text-[15px] font-semibold text-ink">
             Where
@@ -111,25 +111,28 @@ export function HeroSearch({ shopCount, artistCount }: HeroSearchProps) {
             className={fieldClass}
           />
         </div>
-        <div>
-          <label htmlFor="hero-style" className="mb-1.5 block text-[15px] font-semibold text-ink">
-            Style
-          </label>
-          <select id="hero-style" value={style} onChange={(e) => setStyle(e.target.value)} className={fieldClass}>
-            <option value="">Any style</option>
-            {STYLES.map((s) => (
-              <option key={s.slug} value={s.slug}>
-                {s.label}
-              </option>
-            ))}
-          </select>
+        {/* Desktop: Style takes the row, Search sits to its right on the select's baseline. */}
+        <div className="space-y-4 lg:flex lg:items-end lg:gap-3 lg:space-y-0">
+          <div className="lg:min-w-0 lg:flex-1">
+            <label htmlFor="hero-style" className="mb-1.5 block text-[15px] font-semibold text-ink">
+              Style
+            </label>
+            <select id="hero-style" value={style} onChange={(e) => setStyle(e.target.value)} className={fieldClass}>
+              <option value="">Any style</option>
+              {STYLES.map((s) => (
+                <option key={s.slug} value={s.slug}>
+                  {s.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <Button type="submit" className="h-12 w-full border-1.5 border-ink text-base font-semibold lg:w-auto lg:shrink-0 lg:px-7">
+            Search
+          </Button>
         </div>
-        <Button type="submit" className="h-12 w-full border-1.5 border-ink text-base font-semibold">
-          Search
-        </Button>
       </form>
 
-      <div className="mt-5 flex flex-col items-start gap-2 text-[15px]">
+      <div className="mt-5 flex flex-col items-start gap-2 text-[15px] lg:mt-4 lg:flex-row lg:flex-wrap lg:gap-x-6 lg:gap-y-2">
         <button type="button" onClick={handleNearMe} className={linkClass}>
           Use my location
         </button>

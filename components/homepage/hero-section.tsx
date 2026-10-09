@@ -1,6 +1,6 @@
-import { CompassRose } from "@/components/brand/compass-rose"
 import { FlashChart } from "@/components/brand/flash-chart"
 import { NeatlineFrame } from "@/components/brand/neatline-frame"
+import { HeroCompass } from "./hero-compass"
 import { HeroSearch } from "./hero-search"
 
 interface HeroSectionProps {
@@ -11,39 +11,36 @@ interface HeroSectionProps {
   }
 }
 
-// NeatlineFrame's border (2px) + padding (11px) + inner border (1.5px): the
-// overlay layer sits exactly on the chart area.
-const CHART_INSET = "lg:inset-[14.5px]"
-
 /**
  * Home hero.
  * Below 1024px: the chart is a short strip (200px phones, 280px tablets) and the
  * search card sits below the frame, full width. The crop is anchored top-right so
  * the land, banner, X and the chart's own compass stay inside the frame.
- * From 1024px: the chart is 560px tall with the card over the sea. The chart's
- * compass is hidden (the card would cover it); from 1280px a standalone compass
- * sits in the open sea just right of the card. At 1024–1279px there isn't room
- * for the whole compass between the card and the coast, so none is shown.
+ * From 1024px: the card is in flow and sets the hero's height; the frame and chart
+ * fill the hero behind it. Padding = frame (14.5px: 2px border + 11px padding +
+ * 1.5px inner border) + the card gap (40px, 48px from 1280px), so the gap is the
+ * same above, below and left of the card. The card is 430px wide at 1024–1279px so
+ * the banner stays clear of it, 470px from 1280px. The chart's own compass is hidden and
+ * HeroCompass places one in the open sea when it fits.
  */
 export function HeroSection({ stats }: HeroSectionProps = {}) {
   return (
     <section className="mx-auto w-full max-w-[1344px] px-6 pt-6 md:pt-8">
       <div className="relative">
-        <NeatlineFrame>
+        <NeatlineFrame className="lg:absolute lg:inset-0">
           <FlashChart
             variant="hero"
             crop="top-right"
             compassClassName="lg:hidden"
-            className="h-[200px] md:h-[280px] lg:h-[560px]"
+            className="h-[200px] md:h-[280px] lg:h-full"
           />
         </NeatlineFrame>
 
-        <div className={`mt-4 lg:pointer-events-none lg:absolute lg:mt-0 lg:flex lg:items-center lg:p-12 ${CHART_INSET}`}>
-          <div className="lg:pointer-events-auto lg:w-[470px]">
+        <div className="mt-4 lg:relative lg:mt-0 lg:flex lg:items-center lg:p-[54.5px] xl:p-[62.5px]">
+          <div data-hero-card className="lg:w-[430px] xl:w-[470px]">
             <HeroSearch shopCount={stats?.shopCount ?? 0} artistCount={stats?.artistCount ?? 0} />
           </div>
-          {/* 48px card offset + 470px card + 16px gap = 534px from the chart's left edge. */}
-          <CompassRose size={100} tone="sea" className="absolute left-[534px] top-10 hidden xl:block" />
+          <HeroCompass />
         </div>
       </div>
     </section>
