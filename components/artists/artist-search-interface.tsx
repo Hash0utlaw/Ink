@@ -40,7 +40,7 @@ function filtersFromParams(params: URLSearchParams): ArtistFilterValues {
   }
 }
 
-export function ArtistSearchInterface() {
+export function ArtistSearchInterface({ showAvailableNow = false }: { showAvailableNow?: boolean }) {
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -165,7 +165,7 @@ export function ArtistSearchInterface() {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
       <div className="lg:col-span-1">
-        <FilterSidebar filters={filters} onFilterChange={handleFilterChange} onNearMe={handleNearMe} />
+        <FilterSidebar filters={filters} onFilterChange={handleFilterChange} onNearMe={handleNearMe} showAvailableNow={showAvailableNow} />
       </div>
       <div className="lg:col-span-3 space-y-8">
         <Link

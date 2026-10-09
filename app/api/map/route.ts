@@ -38,7 +38,8 @@ function artistToMapLocation(artist: Artist & { distance_mi?: number }): MapboxL
     rating: artist.rating,
     reviewCount: artist.reviewCount,
     image: artist.avatarUrl || undefined,
-    isOpen: artist.isAvailable,
+    // Availability is only real for claimed artists (it defaults to on).
+    isOpen: artist.isAvailable && artist.isClaimed,
     styles: artist.styles,
     priceRange: artist.priceRange,
     distance: artist.distance_mi,

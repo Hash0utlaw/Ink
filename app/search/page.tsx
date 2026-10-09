@@ -6,6 +6,7 @@ import { Footer } from "@/components/layout/footer"
 import { SearchInterface } from "@/components/search/search-interface"
 import { FinderCta } from "@/components/layout/finder-cta"
 import { Skeleton } from "@/components/ui/skeleton"
+import { getClaimedArtistCount } from "@/lib/supabase/claimed"
 
 export const metadata: Metadata = {
   title: "Search Tattoo Artists & Shops | TattooMaps",
@@ -31,7 +32,12 @@ function SearchSkeleton() {
   )
 }
 
-export default function SearchPage() {
+// Picks up the claimed-artist count (cached for an hour) without a redeploy.
+export const revalidate = 3600
+
+export default async function SearchPage() {
+  // Availability is a default until artists claim their pages.
+  const showAvailableNow = (await getClaimedArtistCount()) > 0
   return (
     <div className="flex min-h-screen flex-col">
       <Suspense fallback={<HeaderSkeleton />}>
@@ -49,7 +55,7 @@ export default function SearchPage() {
             <FinderCta />
           </div>
           <Suspense fallback={<SearchSkeleton />}>
-            <SearchInterface />
+            <SearchInterface showAvailableNow={showAvailableNow} />
           </Suspense>
         </div>
       </main>

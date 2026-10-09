@@ -185,7 +185,7 @@ export default async function FindArtistResultsPage({
                           </span>
                         )}
                         <span className="text-xs text-muted-foreground">{priceLabel(artist.priceRange)}</span>
-                        {artist.isAvailable && (
+                        {artist.isClaimed && artist.isAvailable && (
                           <span className="text-xs text-success">Available</span>
                         )}
                       </div>

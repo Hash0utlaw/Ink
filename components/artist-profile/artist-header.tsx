@@ -1,10 +1,11 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Share2, Instagram, Globe, BadgeCheck } from "lucide-react"
+import { Instagram, Globe, BadgeCheck } from "lucide-react"
 import type { Artist } from "@/types/artist"
 import { SaveButton } from "@/components/saved/save-button"
-import { styleEntries } from "@/lib/styles"
-import { StyleBadge } from "@/components/brand/style-badge"
+import { ShareButton } from "@/components/share/share-button"
+import { RequestIntroButton } from "./request-intro-button"
+import { StyleBadgeList } from "./style-badge-list"
 import { Plate } from "@/components/brand/plate"
 import { allowedImageSrc } from "@/lib/utils/safe-image"
 import { STATE_ABBR_TO_NAME } from "@/lib/utils/states"
@@ -26,6 +27,8 @@ export function ArtistHeader({ artist, initialSaved, shopHref }: ArtistHeaderPro
   const igHandle = artist.instagramHandle?.replace(/^@/, "").trim()
   const websiteUrl = artist.websiteUrl?.trim()
   const showVerified = artist.hasAccount && artist.isVerified
+  // Availability defaults to on for every listing; it's only real once claimed.
+  const showAvailable = artist.isClaimed && artist.isAvailable
   const photo = allowedImageSrc(artist.avatarUrl)
   const stateName = STATE_ABBR_TO_NAME[artist.location.state] ?? artist.location.state
   const place = [artist.location.city, stateName].filter(Boolean).join(", ")
@@ -59,7 +62,7 @@ export function ArtistHeader({ artist, initialSaved, shopHref }: ArtistHeaderPro
           </p>
         )}
         {place && <p className="mt-1 font-place text-[17px] italic text-ink-muted lg:text-[19px]">{place}</p>}
-        {(artist.rating > 0 || showVerified || artist.isAvailable) && (
+        {(artist.rating > 0 || showVerified || showAvailable) && (
           <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[15px] text-ink-muted">
             {artist.rating > 0 && (
               <span className="tabular-nums">
@@ -74,19 +77,13 @@ export function ArtistHeader({ artist, initialSaved, shopHref }: ArtistHeaderPro
                 Verified
               </span>
             )}
-            {artist.isAvailable && <span className="font-semibold text-bottle-green">Available for booking</span>}
+            {showAvailable && <span className="font-semibold text-bottle-green">Available for booking</span>}
           </p>
         )}
       </div>
 
       <div className="col-span-2 min-w-0 space-y-5 lg:col-span-1 lg:col-start-2">
-        {artist.styles.length > 0 && (
-          <div className="flex flex-wrap gap-1.5">
-            {styleEntries(artist.styles).map(({ slug, label }) => (
-              <StyleBadge key={slug} slug={slug} label={label} />
-            ))}
-          </div>
-        )}
+        {artist.styles.length > 0 && <StyleBadgeList styles={artist.styles} max={4} />}
 
         <div className="flex flex-wrap gap-2">
           {artist.isClaimed ? (
@@ -95,13 +92,15 @@ export function ArtistHeader({ artist, initialSaved, shopHref }: ArtistHeaderPro
             </Button>
           ) : (
             <Button className={PRIMARY} asChild>
-              <Link href={`/book/${artist.handle || artist.id}?unclaimed=1`}>Request an intro</Link>
+              <RequestIntroButton>Request an intro</RequestIntroButton>
             </Button>
           )}
           <SaveButton itemType="artist" itemId={artist.id} variant="full" initialSaved={initialSaved} className={SECONDARY} />
-          <Button variant="outline" size="icon" aria-label="Share" className={`${SECONDARY} w-11 px-0`}>
-            <Share2 className="h-4 w-4" />
-          </Button>
+          <ShareButton
+            name={artist.name}
+            title={`${artist.name}, tattoo artist${artist.location.city ? ` in ${artist.location.city}` : ""}`}
+            className={`${SECONDARY} w-11 px-0`}
+          />
         </div>
 
         {(igHandle || websiteUrl) && (

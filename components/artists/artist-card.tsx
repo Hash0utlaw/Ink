@@ -104,10 +104,13 @@ export function ArtistCard({ artist, distance, initialSaved }: ArtistCardProps) 
       <CardContent className="p-4 pt-0 flex-1 space-y-2">
         {/* Availability + response time */}
         <div className="flex items-center gap-3 flex-wrap">
-          <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-lg border ${avail.badge}`}>
-            <span className={`w-1.5 h-1.5 rounded-full ${avail.dot}`} />
-            {avail.label}
-          </span>
+          {/* Availability defaults to "available" for every listing; it's only real once claimed. */}
+          {artist.isClaimed && (
+            <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-lg border ${avail.badge}`}>
+              <span className={`w-1.5 h-1.5 rounded-full ${avail.dot}`} />
+              {avail.label}
+            </span>
+          )}
           {artist.avgResponseHours != null && (
             <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
               <Clock className="w-3 h-3" />
@@ -128,11 +131,11 @@ export function ArtistCard({ artist, distance, initialSaved }: ArtistCardProps) 
 
         {artist.styles.length > 0 && (
           <div className="flex flex-wrap gap-1.5 pt-1">
-            {styleEntries(artist.styles).slice(0, 4).map(({ slug, label }) => (
+            {styleEntries(artist.styles).slice(0, 2).map(({ slug, label }) => (
               <StyleBadge key={slug} slug={slug} label={label} className="text-xs" />
             ))}
-            {artist.styles.length > 4 && (
-              <Badge variant="secondary" className="text-xs">+{artist.styles.length - 4}</Badge>
+            {artist.styles.length > 2 && (
+              <Badge variant="secondary" className="text-xs">+{artist.styles.length - 2}</Badge>
             )}
           </div>
         )}

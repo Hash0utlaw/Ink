@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { CheckCircle2, Loader2, ShieldCheck } from "lucide-react"
 import { STYLES } from "@/lib/styles"
+import { requestFormNote, requestSentMessage } from "@/lib/request-copy"
 
 interface Prefill {
   description?: string
@@ -16,6 +17,9 @@ interface Prefill {
 interface PublicBookingFormProps {
   artistId: string
   artistName: string
+  /** The artist's shop and whether they have an account, for what-happens-next copy (lib/request-copy.ts). */
+  shopName?: string | null
+  hasAccount?: boolean
   prefill?: Prefill
 }
 
@@ -25,7 +29,8 @@ const SIZE_OPTIONS = ["Small", "Medium", "Large", "Full Sleeve"]
 const STYLE_OPTIONS = [...STYLES.map((s) => s.label), "Other"]
 const BUDGET_OPTIONS = ["Under $200", "$200–$500", "$500–$1,000", "$1,000+"]
 
-export function PublicBookingForm({ artistId, artistName, prefill }: PublicBookingFormProps) {
+export function PublicBookingForm({ artistId, artistName, shopName, hasAccount, prefill }: PublicBookingFormProps) {
+  const copy = { name: artistName, shopName, hasAccount }
   const [step, setStep] = useState(1)
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
@@ -80,7 +85,7 @@ export function PublicBookingForm({ artistId, artistName, prefill }: PublicBooki
         <CheckCircle2 className="w-16 h-16 text-success" />
         <h3 className="text-xl font-bold">Request Sent!</h3>
         <p className="text-muted-foreground text-sm max-w-xs">
-          {artistName} will review your brief and respond within 24 hours.
+          {requestSentMessage(copy)}
         </p>
       </div>
     )
@@ -226,7 +231,7 @@ export function PublicBookingForm({ artistId, artistName, prefill }: PublicBooki
 
           <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
             <ShieldCheck className="w-3.5 h-3.5 text-primary" />
-            No payment required — artist reviews and responds within 24 hrs
+            {requestFormNote(copy)}
           </div>
         </div>
       )}

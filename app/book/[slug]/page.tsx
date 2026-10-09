@@ -17,6 +17,7 @@ import { createClient } from "@/utils/supabase/server"
 import { safeImageSrc } from "@/lib/utils/safe-image"
 import { styleLabel, styleLabels } from "@/lib/styles"
 import { initials } from "@/lib/initials"
+import { requestNextStep } from "@/lib/request-copy"
 
 async function getPortfolioImages(artistId: string): Promise<string[]> {
   try {
@@ -39,7 +40,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   if (!artist) return { title: "Book a Tattoo Artist — TattooMaps" }
   return {
     title: `Book ${artist.name} — TattooMaps`,
-    description: `Send a booking brief to ${artist.name}${artist.location.city ? ` in ${artist.location.city}` : ""}. No payment required — artist responds within 24 hours.`,
+    description: `Send a booking brief to ${artist.name}${artist.location.city ? ` in ${artist.location.city}` : ""}. No payment required.`,
   }
 }
 
@@ -159,7 +160,7 @@ export default async function BookArtistPage({
               <div className="text-xs text-muted-foreground space-y-1.5">
                 <p className="font-semibold text-foreground text-sm">How it works</p>
                 <p>1. Fill out the brief below — describe your idea in detail.</p>
-                <p>2. {artist.name} reviews and responds within 24 hours.</p>
+                <p>2. {requestNextStep({ name: artist.name, shopName: artist.shopName, hasAccount: artist.hasAccount })}</p>
                 <p>3. Confirm the appointment and lock in your session.</p>
               </div>
             </div>
@@ -172,7 +173,7 @@ export default async function BookArtistPage({
                     {flashListing ? `Book: ${flashListing.title}` : `Send a brief to ${artist.name}`}
                   </CardTitle>
                   <p className="text-sm text-muted-foreground">
-                    No payment required. Share your idea and {artist.name.split(" ")[0]} will be in touch.
+                    No payment required. Share your idea below.
                   </p>
                 </CardHeader>
                 <CardContent>
@@ -184,6 +185,8 @@ export default async function BookArtistPage({
                   <PublicBookingForm
                     artistId={artist.id}
                     artistName={artist.name}
+                    shopName={artist.shopName}
+                    hasAccount={artist.hasAccount}
                     prefill={flashListing ? {
                       description: `I'd like to book your flash design: "${flashListing.title}"${flashListing.description ? `. ${flashListing.description}` : ""}`,
                       style: flashListing.style ? styleLabel(flashListing.style) ?? flashListing.style : undefined,

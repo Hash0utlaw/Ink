@@ -54,9 +54,11 @@ interface FilterSidebarProps {
   filters: ArtistFilterValues
   onFilterChange: (filters: ArtistFilterValues) => void
   onNearMe?: (lat: number, lng: number) => void
+  /** The "Available now" switch. Off until any artist is claimed (availability is a default until then). */
+  showAvailableNow?: boolean
 }
 
-export function FilterSidebar({ filters, onFilterChange, onNearMe }: FilterSidebarProps) {
+export function FilterSidebar({ filters, onFilterChange, onNearMe, showAvailableNow = false }: FilterSidebarProps) {
   const [locating, setLocating] = useState(false)
   const [nearMeActive, setNearMeActive] = useState(false)
   const [locationError, setLocationError] = useState(false)
@@ -258,14 +260,16 @@ export function FilterSidebar({ filters, onFilterChange, onNearMe }: FilterSideb
           </Select>
         </div>
 
-        <div className="flex items-center justify-between">
-          <Label htmlFor="available-now">Available Now</Label>
-          <Switch
-            id="available-now"
-            checked={filters.availableNow}
-            onCheckedChange={(checked) => onFilterChange({ ...filters, availableNow: checked })}
-          />
-        </div>
+        {showAvailableNow && (
+          <div className="flex items-center justify-between">
+            <Label htmlFor="available-now">Available Now</Label>
+            <Switch
+              id="available-now"
+              checked={filters.availableNow}
+              onCheckedChange={(checked) => onFilterChange({ ...filters, availableNow: checked })}
+            />
+          </div>
+        )}
 
         {hasActiveFilters && (
           <button
