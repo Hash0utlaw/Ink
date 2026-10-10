@@ -2,7 +2,6 @@ import Link from "next/link"
 import type { ArtistShop } from "@/lib/supabase/artists"
 import { formatMapAddress } from "@/lib/map-data"
 import { staticMapUrl } from "@/lib/mapbox"
-import { NeatlineFrame } from "@/components/brand/neatline-frame"
 import { XMark } from "@/components/brand/x-mark"
 import { Banner } from "@/components/brand/banner"
 import { ProfileSection } from "./profile-sections"
@@ -51,7 +50,8 @@ export function WhereToFind({ name, shop, onShopPage = false, phone, website }: 
         className={shop.coordinates ? "grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-10" : undefined}
       >
         {shop.coordinates && (
-          <NeatlineFrame>
+          // Plain 1px ink border: the header's "Where to find" panel holds the page's one striped frame.
+          <div className="border border-ink">
             <div className="relative">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -71,7 +71,7 @@ export function WhereToFind({ name, shop, onShopPage = false, phone, website }: 
                 />
               )}
             </div>
-          </NeatlineFrame>
+          </div>
         )}
 
         <div className="text-[15px] leading-[1.55] text-ink">

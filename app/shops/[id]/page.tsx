@@ -12,7 +12,6 @@ import { getReviewsForShop } from "@/lib/supabase/reviews"
 import type { Shop } from "@/types/shop"
 import type { ArtistShop } from "@/lib/supabase/artists"
 import { ShopHeader } from "@/components/shop-profile/shop-header"
-import { ProfileCover } from "@/components/brand/profile-cover"
 import { uploadedImageSrc } from "@/lib/utils/safe-image"
 import { ShopArtists } from "@/components/shop-profile/shop-artists"
 import { NearbyShops } from "@/components/shop-profile/nearby-shops"
@@ -170,10 +169,12 @@ export default async function ShopProfilePage({ params }: { params: { id: string
               </p>
             </div>
           )}
-          <div className="mb-5 lg:mb-0">
-            <ProfileCover src={uploadedImageSrc(shop.coverImageUrl)} alt={`${shop.name}'s cover image`} />
-          </div>
-          <ShopHeader shop={shop} initialSaved={isSaved} />
+          <ShopHeader
+            shop={shop}
+            initialSaved={isSaved}
+            coverSrc={uploadedImageSrc(shop.coverImageUrl)}
+            artistCount={residentArtists.filter((a) => !a.isStub).length}
+          />
           <div className="mt-14 space-y-14 lg:mt-20 lg:space-y-20">
             <ShopArtists shopName={shop.name} artists={residentArtists} />
             <WhereToFind
