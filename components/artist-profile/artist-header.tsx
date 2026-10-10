@@ -19,6 +19,9 @@ const PRIMARY =
   "min-h-11 rounded-lg border-1.5 border-ink bg-flash-red px-5 text-[15px] font-semibold text-white hover:bg-flash-red/90"
 const SECONDARY =
   "min-h-11 rounded-lg border-1.5 border-ink bg-vellum px-4 text-[15px] font-semibold text-ink hover:bg-secondary"
+// Same as "Get directions" in the Where to find panel.
+const OUTLINE =
+  "inline-flex min-h-11 items-center justify-center rounded-lg border-1.5 border-ink px-4 text-[15px] font-semibold text-ink hover:bg-vellum focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 const TEXT_LINK = "font-semibold text-navy underline underline-offset-2 hover:no-underline"
 
 interface ArtistHeaderProps {
@@ -113,9 +116,7 @@ export function ArtistHeader({ artist, initialSaved, shopHref, coverSrc = null, 
                   <Link href={`/book/${artist.handle || artist.id}`}>Book now</Link>
                 </Button>
               ) : (
-                <Button className={PRIMARY} asChild>
-                  <RequestIntroButton>Request an intro</RequestIntroButton>
-                </Button>
+                <RequestIntroButton className={OUTLINE}>Request an intro</RequestIntroButton>
               )}
               <SaveButton
                 itemType="artist"
