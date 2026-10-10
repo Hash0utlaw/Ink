@@ -11,7 +11,6 @@ import { getReviewsForArtist } from "@/lib/supabase/reviews"
 import { ArtistHeader } from "@/components/artist-profile/artist-header"
 import { uploadedImageSrc } from "@/lib/utils/safe-image"
 import { ProfileSections } from "@/components/artist-profile/profile-sections"
-import { WhereToFind } from "@/components/artist-profile/where-to-find"
 import { AlsoAtShop } from "@/components/artist-profile/also-at-shop"
 import { BookingSection } from "@/components/artist-profile/booking-section"
 import { RecordVisit } from "@/components/artist-profile/record-visit"
@@ -132,11 +131,6 @@ export default async function ArtistProfilePage({ params }: { params: { id: stri
             <ProfileSections artist={artist} reviews={reviews} />
             <BookingSection artist={artist} />
           </div>
-          {shop && (
-            <div className="mt-14 lg:mt-20">
-              <WhereToFind name={artist.name} shop={shop} />
-            </div>
-          )}
           {shop && others.artists.length > 0 && (
             <div className="mt-14 lg:mt-20">
               <AlsoAtShop shopId={shop.id} artists={others.artists} total={others.total} />

@@ -1,5 +1,4 @@
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
 import { Globe, Phone } from "lucide-react"
 import type { Shop } from "@/types/shop"
 import { SaveButton } from "@/components/saved/save-button"
@@ -13,20 +12,9 @@ import { allowedImageSrc } from "@/lib/utils/safe-image"
 import { STATE_ABBR_TO_NAME } from "@/lib/utils/states"
 import { cn } from "@/lib/utils"
 
-const PRIMARY =
-  "min-h-11 rounded-lg border-1.5 border-ink bg-flash-red px-5 text-[15px] font-semibold text-white hover:bg-flash-red/90"
 const SECONDARY =
   "min-h-11 rounded-lg border-1.5 border-ink bg-vellum px-4 text-[15px] font-semibold text-ink hover:bg-secondary"
 const TEXT_LINK = "font-semibold text-navy underline underline-offset-2 hover:no-underline"
-
-export function directionsHref(shop: Shop) {
-  const { lat, lng, address, city, state } = shop.location
-  if (lat && lng) {
-    return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`
-  }
-  const query = [address, city, state].filter(Boolean).join(", ")
-  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`
-}
 
 interface ShopHeaderProps {
   shop: Shop
@@ -89,11 +77,6 @@ export function ShopHeader({ shop, initialSaved, coverSrc = null, artistCount = 
             {shop.styles.length > 0 && <StyleBadgeList styles={shop.styles} max={4} />}
 
             <div className="flex flex-wrap gap-2">
-              <Button className={PRIMARY} asChild>
-                <a href={directionsHref(shop)} target="_blank" rel="noopener noreferrer">
-                  Get directions
-                </a>
-              </Button>
               <SaveButton
                 itemType="shop"
                 itemId={shop.id}

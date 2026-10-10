@@ -5,6 +5,11 @@ import { NeatlineFrame } from "./neatline-frame"
 const OUTLINE_BUTTON =
   "inline-flex min-h-11 items-center justify-center rounded-lg border-1.5 border-ink px-4 text-[15px] font-semibold text-ink hover:bg-vellum focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 
+/** "35.247° N, 80.806° W" */
+function formatCoordinates([lng, lat]: [number, number]) {
+  return `${Math.abs(lat).toFixed(3)}° ${lat >= 0 ? "N" : "S"}, ${Math.abs(lng).toFixed(3)}° ${lng >= 0 ? "E" : "W"}`
+}
+
 const WEEKDAYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
 
 /** Hours in weekday order (jsonb keeps keys alphabetical); unknown keys go last, blanks are dropped. */
@@ -101,6 +106,9 @@ export function WhereToFindPanel({
             </p>
           )}
           {address && <p>{address}</p>}
+          {coordinates && (
+            <p className="font-place text-base italic text-ink-muted">{formatCoordinates(coordinates)}</p>
+          )}
           {place && <p className="font-place text-base italic text-ink-muted">{place}</p>}
           {artistCount != null && artistCount > 0 && (
             <p className="tabular-nums text-ink-muted">

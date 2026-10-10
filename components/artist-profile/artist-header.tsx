@@ -177,6 +177,9 @@ export function ArtistHeader({ artist, initialSaved, shopHref, coverSrc = null, 
               mapLabel={`Map showing ${shop.name}${shop.city ? ` in ${shop.city}` : ""}`}
               shop={{ name: shop.name, href: `/shops/${shop.id}` }}
               place={place}
+              rating={shop.rating}
+              reviewCount={shop.reviewCount}
+              hours={shop.hours}
             />
           </div>
         )}
