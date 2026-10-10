@@ -6,8 +6,12 @@ import { StyleBadge } from "@/components/brand/style-badge"
 import { styleEntries } from "@/lib/styles"
 import { allowedImageSrc } from "@/lib/utils/safe-image"
 
+/** What a card or row needs; the homepage and "Also at this shop" pass less than a full Artist. */
+export type CardArtist = Pick<Artist, "id" | "name" | "avatarUrl" | "styles"> &
+  Partial<Pick<Artist, "shopName" | "rating" | "reviewCount" | "isStub" | "location">>
+
 interface ArtistPlateCardProps {
-  artist: Artist
+  artist: CardArtist
   /** "{Shop}, {City}" under the name (listings; off on the artist's own shop page). */
   showShop?: boolean
   distance?: number
@@ -22,8 +26,10 @@ interface ArtistPlateCardProps {
 export function ArtistPlateCard({ artist, showShop = false, distance, sizes }: ArtistPlateCardProps) {
   const photo = artist.isStub ? null : allowedImageSrc(artist.avatarUrl)
   const styles = artist.isStub ? [] : styleEntries(artist.styles)
-  const city = artist.location.city
-  const extraLines = !artist.isStub && (showShop || distance != null || artist.rating > 0)
+  const city = artist.location?.city ?? ""
+  const rating = artist.rating ?? 0
+  const reviewCount = artist.reviewCount ?? 0
+  const extraLines = !artist.isStub && (showShop || distance != null || rating > 0)
 
   const body = (
     <>
@@ -47,11 +53,10 @@ export function ArtistPlateCard({ artist, showShop = false, distance, sizes }: A
               {city && <span className="font-place italic">{city}</span>}
             </span>
           )}
-          {(artist.rating > 0 || distance != null) && (
+          {(rating > 0 || distance != null) && (
             <span className="block tabular-nums">
-              {artist.rating > 0 &&
-                `Rated ${artist.rating.toFixed(1)}${artist.reviewCount > 0 ? ` from ${artist.reviewCount.toLocaleString("en-US")} ${artist.reviewCount === 1 ? "review" : "reviews"}` : ""}`}
-              {artist.rating > 0 && distance != null && ", "}
+              {rating > 0 && ratingLine(rating, reviewCount)}
+              {rating > 0 && distance != null && ", "}
               {distance != null && `${distance.toFixed(1)} mi away`}
             </span>
           )}
@@ -81,9 +86,16 @@ export function ArtistPlateCard({ artist, showShop = false, distance, sizes }: A
   )
 }
 
-/** A grid of artist plates: 2 across on mobile, 4 from lg. */
-export function ArtistPlateGrid({ children }: { children: ReactNode }) {
-  return <ul className="grid grid-cols-2 gap-x-4 gap-y-8 lg:grid-cols-4 lg:gap-x-6">{children}</ul>
+/** "Rated 4.7 from 338 reviews". */
+export function ratingLine(rating: number, reviewCount: number) {
+  return `Rated ${rating.toFixed(1)}${reviewCount > 0 ? ` from ${reviewCount.toLocaleString("en-US")} ${reviewCount === 1 ? "review" : "reviews"}` : ""}`
+}
+
+/** A grid of artist plates: 2 across on mobile, 4 from lg (or `className`). */
+export function ArtistPlateGrid({ children, className }: { children: ReactNode; className?: string }) {
+  return (
+    <ul className={className ?? "grid grid-cols-2 gap-x-4 gap-y-8 lg:grid-cols-4 lg:gap-x-6"}>{children}</ul>
+  )
 }
 
 export function ArtistPlateSkeleton() {

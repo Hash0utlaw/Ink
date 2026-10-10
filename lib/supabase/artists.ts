@@ -1,6 +1,7 @@
 import { createClient } from "@/utils/supabase/server"
 import type { Artist, Review, AvailabilityStatus, PriceTier } from "@/types/artist"
 import { sortStyleSlugs, toStyleSlugs } from "@/lib/styles"
+import { displayName } from "@/lib/display-name"
 
 export type ArtistFilters = {
   styles?: string[]
@@ -41,8 +42,8 @@ export function rowToArtist(row: Record<string, unknown>): Artist {
   return {
     id: String(row.id ?? ""),
     handle: String(row.handle ?? ""),
-    name: String(row.display_name ?? ""),
-    shopName: String(shop?.name ?? ""),
+    name: displayName(String(row.display_name ?? "")),
+    shopName: displayName(String(shop?.name ?? "")),
     shopId: row.shop_id ? String(row.shop_id) : undefined,
     specialties: Array.isArray(row.specialties) ? (row.specialties as string[]) : [],
     styles: Array.isArray(row.styles) ? sortStyleSlugs(row.styles as string[]) : [],
@@ -56,6 +57,7 @@ export function rowToArtist(row: Record<string, unknown>): Artist {
       lng: Number(row.longitude ?? shop?.longitude ?? 0),
     },
     avatarUrl: String(row.avatar_url ?? ""),
+    coverImageUrl: String(row.cover_image_url ?? ""),
     portfolioImages: Array.isArray(row.portfolio_images) ? (row.portfolio_images as string[]) : [],
     previewImages: Array.isArray(row.preview_images) ? (row.preview_images as string[]) : [],
     isAvailable: Boolean(row.is_available ?? false),
@@ -266,7 +268,7 @@ export async function getArtistShop(shopId: string): Promise<ArtistShop | null> 
     const lng = Number(data.longitude ?? 0)
     return {
       id: String(data.id),
-      name: String(data.name ?? ""),
+      name: displayName(String(data.name ?? "")),
       address: String(data.address ?? ""),
       city: String(data.city ?? ""),
       state: String(data.state ?? ""),
@@ -302,7 +304,7 @@ export async function getOtherShopArtists(
     return {
       artists: data.map((row: Record<string, unknown>) => ({
         id: String(row.id),
-        name: String(row.display_name ?? ""),
+        name: displayName(String(row.display_name ?? "")),
         avatarUrl: String(row.avatar_url ?? ""),
         styles: Array.isArray(row.styles) ? sortStyleSlugs(row.styles as string[]) : [],
       })),

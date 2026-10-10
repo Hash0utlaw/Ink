@@ -1,4 +1,5 @@
 import { createClient } from "@/utils/supabase/server"
+import { displayName } from "@/lib/display-name"
 
 export interface Review {
   id: string
@@ -23,7 +24,7 @@ function rowToReview(row: Record<string, unknown>): Review {
     id: String(row.id ?? ""),
     bookingRequestId: row.booking_request_id != null ? String(row.booking_request_id) : null,
     artistId: String(row.artist_id ?? ""),
-    artistName: String(artist?.display_name ?? ""),
+    artistName: displayName(String(artist?.display_name ?? "")),
     artistHandle: String(artist?.handle ?? ""),
     artistAvatar: String(artist?.avatar_url ?? ""),
     clientName: String(row.client_name ?? ""),
@@ -129,7 +130,7 @@ export async function getBookingForReview(bookingId: string): Promise<{
       artistId: String(row.artist_id ?? ""),
       clientName: String(row.client_name ?? ""),
       status: String(row.status ?? ""),
-      artistName: String(artist?.display_name ?? ""),
+      artistName: displayName(String(artist?.display_name ?? "")),
       artistHandle: String(artist?.handle ?? ""),
     }
   } catch {

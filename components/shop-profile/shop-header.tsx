@@ -33,19 +33,21 @@ export function ShopHeader({ shop, initialSaved }: { shop: Shop; initialSaved?: 
   const claimHref = shop.slug ? `/claim?shop=${encodeURIComponent(shop.slug)}` : "/claim"
 
   return (
-    <div className="grid grid-cols-[128px_minmax(0,1fr)] items-start gap-x-4 gap-y-5 lg:grid-cols-[300px_minmax(0,1fr)] lg:gap-x-12">
-      <div className="lg:row-span-2">
+    <div className="grid grid-cols-[128px_minmax(0,1fr)] items-start gap-x-4 gap-y-5 lg:grid-cols-[332px_minmax(0,1fr)] lg:gap-x-12">
+      {/* From lg the plate overlaps the cover strip above by 48px, inset from its frame. */}
+      <div className="relative z-10 lg:row-span-2 lg:-mt-12 lg:pl-8">
         <Plate
           src={photo}
-          alt={photo ? `${shop.name}, tattoo shop` : `${shop.name} initials`}
+          alt={photo ? `${shop.name}, tattoo shop` : `${shop.name} has no photo yet`}
           name={shop.name}
           primaryStyle={shop.styles[0]}
           fluid
+          fallback="compass"
           sizes="(min-width: 1024px) 300px, 128px"
         />
       </div>
 
-      <div className="min-w-0 lg:pt-2">
+      <div className="min-w-0 lg:pt-6">
         <h1 className="font-heading text-[32px] leading-[1.05] text-ink text-balance lg:text-[56px]">{shop.name}</h1>
         {place && <p className="mt-2 font-place text-[17px] italic text-ink-muted lg:text-[19px]">{place}</p>}
         {shop.rating > 0 && (

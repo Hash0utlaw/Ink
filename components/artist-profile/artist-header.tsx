@@ -35,19 +35,21 @@ export function ArtistHeader({ artist, initialSaved, shopHref }: ArtistHeaderPro
   const claimHref = artist.handle ? `/claim?artist=${encodeURIComponent(artist.handle)}` : "/claim"
 
   return (
-    <div className="grid grid-cols-[128px_minmax(0,1fr)] items-start gap-x-4 gap-y-5 lg:grid-cols-[300px_minmax(0,1fr)] lg:gap-x-12">
-      <div className="lg:row-span-2">
+    <div className="grid grid-cols-[128px_minmax(0,1fr)] items-start gap-x-4 gap-y-5 lg:grid-cols-[332px_minmax(0,1fr)] lg:gap-x-12">
+      {/* From lg the plate overlaps the cover strip above by 48px, inset from its frame. */}
+      <div className="relative z-10 lg:row-span-2 lg:-mt-12 lg:pl-8">
         <Plate
           src={photo}
-          alt={photo ? `${artist.name}, tattoo artist` : `${artist.name} initials`}
+          alt={photo ? `${artist.name}, tattoo artist` : `${artist.name} has no photo yet`}
           name={artist.name}
           primaryStyle={artist.styles[0]}
           fluid
+          fallback="compass"
           sizes="(min-width: 1024px) 300px, 128px"
         />
       </div>
 
-      <div className="min-w-0 lg:pt-2">
+      <div className="min-w-0 lg:pt-6">
         <h1 className="font-heading text-[32px] leading-[1.05] text-ink text-balance lg:text-[56px]">{artist.name}</h1>
         {artist.shopName && (
           <p className="mt-2 text-base text-ink lg:text-[19px]">

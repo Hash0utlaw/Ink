@@ -4,6 +4,7 @@ import type { Artist, Review } from "@/types/artist"
 import { cityPattern, rowToArtist } from "./artists"
 import { matchStyleSlugs, toStyleSlugs } from "@/lib/styles"
 import { SHOP_STYLES_EMBED, fetchShopStyles, shopStylesFromRow } from "./shop-styles"
+import { displayName } from "@/lib/display-name"
 
 export type ShopFilters = {
   // Existing (keep these)
@@ -31,7 +32,7 @@ function rowToShop(row: Record<string, unknown>): Shop {
   return {
     id: String(row.id ?? ""),
     slug: String(row.slug ?? ""),
-    name: String(row.name ?? "").trim(),
+    name: displayName(String(row.name ?? "")),
     logoUrl: String(row.logo_url ?? ""),
     coverImageUrl: String(row.cover_image_url ?? ""),
     rating: Number(row.rating ?? 0),
@@ -238,7 +239,7 @@ export async function getShopArtists(shopId: string): Promise<Artist[]> {
     return stubs.map((row: Record<string, unknown>) => ({
       id: String(row.id ?? ""),
       handle: String(row.id ?? ""),
-      name: String(row.name ?? "").trim(),
+      name: displayName(String(row.name ?? "")),
       shopName: "",
       specialties: row.specialty ? [String(row.specialty)] : [],
       // Stub rows aren't in artists.styles yet; rules only (no AI) — see lib/styles.ts.

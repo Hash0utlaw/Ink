@@ -8,6 +8,7 @@ import { getClient } from "@/utils/supabase/client"
 import type { Review } from "@/lib/supabase/reviews"
 import type { RealtimePostgresInsertPayload } from "@supabase/supabase-js"
 import { initials } from "@/lib/initials"
+import { displayName } from "@/lib/display-name"
 
 
 function timeAgo(dateStr: string): string {
@@ -55,7 +56,7 @@ export function LiveReviews({ initialReviews }: LiveReviewsProps) {
             id: String(row.id ?? ""),
             bookingRequestId: row.booking_request_id != null ? String(row.booking_request_id) : null,
             artistId: String(row.artist_id ?? ""),
-            artistName: String(artist?.display_name ?? ""),
+            artistName: displayName(String(artist?.display_name ?? "")),
             artistHandle: String(artist?.handle ?? ""),
             artistAvatar: String(artist?.avatar_url ?? ""),
             clientName: String(row.client_name ?? ""),
