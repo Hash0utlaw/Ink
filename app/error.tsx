@@ -11,7 +11,7 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
   }, [error])
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-background">
+    <main className="flex min-h-screen items-center justify-center bg-paper tex-paper">
       <div className="container mx-auto px-4 py-20 text-center">
         <div className="mx-auto mb-6 flex h-12 w-12 items-center justify-center rounded-lg bg-primary">
           <MapPin className="h-7 w-7 text-accent-foreground" />

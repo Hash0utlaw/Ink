@@ -101,7 +101,7 @@ export function ArtistPlateGrid({ children, className }: { children: ReactNode; 
 export function ArtistPlateSkeleton() {
   return (
     <li className="p-2" aria-hidden="true">
-      <div className="aspect-[4/5] w-full border-1.5 border-rule bg-vellum" />
+      <div className="aspect-[4/5] w-full border-1.5 border-rule bg-vellum tex-vellum" />
       <div className="mt-3 h-5 w-3/4 rounded bg-secondary" />
       <div className="mt-2 h-4 w-1/2 rounded bg-secondary" />
     </li>

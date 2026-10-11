@@ -25,7 +25,7 @@ export function StyleRelated({ styles }: StyleRelatedProps) {
           <MotionView key={style.slug} delay={i * 0.08}>
             <Link
               href={`/styles/${style.slug}`}
-              className="group flex items-center gap-4 p-4 rounded-lg border border-border hover:border-primary/40 bg-card hover:bg-muted/30 transition-all"
+              className="group flex items-center gap-4 p-4 rounded-lg border border-border hover:border-primary/40 bg-vellum tex-vellum hover:bg-muted/30 transition-all"
             >
               <div className="relative w-16 h-16 shrink-0 rounded-lg overflow-hidden bg-muted">
                 {failed ? (

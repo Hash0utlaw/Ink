@@ -87,7 +87,7 @@ export function LiveReviews({ initialReviews }: LiveReviewsProps) {
         </div>
 
         {reviews.length === 0 ? (
-          <div className="rounded-lg border-1.5 border-ink bg-vellum p-5">
+          <div className="rounded-lg border-1.5 border-ink bg-vellum tex-vellum p-5">
             <p className="font-semibold text-ink">No reviews yet</p>
             <p className="mt-1 text-[15px] text-ink-muted">
               Reviews from real bookings will appear here as clients rate their artists.
@@ -99,7 +99,7 @@ export function LiveReviews({ initialReviews }: LiveReviewsProps) {
             <Link
               key={review.id}
               href={`/artists/${review.artistId}`}
-              className="group flex gap-3 rounded-lg border-1.5 border-ink bg-vellum p-4 hover:bg-secondary"
+              className="group flex gap-3 rounded-lg border-1.5 border-ink bg-vellum tex-vellum p-4 hover:bg-secondary"
             >
               <Avatar className="w-10 h-10 shrink-0 border border-ink">
                 <AvatarImage src={review.artistAvatar} alt={review.artistName} />

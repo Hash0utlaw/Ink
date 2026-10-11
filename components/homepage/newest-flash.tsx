@@ -38,7 +38,7 @@ export function NewestFlash({ listings }: NewestFlashProps) {
               <Link
                 key={listing.id}
                 href={bookHref}
-                className="group shrink-0 w-48 flex flex-col rounded-lg overflow-hidden border border-border/50 bg-card hover:border-ink transition-all"
+                className="group shrink-0 w-48 flex flex-col rounded-lg overflow-hidden border border-border/50 bg-vellum tex-vellum hover:border-ink transition-all"
               >
                 <div className="relative aspect-square overflow-hidden bg-muted">
                   <Image

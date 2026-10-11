@@ -19,7 +19,7 @@ export function ProfileSection({ id, title, children }: { id: string; title: Rea
 /** The design's empty state: one vellum box, a bold first line and one helpful sentence. */
 export function EmptyBox({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div className="rounded-lg border-1.5 border-ink bg-vellum p-5">
+    <div className="rounded-lg border-1.5 border-ink bg-vellum tex-vellum p-5">
       <p className="font-semibold text-ink">{title}</p>
       <p className="mt-1 text-[15px] leading-[1.55] text-ink-muted text-pretty">{children}</p>
     </div>

@@ -24,7 +24,7 @@ export function AdminGateBanner() {
   if (!show) return null
 
   return (
-    <div className="flex h-7 w-full items-center justify-center bg-card px-4 text-center text-xs font-medium text-foreground">
+    <div className="flex h-7 w-full items-center justify-center bg-vellum tex-vellum px-4 text-center text-xs font-medium text-foreground">
       Coming-soon mode is on — only admins can see the site.
     </div>
   )

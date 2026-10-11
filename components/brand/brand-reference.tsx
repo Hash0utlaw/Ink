@@ -112,7 +112,7 @@ export function BrandReference() {
       <Section title="Compass, banner, X">
         <div className="flex flex-wrap items-center gap-10">
           <CompassRose size={112} tone="land" />
-          <div className="bg-navy p-4">
+          <div className="bg-night p-4">
             <CompassRose size={112} tone="sea" />
           </div>
           <Banner text="Charlotte" fontSize={26} />

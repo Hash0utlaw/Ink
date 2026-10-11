@@ -2,7 +2,7 @@ import Link from "next/link"
 import { cn } from "@/lib/utils"
 
 const CONTROL =
-  "inline-flex min-h-11 items-center rounded-lg border-1.5 border-ink bg-vellum px-4 text-[15px] font-semibold text-ink hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+  "inline-flex min-h-11 items-center rounded-lg border-1.5 border-ink bg-vellum tex-vellum px-4 text-[15px] font-semibold text-ink hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 const DISABLED = "pointer-events-none border-rule text-ink-muted"
 
 interface PaginationProps {

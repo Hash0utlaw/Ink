@@ -27,7 +27,7 @@ const SECTIONS = [
 
 export default function PrivacyPolicyPage() {
   return (
-    <div className="flex min-h-screen flex-col bg-background">
+    <div className="flex min-h-screen flex-col bg-paper tex-paper">
       <Suspense fallback={<HeaderSkeleton />}>
         <Header />
       </Suspense>

@@ -130,7 +130,7 @@ export default async function ShopProfilePage({ params }: { params: { id: string
       <Suspense fallback={<HeaderSkeleton />}>
         <Header />
       </Suspense>
-      <main className="flex-1 bg-background">
+      <main className="flex-1 bg-paper tex-paper">
         <div className="mx-auto max-w-[1180px] px-4 py-8 sm:px-6 lg:py-14">
           {cityPageHref && (
             <nav aria-label="Breadcrumb" className="mb-6 text-[13px] text-ink-muted lg:mb-8">
@@ -160,7 +160,7 @@ export default async function ShopProfilePage({ params }: { params: { id: string
             </nav>
           )}
           {shop.possiblyClosed && (
-            <div className="mb-8 rounded-lg border-1.5 border-ink bg-vellum p-5">
+            <div className="mb-8 rounded-lg border-1.5 border-ink bg-vellum tex-vellum p-5">
               <p className="font-semibold text-ink">This shop may be permanently closed.</p>
               <p className="mt-1 text-[15px] leading-[1.55] text-ink-muted text-pretty">
                 Call ahead before you visit. Own this shop?{" "}

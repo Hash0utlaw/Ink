@@ -114,7 +114,7 @@ export function Header() {
   const dashboardLabel = role === "artist" ? "Dashboard" : "Browse"
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b-3 border-ink bg-navy">
+    <header className="sticky top-0 z-50 w-full border-b-3 border-ink bg-night tex-night">
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-2">
           {/* Mobile nav trigger */}
@@ -124,12 +124,12 @@ export function Header() {
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="flex w-[300px] flex-col gap-0 p-0 sm:w-80">
+            <SheetContent side="left" className="flex w-[300px] flex-col gap-0 p-0 bg-night tex-night text-cream sm:w-80">
               <SheetTitle className="sr-only">Navigation</SheetTitle>
 
               {/* Brand header */}
-              <div className="flex items-center gap-2 border-b border-border/40 px-6 py-5">
-                <Image src="/brand/logo-wordmark-ink.webp" alt="TattooMaps" width={70} height={40} className="h-10 w-auto" />
+              <div className="flex items-center gap-2 border-b border-cream/20 px-6 py-5">
+                <Image src="/brand/logo-wordmark-cream.webp" alt="TattooMaps" width={70} height={40} className="h-10 w-auto" />
               </div>
 
               {/* Nav links */}
@@ -143,8 +143,8 @@ export function Header() {
                         className={cn(
                           "group flex items-center gap-3 rounded-lg px-3 py-3 text-[15px] font-medium transition-colors",
                           active
-                            ? "bg-secondary text-primary"
-                            : "text-foreground/80 hover:bg-muted hover:text-foreground"
+                            ? "bg-cream/10 text-cream"
+                            : "text-cream/85 hover:bg-cream/10 hover:text-cream"
                         )}
                       >
                         <span
@@ -152,13 +152,13 @@ export function Header() {
                             "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors",
                             active
                               ? "bg-primary text-primary-foreground"
-                              : "bg-muted text-foreground/70 group-hover:bg-secondary group-hover:text-primary"
+                              : "bg-cream/10 text-cream group-hover:bg-cream/15"
                           )}
                         >
                           <Icon className="h-4 w-4" />
                         </span>
                         {label}
-                        <ChevronRight className="ml-auto h-4 w-4 -translate-x-1 text-muted-foreground/40 opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100" />
+                        <ChevronRight className="ml-auto h-4 w-4 -translate-x-1 text-cream/40 opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100" />
                       </Link>
                     </SheetClose>
                   )
@@ -166,12 +166,12 @@ export function Header() {
               </nav>
 
               {/* Auth section */}
-              <div className="mt-auto border-t border-border/40 p-4">
+              <div className="mt-auto border-t border-cream/20 p-4">
                 {isLoading ? (
-                  <div className="h-14 animate-pulse rounded-lg bg-muted" />
+                  <div className="h-14 animate-pulse rounded-lg bg-cream/10" />
                 ) : user ? (
                   <div className="space-y-1">
-                    <div className="mb-2 flex items-center gap-3 rounded-lg bg-muted/50 px-3 py-3">
+                    <div className="mb-2 flex items-center gap-3 rounded-lg bg-cream/10 px-3 py-3">
                       <Avatar className="h-9 w-9">
                         <AvatarImage
                           src={user.user_metadata?.avatar_url || "/placeholder-user.jpg"}
@@ -185,13 +185,13 @@ export function Header() {
                         <p className="truncate text-sm font-medium leading-tight">
                           {user.user_metadata?.full_name || "User"}
                         </p>
-                        <p className="truncate text-xs text-muted-foreground">{user.email}</p>
+                        <p className="truncate text-xs text-cream/70">{user.email}</p>
                       </div>
                     </div>
                     <SheetClose asChild>
                       <Link
                         href={dashboardLink}
-                        className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground/80 transition-colors hover:bg-muted hover:text-foreground"
+                        className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-cream/85 transition-colors hover:bg-cream/10 hover:text-cream"
                       >
                         <User className="h-4 w-4" />
                         {dashboardLabel}
@@ -200,7 +200,7 @@ export function Header() {
                     <SheetClose asChild>
                       <Link
                         href={role === "artist" ? "/artist-dashboard/profile" : "/dashboard/profile"}
-                        className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground/80 transition-colors hover:bg-muted hover:text-foreground"
+                        className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-cream/85 transition-colors hover:bg-cream/10 hover:text-cream"
                       >
                         <Settings className="h-4 w-4" />
                         Settings
@@ -208,7 +208,7 @@ export function Header() {
                     </SheetClose>
                     <button
                       onClick={handleSignOut}
-                      className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10"
+                      className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-cream/85 transition-colors hover:bg-cream/10 hover:text-cream"
                     >
                       <LogOut className="h-4 w-4" />
                       Log out

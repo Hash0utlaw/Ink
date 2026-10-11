@@ -109,7 +109,7 @@ export function FindArtistWizard() {
   const progress = ((step + 1) / 4) * 100
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
+    <div className="flex min-h-screen flex-col bg-paper tex-paper">
       <Header />
 
       <main className="flex-1 flex flex-col items-center justify-center px-4 py-12">
@@ -154,7 +154,7 @@ export function FindArtistWizard() {
                     className={`flex flex-col items-center gap-1.5 rounded-lg border p-4 text-sm font-medium transition-all ${
                       style === s.slug
                         ? "border-ink bg-secondary text-primary"
-                        : "border-border bg-card text-muted-foreground hover:border-ink hover:bg-muted/40"
+                        : "border-border bg-vellum tex-vellum text-muted-foreground hover:border-ink hover:bg-muted/40"
                     }`}
                   >
                     <span className="text-2xl">{STYLE_EMOJI[s.slug]}</span>
@@ -178,7 +178,7 @@ export function FindArtistWizard() {
                     className={`flex items-center gap-3 rounded-lg border p-5 text-left transition-all ${
                       size === s.label
                         ? "border-ink bg-secondary"
-                        : "border-border bg-card hover:border-ink hover:bg-muted/40"
+                        : "border-border bg-vellum tex-vellum hover:border-ink hover:bg-muted/40"
                     }`}
                   >
                     <span className={`text-3xl font-black w-8 text-center ${size === s.label ? "text-primary" : "text-muted-foreground"}`}>{s.icon}</span>
@@ -205,7 +205,7 @@ export function FindArtistWizard() {
                     className={`flex flex-col items-center rounded-lg border p-6 transition-all ${
                       budget === b.value
                         ? "border-ink bg-secondary"
-                        : "border-border bg-card hover:border-ink hover:bg-muted/40"
+                        : "border-border bg-vellum tex-vellum hover:border-ink hover:bg-muted/40"
                     }`}
                   >
                     <span className={`text-3xl font-black ${budget === b.value ? "text-primary" : "text-muted-foreground"}`}>{b.label}</span>

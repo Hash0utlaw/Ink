@@ -687,12 +687,12 @@ export function MapboxMap({
       {/* Error and loading overlays are mutually exclusive — error takes priority */}
       {loadError ? (
         <div className="absolute inset-0 flex items-center justify-center bg-paper px-4">
-          <div className="max-w-sm rounded-lg border-1.5 border-ink bg-vellum p-5 text-center">
+          <div className="max-w-sm rounded-lg border-1.5 border-ink bg-vellum tex-vellum p-5 text-center">
             <p className="font-semibold text-ink">{loadError}</p>
             <p className="mt-1 text-sm text-ink-muted">Try refreshing, or check back shortly</p>
             <button
               onClick={handleRetry}
-              className="mt-4 min-h-11 rounded-lg border-1.5 border-ink bg-vellum px-4 text-[15px] font-semibold text-ink hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="mt-4 min-h-11 rounded-lg border-1.5 border-ink bg-vellum tex-vellum px-4 text-[15px] font-semibold text-ink hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               Retry
             </button>
@@ -713,7 +713,7 @@ export function MapboxMap({
       <div className="absolute left-4 top-[68px] z-10">
         <button
           onClick={zoomOutToUS}
-          className="min-h-11 rounded-lg border-1.5 border-ink bg-vellum px-3 text-[15px] font-semibold text-ink hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
+          className="min-h-11 rounded-lg border-1.5 border-ink bg-vellum tex-vellum px-3 text-[15px] font-semibold text-ink hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
           disabled={!mapLoaded || !mapboxLoaded}
         >
           Zoom out to the US

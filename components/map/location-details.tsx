@@ -58,7 +58,7 @@ export function LocationDetails({ location, pinNumber, onClose }: LocationDetail
   return (
     <section
       aria-label={`Selected: ${location.name}`}
-      className="absolute inset-x-2 bottom-[84px] z-20 max-h-[60%] overflow-y-auto rounded-lg border-2 border-ink bg-vellum p-4 scrollbar-ink sm:inset-x-4 lg:bottom-11 lg:left-4 lg:right-auto lg:w-[380px]"
+      className="absolute inset-x-2 bottom-[84px] z-20 max-h-[60%] overflow-y-auto rounded-lg border-2 border-ink bg-vellum tex-vellum p-4 scrollbar-ink sm:inset-x-4 lg:bottom-11 lg:left-4 lg:right-auto lg:w-[380px]"
     >
       <div className="flex items-start gap-3">
         <MapPin number={pinNumber ?? ""} selected className="mt-0.5" />

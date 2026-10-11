@@ -63,6 +63,7 @@ const config: Config = {
         vellum: "hsl(var(--vellum))",
         rule: "hsl(var(--rule))",
         navy: "hsl(var(--navy))",
+        night: "hsl(var(--night))",
         cream: "hsl(var(--cream))",
         flash: {
           red: "hsl(var(--flash-red))",

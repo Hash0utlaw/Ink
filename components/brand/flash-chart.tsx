@@ -40,7 +40,7 @@ function HeroChart({ waves, place, compassClassName }: { waves: string; place: s
   return (
     <>
       <Waves id={waves} w={30} h={16} d="M3 11 q6 -7 12 0" opacity={0.26} strokeWidth={1.3} />
-      <rect width="1200" height="560" className="fill-navy" />
+      <rect width="1200" height="560" className="fill-night" />
       <rect width="1200" height="560" fill={`url(#${waves})`} />
       <g className="stroke-cream" strokeOpacity="0.14" strokeWidth="1">
         <path d="M575,110 L1200,-60 M575,110 L1200,420 M575,110 L760,600 M575,110 L0,40 M575,110 L120,600" />
@@ -71,7 +71,7 @@ function HeroCenteredChart({ waves }: { waves: string }) {
   return (
     <>
       <Waves id={waves} w={30} h={16} d="M3 11 q6 -7 12 0" opacity={0.22} strokeWidth={1.3} />
-      <rect width="1200" height="640" className="fill-navy" />
+      <rect width="1200" height="640" className="fill-night" />
       <rect width="1200" height="640" fill={`url(#${waves})`} />
       <g className="stroke-cream" strokeOpacity="0.12" strokeWidth="1">
         <path d="M130,130 L1200,-40 M130,130 L1200,330 M130,130 L900,660 M130,130 L380,660 M130,130 L-20,380" />

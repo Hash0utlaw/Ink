@@ -19,7 +19,7 @@ const PAGE_SIZE = 24
 type Results = { artists: Artist[]; artistCount: number; shops: Shop[]; shopCount: number }
 
 const TAB =
-  "min-h-11 rounded-lg border-1.5 border-ink bg-vellum px-4 text-[15px] font-semibold text-ink data-[state=active]:bg-ink data-[state=active]:text-vellum data-[state=active]:shadow-none"
+  "min-h-11 rounded-lg border-1.5 border-ink bg-vellum tex-vellum px-4 text-[15px] font-semibold text-ink data-[state=active]:bg-ink data-[state=active]:text-vellum data-[state=active]:shadow-none"
 
 type Filters = {
   styles: string[]

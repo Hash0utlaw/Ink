@@ -31,7 +31,7 @@ export const metadata: Metadata = {
 // rewrites every gated request here (see lib/launch-gate.ts).
 export default function ComingSoonPage() {
   return (
-    <div className={`${figtree.className} flex min-h-screen flex-col bg-paper text-ink`}>
+    <div className={`${figtree.className} flex min-h-screen flex-col bg-paper tex-paper text-ink`}>
       <main className="flex flex-1 items-center justify-center px-6 py-16 sm:py-24">
         <div className="w-full max-w-[640px] text-center">
           {HAS_WORDMARK ? (

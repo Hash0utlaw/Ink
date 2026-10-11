@@ -19,7 +19,7 @@ export default async function ReviewPage({ params }: { params: { bookingId: stri
   // Already reviewed
   if (existing) {
     return (
-      <div className="flex min-h-screen flex-col bg-background">
+      <div className="flex min-h-screen flex-col bg-paper tex-paper">
         <Header />
         <main className="flex-1 flex items-center justify-center px-4">
           <div className="text-center space-y-4 max-w-sm">
@@ -36,7 +36,7 @@ export default async function ReviewPage({ params }: { params: { bookingId: stri
   // Booking not found or not completed
   if (!booking || booking.status !== "completed") {
     return (
-      <div className="flex min-h-screen flex-col bg-background">
+      <div className="flex min-h-screen flex-col bg-paper tex-paper">
         <Header />
         <main className="flex-1 flex items-center justify-center px-4">
           <div className="text-center space-y-4 max-w-sm">
@@ -52,7 +52,7 @@ export default async function ReviewPage({ params }: { params: { bookingId: stri
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
+    <div className="flex min-h-screen flex-col bg-paper tex-paper">
       <Header />
       <main className="flex-1 flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-md space-y-6">

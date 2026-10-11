@@ -41,7 +41,7 @@ export function FilterDrawer({ resultLabel, activeCount, children }: FilterDrawe
         type="button"
         onClick={() => setOpen(true)}
         aria-expanded={open}
-        className="inline-flex min-h-11 items-center gap-2 rounded-lg border-1.5 border-ink bg-vellum px-4 text-[15px] font-semibold text-ink hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:hidden"
+        className="inline-flex min-h-11 items-center gap-2 rounded-lg border-1.5 border-ink bg-vellum tex-vellum px-4 text-[15px] font-semibold text-ink hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:hidden"
       >
         <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
         Filters
@@ -53,7 +53,7 @@ export function FilterDrawer({ resultLabel, activeCount, children }: FilterDrawe
         aria-modal={open ? true : undefined}
         aria-labelledby={open ? titleId : undefined}
         className={cn(
-          open ? "fixed inset-0 z-50 flex flex-col bg-paper" : "hidden",
+          open ? "fixed inset-0 z-50 flex flex-col bg-paper tex-paper" : "hidden",
           "lg:static lg:z-auto lg:block lg:bg-transparent",
         )}
       >

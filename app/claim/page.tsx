@@ -27,7 +27,7 @@ export default async function ClaimPage({
   const listingName = artist?.name ?? shop?.name ?? null
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
+    <div className="flex min-h-screen flex-col bg-paper tex-paper">
       <Suspense fallback={<HeaderSkeleton />}>
         <Header />
       </Suspense>

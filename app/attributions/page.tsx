@@ -30,7 +30,7 @@ const FOURSQUARE_NOTICE = [
 
 export default function AttributionsPage() {
   return (
-    <div className="flex min-h-screen flex-col bg-background">
+    <div className="flex min-h-screen flex-col bg-paper tex-paper">
       <Suspense fallback={<HeaderSkeleton />}>
         <Header />
       </Suspense>

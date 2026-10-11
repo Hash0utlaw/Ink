@@ -48,7 +48,7 @@ export function ArtistDashboardSidebar({ isPro = false }: { isPro?: boolean }) {
           )
         })}
         {!isPro && (
-          <div className="rounded-lg p-4 mt-2 flex flex-col gap-2 bg-navy">
+          <div className="rounded-lg p-4 mt-2 flex flex-col gap-2 bg-night tex-night">
             <Crown className="h-5 w-5 text-primary-foreground" />
             <p className="text-primary-foreground font-bold text-sm leading-tight">Upgrade to Pro</p>
             <p className="text-primary-foreground text-xs leading-snug opacity-90">

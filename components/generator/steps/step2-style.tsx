@@ -41,7 +41,7 @@ export function Step2Style({ formData, updateFormData }: StepProps) {
                 alt={style.name}
                 className="w-full h-full object-cover absolute inset-0 rounded-lg"
               />
-              <div className="relative z-10 p-2 w-full rounded-b-lg bg-navy">
+              <div className="relative z-10 p-2 w-full rounded-b-lg bg-night">
                 <h3 className="font-bold text-white text-center">{style.name}</h3>
               </div>
             </CardContent>
