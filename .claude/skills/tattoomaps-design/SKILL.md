@@ -86,7 +86,7 @@ Use these classes from `app/globals.css` instead of the flat `bg-*` color for th
 |---|---|---|
 | `.tex-paper` | paper + `paper-grain.png` + ink chart grid (1px, 7%, every 96px) | Body and page backgrounds, map sidebar, full-screen drawers |
 | `.tex-vellum` | vellum + `paper-grain.png` | Cards, panels, secondary buttons, chips, popover-like boxes |
-| `.tex-night` | night + `ink-grain.png` | Header, mobile menu, footer, default profile cover, dark panels |
+| `.tex-night` | night + `ink-grain.png` | Header, mobile menu, footer, dark panels |
 | `.tex-night-chart` | night + `ink-grain.png` + cream grid (1px, 9%, every 64px) | Dark call-to-action bands (the homepage claim band) |
 
 Always pair a texture class with its flat color utility: `bg-paper tex-paper`, `bg-vellum tex-vellum`,
