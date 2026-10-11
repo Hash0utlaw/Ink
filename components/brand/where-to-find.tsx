@@ -69,10 +69,11 @@ export function WhereToFindPanel({
   const directions = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destination)}`
 
   return (
-    <NeatlineFrame>
+    // Textured paper, opaque: on desktop the panel overlaps the cover strip.
+    <NeatlineFrame className="bg-paper tex-paper">
       <section
         aria-labelledby="where-to-find-heading"
-        className="bg-paper p-4 text-[15px] leading-[1.55] text-ink lg:p-5"
+        className="bg-paper tex-paper p-4 text-[15px] leading-[1.55] text-ink lg:p-5"
       >
         <h2 id="where-to-find-heading" className="font-heading text-[22px] leading-[1.15] text-balance">
           Where to find
