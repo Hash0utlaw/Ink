@@ -13,7 +13,7 @@ const STYLE_IMAGES = [
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex min-h-screen bg-paper tex-paper">
       {/* ── Left brand panel (hidden on mobile) ───────────────────────────── */}
       <div className="hidden lg:flex lg:w-1/2 xl:w-[55%] relative flex-col overflow-hidden">
         {/* Background grid */}
@@ -102,7 +102,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       </div>
 
       {/* ── Right form panel ───────────────────────────────────────────────── */}
-      <div className="flex-1 flex flex-col min-h-screen bg-background lg:bg-secondary/30">
+      <div className="flex-1 flex flex-col min-h-screen lg:bg-secondary/30">
         {/* Mobile-only top bar */}
         <div className="lg:hidden flex items-center justify-between p-5 border-b border-border/40">
           <Link href="/" className="flex items-center gap-2">

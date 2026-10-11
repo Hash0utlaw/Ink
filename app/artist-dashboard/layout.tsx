@@ -19,7 +19,7 @@ export default async function ArtistDashboardLayout({ children }: { children: Re
       <Suspense fallback={<HeaderSkeleton />}>
         <Header />
       </Suspense>
-      <main className="flex-1 bg-background">
+      <main className="flex-1 bg-paper tex-paper">
         <div className="container mx-auto px-4 py-8 md:py-12">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="md:col-span-1">

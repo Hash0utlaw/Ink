@@ -62,7 +62,7 @@ export default async function BookArtistPage({
   const location = [artist.location.city, artist.location.state].filter(Boolean).join(", ")
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
+    <div className="flex min-h-screen flex-col bg-paper tex-paper">
       <Suspense fallback={<HeaderSkeleton />}>
         <Header />
       </Suspense>

@@ -3,7 +3,7 @@ import Image from "next/image"
 
 export function Footer() {
   return (
-    <footer className="bg-navy border-t-3 border-ink">
+    <footer className="bg-night tex-night border-t-3 border-ink">
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand */}
@@ -94,7 +94,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-border mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
+        <div className="border-t border-cream/20 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
           <p className="text-cream/85 text-sm">© {new Date().getFullYear()} TattooMaps. All rights reserved.</p>
         </div>
         <p className="text-cream/85 text-sm mt-4 text-center md:text-left">

@@ -26,7 +26,7 @@ export function FlashCard({ listing, initialSaved }: FlashCardProps) {
   const bookHref = `/book/${listing.artistHandle || listing.artistId}?flash=${listing.id}`
 
   return (
-    <div className="group relative flex flex-col rounded-lg overflow-hidden border border-border/50 bg-card hover:border-ink transition-all">
+    <div className="group relative flex flex-col rounded-lg overflow-hidden border border-border/50 bg-vellum tex-vellum hover:border-ink transition-all">
       {/* Image */}
       <div className="relative aspect-square overflow-hidden bg-muted">
         <Image

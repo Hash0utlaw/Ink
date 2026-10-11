@@ -19,7 +19,7 @@ export function PortfolioGallery({ images, name }: { images: string[]; name: str
                 <Plate src={src} alt={`Portfolio piece ${i + 1} by ${name}`} name={name} fluid sizes="(min-width: 1024px) 240px, 45vw" />
               </button>
             </DialogTrigger>
-            <DialogContent className="max-w-3xl border-2 border-ink bg-vellum p-2">
+            <DialogContent className="max-w-3xl border-2 border-ink bg-vellum tex-vellum p-2">
               <DialogTitle className="sr-only">{`Portfolio piece ${i + 1} by ${name}`}</DialogTitle>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={src} alt={`Portfolio piece ${i + 1} by ${name}`} className="h-auto w-full" />

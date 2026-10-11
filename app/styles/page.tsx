@@ -347,7 +347,7 @@ export default function AllStylesPage() {
         <Header />
       </Suspense>
 
-      <main className="flex-1 bg-background">
+      <main className="flex-1 bg-paper tex-paper">
         {/* ── Hero ── */}
         <div className="border-b border-border bg-muted/30">
           <div className="container mx-auto px-4 py-14 md:py-20 text-center">

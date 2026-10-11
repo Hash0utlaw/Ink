@@ -96,7 +96,7 @@ export function PricingClient() {
   const priceEstimate = calculatePrice()
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
+    <div className="flex min-h-screen flex-col bg-paper tex-paper">
       <Suspense fallback={<HeaderSkeleton />}>
         <Header />
       </Suspense>
@@ -290,7 +290,7 @@ export function PricingClient() {
                     </div>
                   </div>
 
-                  <div className="p-4 bg-card border border-warning rounded-lg">
+                  <div className="p-4 bg-vellum tex-vellum border border-warning rounded-lg">
                     <div className="flex items-start gap-2">
                       <AlertCircle className="w-4 h-4 text-foreground mt-0.5" />
                       <div className="text-sm">

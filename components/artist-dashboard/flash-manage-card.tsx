@@ -47,7 +47,7 @@ export function FlashManageCard({ listing }: FlashManageCardProps) {
   }
 
   return (
-    <div className="flex gap-3 p-3 border rounded-lg bg-card">
+    <div className="flex gap-3 p-3 border rounded-lg bg-vellum tex-vellum">
       <div className="relative w-16 h-16 rounded-md overflow-hidden bg-muted shrink-0">
         <Image src={safeImageSrc(listing.imageUrl)} alt={listing.title} fill className="object-cover" />
       </div>

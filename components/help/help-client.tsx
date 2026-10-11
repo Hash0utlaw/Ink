@@ -51,7 +51,7 @@ export function HelpClient() {
   )
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
+    <div className="flex min-h-screen flex-col bg-paper tex-paper">
       <Suspense fallback={<HeaderSkeleton />}>
         <Header />
       </Suspense>
@@ -91,7 +91,7 @@ export function HelpClient() {
                 {CATEGORIES.map((cat) => {
                   const Icon = cat.icon
                   return (
-                    <Card key={cat.slug} className="bg-card">
+                    <Card key={cat.slug} className="bg-vellum tex-vellum">
                       <CardContent className="p-6">
                         <div className="flex items-start gap-4">
                           <div className="w-10 h-10 bg-secondary rounded-lg flex items-center justify-center shrink-0">
@@ -133,7 +133,7 @@ export function HelpClient() {
             ) : (
               <div className="space-y-3">
                 {filteredFaqs.map((faq, i) => (
-                  <div key={i} className="border border-border rounded-lg overflow-hidden bg-card">
+                  <div key={i} className="border border-border rounded-lg overflow-hidden bg-vellum tex-vellum">
                     <button
                       type="button"
                       className="w-full flex items-center justify-between p-5 text-left hover:bg-muted/30 transition-colors"

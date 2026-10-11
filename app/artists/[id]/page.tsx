@@ -111,7 +111,7 @@ export default async function ArtistProfilePage({ params }: { params: { id: stri
       <Suspense fallback={<HeaderSkeleton />}>
         <Header />
       </Suspense>
-      <main className="flex-1 bg-background">
+      <main className="flex-1 bg-paper tex-paper">
         <div className="mx-auto max-w-[1180px] px-4 py-8 sm:px-6 lg:py-14">
           <RecordVisit
             id={artist.id}

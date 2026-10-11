@@ -15,7 +15,8 @@ professional first, themed second.
 
 1. **One bold element per page.** The flash chart (hero, map, or location map) is it.
    Everything else is quiet: paper background, ink text, plain lists.
-2. **Color is an accent, not a fill.** Roughly 60% paper, 25% navy, 15% flash colors.
+2. **Color is an accent, not a fill.** Roughly 60% paper, 25% night, 15% flash colors.
+   **Navy is accent only** (map water, the navy style symbols, links, focus ring), never a large surface.
    Flash red, yellow and green appear in small amounts: buttons, pins, symbols, the X.
 3. **One component set.** Same button, input, chip, plate, list row, header and footer
    everywhere. Don't invent a variant for one page.
@@ -34,8 +35,9 @@ professional first, themed second.
 | `--ink` | `ink` | #221A14 | 26 26% 11% | Text, every outline |
 | `--ink-muted` | `ink-muted` | #5E5045 | 26 15% 32% | Secondary text, captions |
 | `--rule` | `rule` | #B9AC93 | 39 21% 65% | Hairline dividers between list rows |
-| `--navy` | `navy` | #1F3350 | 216 44% 22% | Header, footer, open sea, links, focus ring |
-| `--cream` | `cream` | #F6EEDC | 42 59% 91% | Text and logos on navy |
+| `--night` | `night` | #1A1512 | 22.5 18.2% 8.6% | Warm black: header, mobile menu, footer, dark bands, hero sea |
+| `--navy` | `navy` | #1F3350 | 216 44% 22% | Accent only: map water, rivers, navy style symbols, links, focus ring. Never a large surface |
+| `--cream` | `cream` | #F6EEDC | 42 59% 91% | Text and logos on night |
 | `--flash-red` | `flash-red` | #B3261E | 3 71% 41% | Primary button, X mark, selected pin, errors |
 | `--flash-yellow` | `flash-yellow` | #D9A426 | 42 70% 50% | Cluster seals, compass, small highlights (never text) |
 | `--bottle-green` | `bottle-green` | #2F6B4F | 152 39% 30% | Style symbols, success states |
@@ -54,7 +56,7 @@ White (#FFFFFF) is only for text on flash red and for input fields.
 --popover-foreground: 26 26% 11%;
 --primary: 3 71% 41%;            /* flash red */
 --primary-foreground: 0 0% 100%;
---secondary: 41 45% 82%;        /* muted paper; header/footer use bg-navy directly */
+--secondary: 41 45% 82%;        /* muted paper; header/footer use .tex-night directly */
 --secondary-foreground: 26 26% 11%;
 --muted: 41 45% 82%;             /* slightly darker paper */
 --muted-foreground: 26 15% 32%;  /* ink-muted */
@@ -73,7 +75,25 @@ White (#FFFFFF) is only for text on flash red and for input fields.
 ```
 
 Contrast (checked): ink on paper 13.6:1, ink-muted on paper 6.1:1, white on flash red 6.5:1,
-cream on navy 11:1, ink on flash yellow 7.6:1. Never put text on yellow or green except ink.
+cream on night 15.7:1, cream on navy 11:1, ink on flash yellow 7.6:1. Never put text on yellow or green except ink.
+
+## Textures
+
+Surfaces are textured with two 256px grain tiles in `public/brand/textures/` (do not regenerate them).
+Use these classes from `app/globals.css` instead of the flat `bg-*` color for the same surface:
+
+| Class | What it is | Use |
+|---|---|---|
+| `.tex-paper` | paper + `paper-grain.png` + ink chart grid (1px, 7%, every 96px) | Body and page backgrounds, map sidebar, full-screen drawers |
+| `.tex-vellum` | vellum + `paper-grain.png` | Cards, panels, secondary buttons, chips, popover-like boxes |
+| `.tex-night` | night + `ink-grain.png` | Header, mobile menu, footer, dark panels |
+| `.tex-night-chart` | night + `ink-grain.png` + cream grid (1px, 9%, every 64px) | Dark call-to-action bands (the homepage claim band) |
+
+Always pair a texture class with its flat color utility: `bg-paper tex-paper`, `bg-vellum tex-vellum`,
+`bg-night tex-night`, `bg-night tex-night-chart`. The texture classes sit in the components layer and only
+add grain on top; the paired `bg-*` utility lets tailwind-merge drop a component's base background (e.g. the
+Sheet's `bg-background`), and `hover:bg-*` / `data-[state=active]:bg-*` still override the color. Keep flat `bg-vellum` on tiny parts: avatar fallbacks, pins, small swatches.
+Hairline repeating grids are the only gradients allowed.
 
 ## Type
 
@@ -99,20 +119,21 @@ heading, 44–56 page title. Line height 1.55 for body, 1.05–1.2 for headings.
 
 ## Component recipes
 
-**Header**: navy background, 3px ink bottom border, cream wordmark (`/brand/logo-wordmark-cream.webp`, 40–48px tall),
+**Header**: `.tex-night` background, 3px ink bottom border, cream wordmark (`/brand/logo-wordmark-cream.webp`, 40–48px tall),
 cream nav links, "For artists" as an outline button in cream. On mobile: back chevron, logo, menu icon.
+The mobile menu sheet is `.tex-night` too, with the cream wordmark and cream links.
 
-**Footer**: navy, 3px ink top border, cream text, cream wordmark, link columns, Overture attribution.
+**Footer**: `.tex-night` dark bar, 3px ink top border, cream text, cream wordmark, link columns, Overture attribution.
 
 **Primary button**: flash red fill, white text, 1.5px ink border, 4px radius, 600 weight, min-height 44px.
 One primary button per view area (Search, Request an intro, Claim your page).
 
-**Secondary button**: vellum fill, ink text, 1.5px ink border. **Text link**: navy, underlined, 600 weight.
+**Secondary button**: `.tex-vellum` fill, ink text, 1.5px ink border. **Text link**: navy, underlined, 600 weight.
 No arrows (→) in button or link text.
 
 **Input / select**: white fill, 1.5px ink border, 4px radius, min-height 44–52px, visible label above.
 
-**Chip (filters, style tags)**: vellum fill, 1.5px ink border, 4px radius, 14px text, optional style symbol.
+**Chip (filters, style tags)**: `.tex-vellum` fill, 1.5px ink border, 4px radius, 14px text, optional style symbol.
 Active chip: ink fill, vellum text. Not pill-shaped.
 
 **Plate (artist photo frame)**: 4:5, 1.5px ink outer border, 5px paper gap, 1px ink inner border.
@@ -130,7 +151,7 @@ Docked bottom-left of the map, not a floating bubble.
 
 ## Signature pieces (the bold element)
 
-- **Flash chart**: navy sea with faint cream wave strokes, paper land with a 3–3.5px ink coastline
+- **Flash chart**: night sea with faint cream wave strokes, paper land with a 3–3.5px ink coastline
   and a faint offset second line, rivers as ink-cased navy lines, roads as ink-cased vellum lines,
   place names in IM Fell italic, a red X with ink outline, compass rose (yellow and red points,
   ink outline). No cartoon islands, no dotted treasure paths.
@@ -180,7 +201,7 @@ Keep Mapbox and OpenStreetMap attribution visible.
 
 ## Logos (public/brand/)
 
-- Navy backgrounds: `logo-wordmark-cream`. Paper backgrounds: `logo-wordmark-ink`. Big moments: `logo-wordmark-color`.
+- Night backgrounds: `logo-wordmark-cream`. Paper backgrounds: `logo-wordmark-ink`. Big moments: `logo-wordmark-color`.
 - Single-profile default photo: `compass-color`. Default profile banner: `banner-color`.
 - Never recolor, stretch or add effects. Minimum wordmark height 40px; below that use the compass.
 

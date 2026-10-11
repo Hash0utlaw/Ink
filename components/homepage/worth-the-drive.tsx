@@ -37,7 +37,7 @@ export function WorthTheDrive({ artists }: WorthTheDriveProps) {
               <Link
                 key={artist.id}
                 href={`/artists/${artist.id}`}
-                className="group flex gap-3 p-4 rounded-lg border border-border/50 bg-card hover:border-ink transition-all"
+                className="group flex gap-3 p-4 rounded-lg border border-border/50 bg-vellum tex-vellum hover:border-ink transition-all"
               >
                 <Avatar className="w-14 h-14 shrink-0 border-2 border-ink">
                   <AvatarImage src={artist.avatarUrl} alt={artist.name} />

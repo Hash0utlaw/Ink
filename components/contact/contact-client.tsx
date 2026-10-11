@@ -89,7 +89,7 @@ export function ContactClient() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
+    <div className="flex min-h-screen flex-col bg-paper tex-paper">
       <Suspense fallback={<HeaderSkeleton />}>
         <Header />
       </Suspense>
@@ -150,7 +150,7 @@ export function ContactClient() {
                 <h2 className="text-2xl font-bold mb-6">Send us a message</h2>
 
                 {submitted ? (
-                  <div className="flex flex-col items-center text-center py-16 px-6 border border-border rounded-lg bg-card">
+                  <div className="flex flex-col items-center text-center py-16 px-6 border border-border rounded-lg bg-vellum tex-vellum">
                     <div className="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mb-4">
                       <CheckCircle className="w-8 h-8 text-success" />
                     </div>

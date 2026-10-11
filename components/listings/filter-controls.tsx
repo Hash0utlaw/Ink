@@ -43,7 +43,7 @@ export function FilterChip({
       onClick={onClick}
       className={cn(
         "inline-flex min-h-9 items-center gap-1.5 rounded-lg border-1.5 border-ink px-2.5 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-        pressed ? "bg-ink text-vellum" : "bg-vellum text-ink hover:bg-secondary",
+        pressed ? "bg-ink text-vellum" : "bg-vellum tex-vellum text-ink hover:bg-secondary",
       )}
     >
       {children}

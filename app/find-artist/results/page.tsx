@@ -83,7 +83,7 @@ export default async function FindArtistResultsPage({
   const locationLabel = city ? `${city}${stateParam ? `, ${stateParam}` : ""}` : stateParam || "nationwide"
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
+    <div className="flex min-h-screen flex-col bg-paper tex-paper">
       <Suspense fallback={<HeaderSkeleton />}>
         <Header />
       </Suspense>
@@ -152,7 +152,7 @@ export default async function FindArtistResultsPage({
                   <Link
                     key={artist.id}
                     href={`/artists/${artist.id}`}
-                    className="group flex gap-4 p-4 rounded-lg border border-border/50 bg-card hover:border-ink transition-all"
+                    className="group flex gap-4 p-4 rounded-lg border border-border/50 bg-vellum tex-vellum hover:border-ink transition-all"
                   >
                     <Avatar className="w-16 h-16 shrink-0 border-2 border-ink">
                       <AvatarImage src={artist.avatarUrl} alt={artist.name} />

@@ -42,7 +42,7 @@ export default async function FlashPage({
   const savedArtistIds = new Set(userId ? await getSavedIdsForUser(userId, "artist") : [])
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
+    <div className="flex min-h-screen flex-col bg-paper tex-paper">
       <Suspense fallback={<HeaderSkeleton />}>
         <Header />
       </Suspense>

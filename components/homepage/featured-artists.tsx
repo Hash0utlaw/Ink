@@ -33,7 +33,7 @@ export function FeaturedArtists({ artists }: FeaturedArtistsProps) {
           {realArtists.map((artist, i) => (
             <MotionView key={artist.id} delay={i * 0.1}>
               <Link href={`/artists/${artist.id}`} className="block h-full">
-                <Card className="overflow-hidden h-full bg-card border-border/60 transition-all duration-300 hover:border-ink">
+                <Card className="overflow-hidden h-full bg-vellum tex-vellum border-border/60 transition-all duration-300 hover:border-ink">
                   <CardContent className="p-6 flex flex-col items-center text-center">
                     <Avatar className="w-24 h-24 mb-4 border-2 border-ink">
                       <AvatarImage src={artist.avatarUrl || "/placeholder.svg"} alt={artist.name} />
@@ -66,7 +66,7 @@ export function FeaturedArtistsSkeleton() {
         <Skeleton className="h-9 w-64 mx-auto mb-12" />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {Array.from({ length: 4 }).map((_, i) => (
-            <Card key={i} className="overflow-hidden bg-card border-border/60">
+            <Card key={i} className="overflow-hidden bg-vellum tex-vellum border-border/60">
               <CardContent className="p-6 flex flex-col items-center text-center">
                 <Skeleton className="w-24 h-24 rounded-full mb-4" />
                 <Skeleton className="h-6 w-32 mb-2" />

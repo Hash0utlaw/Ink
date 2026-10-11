@@ -53,7 +53,7 @@ export function SearchBar({ onSearch, onCurrentLocation, placeholder = "Search..
       <button
         type="button"
         onClick={onCurrentLocation}
-        className="inline-flex min-h-11 w-full items-center gap-2 rounded-lg border-1.5 border-ink bg-vellum px-3 text-[15px] font-semibold text-ink hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="inline-flex min-h-11 w-full items-center gap-2 rounded-lg border-1.5 border-ink bg-vellum tex-vellum px-3 text-[15px] font-semibold text-ink hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         <MapPin className="h-4 w-4" aria-hidden="true" />
         Use my location

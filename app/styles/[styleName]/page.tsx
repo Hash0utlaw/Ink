@@ -51,7 +51,7 @@ export default function StylePage({ params }: { params: { styleName: string } })
   ).slice(0, 3)
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
+    <div className="flex min-h-screen flex-col bg-paper tex-paper">
       <Suspense fallback={<HeaderSkeleton />}>
         <Header />
       </Suspense>
@@ -120,7 +120,7 @@ export default function StylePage({ params }: { params: { styleName: string } })
               {/* Find a Shop card */}
               <Link
                 href={shopsHref}
-                className={`group relative flex flex-col gap-4 p-7 md:p-10 bg-card hover:bg-muted/30 transition-colors ${artistsHref ? "border-b md:border-b-0 md:border-r border-border" : ""}`}
+                className={`group relative flex flex-col gap-4 p-7 md:p-10 bg-vellum tex-vellum hover:bg-muted/30 transition-colors ${artistsHref ? "border-b md:border-b-0 md:border-r border-border" : ""}`}
               >
                 <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                   <MapPin className="w-5 h-5 text-primary" />
@@ -144,7 +144,7 @@ export default function StylePage({ params }: { params: { styleName: string } })
               {artistsHref && (
                 <Link
                   href={artistsHref}
-                  className="group relative flex flex-col gap-4 p-7 md:p-10 bg-card hover:bg-muted/30 transition-colors"
+                  className="group relative flex flex-col gap-4 p-7 md:p-10 bg-vellum tex-vellum hover:bg-muted/30 transition-colors"
                 >
                   <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                     <User className="w-5 h-5 text-primary" />

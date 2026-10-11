@@ -3,7 +3,7 @@ import Link from "next/link"
 
 export function ClaimBand() {
   return (
-    <section aria-labelledby="claim-heading" className="w-full border-y-3 border-ink bg-navy">
+    <section aria-labelledby="claim-heading" className="w-full border-y-3 border-ink bg-night tex-night-chart">
       <div className="mx-auto flex w-full max-w-[1344px] flex-col items-start gap-6 px-6 py-12 md:flex-row md:items-center md:gap-10 md:py-14">
         <Image
           src="/brand/banner-cream.webp"
@@ -22,7 +22,7 @@ export function ClaimBand() {
         </div>
         <Link
           href="/claim"
-          className="inline-flex min-h-[44px] shrink-0 items-center justify-center rounded-lg border-1.5 border-cream bg-primary px-6 text-base font-semibold text-primary-foreground hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cream focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
+          className="inline-flex min-h-[44px] shrink-0 items-center justify-center rounded-lg border-1.5 border-cream bg-primary px-6 text-base font-semibold text-primary-foreground hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cream focus-visible:ring-offset-2 focus-visible:ring-offset-night"
         >
           Claim your page
         </Link>

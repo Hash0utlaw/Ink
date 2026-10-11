@@ -52,7 +52,7 @@ export function Plate({
         </div>
       ) : fallback === "compass" ? (
         <div
-          className="relative flex h-full w-full items-center justify-center border border-ink bg-vellum"
+          className="relative flex h-full w-full items-center justify-center border border-ink bg-vellum tex-vellum"
           style={{ borderBottomWidth: 5, borderBottomColor: edge }}
         >
           {/* 400x349 source; 70% of the plate's width, never stretched. */}
@@ -60,7 +60,7 @@ export function Plate({
         </div>
       ) : (
         <div
-          className="flex h-full w-full items-center justify-center border border-ink bg-vellum"
+          className="flex h-full w-full items-center justify-center border border-ink bg-vellum tex-vellum"
           style={{ borderBottomWidth: 5, borderBottomColor: edge }}
           role="img"
           aria-label={alt}

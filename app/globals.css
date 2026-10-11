@@ -56,7 +56,8 @@
     --ink: 26 26% 11%;
     --ink-muted: 26 15% 32%;
     --rule: 39 21% 65%;
-    --navy: 216 44% 22%;
+    --navy: 216 44% 22%; /* accent only: map water, Japanese style symbol, links */
+    --night: 22.5 18.2% 8.6%; /* #1A1512 warm black: header, footer, dark bands, hero sea */
     --cream: 42 59% 91%;
     --flash-red: 3 71% 41%;
     --flash-yellow: 42 70% 50%;
@@ -88,9 +89,41 @@
 }
 
 @layer components {
+  /* Textured surfaces. The grain PNGs are 256px transparent tiles (ink grain on
+     paper-grain.png, cream grain on ink-grain.png). The only gradients allowed
+     are these 1px hairline grids. Utilities like hover:bg-* still override the
+     color because these live in the components layer. */
+  .tex-paper {
+    background-color: hsl(var(--paper));
+    background-image: url("/brand/textures/paper-grain.png"),
+      linear-gradient(to right, hsl(var(--ink) / 0.07) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(var(--ink) / 0.07) 1px, transparent 1px);
+    background-size: 256px 256px, 96px 96px, 96px 96px;
+  }
+
+  .tex-vellum {
+    background-color: hsl(var(--vellum));
+    background-image: url("/brand/textures/paper-grain.png");
+    background-size: 256px 256px;
+  }
+
+  .tex-night {
+    background-color: hsl(var(--night));
+    background-image: url("/brand/textures/ink-grain.png");
+    background-size: 256px 256px;
+  }
+
+  .tex-night-chart {
+    background-color: hsl(var(--night));
+    background-image: url("/brand/textures/ink-grain.png"),
+      linear-gradient(to right, hsl(var(--cream) / 0.09) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(var(--cream) / 0.09) 1px, transparent 1px);
+    background-size: 256px 256px, 64px 64px, 64px 64px;
+  }
+
   /* Adding pricing guide specific components */
   .pricing-card {
-    @apply bg-card border border-border rounded-lg p-6 hover:border-ink transition-all duration-300 relative overflow-hidden;
+    @apply tex-vellum border border-border rounded-lg p-6 hover:border-ink transition-all duration-300 relative overflow-hidden;
   }
 
   .pricing-card-featured {
@@ -102,7 +135,7 @@
   }
 
   .pricing-step {
-    @apply bg-card border border-border rounded-lg p-6 space-y-4;
+    @apply tex-vellum border border-border rounded-lg p-6 space-y-4;
   }
 
   /* Custom scrollbar */

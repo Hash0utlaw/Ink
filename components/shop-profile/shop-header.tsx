@@ -13,7 +13,7 @@ import { STATE_ABBR_TO_NAME } from "@/lib/utils/states"
 import { cn } from "@/lib/utils"
 
 const SECONDARY =
-  "min-h-11 rounded-lg border-1.5 border-ink bg-vellum px-4 text-[15px] font-semibold text-ink hover:bg-secondary"
+  "min-h-11 rounded-lg border-1.5 border-ink bg-vellum tex-vellum px-4 text-[15px] font-semibold text-ink hover:bg-secondary"
 const TEXT_LINK = "font-semibold text-navy underline underline-offset-2 hover:no-underline"
 
 interface ShopHeaderProps {
