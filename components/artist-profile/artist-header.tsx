@@ -7,7 +7,6 @@ import { ShareButton } from "@/components/share/share-button"
 import { RequestIntroButton } from "./request-intro-button"
 import { StyleBadgeList } from "./style-badge-list"
 import { Plate } from "@/components/brand/plate"
-import { ProfileCover } from "@/components/brand/profile-cover"
 import { WhereToFindPanel, hasWhereToFind } from "@/components/brand/where-to-find"
 import type { ArtistShop } from "@/lib/supabase/artists"
 import { formatMapAddress } from "@/lib/format-address"
@@ -27,13 +26,11 @@ interface ArtistHeaderProps {
   initialSaved?: boolean
   /** The artist's shop page, when the shop is active. */
   shopHref?: string | null
-  /** The artist's uploaded cover image; the default night strip without one. */
-  coverSrc?: string | null
   /** The artist's active shop, for the "Where to find" panel. */
   shop?: ArtistShop | null
 }
 
-export function ArtistHeader({ artist, initialSaved, shopHref, coverSrc = null, shop = null }: ArtistHeaderProps) {
+export function ArtistHeader({ artist, initialSaved, shopHref, shop = null }: ArtistHeaderProps) {
   const igHandle = artist.instagramHandle?.replace(/^@/, "").trim()
   const websiteUrl = artist.websiteUrl?.trim()
   const showVerified = artist.hasAccount && artist.isVerified
@@ -47,8 +44,8 @@ export function ArtistHeader({ artist, initialSaved, shopHref, coverSrc = null, 
   const showPanel = !!shop && hasWhereToFind({ address: shopAddress, coordinates: shop.coordinates })
 
   return (
+    // Sits right under the page's full-bleed ProfileCover; the plate and panel overlap it.
     <div>
-      <ProfileCover src={coverSrc} alt={`${artist.name}'s cover image`} />
       <div className={cn("grid gap-8", showPanel ? "lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-12" : "max-w-[720px]")}>
         <div className="min-w-0">
           <div className="flex items-start gap-4 lg:gap-6">

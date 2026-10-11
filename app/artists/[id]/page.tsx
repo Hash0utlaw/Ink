@@ -8,6 +8,7 @@ import { getArtistById, getArtistShop, getOtherShopArtists, shopArtistRedirectPa
 import { getCurrentUserId } from "@/lib/supabase/users"
 import { getSavedIdsForUser } from "@/lib/supabase/saved"
 import { getReviewsForArtist } from "@/lib/supabase/reviews"
+import { ProfileCover } from "@/components/brand/profile-cover"
 import { ArtistHeader } from "@/components/artist-profile/artist-header"
 import { uploadedImageSrc } from "@/lib/utils/safe-image"
 import { ProfileSections } from "@/components/artist-profile/profile-sections"
@@ -112,7 +113,9 @@ export default async function ArtistProfilePage({ params }: { params: { id: stri
         <Header />
       </Suspense>
       <main className="flex-1 bg-paper tex-paper">
-        <div className="mx-auto max-w-[1180px] px-4 py-8 sm:px-6 lg:py-14">
+        {/* Full bleed, flush under the site header; the header plate and panel overlap its bottom. */}
+        <ProfileCover src={uploadedImageSrc(artist.coverImageUrl)} alt={`${artist.name}'s cover image`} />
+        <div className="mx-auto max-w-[1180px] px-4 pb-8 sm:px-6 lg:pb-14">
           <RecordVisit
             id={artist.id}
             name={artist.name}
@@ -124,7 +127,6 @@ export default async function ArtistProfilePage({ params }: { params: { id: stri
             artist={artist}
             initialSaved={isSaved}
             shopHref={shop ? `/shops/${shop.id}` : null}
-            coverSrc={uploadedImageSrc(artist.coverImageUrl)}
             shop={shop}
           />
           <div className="mt-14 grid grid-cols-1 gap-14 lg:mt-20 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-12">

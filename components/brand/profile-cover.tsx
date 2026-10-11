@@ -1,16 +1,17 @@
 import Image from "next/image"
 
 /**
- * The strip across the top of a single profile, 150px tall on mobile, 260px from
- * lg, over a 3px ink bottom border. With an uploaded cover it shows the photo;
- * without one, the night chart with the cream banner near the top and a cream
+ * The full-bleed strip across the top of a single profile, right under the site
+ * header (render it outside the page's max-width container): 150px tall on
+ * mobile, 260px from lg, over a 3px ink bottom border. With an uploaded cover it
+ * shows the photo; without one, the night chart with the cream banner near the top and a cream
  * hairline 7px above the bottom. The header plate overlaps its bottom edge.
  */
 export function ProfileCover({ src, alt }: { src: string | null; alt: string }) {
   return (
     <div className="relative h-[150px] overflow-hidden border-b-[3px] border-ink bg-night tex-night-chart lg:h-[260px]">
       {src ? (
-        <Image src={src} alt={alt} fill priority sizes="(min-width: 1180px) 1132px, 100vw" className="object-cover" />
+        <Image src={src} alt={alt} fill priority sizes="100vw" className="object-cover" />
       ) : (
         <>
           {/* 1150x792 source; 78px tall on mobile, 132px from lg, never stretched. */}
