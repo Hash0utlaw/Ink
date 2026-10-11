@@ -10,6 +10,7 @@ import { getCurrentUserId } from "@/lib/supabase/users"
 import { getSavedIdsForUser } from "@/lib/supabase/saved"
 import { getReviewsForShop } from "@/lib/supabase/reviews"
 import type { Shop } from "@/types/shop"
+import { ProfileCover } from "@/components/brand/profile-cover"
 import { ShopHeader } from "@/components/shop-profile/shop-header"
 import { uploadedImageSrc } from "@/lib/utils/safe-image"
 import { ShopArtists } from "@/components/shop-profile/shop-artists"
@@ -111,36 +112,45 @@ export default async function ShopProfilePage({ params }: { params: { id: string
         <Header />
       </Suspense>
       <main className="flex-1 bg-paper tex-paper">
-        <div className="mx-auto max-w-[1180px] px-4 py-8 sm:px-6 lg:py-14">
-          {cityPageHref && (
-            <nav aria-label="Breadcrumb" className="mb-6 text-[13px] text-ink-muted lg:mb-8">
-              <ol className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
-                <li>
-                  <Link href="/tattoo-shops" className="underline-offset-2 hover:text-ink hover:underline">
-                    Tattoo shops
-                  </Link>
-                </li>
-                <li aria-hidden="true">/</li>
-                <li>
-                  <Link href={`/tattoo-shops/${stateSlug}`} className="underline-offset-2 hover:text-ink hover:underline">
-                    {STATE_ABBR_TO_NAME[shop.location.state] ?? shop.location.state}
-                  </Link>
-                </li>
-                <li aria-hidden="true">/</li>
-                <li>
-                  <Link href={cityPageHref} className="underline-offset-2 hover:text-ink hover:underline">
-                    {shop.location.city}
-                  </Link>
-                </li>
-                <li aria-hidden="true">/</li>
-                <li aria-current="page" className="text-ink">
-                  {shop.name}
-                </li>
-              </ol>
-            </nav>
-          )}
+        {/* Full bleed, flush under the site header; the header plate and panel overlap its bottom. */}
+        <ProfileCover src={uploadedImageSrc(shop.coverImageUrl)} alt={`${shop.name}'s cover image`} />
+        <div className="mx-auto max-w-[1180px] px-4 pb-8 sm:px-6 lg:pb-14">
+          <ShopHeader
+            shop={shop}
+            initialSaved={isSaved}
+            breadcrumb={
+              cityPageHref && (
+                <nav aria-label="Breadcrumb" className="mb-2 text-[13px] text-ink-muted">
+                  <ol className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
+                    <li>
+                      <Link href="/tattoo-shops" className="underline-offset-2 hover:text-ink hover:underline">
+                        Tattoo shops
+                      </Link>
+                    </li>
+                    <li aria-hidden="true">/</li>
+                    <li>
+                      <Link href={`/tattoo-shops/${stateSlug}`} className="underline-offset-2 hover:text-ink hover:underline">
+                        {STATE_ABBR_TO_NAME[shop.location.state] ?? shop.location.state}
+                      </Link>
+                    </li>
+                    <li aria-hidden="true">/</li>
+                    <li>
+                      <Link href={cityPageHref} className="underline-offset-2 hover:text-ink hover:underline">
+                        {shop.location.city}
+                      </Link>
+                    </li>
+                    <li aria-hidden="true">/</li>
+                    <li aria-current="page" className="text-ink">
+                      {shop.name}
+                    </li>
+                  </ol>
+                </nav>
+              )
+            }
+            artistCount={residentArtists.filter((a) => !a.isStub).length}
+          />
           {shop.possiblyClosed && (
-            <div className="mb-8 rounded-lg border-1.5 border-ink bg-vellum tex-vellum p-5">
+            <div className="mt-10 rounded-lg border-1.5 border-ink bg-vellum tex-vellum p-5">
               <p className="font-semibold text-ink">This shop may be permanently closed.</p>
               <p className="mt-1 text-[15px] leading-[1.55] text-ink-muted text-pretty">
                 Call ahead before you visit. Own this shop?{" "}
@@ -150,12 +160,6 @@ export default async function ShopProfilePage({ params }: { params: { id: string
               </p>
             </div>
           )}
-          <ShopHeader
-            shop={shop}
-            initialSaved={isSaved}
-            coverSrc={uploadedImageSrc(shop.coverImageUrl)}
-            artistCount={residentArtists.filter((a) => !a.isStub).length}
-          />
           <div className="mt-14 space-y-14 lg:mt-20 lg:space-y-20">
             <ShopArtists shopName={shop.name} artists={residentArtists} />
             {shop.about && (

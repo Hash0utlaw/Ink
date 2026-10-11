@@ -1,3 +1,4 @@
+import type { ReactNode } from "react"
 import Link from "next/link"
 import { Globe, Phone } from "lucide-react"
 import type { Shop } from "@/types/shop"
@@ -5,7 +6,6 @@ import { SaveButton } from "@/components/saved/save-button"
 import { ShareButton } from "@/components/share/share-button"
 import { StyleBadgeList } from "@/components/artist-profile/style-badge-list"
 import { Plate } from "@/components/brand/plate"
-import { ProfileCover } from "@/components/brand/profile-cover"
 import { WhereToFindPanel, hasWhereToFind } from "@/components/brand/where-to-find"
 import { formatMapAddress } from "@/lib/format-address"
 import { allowedImageSrc } from "@/lib/utils/safe-image"
@@ -19,13 +19,13 @@ const TEXT_LINK = "font-semibold text-navy underline underline-offset-2 hover:no
 interface ShopHeaderProps {
   shop: Shop
   initialSaved?: boolean
-  /** The shop's uploaded cover image; no strip without one. */
-  coverSrc?: string | null
+  /** Breadcrumb nav, shown small above the name. */
+  breadcrumb?: ReactNode
   /** Active artists at the shop (artists.shop_id). */
   artistCount?: number
 }
 
-export function ShopHeader({ shop, initialSaved, coverSrc = null, artistCount = 0 }: ShopHeaderProps) {
+export function ShopHeader({ shop, initialSaved, breadcrumb, artistCount = 0 }: ShopHeaderProps) {
   // Only the shop's own logo; scraped cover photos (Google, Street View) have expired and return 403.
   const photo = allowedImageSrc(shop.logoUrl)
   const stateName = STATE_ABBR_TO_NAME[shop.location.state] ?? shop.location.state
@@ -38,27 +38,25 @@ export function ShopHeader({ shop, initialSaved, coverSrc = null, artistCount = 
   const showPanel = hasWhereToFind({ address, coordinates })
 
   return (
-    <div className={cn(!coverSrc && "border-b border-rule bg-paper pb-10 pt-6")}>
-      <ProfileCover src={coverSrc} alt={`${shop.name}'s cover image`} />
+    // Sits right under the page's full-bleed ProfileCover; the plate and panel overlap it.
+    <div>
       <div className={cn("grid gap-8", showPanel ? "lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-12" : "max-w-[720px]")}>
         <div className="min-w-0">
           <div className="flex items-start gap-4 lg:gap-6">
-            {/* With a cover, the plate overlaps it by 24px (32px from lg), inset from its edge. */}
-            <div
-              className={cn("relative z-10 w-[112px] shrink-0 lg:w-[160px]", coverSrc && "-mt-6 ml-4 lg:-mt-8 lg:ml-6")}
-            >
+            {/* The plate overlaps the cover by 56px (104px from lg), inset from its edge, above it. */}
+            <div className="relative z-10 -mt-14 ml-4 w-[112px] shrink-0 lg:-mt-[104px] lg:ml-6 lg:w-[168px]">
               <Plate
                 src={photo}
                 alt={photo ? `${shop.name}, tattoo shop` : `${shop.name} has no photo yet`}
                 name={shop.name}
                 primaryStyle={shop.styles[0]}
                 fluid
-                fallback="compass"
-                sizes="(min-width: 1024px) 160px, 112px"
+                sizes="(min-width: 1024px) 168px, 112px"
               />
             </div>
 
-            <div className={cn("min-w-0", coverSrc && "pt-4")}>
+            <div className="min-w-0 pt-4">
+              {breadcrumb}
               <h1 className="font-heading text-[30px] leading-[1.05] text-ink text-balance lg:text-[44px]">
                 {shop.name}
               </h1>
@@ -126,7 +124,7 @@ export function ShopHeader({ shop, initialSaved, coverSrc = null, artistCount = 
         </div>
 
         {showPanel && (
-          <div className={cn(coverSrc && "lg:pt-6")}>
+          <div className="relative z-10 lg:-mt-[104px]">
             <WhereToFindPanel
               coordinates={coordinates}
               address={address}
