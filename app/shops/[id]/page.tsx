@@ -10,13 +10,10 @@ import { getCurrentUserId } from "@/lib/supabase/users"
 import { getSavedIdsForUser } from "@/lib/supabase/saved"
 import { getReviewsForShop } from "@/lib/supabase/reviews"
 import type { Shop } from "@/types/shop"
-import type { ArtistShop } from "@/lib/supabase/artists"
 import { ShopHeader } from "@/components/shop-profile/shop-header"
-import { ProfileCover } from "@/components/brand/profile-cover"
 import { uploadedImageSrc } from "@/lib/utils/safe-image"
 import { ShopArtists } from "@/components/shop-profile/shop-artists"
 import { NearbyShops } from "@/components/shop-profile/nearby-shops"
-import { WhereToFind } from "@/components/artist-profile/where-to-find"
 import { ProfileSection, ReviewList } from "@/components/artist-profile/profile-sections"
 import { STATE_ABBR_TO_NAME, cityToSlug, stateAbbrToSlug } from "@/lib/utils/states"
 import { shopHasNameTwin } from "@/lib/supabase/seo"
@@ -40,23 +37,6 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
       `${shop.name} is a tattoo shop${street ? ` at ${street}` : ""}${loc ? `, ${loc}` : ""}.${rating} ${summary}`,
     ),
     alternates: { canonical: canonicalUrl(`/shops/${shop.id}`) },
-  }
-}
-
-/** The shop in the shape the artist page's "Where to find" block takes. */
-function toWhereShop(shop: Shop): ArtistShop {
-  const { lat, lng } = shop.location
-  return {
-    id: shop.id,
-    name: shop.name,
-    address: shop.location.address,
-    city: shop.location.city,
-    state: shop.location.state,
-    zip: shop.location.zip ?? "",
-    coordinates: lat && lng ? [lng, lat] : null,
-    rating: shop.rating,
-    reviewCount: shop.reviewCount,
-    hours: shop.hours,
   }
 }
 
@@ -170,19 +150,14 @@ export default async function ShopProfilePage({ params }: { params: { id: string
               </p>
             </div>
           )}
-          <div className="mb-5 lg:mb-0">
-            <ProfileCover src={uploadedImageSrc(shop.coverImageUrl)} alt={`${shop.name}'s cover image`} />
-          </div>
-          <ShopHeader shop={shop} initialSaved={isSaved} />
+          <ShopHeader
+            shop={shop}
+            initialSaved={isSaved}
+            coverSrc={uploadedImageSrc(shop.coverImageUrl)}
+            artistCount={residentArtists.filter((a) => !a.isStub).length}
+          />
           <div className="mt-14 space-y-14 lg:mt-20 lg:space-y-20">
             <ShopArtists shopName={shop.name} artists={residentArtists} />
-            <WhereToFind
-              name={shop.name}
-              shop={toWhereShop(shop)}
-              onShopPage
-              phone={shop.phone}
-              website={shop.website}
-            />
             {shop.about && (
               <ProfileSection id="about" title={`About ${shop.name}`}>
                 <p className="max-w-prose whitespace-pre-line text-base leading-[1.55] text-ink text-pretty">{shop.about}</p>

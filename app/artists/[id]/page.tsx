@@ -9,10 +9,8 @@ import { getCurrentUserId } from "@/lib/supabase/users"
 import { getSavedIdsForUser } from "@/lib/supabase/saved"
 import { getReviewsForArtist } from "@/lib/supabase/reviews"
 import { ArtistHeader } from "@/components/artist-profile/artist-header"
-import { ProfileCover } from "@/components/brand/profile-cover"
 import { uploadedImageSrc } from "@/lib/utils/safe-image"
 import { ProfileSections } from "@/components/artist-profile/profile-sections"
-import { WhereToFind } from "@/components/artist-profile/where-to-find"
 import { AlsoAtShop } from "@/components/artist-profile/also-at-shop"
 import { BookingSection } from "@/components/artist-profile/booking-section"
 import { RecordVisit } from "@/components/artist-profile/record-visit"
@@ -122,19 +120,17 @@ export default async function ArtistProfilePage({ params }: { params: { id: stri
             avatarUrl={artist.avatarUrl}
             city={artist.location.city}
           />
-          <div className="mb-5 lg:mb-0">
-            <ProfileCover src={uploadedImageSrc(artist.coverImageUrl)} alt={`${artist.name}'s cover image`} />
-          </div>
-          <ArtistHeader artist={artist} initialSaved={isSaved} shopHref={shop ? `/shops/${shop.id}` : null} />
+          <ArtistHeader
+            artist={artist}
+            initialSaved={isSaved}
+            shopHref={shop ? `/shops/${shop.id}` : null}
+            coverSrc={uploadedImageSrc(artist.coverImageUrl)}
+            shop={shop}
+          />
           <div className="mt-14 grid grid-cols-1 gap-14 lg:mt-20 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-12">
             <ProfileSections artist={artist} reviews={reviews} />
             <BookingSection artist={artist} />
           </div>
-          {shop && (
-            <div className="mt-14 lg:mt-20">
-              <WhereToFind name={artist.name} shop={shop} />
-            </div>
-          )}
           {shop && others.artists.length > 0 && (
             <div className="mt-14 lg:mt-20">
               <AlsoAtShop shopId={shop.id} artists={others.artists} total={others.total} />
