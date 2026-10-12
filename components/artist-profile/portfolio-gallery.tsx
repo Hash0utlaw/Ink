@@ -30,7 +30,7 @@ export function PortfolioGallery({ images, name }: { images: PortfolioImage[]; n
                 </button>
               </DialogTrigger>
               {caption && <p className="mt-1.5 text-[13px] leading-[1.4] text-ink-muted text-pretty">{caption}</p>}
-              <DialogContent className="max-w-3xl border-2 border-ink bg-vellum tex-vellum p-2">
+              <DialogContent className="max-w-3xl border-2 border-ink bg-vellum tex-vellum p-2 pt-14">
                 <DialogTitle className="sr-only">{`Portfolio piece ${i + 1} by ${name}`}</DialogTitle>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={src} alt={alt} className="h-auto w-full" />

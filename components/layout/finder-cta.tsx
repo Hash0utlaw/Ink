@@ -10,7 +10,7 @@ export function FinderCta({ variant = "banner" }: FinderCtaProps) {
     return (
       <p className="text-[15px] text-ink-muted">
         Not sure where to start?{" "}
-        <Link href="/find-artist" className="inline-flex items-center gap-1 font-semibold text-navy underline underline-offset-2 hover:no-underline">
+        <Link href="/find-artist" className="inline-flex min-h-11 items-center gap-1 font-semibold text-navy underline underline-offset-2 hover:no-underline">
           <Wand2 className="w-3.5 h-3.5" />
           Try our Artist Finder
         </Link>

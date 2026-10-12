@@ -230,31 +230,31 @@ export function Header() {
           </Sheet>
 
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2">
+          <Link href="/" className="flex min-h-11 items-center">
             <Image src="/brand/logo-wordmark-cream.webp" alt="TattooMaps" width={70} height={40} className="h-10 w-auto" priority />
           </Link>
         </div>
 
         {/* Navigation */}
         <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
-          <Link href="/artists" className="text-cream underline-offset-4 hover:underline">
+          <Link href="/artists" className="inline-flex min-h-11 items-center text-cream underline-offset-4 hover:underline">
             Artists
           </Link>
-          <Link href="/tattoo-shops" className="text-cream underline-offset-4 hover:underline">
+          <Link href="/tattoo-shops" className="inline-flex min-h-11 items-center text-cream underline-offset-4 hover:underline">
             Shops
           </Link>
-          <Link href="/map" className="text-cream underline-offset-4 hover:underline">
+          <Link href="/map" className="inline-flex min-h-11 items-center text-cream underline-offset-4 hover:underline">
             Map
           </Link>
-          <Link href="/flash" className="flex items-center gap-1.5 text-cream underline-offset-4 hover:underline">
-            <Zap className="w-4 h-4" />
+          <Link href="/flash" className="inline-flex min-h-11 items-center gap-1.5 text-cream underline-offset-4 hover:underline">
+            <Zap className="w-4 h-4" aria-hidden="true" />
             Flash
           </Link>
-          <Link href="/styles" className="text-cream underline-offset-4 hover:underline">
+          <Link href="/styles" className="inline-flex min-h-11 items-center text-cream underline-offset-4 hover:underline">
             Styles
           </Link>
-          <Link href="/find-artist" className="flex items-center gap-1.5 text-cream underline-offset-4 hover:underline">
-            <Compass className="w-4 h-4" />
+          <Link href="/find-artist" className="inline-flex min-h-11 items-center gap-1.5 text-cream underline-offset-4 hover:underline">
+            <Compass className="w-4 h-4" aria-hidden="true" />
             Find Artist
           </Link>
         </nav>
@@ -267,7 +267,7 @@ export function Header() {
             <>
               <Link
                 href={dashboardLink}
-                className="hidden md:block text-sm font-medium text-cream underline-offset-4 hover:underline"
+                className="hidden md:inline-flex min-h-11 items-center text-sm font-medium text-cream underline-offset-4 hover:underline"
               >
                 {dashboardLabel}
               </Link>
@@ -276,7 +276,7 @@ export function Header() {
                   <Button
                     variant="ghost"
                     aria-label="Account menu"
-                    className="relative h-10 w-10 overflow-hidden rounded border-1.5 border-cream bg-transparent p-0 text-cream hover:bg-cream/10 hover:text-cream [&_svg]:size-5"
+                    className="relative h-11 w-11 overflow-hidden rounded border-1.5 border-cream bg-transparent p-0 text-cream hover:bg-cream/10 hover:text-cream [&_svg]:size-5"
                   >
                     {user.user_metadata?.avatar_url ? (
                       <Avatar className="h-full w-full rounded-none">

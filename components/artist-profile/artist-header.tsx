@@ -132,7 +132,7 @@ export function ArtistHeader({ artist, initialSaved, shopHref, shop = null }: Ar
                     href={`https://instagram.com/${igHandle}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`inline-flex items-center gap-1.5 ${TEXT_LINK}`}
+                    className={`inline-flex min-h-11 items-center gap-1.5 ${TEXT_LINK}`}
                   >
                     <Instagram className="h-4 w-4" aria-hidden="true" />@{igHandle}
                   </a>
@@ -142,7 +142,7 @@ export function ArtistHeader({ artist, initialSaved, shopHref, shop = null }: Ar
                     href={websiteUrl.startsWith("http") ? websiteUrl : `https://${websiteUrl}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`inline-flex items-center gap-1.5 ${TEXT_LINK}`}
+                    className={`inline-flex min-h-11 items-center gap-1.5 ${TEXT_LINK}`}
                   >
                     <Globe className="h-4 w-4" aria-hidden="true" />
                     Website

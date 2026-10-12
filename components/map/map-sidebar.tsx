@@ -92,14 +92,15 @@ export function MapSidebar({
 
   return (
     /*
-      Mobile: an overlay that floats on top of the map (fixed, taken out of
-      flex flow entirely) so the map is always full-width underneath it.
-      md+: rejoins the flex row as a fixed 420px side panel.
+      Mobile: an overlay that floats on top of the map (absolute, taken out of
+      flex flow entirely, below the site header) so the map is always
+      full-width underneath it. md+: rejoins the flex row as a fixed 420px
+      side panel.
     */
     <div
       className={cn(
         "flex flex-col overflow-hidden bg-paper tex-paper transition-all duration-300 ease-out",
-        "fixed inset-y-0 left-0 z-40 md:relative md:inset-auto md:z-30",
+        "absolute inset-y-0 left-0 z-40 md:relative md:inset-auto md:z-30",
         isOpen ? "w-full max-w-[420px] border-r-1.5 border-ink opacity-100 md:w-[420px]" : "pointer-events-none w-0 opacity-0"
       )}
     >

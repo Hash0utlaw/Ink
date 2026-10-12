@@ -86,6 +86,20 @@
     font-family: var(--font-heading);
     font-weight: 400;
   }
+
+  /* Reduced motion: no slides, fades or smooth scrolling. Loading spinners keep
+     turning so they still read as "loading". Mapbox camera moves already jump
+     instead of fly when this is set. */
+  @media (prefers-reduced-motion: reduce) {
+    *:not(.animate-spin),
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 }
 
 @layer components {

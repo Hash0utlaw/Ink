@@ -54,11 +54,11 @@ export function TopArtists({ artists }: { artists: Artist[] }) {
           )}
         </h2>
         {nearby ? (
-          <button type="button" onClick={changeLocation} className="font-semibold text-navy underline underline-offset-2 hover:no-underline">
+          <button type="button" onClick={changeLocation} className="inline-flex min-h-11 items-center font-semibold text-navy underline underline-offset-2 hover:no-underline">
             Change location
           </button>
         ) : (
-          <Link href="/artists" className="font-semibold text-navy underline underline-offset-2 hover:no-underline">
+          <Link href="/artists" className="inline-flex min-h-11 items-center font-semibold text-navy underline underline-offset-2 hover:no-underline">
             See all artists
           </Link>
         )}

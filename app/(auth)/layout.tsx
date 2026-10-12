@@ -9,7 +9,7 @@ import Link from "next/link"
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col items-center bg-paper tex-paper px-4 py-10 sm:py-16">
-      <Link href="/" aria-label="TattooMaps home" className="rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+      <Link href="/" aria-label="TattooMaps home" className="inline-flex min-h-11 items-center rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
         <Image src="/brand/logo-wordmark-ink.webp" alt="TattooMaps" width={70} height={40} className="h-10 w-auto" priority />
       </Link>
 

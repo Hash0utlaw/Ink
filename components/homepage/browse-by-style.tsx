@@ -24,7 +24,7 @@ export function BrowseByStyle({ counts }: { counts: StyleCount[] }) {
         <p className="mt-3 text-pretty text-base leading-[1.55] text-ink-muted">
           Every artist is sorted into the same 21 styles. Each style keeps its symbol everywhere, from these lists to the pins on the map.
         </p>
-        <Link href="/styles" className="mt-4 inline-block font-semibold text-navy underline underline-offset-2 hover:no-underline">
+        <Link href="/styles" className="mt-2 inline-flex min-h-11 items-center font-semibold text-navy underline underline-offset-2 hover:no-underline">
           See all 21 styles
         </Link>
       </div>

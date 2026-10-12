@@ -96,14 +96,14 @@ export function ShopHeader({ shop, initialSaved, breadcrumb, artistCount = 0 }: 
                     href={websiteUrl.startsWith("http") ? websiteUrl : `https://${websiteUrl}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`inline-flex items-center gap-1.5 ${TEXT_LINK}`}
+                    className={`inline-flex min-h-11 items-center gap-1.5 ${TEXT_LINK}`}
                   >
                     <Globe className="h-4 w-4" aria-hidden="true" />
                     Website
                   </a>
                 )}
                 {shop.phone && (
-                  <a href={`tel:${shop.phone}`} className={`inline-flex items-center gap-1.5 ${TEXT_LINK}`}>
+                  <a href={`tel:${shop.phone}`} className={`inline-flex min-h-11 items-center gap-1.5 ${TEXT_LINK}`}>
                     <Phone className="h-4 w-4" aria-hidden="true" />
                     Call {shop.phone}
                   </a>

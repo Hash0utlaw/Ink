@@ -116,7 +116,7 @@ export function AuthForm({ mode }: AuthFormProps) {
             {isLogin && (
               <Link
                 href="/forgot-password"
-                className="text-sm font-semibold text-navy underline underline-offset-2 hover:no-underline"
+                className="inline-flex min-h-11 items-center text-sm font-semibold text-navy underline underline-offset-2 hover:no-underline"
               >
                 Forgot password?
               </Link>

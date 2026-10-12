@@ -81,7 +81,7 @@ export function LiveReviews({ initialReviews }: LiveReviewsProps) {
             <span aria-hidden="true" className="h-3 w-3 shrink-0 rounded-full border-1.5 border-ink bg-success" />
             Live Reviews
           </h2>
-          <Link href="/artists" className="font-semibold text-navy underline underline-offset-2 hover:no-underline">
+          <Link href="/artists" className="inline-flex min-h-11 items-center font-semibold text-navy underline underline-offset-2 hover:no-underline">
             Find an artist
           </Link>
         </div>
