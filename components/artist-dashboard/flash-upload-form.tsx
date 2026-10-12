@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils"
 
 const LABEL = "mb-1.5 block text-sm font-semibold text-ink"
 const CHIP =
-  "inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border-1.5 border-ink px-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+  "inline-flex min-h-11 items-center justify-center gap-1.5 rounded border-1.5 border-ink px-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 const chipState = (on: boolean) => (on ? "bg-ink text-vellum" : "bg-vellum tex-vellum text-ink hover:bg-secondary")
 
 const SIZES = ["Tiny", "Small", "Medium", "Large"]

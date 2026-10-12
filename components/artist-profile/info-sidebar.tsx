@@ -60,7 +60,7 @@ export function InfoSidebar({
 
   return (
     <div className="lg:sticky lg:top-6">
-      <section aria-labelledby="request-form" className="rounded-lg border-2 border-ink bg-vellum tex-vellum p-5">
+      <section aria-labelledby="request-form" className="rounded border-2 border-ink bg-vellum tex-vellum p-5">
         <h2 id="request-form" className="font-heading text-[22px] leading-[1.15] text-ink">
           Request an intro
         </h2>
@@ -116,7 +116,7 @@ export function InfoSidebar({
                       onClick={() => setSize(option)}
                       disabled={isSubmitting}
                       aria-pressed={size === option}
-                      className={`min-h-11 rounded-lg border-1.5 border-ink px-2 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                      className={`min-h-11 rounded border-1.5 border-ink px-2 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                         size === option ? "bg-ink text-vellum" : "bg-vellum tex-vellum text-ink hover:bg-secondary"
                       }`}
                     >
@@ -140,7 +140,7 @@ export function InfoSidebar({
               )}
 
               <Button
-                className="min-h-11 w-full rounded-lg border-1.5 border-ink bg-flash-red text-[15px] font-semibold text-white hover:bg-flash-red/90"
+                className="min-h-11 w-full rounded border-1.5 border-ink bg-flash-red text-[15px] font-semibold text-white hover:bg-flash-red/90"
                 onClick={handleSubmit}
                 disabled={isSubmitting}
               >

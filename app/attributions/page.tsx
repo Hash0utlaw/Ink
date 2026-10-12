@@ -71,7 +71,7 @@ export default function AttributionsPage() {
                 <ExternalLink href="https://opensource.foursquare.com/places-notice-txt/">NOTICE.txt</ExternalLink> is
                 reproduced below.
               </Prose>
-              <div className="p-5 bg-muted/40 rounded-lg border border-border/60 space-y-3">
+              <div className="p-5 bg-muted/40 rounded border border-border/60 space-y-3">
                 {FOURSQUARE_NOTICE.map((line) => (
                   <Prose key={line}>{line}</Prose>
                 ))}

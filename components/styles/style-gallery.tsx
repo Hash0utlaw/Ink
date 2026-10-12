@@ -64,7 +64,7 @@ export function StyleGallery({ images, styleName }: StyleGalleryProps) {
         >
           <button
             type="button"
-            className="absolute right-4 top-4 inline-flex h-11 w-11 items-center justify-center rounded-lg border-1.5 border-cream text-cream hover:bg-cream hover:text-night"
+            className="absolute right-4 top-4 inline-flex h-11 w-11 items-center justify-center rounded border-1.5 border-cream text-cream hover:bg-cream hover:text-night"
             onClick={() => setLightboxSrc(null)}
             aria-label="Close lightbox"
           >

@@ -235,7 +235,7 @@ export function PricingClient() {
                   <CardDescription>Based on your specifications</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  <div className="text-center p-6 bg-secondary rounded-lg border border-ink">
+                  <div className="text-center p-6 bg-secondary rounded border border-ink">
                     <div className="text-4xl font-bold text-foreground mb-2">
                       ${priceEstimate.priceRange.min} - ${priceEstimate.priceRange.max}
                     </div>
@@ -243,11 +243,11 @@ export function PricingClient() {
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="text-center p-4 bg-secondary rounded-lg">
+                    <div className="text-center p-4 bg-secondary rounded">
                       <div className="text-2xl font-semibold">${priceEstimate.hourlyRate}</div>
                       <p className="text-sm text-muted-foreground">Per Hour</p>
                     </div>
-                    <div className="text-center p-4 bg-secondary rounded-lg">
+                    <div className="text-center p-4 bg-secondary rounded">
                       <div className="text-2xl font-semibold">{priceEstimate.estimatedHours}h</div>
                       <p className="text-sm text-muted-foreground">Est. Time</p>
                     </div>
@@ -290,7 +290,7 @@ export function PricingClient() {
                     </div>
                   </div>
 
-                  <div className="p-4 bg-vellum tex-vellum border border-warning rounded-lg">
+                  <div className="p-4 bg-vellum tex-vellum border border-warning rounded">
                     <div className="flex items-start gap-2">
                       <AlertCircle className="w-4 h-4 text-foreground mt-0.5" />
                       <div className="text-sm">
@@ -445,7 +445,7 @@ export function PricingClient() {
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               <Card className="pricing-step">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 bg-secondary rounded-lg flex items-center justify-center">
+                  <div className="w-10 h-10 bg-secondary rounded flex items-center justify-center">
                     <Palette className="w-5 h-5 text-primary" />
                   </div>
                   <h3 className="font-semibold">Style & Complexity</h3>
@@ -471,7 +471,7 @@ export function PricingClient() {
 
               <Card className="pricing-step">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 bg-secondary rounded-lg flex items-center justify-center">
+                  <div className="w-10 h-10 bg-secondary rounded flex items-center justify-center">
                     <MapPin className="w-5 h-5 text-primary" />
                   </div>
                   <h3 className="font-semibold">Size & Placement</h3>
@@ -497,7 +497,7 @@ export function PricingClient() {
 
               <Card className="pricing-step">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 bg-secondary rounded-lg flex items-center justify-center">
+                  <div className="w-10 h-10 bg-secondary rounded flex items-center justify-center">
                     <Star className="w-5 h-5 text-primary" />
                   </div>
                   <h3 className="font-semibold">Artist Experience</h3>
@@ -523,7 +523,7 @@ export function PricingClient() {
 
               <Card className="pricing-step">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 bg-secondary rounded-lg flex items-center justify-center">
+                  <div className="w-10 h-10 bg-secondary rounded flex items-center justify-center">
                     <Clock className="w-5 h-5 text-primary" />
                   </div>
                   <h3 className="font-semibold">Time Required</h3>
@@ -549,7 +549,7 @@ export function PricingClient() {
 
               <Card className="pricing-step">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 bg-secondary rounded-lg flex items-center justify-center">
+                  <div className="w-10 h-10 bg-secondary rounded flex items-center justify-center">
                     <TrendingUp className="w-5 h-5 text-primary" />
                   </div>
                   <h3 className="font-semibold">Location & Demand</h3>
@@ -575,7 +575,7 @@ export function PricingClient() {
 
               <Card className="pricing-step">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 bg-secondary rounded-lg flex items-center justify-center">
+                  <div className="w-10 h-10 bg-secondary rounded flex items-center justify-center">
                     <Zap className="w-5 h-5 text-primary" />
                   </div>
                   <h3 className="font-semibold">Additional Costs</h3>

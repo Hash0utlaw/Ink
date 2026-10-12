@@ -15,10 +15,10 @@ import { STATE_ABBR_TO_NAME } from "@/lib/utils/states"
 import { cn } from "@/lib/utils"
 
 const SECONDARY =
-  "min-h-11 rounded-lg border-1.5 border-ink bg-vellum tex-vellum px-4 text-[15px] font-semibold text-ink hover:bg-secondary"
+  "min-h-11 rounded border-1.5 border-ink bg-vellum tex-vellum px-4 text-[15px] font-semibold text-ink hover:bg-secondary"
 // Same as "Get directions" in the Where to find panel.
 const OUTLINE =
-  "inline-flex min-h-11 items-center justify-center rounded-lg border-1.5 border-ink px-4 text-[15px] font-semibold text-ink hover:bg-vellum focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+  "inline-flex min-h-11 items-center justify-center rounded border-1.5 border-ink px-4 text-[15px] font-semibold text-ink hover:bg-vellum focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 const TEXT_LINK = "font-semibold text-navy underline underline-offset-2 hover:no-underline"
 
 interface ArtistHeaderProps {

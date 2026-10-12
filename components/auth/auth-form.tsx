@@ -175,7 +175,7 @@ export function AuthForm({ mode }: AuthFormProps) {
                     aria-pressed={active}
                     disabled={isPending}
                     className={cn(
-                      "flex flex-col items-center gap-2 rounded-lg border-1.5 border-ink p-4 text-center focus:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                      "flex flex-col items-center gap-2 rounded border-1.5 border-ink p-4 text-center focus:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                       active ? "bg-ink text-vellum" : "bg-vellum tex-vellum text-ink hover:bg-secondary",
                     )}
                   >

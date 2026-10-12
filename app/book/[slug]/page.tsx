@@ -133,7 +133,7 @@ export default async function BookArtistPage({
                     href={`/artists/${artist.id}`}
                     className="text-xs text-navy underline-offset-2 hover:underline"
                   >
-                    View full profile →
+                    View full profile
                   </Link>
                 </CardContent>
               </Card>
@@ -144,7 +144,7 @@ export default async function BookArtistPage({
                   <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Recent Work</p>
                   <div className="grid grid-cols-3 gap-2">
                     {portfolioImages.map((url, i) => (
-                      <div key={i} className="relative aspect-square rounded-lg overflow-hidden bg-muted">
+                      <div key={i} className="relative aspect-square rounded overflow-hidden bg-muted">
                         <SafeImage
                           src={url}
                           alt={`${artist.name} portfolio ${i + 1}`}

@@ -121,7 +121,7 @@ export function ContactClient() {
                   <Link key={ch.title} href={ch.href} className="group block">
                     <Card className="h-full hover:border-ink transition-all duration-200">
                       <CardContent className="p-6 flex flex-col gap-3">
-                        <div className="w-10 h-10 bg-secondary rounded-lg flex items-center justify-center group-hover:bg-secondary transition-colors">
+                        <div className="w-10 h-10 bg-secondary rounded flex items-center justify-center group-hover:bg-secondary transition-colors">
                           <Icon className="w-5 h-5 text-primary" />
                         </div>
                         <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
@@ -150,8 +150,8 @@ export function ContactClient() {
                 <h2 className="text-2xl font-bold mb-6">Send us a message</h2>
 
                 {submitted ? (
-                  <div className="flex flex-col items-center text-center py-16 px-6 border border-border rounded-lg bg-vellum tex-vellum">
-                    <div className="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mb-4">
+                  <div className="flex flex-col items-center text-center py-16 px-6 border border-border rounded bg-vellum tex-vellum">
+                    <div className="w-16 h-16 bg-secondary rounded flex items-center justify-center mb-4">
                       <CheckCircle className="w-8 h-8 text-success" />
                     </div>
                     <h3 className="text-xl font-bold mb-2">Message received!</h3>
@@ -290,14 +290,14 @@ export function ContactClient() {
                     <a
                       href="mailto:support@tattoomaps.com"
                       aria-label="Email TattooMaps"
-                      className="w-9 h-9 bg-muted hover:bg-secondary border border-border hover:border-ink rounded-lg flex items-center justify-center transition-colors"
+                      className="w-9 h-9 bg-muted hover:bg-secondary border border-border hover:border-ink rounded flex items-center justify-center transition-colors"
                     >
                       <Mail className="w-4 h-4 text-muted-foreground hover:text-primary" />
                     </a>
                   </div>
                 </div>
 
-                <div className="p-4 bg-muted/50 rounded-lg border border-border/50 space-y-2">
+                <div className="p-4 bg-muted/50 rounded border border-border/50 space-y-2">
                   <div className="flex items-center gap-2">
                     <Shield className="w-4 h-4 text-primary" />
                     <span className="text-sm font-medium">Privacy Notice</span>

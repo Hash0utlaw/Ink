@@ -72,7 +72,7 @@ export default function TermsOfServicePage() {
 
             {/* Content */}
             <article className="lg:col-span-3 space-y-10 text-foreground">
-              <div className="p-5 bg-muted/40 rounded-lg border border-border/60 text-sm text-muted-foreground leading-relaxed">
+              <div className="p-5 bg-muted/40 rounded border border-border/60 text-sm text-muted-foreground leading-relaxed">
                 Please read these Terms of Service (&quot;Terms&quot;) carefully before using TattooMaps. By accessing or using TattooMaps you agree to be bound by these Terms. If you do not agree, do not use the platform.
               </div>
 
@@ -192,7 +192,7 @@ export default function TermsOfServicePage() {
                 <Prose>
                   Questions about these Terms? Reach us at:
                 </Prose>
-                <div className="flex items-center gap-3 mt-4 p-4 bg-muted/40 rounded-lg border border-border/60">
+                <div className="flex items-center gap-3 mt-4 p-4 bg-muted/40 rounded border border-border/60">
                   <Mail className="w-5 h-5 text-primary shrink-0" />
                   <div>
                     <p className="text-sm font-medium">Legal Team</p>
@@ -243,7 +243,7 @@ function List({ items }: { items: string[] }) {
     <ul className="space-y-2">
       {items.map((item) => (
         <li key={item} className="flex items-start gap-2 text-sm text-muted-foreground">
-          <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0 mt-2" />
+          <span className="w-1.5 h-1.5 rounded bg-primary shrink-0 mt-2" />
           {item}
         </li>
       ))}

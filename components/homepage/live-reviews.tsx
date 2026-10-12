@@ -87,7 +87,7 @@ export function LiveReviews({ initialReviews }: LiveReviewsProps) {
         </div>
 
         {reviews.length === 0 ? (
-          <div className="rounded-lg border-1.5 border-ink bg-vellum tex-vellum p-5">
+          <div className="rounded border-1.5 border-ink bg-vellum tex-vellum p-5">
             <p className="font-semibold text-ink">No reviews yet</p>
             <p className="mt-1 text-[15px] text-ink-muted">
               Reviews from real bookings will appear here as clients rate their artists.
@@ -99,7 +99,7 @@ export function LiveReviews({ initialReviews }: LiveReviewsProps) {
             <Link
               key={review.id}
               href={`/artists/${review.artistId}`}
-              className="group flex gap-3 rounded-lg border-1.5 border-ink bg-vellum tex-vellum p-4 hover:bg-secondary"
+              className="group flex gap-3 rounded border-1.5 border-ink bg-vellum tex-vellum p-4 hover:bg-secondary"
             >
               <Avatar className="w-10 h-10 shrink-0 border border-ink">
                 <AvatarImage src={review.artistAvatar} alt={review.artistName} />
@@ -111,7 +111,7 @@ export function LiveReviews({ initialReviews }: LiveReviewsProps) {
               <div className="flex-1 min-w-0 space-y-1">
                 <div className="flex items-center justify-between gap-2">
                   <p className="text-xs font-semibold text-muted-foreground truncate">
-                    {review.clientName} → <span className="text-foreground">{review.artistName}</span>
+                    {review.clientName} on <span className="text-foreground">{review.artistName}</span>
                   </p>
                   <span className="text-xs text-muted-foreground shrink-0">{timeAgo(review.createdAt)}</span>
                 </div>
@@ -146,11 +146,11 @@ export function LiveReviewsSkeleton() {
     <section className="mx-auto w-full max-w-[1344px] px-6">
       <div className="mb-6 flex items-center gap-3">
         <span className="h-3 w-3 rounded-full border-1.5 border-ink bg-success" />
-        <div className="h-8 w-40 rounded-lg bg-muted animate-pulse" />
+        <div className="h-8 w-40 rounded bg-muted animate-pulse" />
       </div>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="h-20 rounded-lg bg-muted animate-pulse" />
+          <div key={i} className="h-20 rounded bg-muted animate-pulse" />
         ))}
       </div>
     </section>

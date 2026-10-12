@@ -68,7 +68,7 @@ export default function PrivacyPolicyPage() {
 
             {/* Content */}
             <article className="lg:col-span-3 prose-style space-y-10 text-foreground">
-              <div className="p-5 bg-muted/40 rounded-lg border border-border/60 text-sm text-muted-foreground leading-relaxed">
+              <div className="p-5 bg-muted/40 rounded border border-border/60 text-sm text-muted-foreground leading-relaxed">
                 TattooMaps (&quot;we&quot;, &quot;our&quot;, or &quot;us&quot;) is committed to protecting your personal information. This Privacy Policy explains what data we collect, how we use it, and your choices regarding that data. By using TattooMaps, you agree to the practices described here.
               </div>
 
@@ -193,7 +193,7 @@ export default function PrivacyPolicyPage() {
                 <Prose>
                   If you have questions about this Privacy Policy or want to exercise your data rights, contact us:
                 </Prose>
-                <div className="flex items-center gap-3 mt-4 p-4 bg-muted/40 rounded-lg border border-border/60">
+                <div className="flex items-center gap-3 mt-4 p-4 bg-muted/40 rounded border border-border/60">
                   <Mail className="w-5 h-5 text-primary shrink-0" />
                   <div>
                     <p className="text-sm font-medium">Privacy Team</p>
@@ -244,7 +244,7 @@ function List({ items }: { items: string[] }) {
     <ul className="space-y-2">
       {items.map((item) => (
         <li key={item} className="flex items-start gap-2 text-sm text-muted-foreground">
-          <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0 mt-2" />
+          <span className="w-1.5 h-1.5 rounded bg-primary shrink-0 mt-2" />
           {item}
         </li>
       ))}

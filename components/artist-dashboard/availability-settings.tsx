@@ -61,7 +61,7 @@ export function AvailabilitySettings({ initialAvailability }: AvailabilitySettin
                 aria-pressed={on}
                 onClick={() => setAvailability(opt.value)}
                 className={cn(
-                  "flex min-h-11 items-center gap-2 rounded-lg border-1.5 border-ink px-3 text-left text-[15px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                  "flex min-h-11 items-center gap-2 rounded border-1.5 border-ink px-3 text-left text-[15px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                   on ? "bg-ink text-vellum" : "bg-vellum tex-vellum text-ink hover:bg-secondary",
                 )}
               >

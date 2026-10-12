@@ -39,9 +39,9 @@ export async function generateStaticParams() {
 
 const ARTIST_LIMIT = 24
 const PRIMARY =
-  "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border-1.5 border-ink bg-flash-red px-5 text-[15px] font-semibold text-white hover:bg-flash-red/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+  "inline-flex min-h-11 items-center justify-center gap-2 rounded border-1.5 border-ink bg-flash-red px-5 text-[15px] font-semibold text-white hover:bg-flash-red/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 const SECONDARY =
-  "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border-1.5 border-ink bg-vellum tex-vellum px-5 text-[15px] font-semibold text-ink hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+  "inline-flex min-h-11 items-center justify-center gap-2 rounded border-1.5 border-ink bg-vellum tex-vellum px-5 text-[15px] font-semibold text-ink hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 const TEXT_LINK = "font-semibold text-navy underline underline-offset-2 hover:no-underline"
 const SECTION_HEADING = "font-heading text-[26px] leading-[1.15] text-ink text-balance lg:text-[30px]"
 
@@ -102,7 +102,7 @@ export default async function StylePage({ params }: { params: { styleName: strin
             <p className="mt-3 max-w-prose text-base leading-[1.55] text-ink text-pretty">{style.description}</p>
             <ul className="mt-4 flex flex-wrap gap-2">
               {style.tags.map((tag) => (
-                <li key={tag} className="rounded-lg border-1.5 border-ink bg-vellum tex-vellum px-2.5 py-1 text-sm text-ink">
+                <li key={tag} className="rounded border-1.5 border-ink bg-vellum tex-vellum px-2.5 py-1 text-sm text-ink">
                   {tag}
                 </li>
               ))}
@@ -119,7 +119,7 @@ export default async function StylePage({ params }: { params: { styleName: strin
             <p className="mt-3 text-[13px] text-ink-muted">Example images, not work by listed artists.</p>
           </section>
 
-          <section aria-labelledby="style-find" className="rounded-lg border-1.5 border-ink bg-vellum tex-vellum p-6 lg:p-8">
+          <section aria-labelledby="style-find" className="rounded border-1.5 border-ink bg-vellum tex-vellum p-6 lg:p-8">
             <h2 id="style-find" className="font-heading text-[22px] leading-[1.15] text-ink lg:text-[26px]">
               Ready to get your {style.name} tattoo?
             </h2>

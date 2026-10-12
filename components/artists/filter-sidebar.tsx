@@ -151,7 +151,7 @@ export function FilterSidebar({ filters, onFilterChange, onNearMe, showAvailable
         {onNearMe && (
           <Button
             variant="outline"
-            className="min-h-11 w-full rounded-lg border-1.5 border-ink bg-vellum tex-vellum text-[15px] font-semibold text-ink hover:bg-secondary"
+            className="min-h-11 w-full rounded border-1.5 border-ink bg-vellum tex-vellum text-[15px] font-semibold text-ink hover:bg-secondary"
             onClick={handleNearMe}
             disabled={locating}
           >

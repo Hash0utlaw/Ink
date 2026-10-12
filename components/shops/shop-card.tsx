@@ -48,7 +48,7 @@ export function ShopCard({
           <div className="flex items-start justify-between gap-2">
             <h3 className="font-bold text-xl">{shop.name}</h3>
             {distanceMi != null && (
-              <span className="bg-warning text-warning-foreground border border-warning text-xs px-2 py-0.5 rounded-lg shrink-0">
+              <span className="bg-warning text-warning-foreground border border-warning text-xs px-2 py-0.5 rounded shrink-0">
                 {distanceMi.toFixed(1)} mi away
               </span>
             )}

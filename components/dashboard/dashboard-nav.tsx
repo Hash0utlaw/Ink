@@ -22,7 +22,7 @@ export function DashboardNav({ items, onSignOut }: { items: DashboardNavItem[]; 
   const pathname = usePathname()
 
   return (
-    <nav aria-label="Dashboard" className="rounded-lg border-1.5 border-ink bg-vellum tex-vellum p-2 md:sticky md:top-20">
+    <nav aria-label="Dashboard" className="rounded border-1.5 border-ink bg-vellum tex-vellum p-2 md:sticky md:top-20">
       <ul className="grid grid-cols-2 gap-1 md:grid-cols-1">
         {items.map((item) => {
           const active = item.exact ? pathname === item.href : pathname.startsWith(item.href)

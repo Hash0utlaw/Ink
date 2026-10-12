@@ -84,7 +84,7 @@ export function CreativeGenerator() {
 
   return (
     <div className="max-w-3xl mx-auto">
-      <div className="p-8 rounded-lg bg-secondary border border-border/50">
+      <div className="p-8 rounded bg-secondary border border-border/50">
         <div className="mb-6">
           <Progress value={((currentStep + 1) / steps.length) * 100} className="w-full" />
           <p className="text-center text-sm text-muted-foreground mt-2">

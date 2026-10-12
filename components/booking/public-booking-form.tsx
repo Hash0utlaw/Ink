@@ -97,7 +97,7 @@ export function PublicBookingForm({ artistId, artistName, shopName, hasAccount, 
       <div className="flex items-center gap-2">
         {[1, 2, 3].map((s) => (
           <div key={s} className="flex items-center gap-2">
-            <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${
+            <div className={`w-7 h-7 rounded flex items-center justify-center text-xs font-bold transition-colors ${
               step > s ? "bg-success text-success-foreground" : step === s ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
             }`}>{s}</div>
             {s < 3 && <div className={`h-px flex-1 w-8 ${step > s ? "bg-success" : "bg-border"}`} />}
@@ -132,7 +132,7 @@ export function PublicBookingForm({ artistId, artistName, shopName, hasAccount, 
             disabled={!description.trim()}
             onClick={() => setStep(2)}
           >
-            Next →
+            Next
           </Button>
         </div>
       )}
@@ -195,8 +195,8 @@ export function PublicBookingForm({ artistId, artistName, shopName, hasAccount, 
             <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" className="flex-1" onClick={() => setStep(1)}>← Back</Button>
-            <Button className="flex-1 bg-primary hover:bg-primary/90" onClick={() => setStep(3)}>Next →</Button>
+            <Button variant="outline" className="flex-1" onClick={() => setStep(1)}>Back</Button>
+            <Button className="flex-1 bg-primary hover:bg-primary/90" onClick={() => setStep(3)}>Next</Button>
           </div>
         </div>
       )}
@@ -219,7 +219,7 @@ export function PublicBookingForm({ artistId, artistName, shopName, hasAccount, 
           {error && <p className="text-sm text-destructive">{error}</p>}
 
           <div className="flex gap-2">
-            <Button variant="outline" className="flex-1" onClick={() => setStep(2)} disabled={submitting}>← Back</Button>
+            <Button variant="outline" className="flex-1" onClick={() => setStep(2)} disabled={submitting}>Back</Button>
             <Button
               className="flex-1 bg-primary hover:bg-primary/90"
               disabled={!name.trim() || !email.trim() || submitting}

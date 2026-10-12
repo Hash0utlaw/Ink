@@ -41,7 +41,7 @@ import { initials } from "@/lib/initials"
 
 // Outline on the night bar: red is kept for each page's main action.
 const SIGN_IN =
-  "min-h-11 rounded-lg border-1.5 border-cream bg-transparent px-4 text-[15px] font-semibold text-cream hover:bg-cream hover:text-night"
+  "min-h-11 rounded border-1.5 border-cream bg-transparent px-4 text-[15px] font-semibold text-cream hover:bg-cream hover:text-night"
 
 const MOBILE_NAV_ITEMS = [
   { href: "/artists", label: "Artists", icon: Users },
@@ -124,7 +124,7 @@ export function Header() {
           {/* Mobile nav trigger */}
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden rounded-lg border-1.5 border-cream text-cream hover:bg-cream/10 hover:text-cream" aria-label="Open menu">
+              <Button variant="ghost" size="icon" className="md:hidden rounded border-1.5 border-cream text-cream hover:bg-cream/10 hover:text-cream" aria-label="Open menu">
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
@@ -145,7 +145,7 @@ export function Header() {
                       <Link
                         href={href}
                         className={cn(
-                          "group flex items-center gap-3 rounded-lg px-3 py-3 text-[15px] font-medium transition-colors",
+                          "group flex items-center gap-3 rounded px-3 py-3 text-[15px] font-medium transition-colors",
                           active
                             ? "bg-cream/10 text-cream"
                             : "text-cream/85 hover:bg-cream/10 hover:text-cream"
@@ -153,7 +153,7 @@ export function Header() {
                       >
                         <span
                           className={cn(
-                            "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors",
+                            "flex h-9 w-9 shrink-0 items-center justify-center rounded transition-colors",
                             active
                               ? "bg-primary text-primary-foreground"
                               : "bg-cream/10 text-cream group-hover:bg-cream/15"
@@ -172,10 +172,10 @@ export function Header() {
               {/* Auth section */}
               <div className="mt-auto border-t border-cream/20 p-4">
                 {isLoading ? (
-                  <div className="h-14 animate-pulse rounded-lg bg-cream/10" />
+                  <div className="h-14 animate-pulse rounded bg-cream/10" />
                 ) : user ? (
                   <div className="space-y-1">
-                    <div className="mb-2 flex items-center gap-3 rounded-lg bg-cream/10 px-3 py-3">
+                    <div className="mb-2 flex items-center gap-3 rounded bg-cream/10 px-3 py-3">
                       <Avatar className="h-9 w-9">
                         <AvatarImage
                           src={user.user_metadata?.avatar_url || "/placeholder-user.jpg"}
@@ -195,7 +195,7 @@ export function Header() {
                     <SheetClose asChild>
                       <Link
                         href={dashboardLink}
-                        className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-cream/85 transition-colors hover:bg-cream/10 hover:text-cream"
+                        className="flex items-center gap-3 rounded px-3 py-2.5 text-sm font-medium text-cream/85 transition-colors hover:bg-cream/10 hover:text-cream"
                       >
                         <User className="h-4 w-4" />
                         {dashboardLabel}
@@ -204,7 +204,7 @@ export function Header() {
                     <SheetClose asChild>
                       <Link
                         href={role === "artist" ? "/artist-dashboard/profile" : "/dashboard/profile"}
-                        className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-cream/85 transition-colors hover:bg-cream/10 hover:text-cream"
+                        className="flex items-center gap-3 rounded px-3 py-2.5 text-sm font-medium text-cream/85 transition-colors hover:bg-cream/10 hover:text-cream"
                       >
                         <Settings className="h-4 w-4" />
                         Settings
@@ -212,7 +212,7 @@ export function Header() {
                     </SheetClose>
                     <button
                       onClick={handleSignOut}
-                      className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-cream/85 transition-colors hover:bg-cream/10 hover:text-cream"
+                      className="flex w-full items-center gap-3 rounded px-3 py-2.5 text-sm font-medium text-cream/85 transition-colors hover:bg-cream/10 hover:text-cream"
                     >
                       <LogOut className="h-4 w-4" />
                       Log out
@@ -276,7 +276,7 @@ export function Header() {
                   <Button
                     variant="ghost"
                     aria-label="Account menu"
-                    className="relative h-10 w-10 overflow-hidden rounded-lg border-1.5 border-cream bg-transparent p-0 text-cream hover:bg-cream/10 hover:text-cream [&_svg]:size-5"
+                    className="relative h-10 w-10 overflow-hidden rounded border-1.5 border-cream bg-transparent p-0 text-cream hover:bg-cream/10 hover:text-cream [&_svg]:size-5"
                   >
                     {user.user_metadata?.avatar_url ? (
                       <Avatar className="h-full w-full rounded-none">

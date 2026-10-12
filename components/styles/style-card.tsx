@@ -15,7 +15,7 @@ export function StyleCard({ style, masterSlug, artistCount }: StyleCardProps) {
   return (
     <Link
       href={`/styles/${style.slug}`}
-      className="flex h-full gap-4 rounded-lg border-1.5 border-ink bg-vellum tex-vellum p-5 hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="flex h-full gap-4 rounded border-1.5 border-ink bg-vellum tex-vellum p-5 hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
       <GuideSymbol masterSlug={masterSlug} size={32} className="mt-0.5 shrink-0" />
       <div className="min-w-0">

@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils"
 
 /** White field, 1.5px ink outline, 44px tall: inputs and select triggers in the filters. */
 export const FIELD_CLASS =
-  "min-h-11 rounded-lg border-1.5 border-ink bg-white text-[15px] text-ink focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-0"
+  "min-h-11 rounded border-1.5 border-ink bg-white text-[15px] text-ink focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-0"
 
 /** A filter group: a plain label above its controls. */
 export function FilterGroup({ label, htmlFor, children }: { label: string; htmlFor?: string; children: ReactNode }) {
@@ -42,7 +42,7 @@ export function FilterChip({
       aria-pressed={pressed}
       onClick={onClick}
       className={cn(
-        "inline-flex min-h-9 items-center gap-1.5 rounded-lg border-1.5 border-ink px-2.5 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        "inline-flex min-h-9 items-center gap-1.5 rounded border-1.5 border-ink px-2.5 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
         pressed ? "bg-ink text-vellum" : "bg-vellum tex-vellum text-ink hover:bg-secondary",
       )}
     >
@@ -71,13 +71,13 @@ export function StyleChips({ selected, onToggle }: { selected: string[]; onToggl
 /** An applied filter above the results, with a button that removes it. */
 export function ActiveFilter({ label, onRemove }: { label: string; onRemove: () => void }) {
   return (
-    <span className="inline-flex min-h-9 items-center gap-1 rounded-lg border-1.5 border-ink bg-ink pl-2.5 text-sm font-semibold text-vellum">
+    <span className="inline-flex min-h-9 items-center gap-1 rounded border-1.5 border-ink bg-ink pl-2.5 text-sm font-semibold text-vellum">
       {label}
       <button
         type="button"
         onClick={onRemove}
         aria-label={`Remove ${label}`}
-        className="inline-flex h-9 w-8 items-center justify-center rounded-r-lg hover:bg-ink/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="inline-flex h-9 w-8 items-center justify-center rounded-r hover:bg-ink/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         <X className="h-3.5 w-3.5" aria-hidden="true" />
       </button>

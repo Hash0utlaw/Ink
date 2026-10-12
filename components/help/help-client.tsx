@@ -76,7 +76,7 @@ export function HelpClient() {
                 placeholder="Search articles, FAQs..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-12 h-13 text-base bg-background border-border focus:border-ink rounded-lg"
+                className="pl-12 h-13 text-base bg-background border-border focus:border-ink rounded"
               />
             </div>
           </div>
@@ -94,7 +94,7 @@ export function HelpClient() {
                     <Card key={cat.slug} className="bg-vellum tex-vellum">
                       <CardContent className="p-6">
                         <div className="flex items-start gap-4">
-                          <div className="w-10 h-10 bg-secondary rounded-lg flex items-center justify-center shrink-0">
+                          <div className="w-10 h-10 bg-secondary rounded flex items-center justify-center shrink-0">
                             <Icon className="w-5 h-5 text-primary" />
                           </div>
                           <div className="flex-1 min-w-0">
@@ -133,7 +133,7 @@ export function HelpClient() {
             ) : (
               <div className="space-y-3">
                 {filteredFaqs.map((faq, i) => (
-                  <div key={i} className="border border-border rounded-lg overflow-hidden bg-vellum tex-vellum">
+                  <div key={i} className="border border-border rounded overflow-hidden bg-vellum tex-vellum">
                     <button
                       type="button"
                       className="w-full flex items-center justify-between p-5 text-left hover:bg-muted/30 transition-colors"
@@ -161,7 +161,7 @@ export function HelpClient() {
             <MessageCircle className="w-10 h-10 text-primary mx-auto mb-4" />
             <h2 className="text-2xl font-bold mb-3">Still need help?</h2>
             <p className="text-muted-foreground mb-6">Our support team is available Monday through Friday, 9am – 6pm EST.</p>
-            <Link href="/contact" className="inline-flex items-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 font-semibold px-6 py-3 rounded-lg transition-colors">
+            <Link href="/contact" className="inline-flex items-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 font-semibold px-6 py-3 rounded transition-colors">
               <MessageCircle className="w-4 h-4" />
               Contact Support
             </Link>

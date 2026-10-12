@@ -79,7 +79,7 @@ export function ArtistPlateCard({ artist, showShop = false, distance, sizes }: A
   return (
     <Link
       href={`/artists/${artist.id}`}
-      className="block rounded-lg border-1.5 border-transparent p-2 hover:border-ink hover:bg-vellum focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="block rounded border-1.5 border-transparent p-2 hover:border-ink hover:bg-vellum focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
       {body}
     </Link>

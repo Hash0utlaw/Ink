@@ -150,7 +150,7 @@ export default async function ShopProfilePage({ params }: { params: { id: string
             artistCount={residentArtists.filter((a) => !a.isStub).length}
           />
           {shop.possiblyClosed && (
-            <div className="mt-10 rounded-lg border-1.5 border-ink bg-vellum tex-vellum p-5">
+            <div className="mt-10 rounded border-1.5 border-ink bg-vellum tex-vellum p-5">
               <p className="font-semibold text-ink">This shop may be permanently closed.</p>
               <p className="mt-1 text-[15px] leading-[1.55] text-ink-muted text-pretty">
                 Call ahead before you visit. Own this shop?{" "}

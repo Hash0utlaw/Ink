@@ -22,7 +22,7 @@ export function ClaimBand() {
         </div>
         <Link
           href="/claim"
-          className="inline-flex min-h-[44px] shrink-0 items-center justify-center rounded-lg border-1.5 border-cream bg-primary px-6 text-base font-semibold text-primary-foreground hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cream focus-visible:ring-offset-2 focus-visible:ring-offset-night"
+          className="inline-flex min-h-[44px] shrink-0 items-center justify-center rounded border-1.5 border-cream bg-primary px-6 text-base font-semibold text-primary-foreground hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cream focus-visible:ring-offset-2 focus-visible:ring-offset-night"
         >
           Claim your page
         </Link>

@@ -5,7 +5,7 @@ import { SlidersHorizontal, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const PRIMARY =
-  "min-h-11 w-full rounded-lg border-1.5 border-ink bg-flash-red px-5 text-[15px] font-semibold text-white hover:bg-flash-red/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+  "min-h-11 w-full rounded border-1.5 border-ink bg-flash-red px-5 text-[15px] font-semibold text-white hover:bg-flash-red/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
 
 interface FilterDrawerProps {
   /** e.g. "Show 79 results"; null while results load. */
@@ -41,7 +41,7 @@ export function FilterDrawer({ resultLabel, activeCount, children }: FilterDrawe
         type="button"
         onClick={() => setOpen(true)}
         aria-expanded={open}
-        className="inline-flex min-h-11 items-center gap-2 rounded-lg border-1.5 border-ink bg-vellum tex-vellum px-4 text-[15px] font-semibold text-ink hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:hidden"
+        className="inline-flex min-h-11 items-center gap-2 rounded border-1.5 border-ink bg-vellum tex-vellum px-4 text-[15px] font-semibold text-ink hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:hidden"
       >
         <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
         Filters
@@ -65,7 +65,7 @@ export function FilterDrawer({ resultLabel, activeCount, children }: FilterDrawe
             type="button"
             onClick={() => setOpen(false)}
             aria-label="Close filters"
-            className="inline-flex h-11 w-11 items-center justify-center rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="inline-flex h-11 w-11 items-center justify-center rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <X className="h-5 w-5" aria-hidden="true" />
           </button>

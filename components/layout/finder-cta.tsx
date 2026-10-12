@@ -21,10 +21,10 @@ export function FinderCta({ variant = "banner" }: FinderCtaProps) {
   return (
     <Link
       href="/find-artist"
-      className="group flex items-center justify-between gap-4 rounded-lg border border-ink bg-secondary px-5 py-4 hover:bg-secondary hover:border-ink transition-all"
+      className="group flex items-center justify-between gap-4 rounded border border-ink bg-secondary px-5 py-4 hover:bg-secondary hover:border-ink transition-all"
     >
       <div className="flex items-center gap-3">
-        <div className="rounded-full bg-secondary p-2 shrink-0">
+        <div className="rounded bg-secondary p-2 shrink-0">
           <Wand2 className="w-4 h-4 text-primary" />
         </div>
         <div>

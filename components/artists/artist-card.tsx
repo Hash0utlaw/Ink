@@ -70,7 +70,7 @@ export function ArtistCard({ artist, distance, initialSaved }: ArtistCardProps) 
           <div className={`flex items-start justify-between gap-2 ${artist.isStub ? "" : "pr-12"}`}>
             <h3 className="font-bold text-base leading-tight truncate">{artist.name}</h3>
             {distance != null && (
-              <span className="text-xs px-2 py-0.5 rounded-lg bg-warning text-warning-foreground border border-warning whitespace-nowrap shrink-0">
+              <span className="text-xs px-2 py-0.5 rounded bg-warning text-warning-foreground border border-warning whitespace-nowrap shrink-0">
                 {distance.toFixed(1)} mi
               </span>
             )}
@@ -102,8 +102,8 @@ export function ArtistCard({ artist, distance, initialSaved }: ArtistCardProps) 
         <div className="flex items-center gap-3 flex-wrap">
           {/* Availability defaults to "available" for every listing; it's only real once claimed. */}
           {artist.isClaimed && (
-            <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-lg border ${avail.badge}`}>
-              <span className={`w-1.5 h-1.5 rounded-full ${avail.dot}`} />
+            <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded border ${avail.badge}`}>
+              <span className={`w-1.5 h-1.5 rounded ${avail.dot}`} />
               {avail.label}
             </span>
           )}
@@ -119,7 +119,7 @@ export function ArtistCard({ artist, distance, initialSaved }: ArtistCardProps) 
 
         {/* Discount badge (Pro only) */}
         {artist.firstBookingDiscount != null && artist.firstBookingDiscount > 0 && (
-          <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-lg border border-warning text-warning-foreground bg-warning">
+          <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded border border-warning text-warning-foreground bg-warning">
             <Tag className="w-3 h-3" />
             {artist.firstBookingDiscount}% off first session
           </span>
@@ -161,11 +161,11 @@ export function ArtistCardSkeleton() {
         </div>
       </CardHeader>
       <CardContent className="p-4 pt-0 space-y-2">
-        <Skeleton className="h-5 w-32 rounded-lg" />
+        <Skeleton className="h-5 w-32 rounded" />
         <div className="flex flex-wrap gap-1.5">
-          <Skeleton className="h-5 w-16 rounded-lg" />
-          <Skeleton className="h-5 w-20 rounded-lg" />
-          <Skeleton className="h-5 w-14 rounded-lg" />
+          <Skeleton className="h-5 w-16 rounded" />
+          <Skeleton className="h-5 w-20 rounded" />
+          <Skeleton className="h-5 w-14 rounded" />
         </div>
       </CardContent>
       <CardFooter className="p-4 pt-0">
