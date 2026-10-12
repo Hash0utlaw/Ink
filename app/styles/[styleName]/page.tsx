@@ -16,8 +16,7 @@ import { toStyleSlugs } from "@/lib/styles"
 import { exactMasterSlug } from "@/lib/style-guide"
 
 // Guide pages whose name isn't on the master style list (lib/styles.ts):
-// Surrealism links to the closest master style; Biomechanical has none, so
-// its artist links are hidden rather than showing unfiltered results.
+// Surrealism's shop link uses the closest master style; Biomechanical has none.
 const FILTER_OVERRIDES: Record<string, string | null> = { surrealism: "illustrative", biomechanical: null }
 
 // Real artist counts and lists, refreshed hourly.
@@ -56,11 +55,11 @@ export default async function StylePage({ params }: { params: { styleName: strin
 
   const filterSlug =
     style.slug in FILTER_OVERRIDES ? FILTER_OVERRIDES[style.slug] : toStyleSlugs([style.name])[0] ?? null
-  const artistsHref = filterSlug ? `/artists?styles=${filterSlug}` : null
-  const shopsHref = `/shops?styles=${encodeURIComponent(filterSlug ?? style.name)}`
-
   // Artists only for guide styles that are exactly a master style; none for close matches.
   const masterSlug = exactMasterSlug(style.slug)
+  // Exact matches keep their style filter; close or no matches link to all artists.
+  const artistsHref = masterSlug && filterSlug ? `/artists?styles=${filterSlug}` : "/artists"
+  const shopsHref = `/shops?styles=${encodeURIComponent(filterSlug ?? style.name)}`
   const artists = masterSlug ? await getArtists({ styles: [masterSlug], sortBy: "rating", pageSize: ARTIST_LIMIT }) : null
 
   const related = ALL_STYLES.filter(
