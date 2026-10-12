@@ -75,7 +75,7 @@ export default function PrivacyPolicyPage() {
               <Section id="information-we-collect" title="1. Information We Collect">
                 <SubHeading>Information you provide</SubHeading>
                 <Prose>
-                  When you create an account, book an appointment, or contact us, we collect: your name and email address; username and password (stored in hashed form); profile information you add (bio, location, portfolio photos for artists); payment information processed securely via our payment processor — we never store full card numbers; messages you send through the platform.
+                  When you create an account, send a request to an artist, or contact us, we collect: your name and email address; username and password (stored in hashed form); profile information you add (bio, location, portfolio photos for artists); payment information processed securely via our payment processor — we never store full card numbers; messages you send through the platform.
                 </Prose>
                 <SubHeading>Information collected automatically</SubHeading>
                 <Prose>

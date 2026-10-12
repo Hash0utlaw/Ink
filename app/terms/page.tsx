@@ -137,7 +137,7 @@ export default function TermsOfServicePage() {
 
               <Section id="bookings" title="6. Bookings & Payments">
                 <Prose>
-                  TattooMaps facilitates bookings between clients and artists. Deposits and payment policies are set by individual artists and are displayed on their profiles. TattooMaps is not responsible for disputes between clients and artists regarding services, refunds, or deposits. If a dispute arises, we encourage both parties to resolve it directly. We may offer mediation assistance at our discretion.
+                  TattooMaps facilitates bookings between clients and artists. Artists and shops set their own prices, deposits and policies, and arrange them with you directly. TattooMaps is not responsible for disputes between clients and artists regarding services, refunds, or deposits. If a dispute arises, we encourage both parties to resolve it directly. We may offer mediation assistance at our discretion.
                 </Prose>
                 <Prose>
                   Platform service fees (if applicable) are non-refundable once a booking is confirmed, except where required by law.
