@@ -30,6 +30,7 @@ next-env.d.ts
 data/us_artists_import.csv
 data/*.csv
 data/undo/
+data/reports/
 
 # Overture / Foursquare staging databases (scripts/overture/fetch.ts)
 data/overture/
