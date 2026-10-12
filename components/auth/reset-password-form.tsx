@@ -8,9 +8,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { AlertCircle, ArrowLeft, KeyRound } from "lucide-react"
 import { updatePassword, verifyRecoveryLink } from "@/app/(auth)/actions"
+import { AUTH_HEADING, AUTH_ICON_TILE, AUTH_INPUT, AUTH_INTRO, AUTH_LABEL, AUTH_LINK, AUTH_SUBMIT, AuthNotice } from "./auth-ui"
 
-const inputClass =
-  "h-11 bg-muted/40 border-border/60 focus:border-ink focus:ring-ring/20 text-foreground placeholder:text-muted-foreground/50 rounded-lg"
 
 export function ResetPasswordForm() {
   const searchParams = useSearchParams()
@@ -51,24 +50,24 @@ export function ResetPasswordForm() {
   }
 
   if (linkState === "checking") {
-    return <div className="py-12 text-center text-muted-foreground">{"Checking your link…"}</div>
+    return <div className="py-12 text-center text-ink-muted">{"Checking your link…"}</div>
   }
 
   if (linkState === "invalid") {
     return (
-      <div className="w-full max-w-[420px] space-y-6">
-        <div className="w-14 h-14 rounded-lg bg-destructive/15 border border-destructive/25 flex items-center justify-center">
-          <AlertCircle className="w-7 h-7 text-destructive" />
+      <div className="w-full space-y-6">
+        <div className={AUTH_ICON_TILE}>
+          <AlertCircle className="h-7 w-7 text-ink" aria-hidden="true" />
         </div>
         <div className="space-y-2">
-          <h2 className="text-3xl font-black tracking-tight text-foreground">Link expired</h2>
-          <p className="text-muted-foreground text-sm leading-relaxed">
+          <h1 className={AUTH_HEADING}>Link expired</h1>
+          <p className={AUTH_INTRO}>
             This password reset link is invalid or has expired. Request a new one and we&apos;ll email it to you.
           </p>
         </div>
         <Link
           href="/forgot-password"
-          className="inline-flex items-center gap-1.5 text-sm font-semibold text-navy underline-offset-2 hover:underline"
+          className={`inline-flex items-center gap-1.5 text-[15px] ${AUTH_LINK}`}
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           Request a new reset link
@@ -78,20 +77,20 @@ export function ResetPasswordForm() {
   }
 
   return (
-    <div className="w-full max-w-[420px]">
+    <div className="w-full">
       <div className="mb-8 space-y-4">
-        <div className="w-14 h-14 rounded-lg bg-secondary border border-ink flex items-center justify-center">
-          <KeyRound className="w-7 h-7 text-primary" />
+        <div className={AUTH_ICON_TILE}>
+          <KeyRound className="h-7 w-7 text-ink" aria-hidden="true" />
         </div>
         <div>
-          <h2 className="text-3xl font-black tracking-tight text-foreground mb-2">Set a new password</h2>
-          <p className="text-muted-foreground text-sm leading-relaxed">Choose a password with at least 8 characters.</p>
+          <h1 className={AUTH_HEADING}>Set a new password</h1>
+          <p className={AUTH_INTRO}>Choose a password with at least 8 characters.</p>
         </div>
       </div>
 
       <form action={handleSubmit} className="space-y-5">
         <div className="space-y-1.5">
-          <Label htmlFor="password" className="text-sm font-medium text-foreground">
+          <Label htmlFor="password" className={AUTH_LABEL}>
             New password
           </Label>
           <Input
@@ -104,11 +103,11 @@ export function ResetPasswordForm() {
             disabled={isPending}
             autoFocus
             autoComplete="new-password"
-            className={inputClass}
+            className={AUTH_INPUT}
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="confirm" className="text-sm font-medium text-foreground">
+          <Label htmlFor="confirm" className={AUTH_LABEL}>
             Confirm new password
           </Label>
           <Input
@@ -120,21 +119,18 @@ export function ResetPasswordForm() {
             required
             disabled={isPending}
             autoComplete="new-password"
-            className={inputClass}
+            className={AUTH_INPUT}
           />
         </div>
 
         {message && (
-          <div className="flex items-start gap-2.5 text-sm p-3.5 rounded-lg border bg-destructive/10 border-destructive/30 text-destructive-foreground">
-            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-            <span>{message}</span>
-          </div>
+          <AuthNotice tone="error">{message}</AuthNotice>
         )}
 
         <Button
           type="submit"
           disabled={isPending}
-          className="w-full h-11 rounded-lg font-semibold text-sm bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-200"
+          className={AUTH_SUBMIT}
         >
           {isPending ? "Saving..." : "Update password"}
         </Button>

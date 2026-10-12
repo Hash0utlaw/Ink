@@ -39,6 +39,10 @@ import {
 } from "@/components/ui/sheet"
 import { initials } from "@/lib/initials"
 
+// Outline on the night bar: red is kept for each page's main action.
+const SIGN_IN =
+  "min-h-11 rounded-lg border-1.5 border-cream bg-transparent px-4 text-[15px] font-semibold text-cream hover:bg-cream hover:text-night"
+
 const MOBILE_NAV_ITEMS = [
   { href: "/artists", label: "Artists", icon: Users },
   { href: "/tattoo-shops", label: "Shops", icon: Store },
@@ -216,7 +220,7 @@ export function Header() {
                   </div>
                 ) : (
                   <SheetClose asChild>
-                    <Button asChild className="w-full">
+                    <Button asChild variant="outline" className={`w-full ${SIGN_IN}`}>
                       <Link href={loginHref}>Sign in</Link>
                     </Button>
                   </SheetClose>
@@ -323,7 +327,7 @@ export function Header() {
               </DropdownMenu>
             </>
           ) : (
-            <Button asChild>
+            <Button asChild variant="outline" className={SIGN_IN}>
               <Link href={loginHref}>Sign in</Link>
             </Button>
           )}

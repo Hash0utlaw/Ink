@@ -3,10 +3,12 @@ import Link from "next/link"
 import { HeaderSkeleton } from "@/components/layout/header-skeleton"
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
-import { MotionView } from "@/components/utils/motion-view"
-import { Badge } from "@/components/ui/badge"
-import { ArrowRight } from "lucide-react"
 import { StyleCard } from "@/components/styles/style-card"
+import { getArtists } from "@/lib/supabase/artists"
+import { exactMasterSlug } from "@/lib/style-guide"
+
+// Real artist counts and lists, refreshed hourly.
+export const revalidate = 3600
 
 export const metadata = {
   title: "Tattoo Styles Guide — Every Style Explained | TattooMaps",
@@ -337,87 +339,69 @@ export const ALL_STYLES = [
   },
 ]
 
-// Group styles by category
-const CATEGORIES = Array.from(new Set(ALL_STYLES.map((s) => s.category)))
+// Same buttons as the rest of the site (docs: Primary / Secondary button).
+const PRIMARY =
+  "inline-flex min-h-11 items-center justify-center rounded-lg border-1.5 border-ink bg-flash-red px-5 text-[15px] font-semibold text-white hover:bg-flash-red/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+const SECONDARY =
+  "inline-flex min-h-11 items-center justify-center rounded-lg border-1.5 border-ink bg-vellum tex-vellum px-5 text-[15px] font-semibold text-ink hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 
-export default function AllStylesPage() {
+/** Real artist counts for guide styles that exactly match a master style; null when unknown. */
+async function artistCounts(): Promise<Record<string, number | null>> {
+  const entries = await Promise.all(
+    ALL_STYLES.map(async (style) => {
+      const master = exactMasterSlug(style.slug)
+      if (!master) return [style.slug, null] as const
+      const { count, error } = await getArtists({ styles: [master], pageSize: 1 })
+      return [style.slug, error ? null : count] as const
+    }),
+  )
+  return Object.fromEntries(entries)
+}
+
+export default async function AllStylesPage() {
+  const counts = await artistCounts()
+
   return (
     <div className="flex min-h-screen flex-col">
       <Suspense fallback={<HeaderSkeleton />}>
         <Header />
       </Suspense>
 
+      {/* No entrance animation: everything is readable on first paint. */}
       <main className="flex-1 bg-paper tex-paper">
-        {/* ── Hero ── */}
-        <div className="border-b border-border bg-muted/30">
-          <div className="container mx-auto px-4 py-14 md:py-20 text-center">
-            <MotionView>
-              <Badge variant="outline" className="mb-4 text-xs font-medium tracking-wider uppercase">
-                Style Guide
-              </Badge>
-              <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-balance">
-                Every Tattoo Style,<br className="hidden sm:block" /> All in One Place
-              </h1>
-              <p className="mt-5 max-w-2xl mx-auto text-lg text-muted-foreground leading-relaxed">
-                Browse {ALL_STYLES.length} distinct styles — from fine line and realism to Japanese, blackwork, and
-                watercolor. Click any style to see examples and find artists or shops near you.
-              </p>
-            </MotionView>
-          </div>
-        </div>
+        <div className="mx-auto max-w-[1180px] px-4 py-12 sm:px-6 lg:py-16">
+          <h1 className="font-heading text-[34px] leading-[1.1] text-ink text-balance lg:text-[52px]">
+            Every tattoo style in one place
+          </h1>
+          <p className="mt-3 max-w-prose text-[17px] leading-[1.55] text-ink-muted text-pretty lg:text-[19px]">
+            Browse {ALL_STYLES.length} styles, from fine line and realism to Japanese and blackwork, then find artists or
+            shops near you.
+          </p>
 
-        {/* ── Styles grouped by category ── */}
-        <div className="container mx-auto px-4 py-12 space-y-16">
-          {CATEGORIES.map((category) => {
-            const categoryStyles = ALL_STYLES.filter((s) => s.category === category)
-            return (
-              <section key={category}>
-                <MotionView>
-                  <div className="flex items-center gap-3 mb-6">
-                    <h2 className="text-2xl font-bold">{category}</h2>
-                    <div className="flex-1 h-px bg-border" />
-                    <span className="text-sm text-muted-foreground tabular-nums">
-                      {categoryStyles.length} style{categoryStyles.length !== 1 ? "s" : ""}
-                    </span>
-                  </div>
-                </MotionView>
+          <ul className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:mt-12 lg:grid-cols-3 lg:gap-5">
+            {ALL_STYLES.map((style) => (
+              <li key={style.slug}>
+                <StyleCard style={style} masterSlug={exactMasterSlug(style.slug)} artistCount={counts[style.slug]} />
+              </li>
+            ))}
+          </ul>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {categoryStyles.map((style, i) => (
-                    <MotionView key={style.slug} delay={i * 0.07}>
-                      <StyleCard style={style} />
-                    </MotionView>
-                  ))}
-                </div>
-              </section>
-            )
-          })}
-        </div>
-
-        {/* ── Bottom CTA ── */}
-        <div className="border-t border-border bg-muted/30">
-          <div className="container mx-auto px-4 py-14 text-center">
-            <MotionView>
-              <h2 className="text-2xl md:text-3xl font-bold mb-3">Not sure which style suits you?</h2>
-              <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                Browse artists and shops to get inspired and find the right fit.
-              </p>
-              <div className="flex items-center justify-center gap-3 flex-wrap">
-                <Link
-                  href="/artists"
-                  className="inline-flex items-center gap-2 bg-primary text-primary-foreground font-medium px-6 py-3 rounded-lg hover:bg-primary/90 transition-colors"
-                >
-                  Browse Artists <ArrowRight className="w-4 h-4" />
-                </Link>
-                <Link
-                  href="/shops"
-                  className="inline-flex items-center gap-2 border border-border bg-background text-foreground font-medium px-6 py-3 rounded-lg hover:bg-muted/50 transition-colors"
-                >
-                  Browse Shops <ArrowRight className="w-4 h-4" />
-                </Link>
-              </div>
-            </MotionView>
-          </div>
+          <section aria-labelledby="styles-next" className="mt-16 border-t border-rule pt-10 lg:mt-20">
+            <h2 id="styles-next" className="font-heading text-[26px] leading-[1.15] text-ink lg:text-[30px]">
+              Not sure which style suits you?
+            </h2>
+            <p className="mt-2 max-w-prose text-base leading-[1.55] text-ink-muted text-pretty">
+              Browse artists and shops to get inspired and find the right fit.
+            </p>
+            <div className="mt-5 flex flex-wrap gap-3">
+              <Link href="/artists" className={PRIMARY}>
+                Browse artists
+              </Link>
+              <Link href="/shops" className={SECONDARY}>
+                Browse shops
+              </Link>
+            </div>
+          </section>
         </div>
       </main>
 

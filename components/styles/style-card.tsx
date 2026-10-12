@@ -1,69 +1,31 @@
-"use client"
-
-import { useState } from "react"
 import Link from "next/link"
-import { ArrowRight, ImageOff } from "lucide-react"
 import type { ALL_STYLES } from "@/app/styles/page"
+import { GuideSymbol } from "./guide-symbol"
 
 interface StyleCardProps {
   style: (typeof ALL_STYLES)[number]
+  /** The exact master style, or null (plain outline circle). */
+  masterSlug: string | null
+  /** Real artist count; hidden when missing or 0. */
+  artistCount: number | null
 }
 
-/**
- * Individual style card used on the /styles browse page.
- * Client component so it can handle image load errors with a graceful fallback.
- */
-export function StyleCard({ style }: StyleCardProps) {
-  const [imgFailed, setImgFailed] = useState(false)
-
+/** A style on the /styles index: symbol, name, short description and the real artist count. */
+export function StyleCard({ style, masterSlug, artistCount }: StyleCardProps) {
   return (
-    <Link href={`/styles/${style.slug}`} className="group block">
-      <div className="relative overflow-hidden rounded-lg aspect-[4/3] transition-all duration-300 border border-border/60 bg-muted">
-        {/* Hero image or fallback */}
-        {imgFailed ? (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-muted-foreground bg-muted">
-            <ImageOff className="w-8 h-8 opacity-30" />
-            <span className="text-xs font-medium opacity-50">{style.name}</span>
-          </div>
-        ) : (
-          <img
-            src={style.heroImage}
-            alt={`${style.name} tattoo style`}
-            className="absolute inset-0 h-full w-full object-cover transition-transform duration-500"
-            loading="lazy"
-            onError={() => setImgFailed(true)}
-          />
+    <Link
+      href={`/styles/${style.slug}`}
+      className="flex h-full gap-4 rounded-lg border-1.5 border-ink bg-vellum tex-vellum p-5 hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+    >
+      <GuideSymbol masterSlug={masterSlug} size={32} className="mt-0.5 shrink-0" />
+      <div className="min-w-0">
+        <h2 className="font-heading text-[22px] leading-[1.15] text-ink text-balance">{style.name}</h2>
+        <p className="mt-1.5 text-[15px] leading-[1.55] text-ink-muted text-pretty">{style.description}</p>
+        {artistCount != null && artistCount > 0 && (
+          <p className="mt-2 text-sm font-semibold tabular-nums text-ink">
+            {artistCount.toLocaleString("en-US")} {artistCount === 1 ? "artist" : "artists"}
+          </p>
         )}
-
-        {/* Gradient overlay — shown even over fallback for consistent text legibility */}
-        <div className="absolute inset-0 bg-ink/50" />
-
-        {/* Tags top-left */}
-        <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
-          {style.tags.slice(0, 2).map((tag) => (
-            <span
-              key={tag}
-              className="bg-black/50 text-white/90 text-[10px] font-medium px-2 py-0.5 rounded-lg"
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
-
-        {/* Arrow top-right on hover */}
-        <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-          <div className="bg-primary rounded-full p-1.5">
-            <ArrowRight className="w-3.5 h-3.5 text-primary-foreground" />
-          </div>
-        </div>
-
-        {/* Text bottom */}
-        <div className="absolute bottom-0 left-0 right-0 p-5">
-          <h3 className="font-bold text-white text-xl mb-1 group-hover:text-primary/90 transition-colors">
-            {style.name}
-          </h3>
-          <p className="text-white/70 text-xs leading-relaxed line-clamp-2">{style.description}</p>
-        </div>
       </div>
     </Link>
   )

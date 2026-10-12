@@ -5,9 +5,9 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { AlertCircle, ArrowLeft, CheckCircle2, Mail } from "lucide-react"
+import { ArrowLeft, Mail } from "lucide-react"
 import { forgotPassword } from "@/app/(auth)/actions"
-import { cn } from "@/lib/utils"
+import { AUTH_HEADING, AUTH_ICON_TILE, AUTH_INPUT, AUTH_INTRO, AUTH_LABEL, AUTH_LINK, AUTH_SUBMIT, AuthNotice } from "@/components/auth/auth-ui"
 
 export default function ForgotPasswordPage() {
   const [isPending, setIsPending] = useState(false)
@@ -32,11 +32,11 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="w-full max-w-[420px]">
+    <div className="w-full">
       {/* Back link */}
       <Link
         href="/login"
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8"
+        className="mb-6 inline-flex min-h-11 items-center gap-1.5 text-[15px] font-semibold text-ink-muted hover:text-ink"
       >
         <ArrowLeft className="w-3.5 h-3.5" />
         Back to sign in
@@ -45,34 +45,31 @@ export default function ForgotPasswordPage() {
       {isSuccess ? (
         /* ── Success state ──────────────────────────────────────────── */
         <div className="space-y-6">
-          <div className="w-14 h-14 rounded-lg bg-secondary border border-success flex items-center justify-center">
-            <Mail className="w-7 h-7 text-success" />
+          <div className={AUTH_ICON_TILE}>
+            <Mail className="h-7 w-7 text-bottle-green" aria-hidden="true" />
           </div>
 
           <div className="space-y-2">
-            <h2 className="text-3xl font-black tracking-tight text-foreground">
+            <h1 className={AUTH_HEADING}>
               Check your inbox
-            </h2>
-            <p className="text-muted-foreground text-sm leading-relaxed">
+            </h1>
+            <p className={AUTH_INTRO}>
               We&apos;ve sent a password reset link to your email address. It may take a
               minute or two to arrive.
             </p>
           </div>
 
-          <div className="flex items-start gap-2.5 text-sm p-3.5 rounded-lg border bg-success border-success text-success-foreground">
-            <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
-            <span>{message}</span>
-          </div>
+          <AuthNotice tone="success">{message}</AuthNotice>
 
           <div className="space-y-3 pt-1">
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-ink-muted">
               Didn&apos;t receive the email? Check your spam folder or{" "}
               <button
                 onClick={() => {
                   setIsSuccess(false)
                   setMessage("")
                 }}
-                className="text-navy underline-offset-2 hover:underline font-medium"
+                className={AUTH_LINK}
               >
                 try again
               </button>
@@ -80,7 +77,7 @@ export default function ForgotPasswordPage() {
             </p>
             <Link
               href="/login"
-              className="inline-flex items-center gap-1.5 text-sm font-semibold text-navy underline-offset-2 hover:underline"
+              className={`inline-flex items-center gap-1.5 text-[15px] ${AUTH_LINK}`}
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               Return to sign in
@@ -92,14 +89,14 @@ export default function ForgotPasswordPage() {
         <>
           {/* Icon + heading */}
           <div className="mb-8 space-y-4">
-            <div className="w-14 h-14 rounded-lg bg-secondary border border-ink flex items-center justify-center">
-              <Mail className="w-7 h-7 text-primary" />
+            <div className={AUTH_ICON_TILE}>
+              <Mail className="h-7 w-7 text-ink" aria-hidden="true" />
             </div>
             <div>
-              <h2 className="text-3xl font-black tracking-tight text-foreground mb-2">
+              <h1 className={AUTH_HEADING}>
                 Forgot your password?
-              </h2>
-              <p className="text-muted-foreground text-sm leading-relaxed">
+              </h1>
+              <p className={AUTH_INTRO}>
                 No worries. Enter the email address linked to your account and we&apos;ll
                 send you a secure reset link.
               </p>
@@ -108,7 +105,7 @@ export default function ForgotPasswordPage() {
 
           <form action={handleSubmit} className="space-y-5">
             <div className="space-y-1.5">
-              <Label htmlFor="email" className="text-sm font-medium text-foreground">
+              <Label htmlFor="email" className={AUTH_LABEL}>
                 Email address
               </Label>
               <Input
@@ -119,22 +116,19 @@ export default function ForgotPasswordPage() {
                 required
                 disabled={isPending}
                 autoFocus
-                className="h-11 bg-muted/40 border-border/60 focus:border-ink focus:ring-ring/20 text-foreground placeholder:text-muted-foreground/50 rounded-lg"
+                className={AUTH_INPUT}
               />
             </div>
 
             {/* Error feedback */}
             {message && !isSuccess && (
-              <div className="flex items-start gap-2.5 text-sm p-3.5 rounded-lg border bg-destructive/10 border-destructive/30 text-destructive-foreground">
-                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-                <span>{message}</span>
-              </div>
+              <AuthNotice tone="error">{message}</AuthNotice>
             )}
 
             <Button
               type="submit"
               disabled={isPending}
-              className="w-full h-11 rounded-lg font-semibold text-sm bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-200"
+              className={AUTH_SUBMIT}
             >
               {isPending ? "Sending reset link..." : "Send reset link"}
             </Button>
@@ -143,25 +137,25 @@ export default function ForgotPasswordPage() {
           {/* Divider */}
           <div className="relative my-7">
             <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-border/50" />
+              <span className="w-full border-t border-rule" />
             </div>
           </div>
 
-          <p className="text-center text-sm text-muted-foreground">
+          <p className="text-center text-[15px] text-ink-muted">
             Remember your password?{" "}
             <Link
               href="/login"
-              className="font-semibold text-navy underline-offset-2 hover:underline"
+              className={AUTH_LINK}
             >
               Sign in instead
             </Link>
           </p>
 
-          <p className="mt-3 text-center text-sm text-muted-foreground">
+          <p className="mt-3 text-center text-[15px] text-ink-muted">
             Don&apos;t have an account?{" "}
             <Link
               href="/signup"
-              className="font-semibold text-navy underline-offset-2 hover:underline"
+              className={AUTH_LINK}
             >
               Create one for free
             </Link>

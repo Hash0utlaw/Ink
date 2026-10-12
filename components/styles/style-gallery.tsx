@@ -1,8 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { X, ZoomIn, ImageOff } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { X, ImageOff } from "lucide-react"
 
 interface StyleGalleryProps {
   images: string[]
@@ -12,7 +11,7 @@ interface StyleGalleryProps {
 // Fallback shown when an image fails to load
 function ImageFallback({ label }: { label: string }) {
   return (
-    <div className="h-full w-full flex flex-col items-center justify-center bg-muted gap-2 text-muted-foreground">
+    <div className="h-full w-full flex flex-col items-center justify-center bg-vellum gap-2 text-ink-muted">
       <ImageOff className="w-6 h-6 opacity-40" />
       <span className="text-[10px] text-center px-2 line-clamp-2 opacity-60">{label}</span>
     </div>
@@ -29,34 +28,28 @@ export function StyleGallery({ images, styleName }: StyleGalleryProps) {
 
   return (
     <>
-      {/* Grid — no MotionView wrappers so images are always visible in the DOM */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+      {/* Framed tiles, no entrance animation, so images are always visible. */}
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
         {images.map((src, i) => {
           const failed = failedImages.has(src)
           return (
             <button
               key={src + i}
               type="button"
-              className="group relative overflow-hidden rounded-lg aspect-square cursor-zoom-in w-full block border border-border/50 hover:border-primary/40 transition-colors bg-muted"
+              className="relative block aspect-square w-full cursor-zoom-in overflow-hidden border-1.5 border-ink bg-paper p-[5px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               onClick={() => !failed && setLightboxSrc(src)}
               aria-label={`View ${styleName} example ${i + 1}`}
             >
               {failed ? (
                 <ImageFallback label={`${styleName} example ${i + 1}`} />
               ) : (
-                <>
-                  <img
-                    src={src}
-                    alt={`${styleName} tattoo example ${i + 1}`}
-                    className="h-full w-full object-cover transition-transform duration-500"
-                    loading={i < 4 ? "eager" : "lazy"}
-                    onError={() => handleError(src)}
-                  />
-                  {/* Hover overlay */}
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300 flex items-center justify-center">
-                    <ZoomIn className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  </div>
-                </>
+                <img
+                  src={src}
+                  alt={`${styleName} tattoo example ${i + 1}`}
+                  className="h-full w-full border border-ink object-cover"
+                  loading={i < 4 ? "eager" : "lazy"}
+                  onError={() => handleError(src)}
+                />
               )}
             </button>
           )
@@ -66,12 +59,12 @@ export function StyleGallery({ images, styleName }: StyleGalleryProps) {
       {/* Lightbox */}
       {lightboxSrc && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-night/95 p-4"
           onClick={() => setLightboxSrc(null)}
         >
           <button
             type="button"
-            className="absolute top-4 right-4 bg-white/10 hover:bg-white/20 text-white rounded-full p-2 transition-colors"
+            className="absolute right-4 top-4 inline-flex h-11 w-11 items-center justify-center rounded-lg border-1.5 border-cream text-cream hover:bg-cream hover:text-night"
             onClick={() => setLightboxSrc(null)}
             aria-label="Close lightbox"
           >
@@ -80,7 +73,7 @@ export function StyleGallery({ images, styleName }: StyleGalleryProps) {
           <img
             src={lightboxSrc}
             alt="Selected tattoo example"
-            className="max-h-[90vh] max-w-[90vw] object-contain rounded-lg"
+            className="max-h-[90vh] max-w-[90vw] border-2 border-ink object-contain"
             onClick={(e) => e.stopPropagation()}
           />
         </div>
