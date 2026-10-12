@@ -6,13 +6,13 @@ import { MotionView } from "@/components/utils/motion-view"
 export function StyleImageGallery({ images }: { images: string[] }) {
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-      {images.map((src, i) => (
+      {images.filter(Boolean).map((src, i) => (
         <MotionView key={i} delay={i * 0.05}>
           <Dialog>
             <DialogTrigger asChild>
               <div className="group relative overflow-hidden rounded-lg aspect-square cursor-pointer">
                 <img
-                  src={src || "/placeholder.svg"}
+                  src={src}
                   alt={`Style example ${i + 1}`}
                   className="h-full w-full object-cover transition-transform duration-300"
                 />
@@ -20,7 +20,7 @@ export function StyleImageGallery({ images }: { images: string[] }) {
               </div>
             </DialogTrigger>
             <DialogContent className="max-w-3xl p-0 bg-transparent border-0">
-              <img src={src || "/placeholder.svg"} alt="Selected style example" className="w-full h-auto rounded-lg" />
+              <img src={src} alt="Selected style example" className="w-full h-auto rounded-lg" />
             </DialogContent>
           </Dialog>
         </MotionView>

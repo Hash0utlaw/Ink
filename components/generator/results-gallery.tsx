@@ -10,7 +10,8 @@ interface ResultsGalleryProps {
 }
 
 export function ResultsGallery({ results, isLoading }: ResultsGalleryProps) {
-  const hasResults = results.length > 0
+  const images = results.filter(Boolean)
+  const hasResults = images.length > 0
 
   return (
     <Card className="bg-muted/30 border-border/30 min-h-[60vh]">
@@ -56,10 +57,10 @@ export function ResultsGallery({ results, isLoading }: ResultsGalleryProps) {
 
         {!isLoading && hasResults && (
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {results.map((src, i) => (
+            {images.map((src, i) => (
               <div key={i} className="group relative overflow-hidden rounded-lg aspect-square">
                 <img
-                  src={src || "/placeholder.svg"}
+                  src={src}
                   alt={`Generated tattoo design ${i + 1}`}
                   className="h-full w-full object-cover"
                 />

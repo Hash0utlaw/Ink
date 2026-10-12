@@ -36,8 +36,8 @@ export function FeaturedArtists({ artists }: FeaturedArtistsProps) {
                 <Card className="overflow-hidden h-full bg-vellum tex-vellum border-border/60 transition-all duration-300 hover:border-ink">
                   <CardContent className="p-6 flex flex-col items-center text-center">
                     <Avatar className="w-24 h-24 mb-4 border-2 border-ink">
-                      <AvatarImage src={artist.avatarUrl || "/placeholder.svg"} alt={artist.name} />
-                      <AvatarFallback className="bg-vellum text-ink font-heading border-1.5 border-ink">{initials(artist.name)}</AvatarFallback>
+                      <AvatarImage src={artist.avatarUrl || undefined} alt={artist.name} />
+                      <AvatarFallback className="bg-vellum text-ink font-heading text-[34px] border-1.5 border-ink">{initials(artist.name) || "?"}</AvatarFallback>
                     </Avatar>
                     <h3 className="font-bold text-xl">{artist.name}</h3>
                     {artist.styles.length > 0 && (

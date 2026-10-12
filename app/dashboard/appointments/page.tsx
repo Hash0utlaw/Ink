@@ -40,7 +40,7 @@ export default async function AppointmentsPage() {
                     className="flex items-start gap-4 border-b border-rule py-4 first:pt-0 last:border-0 last:pb-0"
                   >
                     <Avatar className="h-12 w-12">
-                      <AvatarImage src={artist?.avatarUrl || "/placeholder.svg"} />
+                      <AvatarImage src={artist?.avatarUrl || undefined} alt="" />
                       <AvatarFallback className="bg-vellum text-ink font-heading border-1.5 border-ink">{initials(artist?.name ?? "") || "?"}</AvatarFallback>
                     </Avatar>
                     <div className="min-w-0 flex-1 space-y-1">

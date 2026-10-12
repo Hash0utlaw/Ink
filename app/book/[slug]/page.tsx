@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation"
 import { Suspense } from "react"
 import type { Metadata } from "next"
-import Image from "next/image"
 import Link from "next/link"
 import { MapPin, Star, ChevronRight } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -14,7 +13,8 @@ import { getArtistBySlug } from "@/lib/supabase/artists"
 import { getFlashById } from "@/lib/supabase/flash"
 import { PublicBookingForm } from "@/components/booking/public-booking-form"
 import { createClient } from "@/utils/supabase/server"
-import { safeImageSrc } from "@/lib/utils/safe-image"
+import { allowedImageSrc } from "@/lib/utils/safe-image"
+import { SafeImage } from "@/components/brand/safe-image"
 import { styleLabel, styleLabels } from "@/lib/styles"
 import { initials } from "@/lib/initials"
 import { requestNextStep } from "@/lib/request-copy"
@@ -54,11 +54,13 @@ export default async function BookArtistPage({
   const artist = await getArtistBySlug(params.slug)
   if (!artist) notFound()
 
-  const [portfolioImages, flashListing] = await Promise.all([
+  const [allPortfolioImages, flashListing] = await Promise.all([
     getPortfolioImages(artist.id),
     searchParams.flash ? getFlashById(searchParams.flash) : Promise.resolve(null),
   ])
 
+  // Only photos next/image can load; no placeholders.
+  const portfolioImages = allPortfolioImages.filter((url) => allowedImageSrc(url))
   const location = [artist.location.city, artist.location.state].filter(Boolean).join(", ")
 
   return (
@@ -142,13 +144,13 @@ export default async function BookArtistPage({
                   <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Recent Work</p>
                   <div className="grid grid-cols-3 gap-2">
                     {portfolioImages.map((url, i) => (
-                      <div key={i} className="aspect-square rounded-lg overflow-hidden bg-muted">
-                        <Image
-                          src={safeImageSrc(url)}
+                      <div key={i} className="relative aspect-square rounded-lg overflow-hidden bg-muted">
+                        <SafeImage
+                          src={url}
                           alt={`${artist.name} portfolio ${i + 1}`}
-                          width={160}
-                          height={160}
-                          className="w-full h-full object-cover"
+                          name={artist.name}
+                          showInitials={false}
+                          sizes="160px"
                         />
                       </div>
                     ))}

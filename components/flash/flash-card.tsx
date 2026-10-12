@@ -1,4 +1,3 @@
-import Image from "next/image"
 import Link from "next/link"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -6,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Sparkles } from "lucide-react"
 import type { FlashListing } from "@/lib/supabase/flash"
 import { SaveButton } from "@/components/saved/save-button"
-import { safeImageSrc } from "@/lib/utils/safe-image"
+import { SafeImage } from "@/components/brand/safe-image"
 import { styleLabel } from "@/lib/styles"
 import { StyleBadge } from "@/components/brand/style-badge"
 import { initials } from "@/lib/initials"
@@ -29,11 +28,14 @@ export function FlashCard({ listing, initialSaved }: FlashCardProps) {
     <div className="group relative flex flex-col rounded-lg overflow-hidden border border-border/50 bg-vellum tex-vellum hover:border-ink transition-all">
       {/* Image */}
       <div className="relative aspect-square overflow-hidden bg-muted">
-        <Image
-          src={safeImageSrc(listing.imageUrl)}
+        <SafeImage
+          src={listing.imageUrl}
           alt={listing.title}
-          fill
-          className="object-cover transition-transform duration-300"
+          name={listing.artistName}
+          primaryStyle={listing.style}
+          initialsSize={56}
+          sizes="(min-width: 1024px) 25vw, 50vw"
+          className="transition-transform duration-300"
         />
         <div className="absolute top-2 right-2 z-10 flex flex-col items-end gap-1">
           {listing.isExclusive && (

@@ -2,7 +2,6 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 import { StyleBadge } from "@/components/brand/style-badge"
 import { styleLabel } from "@/lib/styles"
@@ -10,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { Trash2, Loader2, Sparkles } from "lucide-react"
 import type { FlashListing } from "@/lib/supabase/flash"
-import { safeImageSrc } from "@/lib/utils/safe-image"
+import { SafeImage } from "@/components/brand/safe-image"
 
 interface FlashManageCardProps {
   listing: FlashListing
@@ -51,7 +50,7 @@ export function FlashManageCard({ listing }: FlashManageCardProps) {
   return (
     <div className="flex gap-3 rounded-lg border-1.5 border-ink bg-vellum tex-vellum p-3">
       <div className="relative h-16 w-16 shrink-0 overflow-hidden border-1.5 border-ink bg-paper">
-        <Image src={safeImageSrc(listing.imageUrl)} alt={listing.title} fill className="object-cover" />
+        <SafeImage src={listing.imageUrl} alt={listing.title} name={listing.title} initialsSize={22} sizes="64px" />
       </div>
 
       <div className="flex-1 min-w-0 space-y-1">
