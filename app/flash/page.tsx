@@ -53,13 +53,13 @@ export default async function FlashPage({
           <div className="container mx-auto px-4 py-6">
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div className="rounded-full bg-secondary p-2">
+                <div className="rounded bg-secondary p-2">
                   <Zap className="w-5 h-5 text-primary" />
                 </div>
                 <div>
                   <h1 className="text-2xl font-extrabold">Flash</h1>
                   <p className="text-sm text-muted-foreground">
-                    Ready-to-book designs{count > 0 ? ` · ${count} available` : ""}
+                    Ready-to-book designs.{count > 0 ? ` ${count.toLocaleString()} available.` : ""}
                   </p>
                 </div>
               </div>
@@ -77,7 +77,7 @@ export default async function FlashPage({
             <div className="mt-4 flex gap-2 overflow-x-auto pb-1 scrollbar-none">
               <Link
                 href="/flash"
-                className={`shrink-0 rounded-lg border px-3 py-1 text-xs font-medium transition-colors ${
+                className={`shrink-0 rounded border px-3 py-1 text-xs font-medium transition-colors ${
                   !searchParams.style
                     ? "bg-primary border-ink text-primary-foreground"
                     : "border-border text-muted-foreground hover:bg-muted/60"
@@ -92,7 +92,7 @@ export default async function FlashPage({
                   <Link
                     key={s.slug}
                     href={`/flash?${params}`}
-                    className={`shrink-0 rounded-lg border px-3 py-1 text-xs font-medium transition-colors ${
+                    className={`shrink-0 rounded border px-3 py-1 text-xs font-medium transition-colors ${
                       activeStyle === s.slug
                         ? "bg-primary border-ink text-primary-foreground"
                         : "border-border text-muted-foreground hover:bg-muted/60"
@@ -133,17 +133,17 @@ export default async function FlashPage({
                   {page > 0 && (
                     <Link
                       href={`/flash?${new URLSearchParams({ ...searchParams, page: String(page - 1) })}`}
-                      className="rounded-lg border px-4 py-2 text-sm font-medium hover:bg-muted/60 transition-colors"
+                      className="rounded border px-4 py-2 text-sm font-medium hover:bg-muted/60 transition-colors"
                     >
-                      ← Previous
+                      Previous
                     </Link>
                   )}
                   {(page + 1) * 24 < count && (
                     <Link
                       href={`/flash?${new URLSearchParams({ ...searchParams, page: String(page + 1) })}`}
-                      className="rounded-lg border px-4 py-2 text-sm font-medium hover:bg-muted/60 transition-colors"
+                      className="rounded border px-4 py-2 text-sm font-medium hover:bg-muted/60 transition-colors"
                     >
-                      Next →
+                      Next
                     </Link>
                   )}
                 </div>

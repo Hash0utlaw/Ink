@@ -25,7 +25,7 @@ export function FlashCard({ listing, initialSaved }: FlashCardProps) {
   const bookHref = `/book/${listing.artistHandle || listing.artistId}?flash=${listing.id}`
 
   return (
-    <div className="group relative flex flex-col rounded-lg overflow-hidden border border-border/50 bg-vellum tex-vellum hover:border-ink transition-all">
+    <div className="group relative flex flex-col rounded overflow-hidden border border-border/50 bg-vellum tex-vellum hover:border-ink transition-all">
       {/* Image */}
       <div className="relative aspect-square overflow-hidden bg-muted">
         <SafeImage
@@ -47,7 +47,7 @@ export function FlashCard({ listing, initialSaved }: FlashCardProps) {
           <SaveButton itemType="artist" itemId={listing.artistId} variant="icon" initialSaved={initialSaved} />
         </div>
         <div className="absolute bottom-2 left-2">
-          <span className="bg-black/70 text-white text-sm font-bold px-2 py-0.5 rounded-md">
+          <span className="border-1.5 border-ink bg-vellum text-ink text-sm font-bold tabular-nums px-2 py-0.5 rounded">
             {priceLabel(listing)}
           </span>
         </div>

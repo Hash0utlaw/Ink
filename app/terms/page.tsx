@@ -18,8 +18,7 @@ const SECTIONS = [
   { id: "accounts", title: "Accounts" },
   { id: "platform-use", title: "Use of the Platform" },
   { id: "artist-terms", title: "Artist & Studio Terms" },
-  { id: "bookings", title: "Bookings & Payments" },
-  { id: "ai-generator", title: "Reserved" },
+  { id: "bookings", title: "Requests" },
   { id: "content", title: "User Content" },
   { id: "intellectual-property", title: "Intellectual Property" },
   { id: "disclaimers", title: "Disclaimers" },
@@ -72,7 +71,7 @@ export default function TermsOfServicePage() {
 
             {/* Content */}
             <article className="lg:col-span-3 space-y-10 text-foreground">
-              <div className="p-5 bg-muted/40 rounded-lg border border-border/60 text-sm text-muted-foreground leading-relaxed">
+              <div className="p-5 bg-muted/40 rounded border border-border/60 text-sm text-muted-foreground leading-relaxed">
                 Please read these Terms of Service (&quot;Terms&quot;) carefully before using TattooMaps. By accessing or using TattooMaps you agree to be bound by these Terms. If you do not agree, do not use the platform.
               </div>
 
@@ -136,20 +135,13 @@ export default function TermsOfServicePage() {
                 />
               </Section>
 
-              <Section id="bookings" title="6. Bookings & Payments">
+              <Section id="bookings" title="6. Requests">
                 <Prose>
-                  TattooMaps facilitates bookings between clients and artists. Deposits and payment policies are set by individual artists and are displayed on their profiles. TattooMaps is not responsible for disputes between clients and artists regarding services, refunds, or deposits. If a dispute arises, we encourage both parties to resolve it directly. We may offer mediation assistance at our discretion.
-                </Prose>
-                <Prose>
-                  Platform service fees (if applicable) are non-refundable once a booking is confirmed, except where required by law.
+                  TattooMaps facilitates bookings between clients and artists. Artists and shops set their own prices, deposits and policies, and arrange them with you directly. TattooMaps is not responsible for disputes between clients and artists regarding services, refunds, or deposits. If a dispute arises, we encourage both parties to resolve it directly. We may offer mediation assistance at our discretion.
                 </Prose>
               </Section>
 
-              <Section id="ai-generator" title="7. Reserved">
-                <Prose>This section is reserved.</Prose>
-              </Section>
-
-              <Section id="content" title="8. User Content">
+              <Section id="content" title="7. User Content">
                 <Prose>
                   By submitting content to TattooMaps (including portfolio photos, reviews, and profile information) you grant TattooMaps a worldwide, non-exclusive, royalty-free licence to display, reproduce, and distribute that content solely in connection with operating and promoting the Platform. You retain ownership of your content and may delete it at any time by removing it from your account.
                 </Prose>
@@ -158,41 +150,41 @@ export default function TermsOfServicePage() {
                 </Prose>
               </Section>
 
-              <Section id="intellectual-property" title="9. Intellectual Property">
+              <Section id="intellectual-property" title="8. Intellectual Property">
                 <Prose>
                   The TattooMaps name, logo, design, and all platform software are the property of TattooMaps, Inc. and are protected by applicable intellectual property laws. You may not reproduce, modify, distribute, or create derivative works of any TattooMaps property without our express written consent. Nothing in these Terms transfers any TattooMaps intellectual property rights to you.
                 </Prose>
               </Section>
 
-              <Section id="disclaimers" title="10. Disclaimers">
+              <Section id="disclaimers" title="9. Disclaimers">
                 <Prose>
                   THE PLATFORM IS PROVIDED &quot;AS IS&quot; AND &quot;AS AVAILABLE&quot; WITHOUT WARRANTIES OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING FITNESS FOR A PARTICULAR PURPOSE OR NON-INFRINGEMENT. TATTOOMAPS DOES NOT WARRANT THAT THE PLATFORM WILL BE UNINTERRUPTED, ERROR-FREE, OR FREE OF VIRUSES. WE DO NOT ENDORSE ANY ARTIST OR STUDIO LISTED ON THE PLATFORM AND MAKE NO REPRESENTATIONS REGARDING THE QUALITY OF THEIR SERVICES.
                 </Prose>
               </Section>
 
-              <Section id="limitation" title="11. Limitation of Liability">
+              <Section id="limitation" title="10. Limitation of Liability">
                 <Prose>
                   TO THE FULLEST EXTENT PERMITTED BY LAW, TATTOOMAPS WILL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES ARISING FROM YOUR USE OF THE PLATFORM OR SERVICES BOOKED THROUGH IT. OUR TOTAL LIABILITY TO YOU FOR ANY CLAIM SHALL NOT EXCEED THE GREATER OF (A) THE AMOUNT YOU PAID TO TATTOOMAPS IN THE 12 MONTHS PRECEDING THE CLAIM OR (B) USD $100. SOME JURISDICTIONS DO NOT ALLOW THESE LIMITATIONS, SO THEY MAY NOT APPLY TO YOU.
                 </Prose>
               </Section>
 
-              <Section id="termination" title="12. Termination">
+              <Section id="termination" title="11. Termination">
                 <Prose>
                   You may close your account at any time from your account settings or by contacting support. We may suspend or terminate your access at any time if we determine you have violated these Terms, with or without notice. Upon termination, your right to use the Platform ceases immediately. Sections that by their nature should survive termination (including intellectual property, disclaimers, and limitation of liability) will survive.
                 </Prose>
               </Section>
 
-              <Section id="governing-law" title="13. Governing Law">
+              <Section id="governing-law" title="12. Governing Law">
                 <Prose>
                   These Terms are governed by the laws of the State of New York, USA, without regard to conflict-of-law principles. Any dispute arising out of or relating to these Terms shall be subject to the exclusive jurisdiction of the state and federal courts located in New York County, New York. If you are a consumer in a jurisdiction where mandatory consumer protection laws apply, those laws may override this clause.
                 </Prose>
               </Section>
 
-              <Section id="contact" title="14. Contact">
+              <Section id="contact" title="13. Contact">
                 <Prose>
                   Questions about these Terms? Reach us at:
                 </Prose>
-                <div className="flex items-center gap-3 mt-4 p-4 bg-muted/40 rounded-lg border border-border/60">
+                <div className="flex items-center gap-3 mt-4 p-4 bg-muted/40 rounded border border-border/60">
                   <Mail className="w-5 h-5 text-primary shrink-0" />
                   <div>
                     <p className="text-sm font-medium">Legal Team</p>
@@ -243,7 +235,7 @@ function List({ items }: { items: string[] }) {
     <ul className="space-y-2">
       {items.map((item) => (
         <li key={item} className="flex items-start gap-2 text-sm text-muted-foreground">
-          <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0 mt-2" />
+          <span className="w-1.5 h-1.5 rounded bg-primary shrink-0 mt-2" />
           {item}
         </li>
       ))}

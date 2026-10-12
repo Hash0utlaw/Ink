@@ -3,7 +3,7 @@ import { HelpClient } from "@/components/help/help-client"
 
 export const metadata: Metadata = {
   title: "Help Center — FAQs & Support | TattooMaps",
-  description: "Find answers to common questions about booking tattoo appointments, artist profiles, payments, and more on TattooMaps.",
+  description: "Find answers to common questions about finding tattoo artists and shops, sending requests, saving favorites, reviews and claiming your page on TattooMaps.",
   alternates: { canonical: "/help" },
 }
 

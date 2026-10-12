@@ -45,7 +45,7 @@ export function RecentlyViewed() {
             <Link
               key={artist.id}
               href={`/artists/${artist.id}`}
-              className="flex shrink-0 items-center gap-2 rounded-lg border-1.5 border-ink bg-vellum tex-vellum py-1 pl-1 pr-3 hover:bg-secondary"
+              className="flex shrink-0 items-center gap-2 rounded border-1.5 border-ink bg-vellum tex-vellum py-1 pl-1 pr-3 hover:bg-secondary"
             >
               <MiniPlate name={artist.name} avatarUrl={artist.avatarUrl} />
               <span className="whitespace-nowrap text-[15px] font-semibold text-ink">{artist.name}</span>

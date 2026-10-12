@@ -100,7 +100,7 @@ export default async function FindArtistResultsPage({
               </Button>
             </div>
             <div className="flex items-center gap-3">
-              <div className="rounded-full bg-secondary p-2">
+              <div className="rounded bg-secondary p-2">
                 <Wand2 className="w-5 h-5 text-primary" />
               </div>
               <div>
@@ -108,10 +108,7 @@ export default async function FindArtistResultsPage({
                   {scored.length} {scored.length === 1 ? "artist" : "artists"} match{scored.length === 1 ? "es" : ""} your style
                 </h1>
                 <p className="text-sm text-muted-foreground">
-                  {style && <span className="font-medium">{styleName}</span>}
-                  {style && locationLabel && " · "}
-                  {locationLabel && <span>{locationLabel}</span>}
-                  {size && ` · ${size}`}
+                  {[style ? styleName : null, locationLabel, size].filter(Boolean).join(", ")}
                 </p>
               </div>
             </div>
@@ -152,7 +149,7 @@ export default async function FindArtistResultsPage({
                   <Link
                     key={artist.id}
                     href={`/artists/${artist.id}`}
-                    className="group flex gap-4 p-4 rounded-lg border border-border/50 bg-vellum tex-vellum hover:border-ink transition-all"
+                    className="group flex gap-4 p-4 rounded border border-border/50 bg-vellum tex-vellum hover:border-ink transition-all"
                   >
                     <Avatar className="w-16 h-16 shrink-0 border-2 border-ink">
                       <AvatarImage src={artist.avatarUrl} alt={artist.name} />
@@ -211,7 +208,7 @@ export default async function FindArtistResultsPage({
               <p className="text-sm text-muted-foreground mb-3">Not seeing the right fit?</p>
               <div className="flex justify-center gap-3 flex-wrap">
                 <Button variant="outline" asChild>
-                  <Link href="/find-artist">← Refine search</Link>
+                  <Link href="/find-artist">Refine search</Link>
                 </Button>
                 <Button variant="outline" asChild>
                   <Link href="/artists">Browse all artists</Link>

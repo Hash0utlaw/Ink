@@ -11,7 +11,7 @@ const MAX_BYTES = 5 * 1024 * 1024
 const TYPES: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" }
 
 const SECONDARY =
-  "inline-flex min-h-11 items-center rounded-lg border-1.5 border-ink bg-vellum tex-vellum px-4 text-[15px] font-semibold text-ink hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60"
+  "inline-flex min-h-11 items-center rounded border-1.5 border-ink bg-vellum tex-vellum px-4 text-[15px] font-semibold text-ink hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60"
 const TEXT_BUTTON =
   "min-h-11 px-1 text-[15px] font-semibold text-navy underline underline-offset-2 hover:no-underline disabled:opacity-60"
 

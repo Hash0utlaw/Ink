@@ -56,7 +56,7 @@ export function ArtistRow({ artist, showShop = false, distance }: { artist: Card
     </>
   )
 
-  const row = "flex items-start gap-3 rounded-lg border-1.5 border-transparent px-2 py-3"
+  const row = "flex items-start gap-3 rounded border-1.5 border-transparent px-2 py-3"
   return (
     <li className="border-b border-rule">
       {artist.isStub ? (

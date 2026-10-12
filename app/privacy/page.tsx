@@ -68,14 +68,14 @@ export default function PrivacyPolicyPage() {
 
             {/* Content */}
             <article className="lg:col-span-3 prose-style space-y-10 text-foreground">
-              <div className="p-5 bg-muted/40 rounded-lg border border-border/60 text-sm text-muted-foreground leading-relaxed">
+              <div className="p-5 bg-muted/40 rounded border border-border/60 text-sm text-muted-foreground leading-relaxed">
                 TattooMaps (&quot;we&quot;, &quot;our&quot;, or &quot;us&quot;) is committed to protecting your personal information. This Privacy Policy explains what data we collect, how we use it, and your choices regarding that data. By using TattooMaps, you agree to the practices described here.
               </div>
 
               <Section id="information-we-collect" title="1. Information We Collect">
                 <SubHeading>Information you provide</SubHeading>
                 <Prose>
-                  When you create an account, book an appointment, or contact us, we collect: your name and email address; username and password (stored in hashed form); profile information you add (bio, location, portfolio photos for artists); payment information processed securely via our payment processor — we never store full card numbers; messages you send through the platform.
+                  When you create an account, send a request to an artist, or contact us, we collect: your name and email address; username and password (stored in hashed form); profile information you add (bio, location, portfolio photos for artists); messages you send through the platform.
                 </Prose>
                 <SubHeading>Information collected automatically</SubHeading>
                 <Prose>
@@ -93,9 +93,8 @@ export default function PrivacyPolicyPage() {
                   items={[
                     "Create and manage your account",
                     "Connect clients with tattoo artists and studios",
-                    "Process bookings and payments",
-                    "Power the AI Tattoo Generator",
-                    "Send transactional emails (booking confirmations, receipts)",
+                    "Process bookings",
+                    "Send transactional emails (booking confirmations)",
                     "Send optional marketing emails if you have opted in",
                     "Improve and personalise the platform",
                     "Detect and prevent fraud or abuse",
@@ -112,7 +111,6 @@ export default function PrivacyPolicyPage() {
                 <List
                   items={[
                     "With artists or studios you book through the platform, solely to facilitate your appointment",
-                    "With payment processors (e.g. Stripe) to complete transactions",
                     "With cloud infrastructure providers who host our services under strict data processing agreements",
                     "With analytics providers (aggregated and anonymised where possible)",
                     "If required by law, court order, or government authority",
@@ -193,7 +191,7 @@ export default function PrivacyPolicyPage() {
                 <Prose>
                   If you have questions about this Privacy Policy or want to exercise your data rights, contact us:
                 </Prose>
-                <div className="flex items-center gap-3 mt-4 p-4 bg-muted/40 rounded-lg border border-border/60">
+                <div className="flex items-center gap-3 mt-4 p-4 bg-muted/40 rounded border border-border/60">
                   <Mail className="w-5 h-5 text-primary shrink-0" />
                   <div>
                     <p className="text-sm font-medium">Privacy Team</p>
@@ -244,7 +242,7 @@ function List({ items }: { items: string[] }) {
     <ul className="space-y-2">
       {items.map((item) => (
         <li key={item} className="flex items-start gap-2 text-sm text-muted-foreground">
-          <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0 mt-2" />
+          <span className="w-1.5 h-1.5 rounded bg-primary shrink-0 mt-2" />
           {item}
         </li>
       ))}

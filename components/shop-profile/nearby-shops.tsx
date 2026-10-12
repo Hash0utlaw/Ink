@@ -12,7 +12,7 @@ export function NearbyShops({ shops }: { shops: Shop[] }) {
           <li key={shop.id} className="border-b border-rule">
             <Link
               href={`/shops/${shop.id}`}
-              className="-mx-2 block rounded-lg border-1.5 border-transparent px-2 py-4 hover:border-ink hover:bg-vellum focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="-mx-2 block rounded border-1.5 border-transparent px-2 py-4 hover:border-ink hover:bg-vellum focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <span className="block font-heading text-[21px] leading-tight text-ink">{shop.name}</span>
               {shop.location.city && (

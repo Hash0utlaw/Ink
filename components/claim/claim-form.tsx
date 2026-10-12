@@ -46,7 +46,7 @@ export function ClaimForm({ artistSlug, shopSlug, listingName }: ClaimFormProps)
     return (
       <Card className="bg-muted/30 border-border/50">
         <CardContent className="pt-10 pb-10 flex flex-col items-center text-center gap-3">
-          <div className="w-14 h-14 bg-secondary rounded-full flex items-center justify-center">
+          <div className="w-14 h-14 bg-secondary rounded flex items-center justify-center">
             <CheckCircle className="w-8 h-8 text-success" />
           </div>
           <h2 className="text-xl font-bold">Claim submitted</h2>

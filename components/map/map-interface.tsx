@@ -352,10 +352,9 @@ export function MapInterface() {
     setMapStyle(style)
   }, [])
 
-  // Fills the screen below the admin banner (the only bar /map shows; it sets
-  // --admin-banner-h while visible). dvh tracks mobile browser chrome.
+  // Fills the rest of app/map/page.tsx's full-height column, below the header.
   return (
-    <div className="relative flex h-[calc(100dvh-var(--admin-banner-h,0px))]">
+    <div className="relative flex min-h-0 flex-1">
       {/* Sidebar */}
       <MapSidebar
         isOpen={sidebarOpen}
@@ -396,7 +395,7 @@ export function MapInterface() {
             type="button"
             onClick={() => setSidebarOpen(!sidebarOpen)}
             aria-expanded={sidebarOpen}
-            className="absolute left-4 top-4 z-20 inline-flex min-h-11 items-center gap-2 rounded-lg border-1.5 border-ink bg-vellum tex-vellum px-3 text-[15px] font-semibold text-ink hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="absolute left-4 top-4 z-20 inline-flex min-h-11 items-center gap-2 rounded border-1.5 border-ink bg-vellum tex-vellum px-3 text-[15px] font-semibold text-ink hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <List className="h-4 w-4" aria-hidden="true" />
             {sidebarOpen ? "Hide list" : "Show list"}
@@ -406,7 +405,7 @@ export function MapInterface() {
           <div
             role="group"
             aria-label="Map style"
-            className="absolute right-4 top-4 z-20 flex overflow-hidden rounded-lg border-1.5 border-ink bg-vellum tex-vellum"
+            className="absolute right-4 top-4 z-20 flex overflow-hidden rounded border-1.5 border-ink bg-vellum tex-vellum"
           >
             {MAP_STYLE_OPTIONS.map(({ value, label }, i) => (
               <button

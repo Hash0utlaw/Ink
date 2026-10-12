@@ -19,14 +19,14 @@ export function ResultsGallery({ results, isLoading }: ResultsGalleryProps) {
         {isLoading && (
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {Array.from({ length: 6 }).map((_, i) => (
-              <Skeleton key={i} className="aspect-square rounded-lg" />
+              <Skeleton key={i} className="aspect-square rounded" />
             ))}
           </div>
         )}
 
         {!isLoading && !hasResults && (
           <div className="flex flex-col items-center justify-center h-full min-h-[50vh] text-center">
-            <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
+            <div className="w-16 h-16 bg-muted rounded flex items-center justify-center mb-4">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
@@ -58,13 +58,13 @@ export function ResultsGallery({ results, isLoading }: ResultsGalleryProps) {
         {!isLoading && hasResults && (
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {images.map((src, i) => (
-              <div key={i} className="group relative overflow-hidden rounded-lg aspect-square">
+              <div key={i} className="group relative overflow-hidden rounded aspect-square">
                 <img
                   src={src}
                   alt={`Generated tattoo design ${i + 1}`}
                   className="h-full w-full object-cover"
                 />
-                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center p-4 gap-2">
+                <div className="absolute inset-0 bg-night/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center p-4 gap-2">
                   <Button size="sm" asChild>
                     <Link href="/artists?design=...">
                       <Search className="mr-2 h-4 w-4" /> Find Artist

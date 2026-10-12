@@ -86,6 +86,20 @@
     font-family: var(--font-heading);
     font-weight: 400;
   }
+
+  /* Reduced motion: no slides, fades or smooth scrolling. Loading spinners keep
+     turning so they still read as "loading". Mapbox camera moves already jump
+     instead of fly when this is set. */
+  @media (prefers-reduced-motion: reduce) {
+    *:not(.animate-spin),
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 }
 
 @layer components {
@@ -123,7 +137,7 @@
 
   /* Adding pricing guide specific components */
   .pricing-card {
-    @apply tex-vellum border border-border rounded-lg p-6 hover:border-ink transition-all duration-300 relative overflow-hidden;
+    @apply tex-vellum border border-border rounded p-6 hover:border-ink transition-all duration-300 relative overflow-hidden;
   }
 
   .pricing-card-featured {
@@ -131,11 +145,11 @@
   }
 
   .pricing-calculator {
-    @apply bg-muted/50 border border-border rounded-lg p-4 space-y-4;
+    @apply bg-muted/50 border border-border rounded p-4 space-y-4;
   }
 
   .pricing-step {
-    @apply tex-vellum border border-border rounded-lg p-6 space-y-4;
+    @apply tex-vellum border border-border rounded p-6 space-y-4;
   }
 
   /* Custom scrollbar */
@@ -159,25 +173,6 @@
 
   .scrollbar-ink::-webkit-scrollbar-thumb:hover {
     background: hsl(var(--ink-muted));
-  }
-
-  /* Hero-specific components inspired by design inspiration */
-  .hero-grid {
-    background-image: linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-    background-size: 50px 50px;
-  }
-
-  .hero-text-glow {
-    text-shadow: 0 0 20px hsl(var(--hero-accent) / 0.3);
-  }
-
-  .hero-card {
-    @apply bg-card/80 backdrop-blur-xl border border-white/10 rounded-2xl;
-  }
-
-  .hero-button-primary {
-    @apply bg-primary text-primary-foreground hover:bg-primary/90 font-medium px-8 py-4 rounded-lg transition-all duration-300 hover:scale-105;
   }
 
   /* Map controls (components/map/mapbox-map.tsx). Mapbox's own CSS loads
@@ -222,22 +217,5 @@
     font-size: 11px;
     font-variant-numeric: tabular-nums;
     padding: 1px 6px;
-  }
-}
-
-@layer utilities {
-  /* Hero animation utilities (animate-float: hero-section only, rebuilt later) */
-  .animate-float {
-    animation: float 6s ease-in-out infinite;
-  }
-
-  @keyframes float {
-    0%,
-    100% {
-      transform: translateY(0px);
-    }
-    50% {
-      transform: translateY(-20px);
-    }
   }
 }

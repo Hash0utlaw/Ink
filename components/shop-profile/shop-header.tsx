@@ -13,7 +13,7 @@ import { STATE_ABBR_TO_NAME } from "@/lib/utils/states"
 import { cn } from "@/lib/utils"
 
 const SECONDARY =
-  "min-h-11 rounded-lg border-1.5 border-ink bg-vellum tex-vellum px-4 text-[15px] font-semibold text-ink hover:bg-secondary"
+  "min-h-11 rounded border-1.5 border-ink bg-vellum tex-vellum px-4 text-[15px] font-semibold text-ink hover:bg-secondary"
 const TEXT_LINK = "font-semibold text-navy underline underline-offset-2 hover:no-underline"
 
 interface ShopHeaderProps {
@@ -96,14 +96,14 @@ export function ShopHeader({ shop, initialSaved, breadcrumb, artistCount = 0 }: 
                     href={websiteUrl.startsWith("http") ? websiteUrl : `https://${websiteUrl}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`inline-flex items-center gap-1.5 ${TEXT_LINK}`}
+                    className={`inline-flex min-h-11 items-center gap-1.5 ${TEXT_LINK}`}
                   >
                     <Globe className="h-4 w-4" aria-hidden="true" />
                     Website
                   </a>
                 )}
                 {shop.phone && (
-                  <a href={`tel:${shop.phone}`} className={`inline-flex items-center gap-1.5 ${TEXT_LINK}`}>
+                  <a href={`tel:${shop.phone}`} className={`inline-flex min-h-11 items-center gap-1.5 ${TEXT_LINK}`}>
                     <Phone className="h-4 w-4" aria-hidden="true" />
                     Call {shop.phone}
                   </a>

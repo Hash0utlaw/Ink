@@ -22,8 +22,8 @@ function roundedThousands(n: number): string {
 }
 
 const fieldClass =
-  "h-12 w-full rounded-lg border-1.5 border-ink bg-white px-3 text-base text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-const linkClass = "font-semibold text-navy underline underline-offset-2 hover:no-underline"
+  "h-12 w-full rounded border-1.5 border-ink bg-white px-3 text-base text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+const linkClass = "inline-flex min-h-11 items-center text-left font-semibold text-navy underline underline-offset-2 hover:no-underline"
 
 export function HeroSearch({ shopCount, artistCount }: HeroSearchProps) {
   const router = useRouter()
@@ -79,7 +79,7 @@ export function HeroSearch({ shopCount, artistCount }: HeroSearchProps) {
 
   const counts = shopCount > 0 && artistCount > 0
   return (
-    <div className="w-full rounded-lg border-2 border-ink bg-vellum tex-vellum p-5 sm:p-7 lg:max-w-[470px] lg:p-8">
+    <div className="w-full rounded border-2 border-ink bg-vellum tex-vellum p-5 sm:p-7 lg:max-w-[470px] lg:p-8">
       <h1 className="text-balance font-heading text-[32px] leading-[1.08] text-ink md:text-[40px] xl:text-[44px]">
         Find a tattoo artist near you
       </h1>
@@ -124,7 +124,7 @@ export function HeroSearch({ shopCount, artistCount }: HeroSearchProps) {
         </div>
       </form>
 
-      <div className="mt-5 flex flex-col items-start gap-2 text-[15px] lg:mt-4 lg:flex-row lg:flex-wrap lg:gap-x-6 lg:gap-y-2">
+      <div className="mt-3 flex flex-col items-start text-[15px] lg:mt-2 lg:flex-row lg:flex-wrap lg:gap-x-6">
         <button type="button" onClick={handleNearMe} className={linkClass}>
           Use my location
         </button>

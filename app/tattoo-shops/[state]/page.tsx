@@ -78,7 +78,7 @@ export default async function StatePage({ params }: { params: { state: string } 
               <Link
                 key={slug}
                 href={`/tattoo-shops/${stateAbbrToSlug(abbr)}/${slug}`}
-                className="group flex flex-col p-4 rounded-lg border border-border/50 bg-vellum tex-vellum hover:border-ink transition-all"
+                className="group flex flex-col p-4 rounded border border-border/50 bg-vellum tex-vellum hover:border-ink transition-all"
               >
                 <span className="font-bold text-sm group-hover:text-navy transition-colors">{name}</span>
                 <span className="text-xs text-muted-foreground mt-1">{count} shops</span>

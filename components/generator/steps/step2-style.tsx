@@ -39,10 +39,10 @@ export function Step2Style({ formData, updateFormData }: StepProps) {
               <img
                 src={`/abstract-geometric-shapes.png?height=200&width=200&query=${style.query}`}
                 alt={style.name}
-                className="w-full h-full object-cover absolute inset-0 rounded-lg"
+                className="w-full h-full object-cover absolute inset-0 rounded"
               />
-              <div className="relative z-10 p-2 w-full rounded-b-lg bg-night">
-                <h3 className="font-bold text-white text-center">{style.name}</h3>
+              <div className="relative z-10 p-2 w-full rounded-b bg-night">
+                <h3 className="font-bold text-cream text-center">{style.name}</h3>
               </div>
             </CardContent>
           </Card>

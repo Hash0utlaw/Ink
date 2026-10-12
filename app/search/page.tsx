@@ -21,13 +21,13 @@ function SearchSkeleton() {
     <ListingHeader title="Search results" />
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
       <div className="lg:col-span-1">
-        <Skeleton className="h-96 w-full rounded-lg bg-secondary" />
+        <Skeleton className="h-96 w-full rounded bg-secondary" />
       </div>
       <div className="lg:col-span-3 space-y-6">
         <Skeleton className="h-10 w-48" />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-64 w-full rounded-lg bg-secondary" />
+            <Skeleton key={i} className="h-64 w-full rounded bg-secondary" />
           ))}
         </div>
       </div>

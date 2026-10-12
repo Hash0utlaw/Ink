@@ -3,7 +3,7 @@ import { staticMapUrl } from "@/lib/mapbox"
 import { NeatlineFrame } from "./neatline-frame"
 
 const OUTLINE_BUTTON =
-  "inline-flex min-h-11 items-center justify-center rounded-lg border-1.5 border-ink px-4 text-[15px] font-semibold text-ink hover:bg-vellum focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+  "inline-flex min-h-11 items-center justify-center rounded border-1.5 border-ink px-4 text-[15px] font-semibold text-ink hover:bg-vellum focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 
 /** "35.247° N, 80.806° W" */
 function formatCoordinates([lng, lat]: [number, number]) {

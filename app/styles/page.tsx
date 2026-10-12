@@ -341,9 +341,9 @@ export const ALL_STYLES = [
 
 // Same buttons as the rest of the site (docs: Primary / Secondary button).
 const PRIMARY =
-  "inline-flex min-h-11 items-center justify-center rounded-lg border-1.5 border-ink bg-flash-red px-5 text-[15px] font-semibold text-white hover:bg-flash-red/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+  "inline-flex min-h-11 items-center justify-center rounded border-1.5 border-ink bg-flash-red px-5 text-[15px] font-semibold text-white hover:bg-flash-red/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 const SECONDARY =
-  "inline-flex min-h-11 items-center justify-center rounded-lg border-1.5 border-ink bg-vellum tex-vellum px-5 text-[15px] font-semibold text-ink hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+  "inline-flex min-h-11 items-center justify-center rounded border-1.5 border-ink bg-vellum tex-vellum px-5 text-[15px] font-semibold text-ink hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 
 /** Real artist counts for guide styles that exactly match a master style; null when unknown. */
 async function artistCounts(): Promise<Record<string, number | null>> {

@@ -116,7 +116,7 @@ export function FindArtistWizard() {
         <div className="w-full max-w-2xl">
           {/* Header */}
           <div className="text-center mb-10">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-secondary border border-ink text-sm text-primary mb-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded bg-secondary border border-ink text-sm text-primary mb-4">
               <Wand2 className="w-4 h-4" />
               Artist Finder
             </div>
@@ -133,9 +133,9 @@ export function FindArtistWizard() {
                 </span>
               ))}
             </div>
-            <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+            <div className="h-1.5 rounded bg-muted overflow-hidden">
               <div
-                className="h-full bg-primary rounded-full transition-all duration-500"
+                className="h-full bg-primary rounded transition-all duration-500"
                 style={{ width: `${progress}%` }}
               />
             </div>
@@ -151,7 +151,7 @@ export function FindArtistWizard() {
                     key={s.slug}
                     type="button"
                     onClick={() => setStyle(s.slug)}
-                    className={`flex flex-col items-center gap-1.5 rounded-lg border p-4 text-sm font-medium transition-all ${
+                    className={`flex flex-col items-center gap-1.5 rounded border p-4 text-sm font-medium transition-all ${
                       style === s.slug
                         ? "border-ink bg-secondary text-primary"
                         : "border-border bg-vellum tex-vellum text-muted-foreground hover:border-ink hover:bg-muted/40"
@@ -175,7 +175,7 @@ export function FindArtistWizard() {
                     key={s.label}
                     type="button"
                     onClick={() => setSize(s.label)}
-                    className={`flex items-center gap-3 rounded-lg border p-5 text-left transition-all ${
+                    className={`flex items-center gap-3 rounded border p-5 text-left transition-all ${
                       size === s.label
                         ? "border-ink bg-secondary"
                         : "border-border bg-vellum tex-vellum hover:border-ink hover:bg-muted/40"
@@ -202,7 +202,7 @@ export function FindArtistWizard() {
                     key={b.value}
                     type="button"
                     onClick={() => setBudget(b.value)}
-                    className={`flex flex-col items-center rounded-lg border p-6 transition-all ${
+                    className={`flex flex-col items-center rounded border p-6 transition-all ${
                       budget === b.value
                         ? "border-ink bg-secondary"
                         : "border-border bg-vellum tex-vellum hover:border-ink hover:bg-muted/40"
@@ -267,7 +267,7 @@ export function FindArtistWizard() {
               disabled={!canAdvance()}
               onClick={goNext}
             >
-              {step < 3 ? "Next →" : "Find my artists"}
+              {step < 3 ? "Next" : "Find my artists"}
             </Button>
           </div>
 

@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
 
 const NAV_BUTTON =
-  "inline-flex h-9 w-9 items-center justify-center rounded-lg border-1.5 border-ink bg-vellum text-ink transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
+  "inline-flex h-9 w-9 items-center justify-center rounded border-1.5 border-ink bg-vellum text-ink transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
 
 export type CalendarProps = React.ComponentProps<typeof DayPicker>
 
@@ -39,11 +39,11 @@ function Calendar({
           buttonVariants({ variant: "ghost" }),
           "h-9 w-9 p-0 text-sm font-normal tabular-nums aria-selected:opacity-100"
         ),
-        range_start: "rounded-l-lg",
-        range_end: "rounded-r-lg",
+        range_start: "rounded-l",
+        range_end: "rounded-r",
         selected:
-          "rounded-lg bg-primary text-primary-foreground [&>button]:text-primary-foreground [&>button]:hover:bg-primary [&>button]:hover:text-primary-foreground",
-        today: "rounded-lg bg-secondary font-semibold text-ink",
+          "rounded bg-primary text-primary-foreground [&>button]:text-primary-foreground [&>button]:hover:bg-primary [&>button]:hover:text-primary-foreground",
+        today: "rounded bg-secondary font-semibold text-ink",
         outside: "text-ink-muted opacity-60",
         disabled: "text-ink-muted opacity-50",
         range_middle: "bg-secondary text-ink",

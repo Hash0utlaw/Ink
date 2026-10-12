@@ -184,7 +184,7 @@ export function ArtistSearchInterface({ showAvailableNow = false }: { showAvaila
         countLine={isLoading ? null : countLabel(totalCount, "artist")}
       >
         <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2">
-          <Link href="/map" className="text-[15px] font-semibold text-navy underline underline-offset-2 hover:no-underline">
+          <Link href="/map" className="inline-flex min-h-11 items-center text-[15px] font-semibold text-navy underline underline-offset-2 hover:no-underline">
             View artists on the map
           </Link>
           <FinderCta variant="inline" />
@@ -218,7 +218,7 @@ export function ArtistSearchInterface({ showAvailableNow = false }: { showAvaila
                 <ActiveFilter key={style} label={styleLabel(style) ?? style} onRemove={() => clearFilter(`style:${style}`)} />
               ))}
               <button
-                className="ml-auto min-h-9 text-[15px] font-semibold text-navy underline underline-offset-2 hover:no-underline"
+                className="ml-auto min-h-11 text-[15px] font-semibold text-navy underline underline-offset-2 hover:no-underline"
                 onClick={() => {
                   setNearMeCoords(null)
                   setDistancesById({})

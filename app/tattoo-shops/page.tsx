@@ -44,7 +44,7 @@ export default async function TattooShopsIndexPage() {
                 <Link
                   key={state}
                   href={`/tattoo-shops/${slug}`}
-                  className="group flex flex-col p-4 rounded-lg border border-border/50 bg-vellum tex-vellum hover:border-ink transition-all"
+                  className="group flex flex-col p-4 rounded border border-border/50 bg-vellum tex-vellum hover:border-ink transition-all"
                 >
                   <span className="font-bold text-sm group-hover:text-navy transition-colors">{name}</span>
                   <span className="text-xs text-muted-foreground mt-1">{count.toLocaleString()} shops</span>

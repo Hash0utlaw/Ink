@@ -13,8 +13,7 @@ import {
   Search,
   MapPin,
   User,
-  Calendar,
-  CreditCard,
+  Send,
   Shield,
   MessageCircle,
   ChevronDown,
@@ -22,26 +21,50 @@ import {
   HelpCircle,
 } from "lucide-react"
 
-const CATEGORIES = [
+type TopicSlug = "finding" | "requests" | "account" | "safety"
+
+// Each card jumps to its questions below (#topic-<slug>).
+const CATEGORIES: { icon: typeof MapPin; title: string; description: string; slug: TopicSlug }[] = [
   { icon: MapPin, title: "Finding Artists & Shops", description: "Search, filter, and discover artists near you", slug: "finding" },
-  { icon: User, title: "Account & Profile", description: "Manage your account, profile settings, and preferences", slug: "account" },
-  { icon: Calendar, title: "Bookings & Appointments", description: "How to book, reschedule, or cancel appointments", slug: "bookings" },
-  { icon: CreditCard, title: "Payments & Deposits", description: "Deposits, refunds, and payment methods", slug: "payments" },
-  { icon: Shield, title: "Safety & Trust", description: "Reviews and community standards", slug: "safety" },
+  { icon: Send, title: "Requests", description: "Getting in touch with an artist and what happens next", slug: "requests" },
+  { icon: User, title: "Account & Profile", description: "Your account, saved artists and shops, and claiming your page", slug: "account" },
+  { icon: Shield, title: "Safety & Trust", description: "How reviews and ratings work", slug: "safety" },
 ]
 
-const FAQS = [
-  { question: "How do I find a tattoo artist near me?", answer: "Use the interactive map on our Artists page or the Search page. Enter your city or allow location access, then filter by style, price range, and availability. You can also browse the Shops page to find studios by area." },
-  { question: "Is TattooMaps free to use?", answer: "Yes — browsing artists, shops, and styles is completely free for clients. Listings are free. Pro plans for artists and shops are coming soon." },
-  { question: "How do I book an appointment?", answer: "Visit an artist's profile page and click the Book Appointment button. Select your preferred date, describe your tattoo idea, and confirm the booking. A deposit may be required depending on the artist's policy." },
-  { question: "Can I cancel or reschedule a booking?", answer: "Cancellation and reschedule policies are set by each individual artist. TattooMaps doesn't take payments or deposits. Deposits, pricing and scheduling are arranged directly with the artist or shop." },
-  { question: "How do I list my studio or artist profile?", answer: "Most shops and artists are already listed. If you claim your page, we review it by hand, usually within 1–2 business days." },
-  { question: "How do I leave a review for an artist?", answer: "Reviews are tied to bookings made through TattooMaps. When the artist marks your session as complete, we email you a link to rate it from 1 to 5 stars and add an optional written review. Each booking can be reviewed once. Ratings combine public business listings and reviews from TattooMaps clients." },
+const FAQS: { topic: TopicSlug; question: string; answer: string }[] = [
+  { topic: "finding", question: "How do I find a tattoo artist near me?", answer: "Search by city, state or ZIP code on the homepage, or open the Artists or Shops page and filter by name, place, style and minimum rating. The map shows the shops and artists in the area you're looking at, and you can use your location to see what's nearby." },
+  { topic: "finding", question: "Is TattooMaps free to use?", answer: "Yes. Searching, browsing profiles, saving artists and shops, and sending requests are free. Listings are free." },
+  { topic: "requests", question: "How do I get in touch with an artist?", answer: "Open the artist's page and send a request with your idea. If the artist manages their page on TattooMaps, the request goes straight to them. Otherwise we pass it on to their shop and email you if they pick it up. Scheduling and pricing are arranged directly with the artist or shop." },
+  { topic: "requests", question: "Can I change or cancel a request?", answer: "TattooMaps passes your request on but doesn't schedule appointments. To change or cancel, contact the artist or shop directly, using the details on their page." },
+  { topic: "account", question: "How do I save artists and shops?", answer: "Sign in, then use Save on an artist's or shop's page. Everything you save is listed under Favorites in your dashboard." },
+  { topic: "account", question: "How do I list my studio or artist profile?", answer: "Most shops and artists are already listed. If you claim your page, we review it by hand, usually within 1–2 business days." },
+  { topic: "safety", question: "How do I leave a review for an artist?", answer: "Reviews are tied to requests sent through TattooMaps. When the artist marks your session as complete, we email you a link to rate it from 1 to 5 stars and add an optional written review. Each request can be reviewed once. Ratings combine public business listings and reviews from TattooMaps clients." },
 ]
+
+function FaqItem({ question, answer, open, onToggle }: { question: string; answer: string; open: boolean; onToggle: () => void }) {
+  return (
+    <div className="border border-border rounded overflow-hidden bg-vellum tex-vellum">
+      <button
+        type="button"
+        className="w-full flex items-center justify-between p-5 text-left hover:bg-muted/30 transition-colors"
+        onClick={onToggle}
+        aria-expanded={open}
+      >
+        <span className="font-medium text-foreground pr-4">{question}</span>
+        <ChevronDown className={`w-4 h-4 text-muted-foreground shrink-0 transition-transform duration-200 ${open ? "rotate-180" : ""}`} aria-hidden="true" />
+      </button>
+      {open && (
+        <div className="px-5 pb-5 text-sm text-muted-foreground leading-relaxed border-t border-border/50 pt-4">
+          {answer}
+        </div>
+      )}
+    </div>
+  )
+}
 
 export function HelpClient() {
   const [searchQuery, setSearchQuery] = useState("")
-  const [openFaq, setOpenFaq] = useState<number | null>(null)
+  const [openFaq, setOpenFaq] = useState<string | null>(null)
 
   const filteredFaqs = FAQS.filter(
     (faq) =>
@@ -76,7 +99,7 @@ export function HelpClient() {
                 placeholder="Search articles, FAQs..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-12 h-13 text-base bg-background border-border focus:border-ink rounded-lg"
+                className="pl-12 h-13 text-base bg-background border-border focus:border-ink rounded"
               />
             </div>
           </div>
@@ -87,23 +110,29 @@ export function HelpClient() {
           <section className="py-16 px-4">
             <div className="container mx-auto max-w-6xl">
               <h2 className="text-2xl font-bold mb-8">Browse by Topic</h2>
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid sm:grid-cols-2 gap-4">
                 {CATEGORIES.map((cat) => {
                   const Icon = cat.icon
                   return (
-                    <Card key={cat.slug} className="bg-vellum tex-vellum">
-                      <CardContent className="p-6">
-                        <div className="flex items-start gap-4">
-                          <div className="w-10 h-10 bg-secondary rounded-lg flex items-center justify-center shrink-0">
-                            <Icon className="w-5 h-5 text-primary" />
+                    <a
+                      key={cat.slug}
+                      href={`#topic-${cat.slug}`}
+                      className="block rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      <Card className="h-full bg-vellum tex-vellum hover:border-ink">
+                        <CardContent className="p-6">
+                          <div className="flex items-start gap-4">
+                            <div className="w-10 h-10 bg-secondary rounded flex items-center justify-center shrink-0">
+                              <Icon className="w-5 h-5 text-primary" aria-hidden="true" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-semibold text-foreground mb-1">{cat.title}</h3>
+                              <p className="text-sm text-muted-foreground leading-relaxed">{cat.description}</p>
+                            </div>
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-foreground mb-1">{cat.title}</h3>
-                            <p className="text-sm text-muted-foreground leading-relaxed">{cat.description}</p>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
+                        </CardContent>
+                      </Card>
+                    </a>
                   )
                 })}
               </div>
@@ -131,25 +160,28 @@ export function HelpClient() {
                 </p>
               </div>
             ) : (
-              <div className="space-y-3">
-                {filteredFaqs.map((faq, i) => (
-                  <div key={i} className="border border-border rounded-lg overflow-hidden bg-vellum tex-vellum">
-                    <button
-                      type="button"
-                      className="w-full flex items-center justify-between p-5 text-left hover:bg-muted/30 transition-colors"
-                      onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                      aria-expanded={openFaq === i}
-                    >
-                      <span className="font-medium text-foreground pr-4">{faq.question}</span>
-                      <ChevronDown className={`w-4 h-4 text-muted-foreground shrink-0 transition-transform duration-200 ${openFaq === i ? "rotate-180" : ""}`} />
-                    </button>
-                    {openFaq === i && (
-                      <div className="px-5 pb-5 text-sm text-muted-foreground leading-relaxed border-t border-border/50 pt-4">
-                        {faq.answer}
+              // Searching shows one list; otherwise the questions are grouped under
+              // their topics so the cards above can jump to them.
+              <div className="space-y-10">
+                {(searchQuery ? [{ slug: null, title: null }] : CATEGORIES).map((topic) => {
+                  const faqs = topic.slug ? filteredFaqs.filter((faq) => faq.topic === topic.slug) : filteredFaqs
+                  return (
+                    <div key={topic.slug ?? "results"} id={topic.slug ? `topic-${topic.slug}` : undefined} className="scroll-mt-24">
+                      {topic.title && <h3 className="mb-3 text-lg font-semibold text-foreground">{topic.title}</h3>}
+                      <div className="space-y-3">
+                        {faqs.map((faq) => (
+                          <FaqItem
+                            key={faq.question}
+                            question={faq.question}
+                            answer={faq.answer}
+                            open={openFaq === faq.question}
+                            onToggle={() => setOpenFaq(openFaq === faq.question ? null : faq.question)}
+                          />
+                        ))}
                       </div>
-                    )}
-                  </div>
-                ))}
+                    </div>
+                  )
+                })}
               </div>
             )}
           </div>
@@ -161,7 +193,7 @@ export function HelpClient() {
             <MessageCircle className="w-10 h-10 text-primary mx-auto mb-4" />
             <h2 className="text-2xl font-bold mb-3">Still need help?</h2>
             <p className="text-muted-foreground mb-6">Our support team is available Monday through Friday, 9am – 6pm EST.</p>
-            <Link href="/contact" className="inline-flex items-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 font-semibold px-6 py-3 rounded-lg transition-colors">
+            <Link href="/contact" className="inline-flex items-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 font-semibold px-6 py-3 rounded transition-colors">
               <MessageCircle className="w-4 h-4" />
               Contact Support
             </Link>

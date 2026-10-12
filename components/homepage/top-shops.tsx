@@ -24,7 +24,7 @@ export function TopShops({ shops, shopCount }: TopShopsProps) {
           {shopCount > 0 ? `${shopCount.toLocaleString("en-US")} shops across the US.` : "Shops across the US."} See them all on the map,
           with every artist who works there.
         </p>
-        <Link href="/map" className="mt-4 inline-block font-semibold text-navy underline underline-offset-2 hover:no-underline">
+        <Link href="/map" className="mt-2 inline-flex min-h-11 items-center font-semibold text-navy underline underline-offset-2 hover:no-underline">
           Open the map
         </Link>
       </div>

@@ -38,7 +38,7 @@ function Chip({ active, onClick, children }: { active: boolean; onClick: () => v
       aria-pressed={active}
       onClick={onClick}
       className={cn(
-        "inline-flex min-h-11 items-center gap-1.5 rounded-lg border-1.5 border-ink px-2.5 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
+        "inline-flex min-h-11 items-center gap-1.5 rounded border-1.5 border-ink px-2.5 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
         active ? "bg-ink text-vellum" : "bg-vellum tex-vellum text-ink hover:bg-secondary"
       )}
     >

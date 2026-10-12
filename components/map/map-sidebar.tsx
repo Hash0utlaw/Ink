@@ -46,7 +46,7 @@ function ratingLine(rating: number, reviewCount: number) {
 }
 
 const SECONDARY_BUTTON =
-  "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border-1.5 border-ink bg-vellum tex-vellum px-3 text-[15px] font-semibold text-ink hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+  "inline-flex min-h-11 items-center justify-center gap-2 rounded border-1.5 border-ink bg-vellum tex-vellum px-3 text-[15px] font-semibold text-ink hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 
 export function MapSidebar({
   isOpen,
@@ -92,14 +92,15 @@ export function MapSidebar({
 
   return (
     /*
-      Mobile: an overlay that floats on top of the map (fixed, taken out of
-      flex flow entirely) so the map is always full-width underneath it.
-      md+: rejoins the flex row as a fixed 420px side panel.
+      Mobile: an overlay that floats on top of the map (absolute, taken out of
+      flex flow entirely, below the site header) so the map is always
+      full-width underneath it. md+: rejoins the flex row as a fixed 420px
+      side panel.
     */
     <div
       className={cn(
         "flex flex-col overflow-hidden bg-paper tex-paper transition-all duration-300 ease-out",
-        "fixed inset-y-0 left-0 z-40 md:relative md:inset-auto md:z-30",
+        "absolute inset-y-0 left-0 z-40 md:relative md:inset-auto md:z-30",
         isOpen ? "w-full max-w-[420px] border-r-1.5 border-ink opacity-100 md:w-[420px]" : "pointer-events-none w-0 opacity-0"
       )}
     >
@@ -135,7 +136,7 @@ export function MapSidebar({
             />
             <button
               type="submit"
-              className="min-h-11 rounded-lg border-1.5 border-ink bg-flash-red px-4 text-[15px] font-semibold text-white hover:bg-flash-red/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              className="min-h-11 rounded border-1.5 border-ink bg-flash-red px-4 text-[15px] font-semibold text-white hover:bg-flash-red/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
               Search
             </button>
@@ -199,15 +200,15 @@ export function MapSidebar({
             <ul className="border-t border-rule">
               {Array.from({ length: 4 }).map((_, i) => (
                 <li key={i} className="animate-pulse space-y-2 border-b border-rule py-5">
-                  <div className="h-5 w-3/4 rounded-lg bg-muted" />
-                  <div className="h-4 w-1/2 rounded-lg bg-muted" />
-                  <div className="h-4 w-2/3 rounded-lg bg-muted" />
+                  <div className="h-5 w-3/4 rounded bg-muted" />
+                  <div className="h-4 w-1/2 rounded bg-muted" />
+                  <div className="h-4 w-2/3 rounded bg-muted" />
                 </li>
               ))}
             </ul>
           ) : locations.length === 0 ? (
             !dataError && (
-              <div className="rounded-lg border-1.5 border-ink bg-vellum tex-vellum p-4">
+              <div className="rounded border-1.5 border-ink bg-vellum tex-vellum p-4">
                 <p className="font-semibold text-ink">No shops on this part of the map</p>
                 <p className="mt-1 text-[15px] text-ink-muted">
                   Zoom out, move the map, or clear some filters to see more.
@@ -227,7 +228,7 @@ export function MapSidebar({
                       onClick={() => onLocationSelect(location)}
                       aria-current={selected ? "true" : undefined}
                       className={cn(
-                        "flex w-full gap-3 rounded-lg border-1.5 px-3 py-4 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                        "flex w-full gap-3 rounded border-1.5 px-3 py-4 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                         selected ? "border-ink bg-vellum tex-vellum" : "border-transparent hover:bg-secondary"
                       )}
                     >

@@ -24,7 +24,7 @@ export function ShopRow({ shop, distanceMi }: { shop: Shop; distanceMi?: number 
     <li className="border-b border-rule">
       <Link
         href={`/shops/${shop.id}`}
-        className="-mx-3 block rounded-lg border-1.5 border-transparent px-3 py-4 hover:border-ink hover:bg-vellum focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="-mx-3 block rounded border-1.5 border-transparent px-3 py-4 hover:border-ink hover:bg-vellum focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         <span className="block font-heading text-[21px] leading-tight text-ink">{shop.name}</span>
         {line && <span className="mt-1 block text-[15px] text-ink">{line}</span>}

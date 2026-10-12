@@ -58,7 +58,7 @@ export function LocationDetails({ location, pinNumber, onClose }: LocationDetail
   return (
     <section
       aria-label={`Selected: ${location.name}`}
-      className="absolute inset-x-2 bottom-[84px] z-20 max-h-[60%] overflow-y-auto rounded-lg border-2 border-ink bg-vellum tex-vellum p-4 scrollbar-ink sm:inset-x-4 lg:bottom-11 lg:left-4 lg:right-auto lg:w-[380px]"
+      className="absolute inset-x-2 bottom-[84px] z-20 max-h-[60%] overflow-y-auto rounded border-2 border-ink bg-vellum tex-vellum p-4 scrollbar-ink sm:inset-x-4 lg:bottom-11 lg:left-4 lg:right-auto lg:w-[380px]"
     >
       <div className="flex items-start gap-3">
         <MapPin number={pinNumber ?? ""} selected className="mt-0.5" />
@@ -74,7 +74,7 @@ export function LocationDetails({ location, pinNumber, onClose }: LocationDetail
             type="button"
             onClick={handleShare}
             aria-label="Share"
-            className="flex h-11 w-11 items-center justify-center rounded-lg text-ink hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="flex h-11 w-11 items-center justify-center rounded text-ink hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <Share2 className="h-[18px] w-[18px]" />
           </button>
@@ -82,7 +82,7 @@ export function LocationDetails({ location, pinNumber, onClose }: LocationDetail
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="flex h-11 w-11 items-center justify-center rounded-lg text-ink hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="flex h-11 w-11 items-center justify-center rounded text-ink hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <X className="h-5 w-5" />
           </button>
