@@ -26,12 +26,10 @@ import {
 
 const CONTACT_REASONS = [
   "General inquiry",
-  "Booking issue",
+  "Problem with a request",
   "Account or login problem",
   "Report a listing",
   "Artist / studio onboarding",
-  "Billing or payment question",
-  "AI Generator feedback",
   "Press or partnership",
   "Other",
 ]

@@ -19,7 +19,6 @@ const SECTIONS = [
   { id: "platform-use", title: "Use of the Platform" },
   { id: "artist-terms", title: "Artist & Studio Terms" },
   { id: "bookings", title: "Bookings & Payments" },
-  { id: "ai-generator", title: "Reserved" },
   { id: "content", title: "User Content" },
   { id: "intellectual-property", title: "Intellectual Property" },
   { id: "disclaimers", title: "Disclaimers" },
@@ -145,11 +144,7 @@ export default function TermsOfServicePage() {
                 </Prose>
               </Section>
 
-              <Section id="ai-generator" title="7. Reserved">
-                <Prose>This section is reserved.</Prose>
-              </Section>
-
-              <Section id="content" title="8. User Content">
+              <Section id="content" title="7. User Content">
                 <Prose>
                   By submitting content to TattooMaps (including portfolio photos, reviews, and profile information) you grant TattooMaps a worldwide, non-exclusive, royalty-free licence to display, reproduce, and distribute that content solely in connection with operating and promoting the Platform. You retain ownership of your content and may delete it at any time by removing it from your account.
                 </Prose>
@@ -158,37 +153,37 @@ export default function TermsOfServicePage() {
                 </Prose>
               </Section>
 
-              <Section id="intellectual-property" title="9. Intellectual Property">
+              <Section id="intellectual-property" title="8. Intellectual Property">
                 <Prose>
                   The TattooMaps name, logo, design, and all platform software are the property of TattooMaps, Inc. and are protected by applicable intellectual property laws. You may not reproduce, modify, distribute, or create derivative works of any TattooMaps property without our express written consent. Nothing in these Terms transfers any TattooMaps intellectual property rights to you.
                 </Prose>
               </Section>
 
-              <Section id="disclaimers" title="10. Disclaimers">
+              <Section id="disclaimers" title="9. Disclaimers">
                 <Prose>
                   THE PLATFORM IS PROVIDED &quot;AS IS&quot; AND &quot;AS AVAILABLE&quot; WITHOUT WARRANTIES OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING FITNESS FOR A PARTICULAR PURPOSE OR NON-INFRINGEMENT. TATTOOMAPS DOES NOT WARRANT THAT THE PLATFORM WILL BE UNINTERRUPTED, ERROR-FREE, OR FREE OF VIRUSES. WE DO NOT ENDORSE ANY ARTIST OR STUDIO LISTED ON THE PLATFORM AND MAKE NO REPRESENTATIONS REGARDING THE QUALITY OF THEIR SERVICES.
                 </Prose>
               </Section>
 
-              <Section id="limitation" title="11. Limitation of Liability">
+              <Section id="limitation" title="10. Limitation of Liability">
                 <Prose>
                   TO THE FULLEST EXTENT PERMITTED BY LAW, TATTOOMAPS WILL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES ARISING FROM YOUR USE OF THE PLATFORM OR SERVICES BOOKED THROUGH IT. OUR TOTAL LIABILITY TO YOU FOR ANY CLAIM SHALL NOT EXCEED THE GREATER OF (A) THE AMOUNT YOU PAID TO TATTOOMAPS IN THE 12 MONTHS PRECEDING THE CLAIM OR (B) USD $100. SOME JURISDICTIONS DO NOT ALLOW THESE LIMITATIONS, SO THEY MAY NOT APPLY TO YOU.
                 </Prose>
               </Section>
 
-              <Section id="termination" title="12. Termination">
+              <Section id="termination" title="11. Termination">
                 <Prose>
                   You may close your account at any time from your account settings or by contacting support. We may suspend or terminate your access at any time if we determine you have violated these Terms, with or without notice. Upon termination, your right to use the Platform ceases immediately. Sections that by their nature should survive termination (including intellectual property, disclaimers, and limitation of liability) will survive.
                 </Prose>
               </Section>
 
-              <Section id="governing-law" title="13. Governing Law">
+              <Section id="governing-law" title="12. Governing Law">
                 <Prose>
                   These Terms are governed by the laws of the State of New York, USA, without regard to conflict-of-law principles. Any dispute arising out of or relating to these Terms shall be subject to the exclusive jurisdiction of the state and federal courts located in New York County, New York. If you are a consumer in a jurisdiction where mandatory consumer protection laws apply, those laws may override this clause.
                 </Prose>
               </Section>
 
-              <Section id="contact" title="14. Contact">
+              <Section id="contact" title="13. Contact">
                 <Prose>
                   Questions about these Terms? Reach us at:
                 </Prose>

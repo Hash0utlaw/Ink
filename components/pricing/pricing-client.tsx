@@ -349,9 +349,6 @@ export function PricingClient() {
                       Smaller tattoos (under 4 inches)
                     </li>
                   </ul>
-                  <Button variant="outline" className="w-full bg-transparent" asChild>
-                    <Link href="/artists">Find Budget Artists</Link>
-                  </Button>
                 </CardContent>
               </Card>
 
@@ -386,9 +383,6 @@ export function PricingClient() {
                       Medium to large pieces
                     </li>
                   </ul>
-                  <Button className="w-full" asChild>
-                    <Link href="/artists">Find Mid-Range Artists</Link>
-                  </Button>
                 </CardContent>
               </Card>
 
@@ -423,11 +417,14 @@ export function PricingClient() {
                       Exclusive and waitlisted artists
                     </li>
                   </ul>
-                  <Button variant="outline" className="w-full bg-transparent" asChild>
-                    <Link href="/artists">Find Premium Artists</Link>
-                  </Button>
                 </CardContent>
               </Card>
+            </div>
+
+            <div className="mt-8 text-center">
+              <Button asChild>
+                <Link href="/artists">Browse artists</Link>
+              </Button>
             </div>
           </div>
         </section>

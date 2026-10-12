@@ -93,9 +93,8 @@ export default function PrivacyPolicyPage() {
                   items={[
                     "Create and manage your account",
                     "Connect clients with tattoo artists and studios",
-                    "Process bookings and payments",
-                    "Power the AI Tattoo Generator",
-                    "Send transactional emails (booking confirmations, receipts)",
+                    "Process bookings",
+                    "Send transactional emails (booking confirmations)",
                     "Send optional marketing emails if you have opted in",
                     "Improve and personalise the platform",
                     "Detect and prevent fraud or abuse",
@@ -112,7 +111,6 @@ export default function PrivacyPolicyPage() {
                 <List
                   items={[
                     "With artists or studios you book through the platform, solely to facilitate your appointment",
-                    "With payment processors (e.g. Stripe) to complete transactions",
                     "With cloud infrastructure providers who host our services under strict data processing agreements",
                     "With analytics providers (aggregated and anonymised where possible)",
                     "If required by law, court order, or government authority",
