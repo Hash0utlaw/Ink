@@ -1,80 +1,64 @@
-import { existsSync } from "node:fs"
-import path from "node:path"
 import type { Metadata } from "next"
 import Image from "next/image"
-import localFont from "next/font/local"
+import { countListed } from "@/lib/supabase/sitemap"
 
-// Figtree (latin, 400/500/800) is stored in app/fonts so builds never fetch from Google Fonts.
-const figtree = localFont({
-  src: [
-    { path: "../fonts/figtree-latin-400-normal.woff2", weight: "400", style: "normal" },
-    { path: "../fonts/figtree-latin-500-normal.woff2", weight: "500", style: "normal" },
-    { path: "../fonts/figtree-latin-800-normal.woff2", weight: "800", style: "normal" },
-  ],
-})
+// Live counts, refreshed hourly.
+export const revalidate = 3600
 
-const SUBLINE =
-  "Find artists by style and city, see who works where, and request your next piece. We're putting on the finishing touches."
-
-// Use the brand wordmark when it's been added to public/brand; otherwise text.
-const HAS_WORDMARK = existsSync(path.join(process.cwd(), "public/brand/logo-wordmark-color.png"))
-
-const STATS = ["26,000+ shops", "21,000+ artists", "All 50 states"]
+const DESCRIPTION = "TattooMaps is almost ready. Tattoo shops and artists across the U.S., searchable by place and style."
 
 export const metadata: Metadata = {
   title: "TattooMaps — Coming soon",
-  description: SUBLINE,
+  description: DESCRIPTION,
   robots: { index: false, follow: false },
+}
+
+/** Listed shop and artist counts rounded down to the thousand, or null if they can't be read. */
+async function getRoundedCounts(): Promise<{ shops: string; artists: string } | null> {
+  try {
+    const [shops, artists] = await Promise.all([countListed("shops"), countListed("artists")])
+    const floor = (n: number) => Math.floor(n / 1000) * 1000
+    if (floor(shops) === 0 || floor(artists) === 0) return null
+    return { shops: floor(shops).toLocaleString("en-US"), artists: floor(artists).toLocaleString("en-US") }
+  } catch {
+    return null
+  }
 }
 
 // Standalone pre-launch page: no site header, footer or nav. The middleware
 // rewrites every gated request here (see lib/launch-gate.ts).
-export default function ComingSoonPage() {
+export default async function ComingSoonPage() {
+  const counts = await getRoundedCounts()
+  const what = counts
+    ? `${counts.shops} shops and ${counts.artists} artists in the U.S.`
+    : "Tattoo shops and artists across the U.S."
+
   return (
-    <div className={`${figtree.className} flex min-h-screen flex-col bg-paper tex-paper text-ink`}>
-      <main className="flex flex-1 items-center justify-center px-6 py-16 sm:py-24">
-        <div className="w-full max-w-[640px] text-center">
-          {HAS_WORDMARK ? (
-            <Image
-              src="/brand/logo-wordmark-color.png"
-              alt="TattooMaps"
-              width={600}
-              height={346}
-              priority
-              className="mx-auto h-20 w-auto sm:h-[110px]"
-            />
-          ) : (
-            <p className="text-4xl font-extrabold tracking-tight sm:text-5xl">TattooMaps</p>
-          )}
+    <div className="flex min-h-[100svh] flex-col bg-paper tex-paper text-ink">
+      <div className="flex h-[60svh] min-h-[260px] items-center justify-center bg-night tex-night-chart px-6">
+        <Image
+          src="/brand/banner-cream.webp"
+          alt="TattooMaps"
+          width={600}
+          height={413}
+          priority
+          className="h-[110px] w-auto md:h-[180px]"
+        />
+      </div>
 
-          <p className="mt-10 text-sm font-medium uppercase tracking-[0.2em] text-flash-red">Coming soon</p>
-
-          <h1 className="mt-4 text-3xl font-extrabold leading-tight tracking-tight sm:text-5xl">
-            Every tattoo shop in America, on one map.
+      <main className="flex flex-1 justify-center px-6 py-8 md:py-10">
+        <div className="w-full max-w-[560px] text-center">
+          <h1 className="font-heading text-[34px] font-normal leading-[1.1] text-balance md:text-[44px]">
+            Find a tattoo artist near you.
           </h1>
-
-          <p className="mx-auto mt-6 max-w-[34rem] text-lg leading-relaxed text-ink/80 sm:text-xl">{SUBLINE}</p>
-
-          <ul className="mt-12 flex flex-col items-center gap-4 sm:flex-row sm:justify-center sm:gap-0">
-            {STATS.map((stat, i) => (
-              <li key={stat} className="flex items-center text-lg font-medium text-navy">
-                {i > 0 && (
-                  <span aria-hidden="true" className="mx-4 hidden text-ink/40 sm:inline">
-                    ·
-                  </span>
-                )}
-                {stat}
-              </li>
-            ))}
-          </ul>
+          <p className="mt-4 text-[17px] leading-[1.55] text-pretty md:text-[19px]">
+            TattooMaps is almost ready. {what}, searchable by place and style.
+          </p>
         </div>
       </main>
 
-      <footer className="px-6 pb-10 text-center text-sm text-ink/75">
-        © {new Date().getFullYear()} TattooMaps · Questions?{" "}
-        <a href="mailto:support@tattoomaps.com" className="font-medium text-navy underline underline-offset-2">
-          support@tattoomaps.com
-        </a>
+      <footer className="flex justify-center border-t-3 border-ink bg-night tex-night px-6 py-6">
+        <Image src="/brand/logo-wordmark-cream.webp" alt="TattooMaps" width={83} height={48} className="h-12 w-auto" />
       </footer>
     </div>
   )
