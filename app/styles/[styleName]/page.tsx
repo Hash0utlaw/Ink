@@ -15,10 +15,6 @@ import { getArtists } from "@/lib/supabase/artists"
 import { toStyleSlugs } from "@/lib/styles"
 import { exactMasterSlug } from "@/lib/style-guide"
 
-// Guide pages whose name isn't on the master style list (lib/styles.ts):
-// Surrealism's shop link uses the closest master style; Biomechanical has none.
-const FILTER_OVERRIDES: Record<string, string | null> = { surrealism: "illustrative", biomechanical: null }
-
 // Real artist counts and lists, refreshed hourly.
 export const revalidate = 3600
 
@@ -53,13 +49,12 @@ export default async function StylePage({ params }: { params: { styleName: strin
   const style = ALL_STYLES.find((s) => s.slug === params.styleName)
   if (!style) notFound()
 
-  const filterSlug =
-    style.slug in FILTER_OVERRIDES ? FILTER_OVERRIDES[style.slug] : toStyleSlugs([style.name])[0] ?? null
   // Artists only for guide styles that are exactly a master style; none for close matches.
   const masterSlug = exactMasterSlug(style.slug)
-  // Exact matches keep their style filter; close or no matches link to all artists.
-  const artistsHref = masterSlug && filterSlug ? `/artists?styles=${filterSlug}` : "/artists"
-  const shopsHref = `/shops?styles=${encodeURIComponent(filterSlug ?? style.name)}`
+  // Exact matches keep their style filter; close or no matches link to all artists and shops.
+  const filterSlug = masterSlug ? toStyleSlugs([style.name])[0] ?? null : null
+  const artistsHref = filterSlug ? `/artists?styles=${filterSlug}` : "/artists"
+  const shopsHref = filterSlug ? `/shops?styles=${encodeURIComponent(filterSlug)}` : "/shops"
   const artists = masterSlug ? await getArtists({ styles: [masterSlug], sortBy: "rating", pageSize: ARTIST_LIMIT }) : null
 
   const related = ALL_STYLES.filter(
