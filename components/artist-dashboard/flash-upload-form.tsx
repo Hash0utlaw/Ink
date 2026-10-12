@@ -7,6 +7,13 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Loader2, CheckCircle2 } from "lucide-react"
 import { STYLES } from "@/lib/styles"
+import { StyleSymbol } from "@/components/brand/style-symbol"
+import { cn } from "@/lib/utils"
+
+const LABEL = "mb-1.5 block text-sm font-semibold text-ink"
+const CHIP =
+  "inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border-1.5 border-ink px-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+const chipState = (on: boolean) => (on ? "bg-ink text-vellum" : "bg-vellum tex-vellum text-ink hover:bg-secondary")
 
 const SIZES = ["Tiny", "Small", "Medium", "Large"]
 
@@ -65,48 +72,48 @@ export function FlashUploadForm() {
   if (success) {
     return (
       <div className="py-8 flex flex-col items-center gap-2 text-center">
-        <CheckCircle2 className="w-10 h-10 text-success" />
-        <p className="font-semibold">Listing added!</p>
+        <CheckCircle2 className="h-10 w-10 text-success" aria-hidden="true" />
+        <p className="font-semibold">Listing added.</p>
       </div>
     )
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3">
+    <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="text-xs font-medium mb-1 block">Title *</label>
-        <Input placeholder="e.g. Japanese Koi Fish" value={title} onChange={(e) => setTitle(e.target.value)} />
+        <label htmlFor="flash-title" className={LABEL}>Title *</label>
+        <Input id="flash-title" placeholder="e.g. Japanese Koi Fish" value={title} onChange={(e) => setTitle(e.target.value)} />
       </div>
 
       <div>
-        <label className="text-xs font-medium mb-1 block">Image URL *</label>
-        <Input placeholder="https://..." value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} />
-        <p className="text-xs text-muted-foreground mt-1">Paste an image link (Instagram, Imgur, etc.)</p>
+        <label htmlFor="flash-image" className={LABEL}>Image URL *</label>
+        <Input id="flash-image" placeholder="https://..." value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} />
+        <p className="mt-1 text-[13px] text-ink-muted">Paste an image link (Instagram, Imgur, etc.)</p>
       </div>
 
       <div className="grid grid-cols-2 gap-2">
         <div>
-          <label className="text-xs font-medium mb-1 block">Price ($) *</label>
-          <Input type="number" placeholder="150" value={price} onChange={(e) => setPrice(e.target.value)} min="0" />
+          <label htmlFor="flash-price" className={LABEL}>Price ($) *</label>
+          <Input id="flash-price" type="number" placeholder="150" value={price} onChange={(e) => setPrice(e.target.value)} min="0" />
         </div>
         <div>
-          <label className="text-xs font-medium mb-1 block">Max price ($)</label>
-          <Input type="number" placeholder="250" value={priceMax} onChange={(e) => setPriceMax(e.target.value)} min="0" />
+          <label htmlFor="flash-price-max" className={LABEL}>Max price ($)</label>
+          <Input id="flash-price-max" type="number" placeholder="250" value={priceMax} onChange={(e) => setPriceMax(e.target.value)} min="0" />
         </div>
       </div>
 
       <div>
-        <label className="text-xs font-medium mb-1 block">Style</label>
-        <div className="grid grid-cols-3 gap-1.5">
+        <p className={LABEL}>Style</p>
+        <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3">
           {STYLES.map((s) => (
             <button
               key={s.slug}
               type="button"
+              aria-pressed={style === s.slug}
               onClick={() => setStyle(style === s.slug ? "" : s.slug)}
-              className={`rounded-md border px-1.5 py-1 text-xs font-medium transition-colors ${
-                style === s.slug ? "border-ink bg-secondary text-primary" : "border-border bg-muted/30 text-muted-foreground hover:bg-muted/60"
-              }`}
+              className={cn(CHIP, "justify-start text-left leading-tight", chipState(style === s.slug))}
             >
+              <StyleSymbol slug={s.slug} size={12} className="shrink-0" />
               {s.label}
             </button>
           ))}
@@ -114,16 +121,15 @@ export function FlashUploadForm() {
       </div>
 
       <div>
-        <label className="text-xs font-medium mb-1 block">Size</label>
+        <p className={LABEL}>Size</p>
         <div className="grid grid-cols-4 gap-1.5">
           {SIZES.map((s) => (
             <button
               key={s}
               type="button"
+              aria-pressed={size === s}
               onClick={() => setSize(size === s ? "" : s)}
-              className={`rounded-md border px-1.5 py-1 text-xs font-medium transition-colors ${
-                size === s ? "border-ink bg-secondary text-primary" : "border-border bg-muted/30 text-muted-foreground hover:bg-muted/60"
-              }`}
+              className={cn(CHIP, chipState(size === s))}
             >
               {s}
             </button>
@@ -132,8 +138,9 @@ export function FlashUploadForm() {
       </div>
 
       <div>
-        <label className="text-xs font-medium mb-1 block">Description (optional)</label>
+        <label htmlFor="flash-description" className={LABEL}>Description (optional)</label>
         <Textarea
+          id="flash-description"
           placeholder="Any notes about the design, placement, etc."
           value={description}
           onChange={(e) => setDescription(e.target.value)}
@@ -141,27 +148,27 @@ export function FlashUploadForm() {
         />
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex min-h-11 items-center gap-2">
         <input
           type="checkbox"
           id="exclusive"
           checked={isExclusive}
           onChange={(e) => setIsExclusive(e.target.checked)}
-          className="accent-primary"
+          className="h-5 w-5 accent-ink"
         />
-        <label htmlFor="exclusive" className="text-xs text-muted-foreground cursor-pointer">
-          Exclusive — only one client can book this design
+        <label htmlFor="exclusive" className="cursor-pointer text-sm text-ink">
+          Exclusive: only one client can book this design
         </label>
       </div>
 
-      {error && <p className="text-xs text-destructive">{error}</p>}
+      {error && <p className="text-sm font-semibold text-destructive">{error}</p>}
 
       <Button
         type="submit"
-        className="w-full bg-primary hover:bg-primary/90"
+        className="w-full"
         disabled={!title || !imageUrl || !price || submitting}
       >
-        {submitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Adding...</> : "Add Listing"}
+        {submitting ? <><Loader2 className="animate-spin" aria-hidden="true" />Adding…</> : "Add listing"}
       </Button>
     </form>
   )

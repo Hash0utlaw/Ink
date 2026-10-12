@@ -38,40 +38,45 @@ export function ProfileForm({ initialName, initialEmail, initialLocation, avatar
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>My Profile</CardTitle>
-        <CardDescription>Update your personal information and preferences.</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="flex items-center gap-4">
-          <Avatar className="w-20 h-20">
-            <AvatarImage src={avatarUrl || "/placeholder.svg"} />
-            <AvatarFallback className="bg-vellum text-ink font-heading border-1.5 border-ink">{initials(name) || "?"}</AvatarFallback>
-          </Avatar>
-          <Button variant="outline">Change Photo</Button>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Full Name</Label>
-            <Input id="name" value={name} onChange={(e) => setName(e.target.value)} />
+    <div className="space-y-8">
+      <h1 className="font-heading text-[30px] leading-tight text-balance md:text-[34px]">Profile</h1>
+      <Card>
+        <CardHeader>
+          <CardTitle>My profile</CardTitle>
+          <CardDescription>Update your name, email and location.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="flex items-center gap-4">
+            <Avatar className="h-20 w-20">
+              <AvatarImage src={avatarUrl || "/placeholder.svg"} />
+              <AvatarFallback className="bg-vellum text-ink font-heading border-1.5 border-ink">{initials(name) || "?"}</AvatarFallback>
+            </Avatar>
+            <Button variant="outline">Change photo</Button>
+          </div>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="name">Full name</Label>
+              <Input id="name" value={name} onChange={(e) => setName(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email address</Label>
+              <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+            </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="email">Email Address</Label>
-            <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+            <Label htmlFor="location">Location</Label>
+            <Input id="location" value={location} onChange={(e) => setLocation(e.target.value)} />
           </div>
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="location">Location</Label>
-          <Input id="location" value={location} onChange={(e) => setLocation(e.target.value)} />
-        </div>
-        <div className="flex items-center justify-end gap-3">
-          {saved && <span className="text-sm text-success">Saved</span>}
-          <Button onClick={handleSave} disabled={saving}>
-            {saving ? "Saving..." : "Save Changes"}
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+          <div className="flex items-center justify-end gap-3">
+            <span aria-live="polite" className="text-sm font-semibold text-success">
+              {saved ? "Saved" : ""}
+            </span>
+            <Button onClick={handleSave} disabled={saving}>
+              {saving ? "Saving…" : "Save changes"}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   )
 }

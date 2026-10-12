@@ -1,12 +1,17 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { getBookingsForArtist } from "@/lib/supabase/bookings"
 import { getCurrentUserId } from "@/lib/supabase/users"
+import { getArtistHandleForUser } from "@/lib/supabase/artists"
+import { NoRequestsYet } from "@/components/artist-dashboard/no-requests-yet"
 import { ArrowUpRight, ArrowDownRight } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 export default async function AnalyticsPage() {
   const userId = await getCurrentUserId()
-  const bookings = userId ? await getBookingsForArtist(userId) : []
+  const [bookings, handle] = await Promise.all([
+    userId ? getBookingsForArtist(userId) : Promise.resolve([]),
+    userId ? getArtistHandleForUser(userId) : Promise.resolve(null),
+  ])
 
   const now = new Date()
   const thisMonth = now.getMonth()
@@ -38,76 +43,76 @@ export default async function AnalyticsPage() {
     .slice(0, 5)
     .map(([style, count]) => ({ style, count }))
 
+  // Only stats with something to count; a zero is never shown.
   const stats = [
-    { title: "Profile Views", value: "—", change: 0, note: "tracking not yet wired" },
-    { title: "Booking Requests (this month)", value: thisMonthCount, change: changePercent, note: "vs last month" },
-    { title: "Total Bookings", value: bookings.length, change: 0, note: "all time" },
-  ]
+    { title: "Booking requests this month", value: thisMonthCount, change: changePercent, note: "vs last month" },
+    { title: "Total bookings", value: bookings.length, change: 0, note: "all time" },
+  ].filter((s) => s.value > 0)
 
   return (
     <div className="space-y-8">
-      <h1 className="text-3xl font-bold">Analytics</h1>
-      <div className="grid gap-4 md:grid-cols-3">
-        {stats.map((stat) => (
-          <Card key={stat.title}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stat.value}</div>
-              <p className="text-xs text-muted-foreground flex items-center gap-1">
-                {stat.change !== 0 && (
-                  <span
-                    className={cn({
-                      "text-success": stat.change > 0,
-                      "text-destructive": stat.change < 0,
-                    })}
-                  >
-                    {stat.change > 0 ? (
-                      <ArrowUpRight className="inline h-3.5 w-3.5" />
-                    ) : (
-                      <ArrowDownRight className="inline h-3.5 w-3.5" />
-                    )}
-                    {Math.abs(stat.change)}%
-                  </span>
-                )}
-                {stat.note}
-              </p>
+      <h1 className="font-heading text-[30px] leading-tight text-balance md:text-[34px]">Analytics</h1>
+
+      {bookings.length === 0 ? (
+        <NoRequestsYet handle={handle} />
+      ) : (
+        <>
+          <Card>
+            <CardContent className="p-6">
+              <dl className="grid gap-6 sm:grid-cols-2">
+                {stats.map((stat) => (
+                  <div key={stat.title}>
+                    <dt className="text-sm font-semibold text-ink">{stat.title}</dt>
+                    <dd className="font-heading text-[30px] leading-tight tabular-nums">{stat.value}</dd>
+                    <dd className="flex items-center gap-1 text-[13px] text-ink-muted">
+                      {stat.change !== 0 && (
+                        <span
+                          className={cn("font-semibold tabular-nums", {
+                            "text-success": stat.change > 0,
+                            "text-destructive": stat.change < 0,
+                          })}
+                        >
+                          {stat.change > 0 ? (
+                            <ArrowUpRight className="inline h-3.5 w-3.5" aria-hidden="true" />
+                          ) : (
+                            <ArrowDownRight className="inline h-3.5 w-3.5" aria-hidden="true" />
+                          )}
+                          {Math.abs(stat.change)}%
+                        </span>
+                      )}
+                      {stat.note}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
             </CardContent>
           </Card>
-        ))}
-      </div>
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Revenue</CardTitle>
-            <CardDescription>Revenue tracking coming in a future update.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="h-64 bg-muted rounded-lg flex items-center justify-center">
-              <p className="text-muted-foreground text-sm">Revenue Chart — coming soon</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Popular Sizes</CardTitle>
-            <CardDescription>Most requested tattoo sizes from your bookings.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {stylePopularity.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No data yet.</p>
-            ) : (
-              stylePopularity.map((item) => (
-                <div key={item.style} className="flex items-center">
-                  <p className="flex-1 text-sm font-medium">{item.style}</p>
-                  <p className="text-sm text-muted-foreground">{item.count} requests</p>
-                </div>
-              ))
-            )}
-          </CardContent>
-        </Card>
-      </div>
+
+          {stylePopularity.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Popular sizes</CardTitle>
+                <CardDescription>Most requested tattoo sizes from your bookings.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul>
+                  {stylePopularity.map((item) => (
+                    <li
+                      key={item.style}
+                      className="flex items-center border-b border-rule py-2.5 first:pt-0 last:border-0 last:pb-0"
+                    >
+                      <p className="flex-1 text-[15px] font-semibold">{item.style}</p>
+                      <p className="text-sm text-ink-muted tabular-nums">
+                        {item.count} {item.count === 1 ? "request" : "requests"}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          )}
+        </>
+      )}
     </div>
   )
 }

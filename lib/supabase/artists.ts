@@ -358,3 +358,18 @@ export async function getWorthTheDriveArtists(limit = 6): Promise<Artist[]> {
     return []
   }
 }
+
+/** The booking-link handle of the artist profile owned by this user, if any. */
+export async function getArtistHandleForUser(userId: string): Promise<string | null> {
+  try {
+    const supabase = createClient()
+    const { data } = await supabase
+      .from("artists")
+      .select("handle")
+      .eq("user_id", userId)
+      .maybeSingle()
+    return (data as { handle: string } | null)?.handle ?? null
+  } catch {
+    return null
+  }
+}

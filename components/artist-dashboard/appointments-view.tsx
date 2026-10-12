@@ -28,14 +28,14 @@ export function AppointmentsView({ bookings }: { bookings: BookingRequest[] }) {
     : active
 
   return (
-    <div className="grid gap-8 md:grid-cols-3">
-      <div className="md:col-span-2 space-y-4">
+    <div className="grid gap-8 xl:grid-cols-3">
+      <div className="space-y-6 xl:col-span-2">
         {pending.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Needs your response</CardTitle>
+              <CardTitle>Needs your response</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent>
               {pending.map((booking) => (
                 <BookingCard key={booking.id} booking={booking} />
               ))}
@@ -44,8 +44,8 @@ export function AppointmentsView({ bookings }: { bookings: BookingRequest[] }) {
         )}
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0">
-            <CardTitle className="text-base">
+          <CardHeader className="flex flex-row items-center justify-between gap-4 space-y-0">
+            <CardTitle>
               {selectedDate
                 ? `Requests on ${selectedDate.toLocaleDateString("en-US", { month: "long", day: "numeric" })}`
                 : "All requests"}
@@ -53,18 +53,17 @@ export function AppointmentsView({ bookings }: { bookings: BookingRequest[] }) {
             {selectedDate && (
               <Button
                 variant="ghost"
-                size="sm"
-                className="gap-1.5 text-muted-foreground"
+                className="min-h-11 shrink-0 gap-1.5 px-3 text-ink-muted"
                 onClick={() => setSelectedDate(undefined)}
               >
-                <X className="h-3.5 w-3.5" />
+                <X aria-hidden="true" />
                 Clear filter
               </Button>
             )}
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent>
             {filteredActive.length === 0 ? (
-              <p className="py-8 text-center text-muted-foreground text-sm">
+              <p className="text-ink-muted">
                 {selectedDate
                   ? "No requests for this date."
                   : "No booking requests yet. Share your booking link to start receiving briefs."}
@@ -76,8 +75,8 @@ export function AppointmentsView({ bookings }: { bookings: BookingRequest[] }) {
         </Card>
       </div>
 
-      <div className="md:col-span-1">
-        <Card>
+      <div>
+        <Card className="w-fit">
           <CardContent className="p-2">
             <Calendar
               mode="single"
@@ -89,7 +88,7 @@ export function AppointmentsView({ bookings }: { bookings: BookingRequest[] }) {
               modifiers={{ booked: bookedDates }}
               modifiersClassNames={{
                 booked:
-                  "relative after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:h-1 after:w-1 after:rounded-full after:bg-primary after:content-['']",
+                  "relative after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:h-1 after:w-1 after:bg-ink after:content-['']",
               }}
             />
           </CardContent>

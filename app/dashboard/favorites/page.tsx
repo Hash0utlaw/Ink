@@ -1,4 +1,4 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ArtistCard } from "@/components/artists/artist-card"
@@ -7,12 +7,26 @@ import Link from "next/link"
 import { getCurrentUserId } from "@/lib/supabase/users"
 import { getSavedItems } from "@/lib/supabase/saved"
 
+function EmptyFavorites({ text, href, action }: { text: string; href: string; action: string }) {
+  return (
+    <Card>
+      <CardContent className="space-y-4 p-6">
+        <p className="font-semibold text-ink">{text}</p>
+        <Button asChild variant="outline">
+          <Link href={href}>{action}</Link>
+        </Button>
+      </CardContent>
+    </Card>
+  )
+}
+
 export default async function FavoritesPage() {
   const userId = await getCurrentUserId()
   const { artists, shops } = userId ? await getSavedItems(userId) : { artists: [], shops: [] }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
+      <h1 className="font-heading text-[30px] leading-tight text-balance md:text-[34px]">Favorites</h1>
       <Tabs defaultValue="artists">
         <TabsList>
           <TabsTrigger value="artists">Artists</TabsTrigger>
@@ -21,20 +35,7 @@ export default async function FavoritesPage() {
 
         <TabsContent value="artists" className="mt-6">
           {artists.length === 0 ? (
-            <Card>
-              <CardHeader>
-                <CardTitle>Favorite Artists</CardTitle>
-                <CardDescription>Your saved list of talented artists.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 space-y-3">
-                  <p className="text-sm text-muted-foreground">You haven&apos;t saved anyone yet.</p>
-                  <Button asChild variant="secondary">
-                    <Link href="/artists">Browse Artists</Link>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            <EmptyFavorites text="No saved artists yet." href="/artists" action="Browse artists" />
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {artists.map((artist) => (
@@ -46,20 +47,7 @@ export default async function FavoritesPage() {
 
         <TabsContent value="shops" className="mt-6">
           {shops.length === 0 ? (
-            <Card>
-              <CardHeader>
-                <CardTitle>Favorite Shops</CardTitle>
-                <CardDescription>Your go-to list of top-rated shops.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 space-y-3">
-                  <p className="text-sm text-muted-foreground">You haven&apos;t saved anyone yet.</p>
-                  <Button asChild variant="secondary">
-                    <Link href="/tattoo-shops">Browse Shops</Link>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            <EmptyFavorites text="No saved shops yet." href="/tattoo-shops" action="Browse shops" />
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {shops.map((shop) => (

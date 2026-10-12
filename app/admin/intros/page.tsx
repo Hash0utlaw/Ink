@@ -57,7 +57,7 @@ function formatDate(iso: string) {
   return new Date(iso).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })
 }
 
-const linkClass = "text-sm text-navy hover:underline"
+const linkClass = "text-sm font-semibold text-navy underline underline-offset-2 hover:no-underline"
 
 export default async function AdminIntrosPage() {
   const supabase = createClient()
@@ -95,11 +95,11 @@ export default async function AdminIntrosPage() {
       </Suspense>
       <main className="flex-1">
         <div className="container mx-auto px-4 py-12 max-w-5xl space-y-12">
-          <h1 className="text-3xl md:text-4xl font-extrabold">Intros</h1>
+          <h1 className="font-heading text-[34px] leading-tight md:text-[44px]">Intros</h1>
 
           <section className="space-y-4">
-            <h2 className="text-2xl font-bold">
-              Waiting requests <span className="text-muted-foreground font-normal">({requests.length})</span>
+            <h2 className="font-heading text-[26px] leading-tight">
+              Waiting requests <span className="text-muted-foreground tabular-nums">({requests.length})</span>
             </h2>
             {requestError && <p className="text-sm text-destructive">{requestError.message}</p>}
             {requests.length === 0 && !requestError && (
@@ -110,7 +110,7 @@ export default async function AdminIntrosPage() {
               const shop = artist ? introShop(artist) : null
               const age = hoursSince(r.created_at, now)
               const overdue = age > 24 && r.outreach_status === "new"
-              const summary = [r.size, r.placement, r.style].filter(Boolean).join(" · ")
+              const summary = [r.size, r.placement, r.style].filter(Boolean).join(", ")
               const request = { size: r.size, placement: r.placement, style: r.style }
               const website = externalUrl(shop?.website)
               const facebook = externalUrl(shop?.facebook_url)
@@ -123,7 +123,7 @@ export default async function AdminIntrosPage() {
                       <Badge variant={overdue ? "destructive" : "secondary"}>{age}h</Badge>
                       <Badge variant="outline">{r.outreach_status}</Badge>
                       {artist ? (
-                        <Link href={`/artists/${artist.id}`} className="font-semibold hover:underline">
+                        <Link href={`/artists/${artist.id}`} className="font-semibold underline-offset-2 hover:underline">
                           {artist.display_name}
                         </Link>
                       ) : (
@@ -143,7 +143,7 @@ export default async function AdminIntrosPage() {
                       {r.description && <p className="text-muted-foreground whitespace-pre-wrap">{r.description}</p>}
                       <p className="text-xs text-muted-foreground mt-1">
                         Submitted {formatDate(r.created_at)}
-                        {r.outreach_contacted_at ? ` · contacted ${formatDate(r.outreach_contacted_at)}` : ""}
+                        {r.outreach_contacted_at ? `, contacted ${formatDate(r.outreach_contacted_at)}` : ""}
                       </p>
                     </div>
 
@@ -186,8 +186,8 @@ export default async function AdminIntrosPage() {
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-2xl font-bold">
-              Pending claims <span className="text-muted-foreground font-normal">({claims.length})</span>
+            <h2 className="font-heading text-[26px] leading-tight">
+              Pending claims <span className="text-muted-foreground tabular-nums">({claims.length})</span>
             </h2>
             {claimError && <p className="text-sm text-destructive">{claimError.message}</p>}
             {claims.length === 0 && !claimError && <p className="text-muted-foreground">No pending claims.</p>}
@@ -196,7 +196,7 @@ export default async function AdminIntrosPage() {
                 <CardContent className="p-5 space-y-3">
                   <div className="flex flex-wrap items-center gap-2">
                     {c.artists ? (
-                      <Link href={`/artists/${c.artists.id}`} className="font-semibold hover:underline">
+                      <Link href={`/artists/${c.artists.id}`} className="font-semibold underline-offset-2 hover:underline">
                         {c.artists.display_name}
                       </Link>
                     ) : (
