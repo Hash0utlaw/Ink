@@ -1,5 +1,5 @@
-import { SITE_URL } from "@/lib/site-config"
-import { escapeHtml } from "@/lib/escape-html"
+import { EMAIL_SITE_URL, SITE_URL } from "@/lib/site-config"
+import { introAlertEmail } from "@/lib/email/templates"
 
 // Shared by the instant intro alert, the /admin/intros page and the daily digest.
 
@@ -53,8 +53,8 @@ export function externalUrl(url: string | null | undefined): string | null {
   }
 }
 
-export function claimUrl(artist: Pick<IntroArtist, "handle">): string {
-  return artist.handle ? `${SITE_URL}/claim?artist=${encodeURIComponent(artist.handle)}` : `${SITE_URL}/claim`
+export function claimUrl(artist: Pick<IntroArtist, "handle">, base = SITE_URL): string {
+  return artist.handle ? `${base}/claim?artist=${encodeURIComponent(artist.handle)}` : `${base}/claim`
 }
 
 export function shopAddress(shop: IntroShop | null): string {
@@ -64,7 +64,11 @@ export function shopAddress(shop: IntroShop | null): string {
 }
 
 /** Ready-to-copy message for the shop. Never includes the client's name, email or phone. */
-export function buildOutreachMessage(artist: IntroArtist, request: Pick<IntroRequest, "size" | "placement" | "style">) {
+export function buildOutreachMessage(
+  artist: IntroArtist,
+  request: Pick<IntroRequest, "size" | "placement" | "style">,
+  base = SITE_URL,
+) {
   const shop = introShop(artist)
   const firstName = artist.display_name?.trim().split(/\s+/)[0] || "your artist"
   const details = [request.size, request.placement, request.style].filter((v) => v && v.trim()).join(", ")
@@ -72,7 +76,7 @@ export function buildOutreachMessage(artist: IntroArtist, request: Pick<IntroReq
   return (
     `Hi ${shop?.name?.trim() || "there"}, a client found ${firstName} on TattooMaps and sent a tattoo request` +
     `${details ? ` (${details})` : ""}. ` +
-    `${firstName} can see the details and reply for free by claiming their profile here: ${claimUrl(artist)}. ` +
+    `${firstName} can see the details and reply for free by claiming their profile here: ${claimUrl(artist, base)}. ` +
     `Adam, TattooMaps`
   )
 }
@@ -94,37 +98,22 @@ export function buildIntroAlertEmail(artist: IntroArtist, request: IntroRequest)
   const location = [shop?.city, shop?.state].filter(Boolean).join(" ")
   const subject = `Intro request: ${artistName} at ${shop?.name ?? "no shop"}${location ? `, ${location}` : ""}`
 
-  const row = (label: string, value: string | null | undefined) =>
-    value ? `<p><strong>${label}:</strong> ${escapeHtml(value)}</p>` : ""
-  const link = (label: string, href: string | null, text?: string | null) =>
-    href ? `<li>${label}: <a href="${escapeHtml(href)}">${escapeHtml(text ?? href)}</a></li>` : ""
+  const contacts: [string, string, string][] = []
+  const add = (label: string, href: string | null, text?: string | null) => {
+    if (href) contacts.push([label, href, text ?? href])
+  }
+  if (shop?.phone) add("Phone", `tel:${shop.phone.replace(/[^\d+]/g, "")}`, shop.phone)
+  if (shop?.email) add("Email", `mailto:${shop.email.trim()}`, shop.email)
+  add("Website", externalUrl(shop?.website))
+  add("Facebook", externalUrl(shop?.facebook_url))
+  add("Instagram", externalUrl(shop?.instagram_url))
 
-  const contacts = [
-    shop?.phone ? link("Phone", `tel:${shop.phone.replace(/[^\d+]/g, "")}`, shop.phone) : "",
-    shop?.email ? link("Email", `mailto:${shop.email.trim()}`, shop.email) : "",
-    link("Website", externalUrl(shop?.website)),
-    link("Facebook", externalUrl(shop?.facebook_url)),
-    link("Instagram", externalUrl(shop?.instagram_url)),
-  ].join("")
-
-  const html = `
-    <h2>New intro request for ${escapeHtml(artistName)}</h2>
-    ${row("Size", request.size)}
-    ${row("Placement", request.placement)}
-    ${row("Style", request.style)}
-    ${row("Preferred date", request.preferredDate)}
-    ${row("Description", request.description)}
-    ${row("Submitted", new Date(request.createdAt).toUTCString())}
-    <h3>Shop</h3>
-    ${row("Name", shop?.name)}
-    ${row("Address", shopAddress(shop))}
-    ${contacts ? `<ul>${contacts}</ul>` : "<p>No contact details on file.</p>"}
-    <h3>Outreach message</h3>
-    <pre style="white-space:pre-wrap;font-family:inherit;background:#f4f4f5;padding:12px;border-radius:8px;">${escapeHtml(
-      buildOutreachMessage(artist, request),
-    )}</pre>
-    <p><a href="${SITE_URL}/admin/intros">Open the intros dashboard →</a></p>
-  `
-
-  return { subject, html }
+  return introAlertEmail({
+    artistName,
+    subject,
+    request: { ...request, submitted: new Date(request.createdAt).toUTCString() },
+    shop: { name: shop?.name, address: shopAddress(shop) },
+    contacts,
+    outreachMessage: buildOutreachMessage(artist, request, EMAIL_SITE_URL),
+  })
 }

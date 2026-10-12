@@ -5,8 +5,8 @@ import { Resend } from "resend"
 import { createClient } from "@/utils/supabase/server"
 import { createAdminClient } from "@/utils/supabase/admin"
 import { isAdmin } from "@/lib/admin"
-import { escapeHtml } from "@/lib/escape-html"
-import { FROM_EMAIL, REPLY_TO, SITE_URL } from "@/lib/site-config"
+import { FROM_EMAIL, REPLY_TO } from "@/lib/site-config"
+import { claimApprovedEmail, claimedRequestArtistEmail, claimedRequestClientEmail } from "@/lib/email/templates"
 
 export type ActionResult = { ok: true; message: string } | { ok: false; error: string }
 
@@ -74,38 +74,38 @@ export async function markClaimed(bookingId: string): Promise<ActionResult> {
   if (!artistEmail) return notLinked
 
   const artistName = b.artists?.display_name || "Your artist"
-  const row = (label: string, value: string | null | undefined) =>
-    value ? `<p><strong>${label}:</strong> ${escapeHtml(value)}</p>` : ""
+  const toArtist = claimedRequestArtistEmail({
+    artistName,
+    clientName: b.client_name,
+    clientEmail: b.client_email,
+    clientPhone: b.client_phone,
+    preferredDate: b.preferred_date,
+    size: b.size,
+    placement: b.placement,
+    style: b.style,
+    budget: b.budget,
+    description: b.description,
+  })
 
   const resend = new Resend(process.env.RESEND_API_KEY)
   const { error: artistEmailError } = await resend.emails.send({
     from: FROM_EMAIL,
     to: artistEmail,
     replyTo: REPLY_TO,
-    subject: `Booking request from ${b.client_name}`,
-    html: `<p>Hi ${escapeHtml(artistName)},</p>
-           <p>Here's the booking request that was waiting for you on TattooMaps.</p>
-           ${row("Name", b.client_name)}
-           ${row("Email", b.client_email)}
-           ${row("Phone", b.client_phone)}
-           ${row("Preferred date", b.preferred_date)}
-           ${row("Size", b.size)}
-           ${row("Placement", b.placement)}
-           ${row("Style", b.style)}
-           ${row("Budget", b.budget)}
-           ${row("Description", b.description)}
-           <p><a href="${SITE_URL}/artist-dashboard">Open your dashboard →</a></p>`,
+    subject: toArtist.subject,
+    html: toArtist.html,
+    text: toArtist.text,
   })
   if (artistEmailError) return { ok: false, error: `Artist email failed: ${artistEmailError.message}` }
 
+  const toClient = claimedRequestClientEmail({ clientName: b.client_name, artistName })
   const { error: clientEmailError } = await resend.emails.send({
     from: FROM_EMAIL,
     to: b.client_email,
     replyTo: REPLY_TO,
-    subject: `${artistName} has claimed their profile and received your request`,
-    html: `<p>Hi ${escapeHtml(b.client_name)},</p>
-           <p><strong>${escapeHtml(artistName)}</strong> has claimed their profile and received your request.
-           They'll reply to you directly.</p>`,
+    subject: toClient.subject,
+    html: toClient.html,
+    text: toClient.text,
   })
   if (clientEmailError) console.error("[admin/intros] client email failed:", clientEmailError.message)
 
@@ -163,15 +163,15 @@ export async function approveClaim(claimId: string): Promise<ActionResult> {
     .eq("id", claimId)
   if (error) return { ok: false, error: error.message }
 
+  const approved = claimApprovedEmail({ name: c.claimant_name })
   const resend = new Resend(process.env.RESEND_API_KEY)
   const { error: emailError } = await resend.emails.send({
     from: FROM_EMAIL,
     to: c.claimant_email,
     replyTo: REPLY_TO,
-    subject: "Your TattooMaps claim is approved",
-    html: `<p>Hi ${escapeHtml(c.claimant_name)},</p>
-           <p>You're approved. Create your TattooMaps account with this email to manage your page:
-           <a href="${SITE_URL}/signup">${SITE_URL}/signup</a></p>`,
+    subject: approved.subject,
+    html: approved.html,
+    text: approved.text,
   })
 
   revalidatePath("/admin/intros")

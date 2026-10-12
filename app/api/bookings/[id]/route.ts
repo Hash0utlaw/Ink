@@ -2,7 +2,9 @@ import { NextResponse } from "next/server"
 import { Resend } from "resend"
 import { createClient } from "@/utils/supabase/server"
 import { getBookingById, updateBookingStatus } from "@/lib/supabase/bookings"
-import { FROM_EMAIL, REPLY_TO, SITE_URL } from "@/lib/site-config"
+import { FROM_EMAIL, REPLY_TO } from "@/lib/site-config"
+import { siteUrl } from "@/lib/email/layout"
+import { bookingConfirmedEmail, bookingDeclinedEmail, reviewRequestEmail } from "@/lib/email/templates"
 
 export const dynamic = "force-dynamic"
 
@@ -45,53 +47,28 @@ export async function PATCH(
       const resend = new Resend(resendKey)
       const artistName = (artistRow as { display_name: string }).display_name ?? "the artist"
       const from = FROM_EMAIL
-      const reviewUrl = `${SITE_URL}/review/${booking.id}`
+      const message =
+        action === "confirm"
+          ? bookingConfirmedEmail({
+              clientName: booking.clientName,
+              artistName,
+              preferredDate: booking.preferredDate,
+              description: booking.description,
+            })
+          : action === "decline"
+            ? bookingDeclinedEmail({ clientName: booking.clientName, artistName })
+            : reviewRequestEmail({ clientName: booking.clientName, artistName, reviewUrl: siteUrl(`/review/${booking.id}`) })
 
-      if (action === "confirm") {
-        await resend.emails.send({
+      await resend.emails
+        .send({
           from,
           to: booking.clientEmail,
           replyTo: REPLY_TO,
-          subject: `Your booking with ${artistName} is confirmed!`,
-          html: `<p>Hi ${booking.clientName},</p>
-                 <p><strong>${artistName}</strong> has confirmed your booking request.</p>
-                 ${booking.preferredDate ? `<p><strong>Date:</strong> ${booking.preferredDate}</p>` : ""}
-                 ${booking.description ? `<p><strong>Your idea:</strong> ${booking.description}</p>` : ""}
-                 <p>The artist will be in touch with next steps.</p>`,
-        }).catch(() => {})
-      } else if (action === "decline") {
-        await resend.emails.send({
-          from,
-          to: booking.clientEmail,
-          replyTo: REPLY_TO,
-          subject: `Update on your booking request`,
-          html: `<p>Hi ${booking.clientName},</p>
-                 <p>Unfortunately, <strong>${artistName}</strong> is unable to take your booking at this time.</p>
-                 <p>We encourage you to browse other talented artists on TattooMaps.</p>`,
-        }).catch(() => {})
-      } else if (action === "complete") {
-        // Review request email — goes to client
-        await resend.emails.send({
-          from,
-          to: booking.clientEmail,
-          replyTo: REPLY_TO,
-          subject: `How was your session with ${artistName}? Leave a review`,
-          html: `
-            <div style="font-family:sans-serif;max-width:480px;margin:0 auto;">
-              <h2 style="color:#7C3AED;">How was your session?</h2>
-              <p>Hi ${booking.clientName},</p>
-              <p>Your session with <strong>${artistName}</strong> has been marked complete. We'd love to hear how it went!</p>
-              <p style="margin:24px 0;">
-                <a href="${reviewUrl}"
-                   style="background:#7C3AED;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;">
-                  Leave a Review →
-                </a>
-              </p>
-              <p style="color:#888;font-size:12px;">This link is unique to your booking and can only be used once.</p>
-            </div>
-          `,
-        }).catch(() => {})
-      }
+          subject: message.subject,
+          html: message.html,
+          text: message.text,
+        })
+        .catch(() => {})
     }
 
     return NextResponse.json({ success: true, status: newStatus })

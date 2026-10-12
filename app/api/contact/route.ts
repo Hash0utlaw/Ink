@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server"
 import { Resend } from "resend"
-import { ADMIN_NOTIFY_EMAIL, FROM_EMAIL, REPLY_TO } from "@/lib/site-config"
+import { ADMIN_NOTIFY_EMAIL, FROM_EMAIL, REPLY_TO, SUPPORT_EMAIL } from "@/lib/site-config"
+import { contactAdminEmail, contactReceiptEmail } from "@/lib/email/templates"
 
 export const dynamic = "force-dynamic"
-
-const SUPPORT_EMAIL = "support@tattoomaps.com"
 
 export async function POST(request: Request) {
   try {
@@ -17,26 +16,25 @@ export async function POST(request: Request) {
     const resend = new Resend(process.env.RESEND_API_KEY)
     const fromAddress = FROM_EMAIL
 
+    const toAdmin = contactAdminEmail({ name, email, reason, message })
+    const toSender = contactReceiptEmail({ name })
+
     const emailPromises: Promise<unknown>[] = [
       resend.emails.send({
         from: fromAddress,
         to: ADMIN_NOTIFY_EMAIL ?? SUPPORT_EMAIL,
         replyTo: email,
-        subject: `[Contact] ${reason} — ${name}`,
-        html: `<p>New contact form submission.</p>
-               <p><strong>Name:</strong> ${name}</p>
-               <p><strong>Email:</strong> ${email}</p>
-               <p><strong>Reason:</strong> ${reason}</p>
-               <p><strong>Message:</strong></p>
-               <p>${message.replace(/\n/g, "<br />")}</p>`,
+        subject: toAdmin.subject,
+        html: toAdmin.html,
+        text: toAdmin.text,
       }),
       resend.emails.send({
         from: fromAddress,
         to: email,
         replyTo: REPLY_TO,
-        subject: "We received your message",
-        html: `<p>Hi ${name},</p>
-               <p>Thanks for reaching out about "${reason}". We'll reply to this email within 24 hours on business days.</p>`,
+        subject: toSender.subject,
+        html: toSender.html,
+        text: toSender.text,
       }),
     ]
 
