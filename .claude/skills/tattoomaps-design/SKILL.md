@@ -221,8 +221,28 @@ The same action keeps the same name across the flow. Empty states say what to do
 - Fade-and-slide animations on every section. Motion only in response to user actions.
 - The Sailor Jerry name or Norman Collins' designs.
 
+## Design check
+
+`npm run check:design` (scripts/check-design.ts) scans `app/`, `components/`, `lib/` and
+`middleware.ts` and fails on any of these. It ignores comments. The GitHub Action
+`.github/workflows/design-check.yml` runs it on every pull request.
+
+| Rule | Fails on | Allowed |
+|---|---|---|
+| hex | Raw hex colors | `lib/brand-colors.ts`, `app/globals.css` |
+| palette | Tailwind default palette classes (`gray-500`, `purple-600`, `bg-black`, `text-white`, ...) | `text-white` on flash red; `bg-white` on inputs |
+| shadow | `shadow-*`, `drop-shadow-*`, box/text shadows | `shadow-none`; the cluster seal's double ring; the map controls' focus ring |
+| radius | `rounded-lg` and larger, `rounded-full`, arbitrary radii over 4px | `rounded-full` on pins, avatars, spinners, loading skeletons, slider and scrollbar parts, the live-review dot |
+| gradient | `*-gradient(` and `bg-gradient-*` | Texture hairlines (`globals.css`), neatline stripes, share-image grid |
+| font | Poppins | |
+| copy | `·` separators, `→` / `←` arrows | |
+
+Use plain `rounded` (4px) for every control and card. Exceptions live in the `ALLOW` list at the top of
+the script, each with a reason. Add one only when the spec itself calls for it.
+
 ## Before finishing any UI change
 
+- `npm run check:design` passes.
 - No raw hex values or Tailwind palette colors (purple-*, green-500, etc.) added.
 - Headings Young Serif, place names IM Fell italic, everything else Libre Franklin.
 - Every control 4px radius with ink outline; tap targets 44px or more; visible focus ring.
