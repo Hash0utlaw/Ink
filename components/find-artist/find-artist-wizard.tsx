@@ -1,292 +1,71 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
-import { Header } from "@/components/layout/header"
-import { Footer } from "@/components/layout/footer"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { MapPin, ArrowLeft, Wand2 } from "lucide-react"
-import { STYLES } from "@/lib/styles"
+import { useEffect, useRef } from "react"
+import { useSearchParams } from "next/navigation"
+import { cn } from "@/lib/utils"
+import { toStyleSlugs } from "@/lib/styles"
+import { StepWhere } from "./step-where"
+import { StepStyle } from "./step-style"
+import { BrowseAllLine, FinderIntro } from "./finder-ui"
+import type { FinderAnswers } from "./finder-url"
 
-// Decoration only — the style list itself is lib/styles.ts.
-const STYLE_EMOJI: Record<string, string> = {
-  traditional: "⚓",
-  "neo-traditional": "🌹",
-  japanese: "🐉",
-  realism: "🖼",
-  "black-and-grey": "◐",
-  "fine-line": "✒️",
-  blackwork: "◼",
-  illustrative: "✏️",
-  watercolor: "🎨",
-  geometric: "◆",
-  dotwork: "⋯",
-  ornamental: "❋",
-  tribal: "🌀",
-  lettering: "✍️",
-  "new-school": "🎭",
-  anime: "⭐",
-  portrait: "👤",
-  floral: "🌸",
-  chicano: "🌹",
-  color: "🌈",
-  "cover-ups": "♻️",
+const RADII = [10, 25, 50, 100]
+
+/** The answers in the URL; null place when lat/lng are missing or invalid. */
+function readAnswers(params: URLSearchParams): { place: FinderAnswers | null; radius: number; styles: string[] } {
+  const r = Number(params.get("r"))
+  const radius = RADII.includes(r) ? r : 25
+  const styles = toStyleSlugs(params.get("style")?.split(",").filter(Boolean) ?? []).slice(0, 3)
+  const latText = params.get("lat")
+  const lngText = params.get("lng")
+  const lat = Number(latText)
+  const lng = Number(lngText)
+  const near = params.get("near")?.trim().slice(0, 80) ?? ""
+  const valid =
+    !!latText && !!lngText && Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180
+  return { place: valid && near ? { near, lat, lng, r: radius, styles } : null, radius, styles }
 }
 
-const SIZES = [
-  { label: "Tiny", sub: "coin-sized or smaller", icon: "◦" },
-  { label: "Small", sub: "palm-sized", icon: "○" },
-  { label: "Medium", sub: "forearm / calf", icon: "◉" },
-  { label: "Large", sub: "half sleeve / back piece", icon: "●" },
-]
-
-const BUDGETS = [
-  { label: "$", sub: "Under $200", value: "low" },
-  { label: "$$", sub: "$200–$500", value: "medium" },
-  { label: "$$$", sub: "$500–$1,000", value: "high" },
-  { label: "$$$$", sub: "$1,000+", value: "luxury" },
-]
-
-const STEPS = ["Style", "Size", "Budget", "Location"]
-
+/**
+ * The artist finder: step 1 (where) and step 2 (style), both driven by the URL
+ * so Back and refresh keep the answers. Focus moves to the step's heading
+ * whenever the step changes.
+ */
 export function FindArtistWizard() {
-  const router = useRouter()
-  const [step, setStep] = useState(0)
-  const [style, setStyle] = useState("")
-  const [size, setSize] = useState("")
-  const [budget, setBudget] = useState("")
-  const [city, setCity] = useState("")
-  const [state, setState] = useState("")
-  const [locating, setLocating] = useState(false)
+  const searchParams = useSearchParams()
+  const { place, radius, styles } = readAnswers(searchParams)
+  const step = searchParams.get("step") === "style" && place ? 2 : 1
 
-  function goNext() {
-    if (step < 3) setStep((s) => s + 1)
-    else findArtists()
-  }
+  const introRef = useRef<HTMLHeadingElement>(null)
+  const styleHeadingRef = useRef<HTMLHeadingElement>(null)
+  // Only on a real step change, never on first load (or React's double effect run in dev).
+  const shownStep = useRef(step)
 
-  function canAdvance() {
-    if (step === 0) return !!style
-    if (step === 1) return !!size
-    if (step === 2) return !!budget
-    return true
-  }
-
-  function findArtists() {
-    const params = new URLSearchParams()
-    if (style) params.set("style", style)
-    if (size) params.set("size", size)
-    if (budget) params.set("budget", budget)
-    if (city) params.set("city", city)
-    if (state) params.set("state", state)
-    router.push(`/find-artist/results?${params}`)
-  }
-
-  function useMyLocation() {
-    if (!navigator.geolocation) return
-    setLocating(true)
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        try {
-          const res = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json`
-          )
-          const data = await res.json()
-          const addr = data.address ?? {}
-          setCity(addr.city ?? addr.town ?? addr.village ?? "")
-          setState(addr.state_code ?? addr["ISO3166-2-lvl4"]?.split("-")[1] ?? "")
-        } catch {
-          // silent
-        } finally {
-          setLocating(false)
-        }
-      },
-      () => setLocating(false)
-    )
-  }
-
-  const progress = ((step + 1) / 4) * 100
+  useEffect(() => {
+    if (shownStep.current === step) return
+    shownStep.current = step
+    ;(step === 2 ? styleHeadingRef : introRef).current?.focus()
+  }, [step])
 
   return (
-    <div className="flex min-h-screen flex-col bg-paper tex-paper">
-      <Header />
-
-      <main className="flex-1 flex flex-col items-center justify-center px-4 py-12">
-        <div className="w-full max-w-2xl">
-          {/* Header */}
-          <div className="text-center mb-10">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded bg-secondary border border-ink text-sm text-primary mb-4">
-              <Wand2 className="w-4 h-4" />
-              Artist Finder
-            </div>
-            <h1 className="text-3xl md:text-4xl font-extrabold">Find your perfect artist</h1>
-            <p className="text-muted-foreground mt-2">Answer 4 quick questions — we'll match you with artists near you.</p>
-          </div>
-
-          {/* Progress bar */}
-          <div className="mb-8">
-            <div className="flex justify-between mb-2">
-              {STEPS.map((s, i) => (
-                <span key={s} className={`text-xs font-medium ${i === step ? "text-primary" : i < step ? "text-muted-foreground" : "text-muted-foreground/40"}`}>
-                  {s}
-                </span>
-              ))}
-            </div>
-            <div className="h-1.5 rounded bg-muted overflow-hidden">
-              <div
-                className="h-full bg-primary rounded transition-all duration-500"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
-          </div>
-
-          {/* Step 0 — Style */}
-          {step === 0 && (
-            <div className="space-y-4">
-              <h2 className="text-xl font-bold text-center">What style speaks to you?</h2>
-              <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
-                {STYLES.map((s) => (
-                  <button
-                    key={s.slug}
-                    type="button"
-                    onClick={() => setStyle(s.slug)}
-                    className={`flex flex-col items-center gap-1.5 rounded border p-4 text-sm font-medium transition-all ${
-                      style === s.slug
-                        ? "border-ink bg-secondary text-primary"
-                        : "border-border bg-vellum tex-vellum text-muted-foreground hover:border-ink hover:bg-muted/40"
-                    }`}
-                  >
-                    <span className="text-2xl">{STYLE_EMOJI[s.slug]}</span>
-                    <span className="text-xs leading-tight text-center">{s.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Step 1 — Size */}
-          {step === 1 && (
-            <div className="space-y-4">
-              <h2 className="text-xl font-bold text-center">How big are you thinking?</h2>
-              <div className="grid grid-cols-2 gap-3">
-                {SIZES.map((s) => (
-                  <button
-                    key={s.label}
-                    type="button"
-                    onClick={() => setSize(s.label)}
-                    className={`flex items-center gap-3 rounded border p-5 text-left transition-all ${
-                      size === s.label
-                        ? "border-ink bg-secondary"
-                        : "border-border bg-vellum tex-vellum hover:border-ink hover:bg-muted/40"
-                    }`}
-                  >
-                    <span className={`text-3xl font-black w-8 text-center ${size === s.label ? "text-primary" : "text-muted-foreground"}`}>{s.icon}</span>
-                    <div>
-                      <p className="font-bold text-sm">{s.label}</p>
-                      <p className="text-xs text-muted-foreground">{s.sub}</p>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Step 2 — Budget */}
-          {step === 2 && (
-            <div className="space-y-4">
-              <h2 className="text-xl font-bold text-center">What's your budget?</h2>
-              <div className="grid grid-cols-2 gap-3">
-                {BUDGETS.map((b) => (
-                  <button
-                    key={b.value}
-                    type="button"
-                    onClick={() => setBudget(b.value)}
-                    className={`flex flex-col items-center rounded border p-6 transition-all ${
-                      budget === b.value
-                        ? "border-ink bg-secondary"
-                        : "border-border bg-vellum tex-vellum hover:border-ink hover:bg-muted/40"
-                    }`}
-                  >
-                    <span className={`text-3xl font-black ${budget === b.value ? "text-primary" : "text-muted-foreground"}`}>{b.label}</span>
-                    <span className="text-xs text-muted-foreground mt-1">{b.sub}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Step 3 — Location */}
-          {step === 3 && (
-            <div className="space-y-4">
-              <h2 className="text-xl font-bold text-center">Where are you located?</h2>
-              <p className="text-sm text-muted-foreground text-center">We'll show you artists nearby. Skip to see all matches.</p>
-              <div className="space-y-3">
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-xs font-medium mb-1 block">City</label>
-                    <Input
-                      placeholder="e.g. Austin"
-                      value={city}
-                      onChange={(e) => setCity(e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs font-medium mb-1 block">State</label>
-                    <Input
-                      placeholder="e.g. TX"
-                      maxLength={2}
-                      value={state}
-                      onChange={(e) => setState(e.target.value.toUpperCase())}
-                    />
-                  </div>
-                </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full gap-2"
-                  onClick={useMyLocation}
-                  disabled={locating}
-                >
-                  <MapPin className="w-4 h-4" />
-                  {locating ? "Detecting location…" : "Use my location"}
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {/* Nav buttons */}
-          <div className="flex gap-3 mt-8">
-            {step > 0 && (
-              <Button variant="outline" className="flex-none" onClick={() => setStep((s) => s - 1)}>
-                <ArrowLeft className="w-4 h-4" />
-              </Button>
-            )}
-            <Button
-              className="flex-1 bg-primary hover:bg-primary/90 h-12 text-base"
-              disabled={!canAdvance()}
-              onClick={goNext}
-            >
-              {step < 3 ? "Next" : "Find my artists"}
-            </Button>
-          </div>
-
-          {step === 3 && (
-            <p className="text-center text-xs text-muted-foreground mt-3">
-              <button type="button" onClick={findArtists} className="hover:underline">
-                Skip location — show all matches
-              </button>
-            </p>
-          )}
-
-          <p className="text-center text-xs text-muted-foreground mt-6">
-            Already know who you want?{" "}
-            <Link href="/artists" className="text-navy underline-offset-2 hover:underline">Browse all artists</Link>
-          </p>
-        </div>
-      </main>
-
-      <Footer />
+    <div
+      className={cn(
+        "mx-auto flex w-full flex-col gap-8 px-4 pb-20 pt-10 sm:px-6 sm:pt-16",
+        step === 2 ? "max-w-[900px]" : "max-w-[620px]",
+      )}
+    >
+      <FinderIntro ref={introRef} />
+      {step === 2 && place ? (
+        <StepStyle key={`${place.lat},${place.lng},${place.r}`} ref={styleHeadingRef} answers={place} />
+      ) : (
+        <StepWhere
+          key={place ? `${place.near}|${place.r}` : "empty"}
+          initialPlace={place ? { label: place.near, lat: place.lat, lng: place.lng } : null}
+          initialRadius={radius}
+          styles={styles}
+        />
+      )}
+      <BrowseAllLine />
     </div>
   )
 }
