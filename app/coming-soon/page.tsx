@@ -35,24 +35,32 @@ export default async function ComingSoonPage() {
 
   return (
     <div className="flex min-h-[100svh] flex-col bg-paper tex-paper text-ink">
-      <div className="flex h-[60svh] min-h-[260px] items-center justify-center bg-night tex-night-chart px-6">
+      {/* Phones 36svh (200-280px), tablets 45svh (max 380px), desktop 50svh (300-460px). */}
+      <div className="flex h-[36svh] max-h-[280px] min-h-[200px] items-center justify-center bg-night tex-night-chart px-6 sm:h-[45svh] sm:max-h-[380px] lg:h-[50svh] lg:max-h-[460px] lg:min-h-[300px]">
         <Image
           src="/brand/banner-cream.webp"
           alt="TattooMaps"
           width={600}
           height={413}
           priority
-          className="h-[110px] w-auto md:h-[180px]"
+          className="h-24 w-auto sm:h-[140px] lg:h-[170px]"
         />
       </div>
 
-      <main className="flex flex-1 justify-center px-6 py-8 md:py-10">
+      <main className="flex flex-1 items-center justify-center px-6 py-8 sm:py-10">
         <div className="w-full max-w-[560px] text-center">
-          <h1 className="font-heading text-[34px] font-normal leading-[1.1] text-balance md:text-[44px]">
+          <h1 className="font-heading text-[34px] font-normal leading-[1.1] text-balance sm:text-[40px] lg:text-[48px]">
             Find a tattoo artist near you.
           </h1>
-          <p className="mt-4 text-[17px] leading-[1.55] text-pretty md:text-[19px]">
+          <p className="mx-auto mt-4 max-w-[34ch] text-base leading-[1.55] text-pretty lg:text-[17px]">
             TattooMaps is almost ready. {what}, searchable by place and style.
+          </p>
+          <p className="mt-4 text-sm text-ink-muted">
+            Artist or shop owner? Email{" "}
+            <a href="mailto:support@tattoomaps.com" className="font-semibold text-navy underline underline-offset-2 hover:no-underline">
+              support@tattoomaps.com
+            </a>
+            .
           </p>
         </div>
       </main>
