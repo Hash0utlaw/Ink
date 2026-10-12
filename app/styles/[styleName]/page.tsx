@@ -4,19 +4,19 @@ import Link from "next/link"
 import { Header } from "@/components/layout/header"
 import { HeaderSkeleton } from "@/components/layout/header-skeleton"
 import { Footer } from "@/components/layout/footer"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { ArrowRight, MapPin, User } from "lucide-react"
+import { MapPin, User } from "lucide-react"
 import { ALL_STYLES } from "@/app/styles/page"
 import { StyleGallery } from "@/components/styles/style-gallery"
-import { StyleRelated } from "@/components/styles/style-related"
+import { StyleCard } from "@/components/styles/style-card"
 import { StyleHero } from "@/components/styles/style-hero"
+import { ArtistList } from "@/components/artists/artist-list"
+import { EmptyBox } from "@/components/artist-profile/profile-sections"
+import { getArtists } from "@/lib/supabase/artists"
 import { toStyleSlugs } from "@/lib/styles"
+import { exactMasterSlug } from "@/lib/style-guide"
 
-// Guide pages whose name isn't on the master style list (lib/styles.ts):
-// Surrealism links to the closest master style; Biomechanical has none, so
-// its artist links are hidden rather than showing unfiltered results.
-const FILTER_OVERRIDES: Record<string, string | null> = { surrealism: "illustrative", biomechanical: null }
+// Real artist counts and lists, refreshed hourly.
+export const revalidate = 3600
 
 // ─── Metadata ─────────────────────────────────────────────────────────────────
 
@@ -37,14 +37,25 @@ export async function generateStaticParams() {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-export default function StylePage({ params }: { params: { styleName: string } }) {
+const ARTIST_LIMIT = 24
+const PRIMARY =
+  "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border-1.5 border-ink bg-flash-red px-5 text-[15px] font-semibold text-white hover:bg-flash-red/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+const SECONDARY =
+  "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border-1.5 border-ink bg-vellum tex-vellum px-5 text-[15px] font-semibold text-ink hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+const TEXT_LINK = "font-semibold text-navy underline underline-offset-2 hover:no-underline"
+const SECTION_HEADING = "font-heading text-[26px] leading-[1.15] text-ink text-balance lg:text-[30px]"
+
+export default async function StylePage({ params }: { params: { styleName: string } }) {
   const style = ALL_STYLES.find((s) => s.slug === params.styleName)
   if (!style) notFound()
 
-  const filterSlug =
-    style.slug in FILTER_OVERRIDES ? FILTER_OVERRIDES[style.slug] : toStyleSlugs([style.name])[0] ?? null
-  const artistsHref = filterSlug ? `/artists?styles=${filterSlug}` : null
-  const shopsHref = `/shops?styles=${encodeURIComponent(filterSlug ?? style.name)}`
+  // Artists only for guide styles that are exactly a master style; none for close matches.
+  const masterSlug = exactMasterSlug(style.slug)
+  // Exact matches keep their style filter; close or no matches link to all artists and shops.
+  const filterSlug = masterSlug ? toStyleSlugs([style.name])[0] ?? null : null
+  const artistsHref = filterSlug ? `/artists?styles=${filterSlug}` : "/artists"
+  const shopsHref = filterSlug ? `/shops?styles=${encodeURIComponent(filterSlug)}` : "/shops"
+  const artists = masterSlug ? await getArtists({ styles: [masterSlug], sortBy: "rating", pageSize: ARTIST_LIMIT }) : null
 
   const related = ALL_STYLES.filter(
     (s) => s.slug !== style.slug && s.category === style.category
@@ -57,129 +68,96 @@ export default function StylePage({ params }: { params: { styleName: string } })
       </Suspense>
 
       <main className="flex-1">
+        <StyleHero style={style} masterSlug={masterSlug} />
 
-        {/* ── Hero ─────────────────────────────────────────────────────────── */}
-        <StyleHero style={style} />
-
-        {/* ── Sticky CTA bar ───────────────────────────────────────────────── */}
-        <div className="sticky top-0 z-30 border-b border-border bg-background/95">
-          <div className="container mx-auto px-4 py-3 flex items-center justify-between gap-4">
-            <p className="text-sm text-muted-foreground hidden sm:block">
-              Ready to get your <span className="font-semibold text-foreground">{style.name}</span> tattoo?
-            </p>
-            <div className="flex items-center gap-2 ml-auto">
-              <Button asChild size="sm" variant="outline" className="gap-1.5">
-                <Link href={shopsHref}>
-                  <MapPin className="w-3.5 h-3.5" />
-                  Find a Shop
-                </Link>
-              </Button>
-              {artistsHref && (
-                <Button asChild size="sm" className="gap-1.5">
-                  <Link href={artistsHref}>
-                    <User className="w-3.5 h-3.5" />
-                    Find an Artist
-                  </Link>
-                </Button>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* ── Gallery ──────────────────────────────────────────────────────── */}
-        <section className="container mx-auto px-4 py-10">
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold mb-1">{style.name} Examples</h2>
-            <p className="text-muted-foreground text-sm">
-              {style.exampleImages.length} curated examples of {style.name.toLowerCase()} tattoo work
-            </p>
-          </div>
-          <StyleGallery images={style.exampleImages} styleName={style.name} />
-        </section>
-
-        {/* ── What makes this style ─────────────────────────────────────────── */}
-        <section className="container mx-auto px-4 py-6 pb-10">
-          <div className="rounded-lg bg-muted/40 border border-border p-6 md:p-8">
-            <h2 className="text-xl font-bold mb-4">About {style.name}</h2>
-            <p className="text-muted-foreground leading-relaxed mb-5">{style.description}</p>
-            <div className="flex flex-wrap gap-2">
-              {style.tags.map((tag) => (
-                <Badge key={tag} variant="secondary" className="text-xs">
-                  {tag}
-                </Badge>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ── Primary CTA: Find Shop or Artist ─────────────────────────────── */}
-        <section className="container mx-auto px-4 pb-10">
-          <div className="rounded-lg overflow-hidden border border-border">
-            <div className={`grid ${artistsHref ? "md:grid-cols-2" : ""}`}>
-
-              {/* Find a Shop card */}
-              <Link
-                href={shopsHref}
-                className={`group relative flex flex-col gap-4 p-7 md:p-10 bg-vellum tex-vellum hover:bg-muted/30 transition-colors ${artistsHref ? "border-b md:border-b-0 md:border-r border-border" : ""}`}
-              >
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                  <MapPin className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold mb-1 group-hover:text-primary transition-colors">
-                    Find a Shop
-                  </h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed">
-                    Browse tattoo shops that specialise in {style.name.toLowerCase()} work. Filter by location
-                    and see shop portfolios.
-                  </p>
-                </div>
-                <div className="flex items-center gap-2 text-sm font-semibold text-primary mt-auto">
-                  Browse {style.name} shops
-                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-                </div>
-              </Link>
-
-              {/* Find an Artist card */}
-              {artistsHref && (
-                <Link
-                  href={artistsHref}
-                  className="group relative flex flex-col gap-4 p-7 md:p-10 bg-vellum tex-vellum hover:bg-muted/30 transition-colors"
-                >
-                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                    <User className="w-5 h-5 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold mb-1 group-hover:text-primary transition-colors">
-                      Find an Artist
-                    </h3>
-                    <p className="text-muted-foreground text-sm leading-relaxed">
-                      Connect directly with tattoo artists who specialise in {style.name.toLowerCase()}. View
-                      portfolios and book a consultation.
+        <div className="mx-auto max-w-[1180px] space-y-14 px-4 py-10 sm:px-6 lg:space-y-20 lg:py-14">
+          {masterSlug && artists && !artists.error && (
+            <section aria-labelledby="style-artists">
+              <h2 id="style-artists" className={SECTION_HEADING}>
+                {style.name} artists
+              </h2>
+              <div className="mt-5">
+                {artists.data.length > 0 ? (
+                  <>
+                    <ArtistList artists={artists.data} showShop />
+                    <p className="mt-6 text-[15px]">
+                      <Link href={`/artists?styles=${masterSlug}`} className={TEXT_LINK}>
+                        See all {style.name} artists
+                      </Link>
                     </p>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm font-semibold text-primary mt-auto">
-                    Browse {style.name} artists
-                    <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-                  </div>
+                  </>
+                ) : (
+                  <EmptyBox title={`No ${style.name} artists listed yet`}>
+                    Browse all artists, or check back as more artists join.
+                  </EmptyBox>
+                )}
+              </div>
+            </section>
+          )}
+
+          <section aria-labelledby="style-about">
+            <h2 id="style-about" className={SECTION_HEADING}>
+              About {style.name}
+            </h2>
+            <p className="mt-3 max-w-prose text-base leading-[1.55] text-ink text-pretty">{style.description}</p>
+            <ul className="mt-4 flex flex-wrap gap-2">
+              {style.tags.map((tag) => (
+                <li key={tag} className="rounded-lg border-1.5 border-ink bg-vellum tex-vellum px-2.5 py-1 text-sm text-ink">
+                  {tag}
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          <section aria-labelledby="style-examples">
+            <h2 id="style-examples" className={SECTION_HEADING}>
+              {style.name} examples
+            </h2>
+            <div className="mt-5">
+              <StyleGallery images={style.exampleImages} styleName={style.name} />
+            </div>
+            <p className="mt-3 text-[13px] text-ink-muted">Example images, not work by listed artists.</p>
+          </section>
+
+          <section aria-labelledby="style-find" className="rounded-lg border-1.5 border-ink bg-vellum tex-vellum p-6 lg:p-8">
+            <h2 id="style-find" className="font-heading text-[22px] leading-[1.15] text-ink lg:text-[26px]">
+              Ready to get your {style.name} tattoo?
+            </h2>
+            <p className="mt-2 max-w-prose text-[15px] leading-[1.55] text-ink-muted text-pretty">
+              {artistsHref
+                ? `Find artists and shops that specialise in ${style.name.toLowerCase()} work, then view portfolios and book a consultation.`
+                : `Browse tattoo shops that specialise in ${style.name.toLowerCase()} work and see shop portfolios.`}
+            </p>
+            <div className="mt-5 flex flex-wrap gap-3">
+              {/* One red button: Find an artist, or Find a shop when there's no artist filter. */}
+              {artistsHref && (
+                <Link href={artistsHref} className={PRIMARY}>
+                  <User className="h-4 w-4" aria-hidden="true" />
+                  Find an artist
                 </Link>
               )}
-
+              <Link href={shopsHref} className={artistsHref ? SECONDARY : PRIMARY}>
+                <MapPin className="h-4 w-4" aria-hidden="true" />
+                Find a shop
+              </Link>
             </div>
-          </div>
-        </section>
-
-        {/* ── Related styles ────────────────────────────────────────────────── */}
-        {related.length > 0 && (
-          <section className="container mx-auto px-4 pb-14">
-            <div className="flex items-center gap-3 mb-5">
-              <h2 className="text-xl font-bold">Related Styles</h2>
-              <div className="flex-1 h-px bg-border" />
-            </div>
-            <StyleRelated styles={related} />
           </section>
-        )}
 
+          {related.length > 0 && (
+            <section aria-labelledby="style-related">
+              <h2 id="style-related" className={SECTION_HEADING}>
+                Related styles
+              </h2>
+              <ul className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-5">
+                {related.map((s) => (
+                  <li key={s.slug}>
+                    <StyleCard style={s} masterSlug={exactMasterSlug(s.slug)} artistCount={null} />
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+        </div>
       </main>
 
       <Footer />

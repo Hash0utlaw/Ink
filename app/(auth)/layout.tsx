@@ -1,138 +1,33 @@
 import type React from "react"
+import Image from "next/image"
 import Link from "next/link"
-import { MapPin, Users, Star, Palette } from "lucide-react"
 
-const STYLE_IMAGES = [
-  { src: "/styles/heroes/japanese-hero.png", label: "Japanese" },
-  { src: "/styles/heroes/watercolor-hero.png", label: "Watercolor" },
-  { src: "/styles/heroes/geometric-hero.png", label: "Geometric" },
-  { src: "/styles/heroes/realism-hero.png", label: "Realism" },
-  { src: "/styles/heroes/blackwork-hero.png", label: "Blackwork" },
-  { src: "/styles/heroes/fine-line-hero.png", label: "Fine Line" },
-]
-
+/**
+ * Login, sign up, forgot and reset password: one centered vellum card (max
+ * 440px) on the paper page, with the ink wordmark above it.
+ */
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen bg-paper tex-paper">
-      {/* ── Left brand panel (hidden on mobile) ───────────────────────────── */}
-      <div className="hidden lg:flex lg:w-1/2 xl:w-[55%] relative flex-col overflow-hidden">
-        {/* Background grid */}
-        <div className="absolute inset-0 hero-grid opacity-40" />
+    <div className="flex min-h-screen flex-col items-center bg-paper tex-paper px-4 py-10 sm:py-16">
+      <Link href="/" aria-label="TattooMaps home" className="rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+        <Image src="/brand/logo-wordmark-ink.webp" alt="TattooMaps" width={70} height={40} className="h-10 w-auto" priority />
+      </Link>
 
-        {/* Ambient glow orbs */}
-        <div className="absolute top-1/4 left-1/4 w-64 h-64 rounded-full" />
-        <div className="absolute bottom-1/4 right-1/4 w-48 h-48 rounded-full" />
-
-        {/* Image mosaic */}
-        <div className="absolute inset-0 grid grid-cols-3 grid-rows-2 gap-1 p-1 opacity-30">
-          {STYLE_IMAGES.map((img) => (
-            <div key={img.src} className="relative overflow-hidden">
-              <img
-                src={img.src}
-                alt={img.label}
-                className="w-full h-full object-cover"
-              />
-            </div>
-          ))}
-        </div>
-
-        {/* Dark overlay over mosaic */}
-        <div className="absolute inset-0 bg-card/80" />
-
-        {/* Content */}
-        <div className="relative z-10 flex flex-col justify-between h-full p-10 xl:p-14">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2.5 w-fit">
-            <div className="w-9 h-9 bg-primary rounded-lg flex items-center justify-center">
-              <MapPin className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-xl font-bold text-foreground">TattooMaps</span>
-          </Link>
-
-          {/* Hero copy */}
-          <div className="space-y-8">
-            <div className="space-y-4">
-              <h1 className="text-4xl xl:text-5xl font-black tracking-tight text-foreground leading-tight">
-                Find Your Next
-                <span className="block text-foreground">
-                  Masterpiece
-                </span>
-              </h1>
-              <p className="text-muted-foreground text-lg leading-relaxed max-w-md">
-                Find tattoo artists and shops across the US, explore their work, and book your next piece — all in one place.
-              </p>
-            </div>
-
-            {/* Feature bullets */}
-            <ul className="space-y-3">
-              {[
-                { icon: Users, text: "21,000+ artists to discover" },
-                { icon: MapPin, text: "26,000+ shops on an interactive map" },
-                { icon: Palette, text: "Browse artists by tattoo style" },
-                { icon: Star, text: "Listings in all 50 states" },
-              ].map(({ icon: Icon, text }) => (
-                <li key={text} className="flex items-center gap-3 text-sm text-muted-foreground">
-                  <div className="w-7 h-7 rounded-lg bg-secondary border border-ink flex items-center justify-center shrink-0">
-                    <Icon className="w-3.5 h-3.5 text-primary" />
-                  </div>
-                  {text}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Bottom stats bar */}
-          <div className="flex items-center gap-8">
-            <div>
-              <div className="text-2xl font-bold text-foreground">21,000+</div>
-              <div className="text-xs text-muted-foreground">Artists</div>
-            </div>
-            <div className="w-px h-8 bg-border" />
-            <div>
-              <div className="text-2xl font-bold text-foreground">26,000+</div>
-              <div className="text-xs text-muted-foreground">Shops</div>
-            </div>
-            <div className="w-px h-8 bg-border" />
-            <div>
-              <div className="text-2xl font-bold text-foreground">50</div>
-              <div className="text-xs text-muted-foreground">States</div>
-            </div>
-          </div>
-        </div>
+      <div className="mt-6 w-full max-w-[440px] rounded-lg border-1.5 border-ink bg-vellum tex-vellum p-6 sm:p-8">
+        {children}
       </div>
 
-      {/* ── Right form panel ───────────────────────────────────────────────── */}
-      <div className="flex-1 flex flex-col min-h-screen lg:bg-secondary/30">
-        {/* Mobile-only top bar */}
-        <div className="lg:hidden flex items-center justify-between p-5 border-b border-border/40">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <MapPin className="w-4 h-4 text-white" />
-            </div>
-            <span className="font-bold text-foreground">TattooMaps</span>
-          </Link>
-        </div>
-
-        {/* Form content */}
-        <div className="flex-1 flex items-center justify-center p-6 lg:p-10">
-          {children}
-        </div>
-
-        {/* Bottom links */}
-        <div className="p-6 text-center border-t border-border/20">
-          <p className="text-xs text-muted-foreground">
-            By continuing, you agree to our{" "}
-            <Link href="/terms" className="underline hover:text-foreground transition-colors">
-              Terms of Service
-            </Link>{" "}
-            and{" "}
-            <Link href="/privacy" className="underline hover:text-foreground transition-colors">
-              Privacy Policy
-            </Link>
-            .
-          </p>
-        </div>
-      </div>
+      <p className="mt-6 max-w-[440px] text-center text-[13px] leading-[1.5] text-ink-muted">
+        By continuing, you agree to our{" "}
+        <Link href="/terms" className="underline underline-offset-2 hover:text-ink">
+          Terms of Service
+        </Link>{" "}
+        and{" "}
+        <Link href="/privacy" className="underline underline-offset-2 hover:text-ink">
+          Privacy Policy
+        </Link>
+        .
+      </p>
     </div>
   )
 }

@@ -7,9 +7,10 @@ import { useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Palette, Search, Eye, EyeOff, AlertCircle, CheckCircle2 } from "lucide-react"
+import { Palette, Search, Eye, EyeOff } from "lucide-react"
 import { login, signup } from "@/app/(auth)/actions"
 import { cn } from "@/lib/utils"
+import { AUTH_HEADING, AUTH_INPUT, AUTH_INTRO, AUTH_LABEL, AUTH_LINK, AUTH_SECONDARY, AUTH_SUBMIT, AuthNotice } from "./auth-ui"
 
 interface AuthFormProps {
   mode: "login" | "signup"
@@ -56,13 +57,13 @@ export function AuthForm({ mode }: AuthFormProps) {
   const isLogin = mode === "login"
 
   return (
-    <div className="w-full max-w-[420px]">
+    <div className="w-full">
       {/* Heading */}
-      <div className="mb-8">
-        <h2 className="text-3xl font-black tracking-tight text-foreground mb-2">
+      <div className="mb-7">
+        <h1 className={AUTH_HEADING}>
           {isLogin ? "Welcome back" : "Create account"}
-        </h2>
-        <p className="text-muted-foreground text-sm leading-relaxed">
+        </h1>
+        <p className={AUTH_INTRO}>
           {isLogin
             ? "Sign in to your TattooMaps account to continue."
             : "Join the TattooMaps community and start your journey."}
@@ -75,7 +76,7 @@ export function AuthForm({ mode }: AuthFormProps) {
         {/* Full name (signup only) */}
         {!isLogin && (
           <div className="space-y-1.5">
-            <Label htmlFor="name" className="text-sm font-medium text-foreground">
+            <Label htmlFor="name" className={AUTH_LABEL}>
               Full name
             </Label>
             <Input
@@ -85,14 +86,14 @@ export function AuthForm({ mode }: AuthFormProps) {
               placeholder="Alex Doe"
               required
               disabled={isPending}
-              className="h-11 bg-muted/40 border-border/60 focus:border-ink focus:ring-ring/20 text-foreground placeholder:text-muted-foreground/50 rounded-lg"
+              className={AUTH_INPUT}
             />
           </div>
         )}
 
         {/* Email */}
         <div className="space-y-1.5">
-          <Label htmlFor="email" className="text-sm font-medium text-foreground">
+          <Label htmlFor="email" className={AUTH_LABEL}>
             Email address
           </Label>
           <Input
@@ -102,20 +103,20 @@ export function AuthForm({ mode }: AuthFormProps) {
             placeholder="alex@example.com"
             required
             disabled={isPending}
-            className="h-11 bg-muted/40 border-border/60 focus:border-ink focus:ring-ring/20 text-foreground placeholder:text-muted-foreground/50 rounded-lg"
+            className={AUTH_INPUT}
           />
         </div>
 
         {/* Password */}
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
-            <Label htmlFor="password" className="text-sm font-medium text-foreground">
+            <Label htmlFor="password" className={AUTH_LABEL}>
               Password
             </Label>
             {isLogin && (
               <Link
                 href="/forgot-password"
-                className="text-xs text-muted-foreground hover:text-navy hover:underline underline-offset-2"
+                className="text-sm font-semibold text-navy underline underline-offset-2 hover:no-underline"
               >
                 Forgot password?
               </Link>
@@ -129,13 +130,13 @@ export function AuthForm({ mode }: AuthFormProps) {
               placeholder={isLogin ? "Enter your password" : "Min. 8 characters"}
               required
               disabled={isPending}
-              className="h-11 bg-muted/40 border-border/60 focus:border-ink focus:ring-ring/20 text-foreground placeholder:text-muted-foreground/50 rounded-lg pr-11"
+              className={`${AUTH_INPUT} pr-11`}
             />
             <button
               type="button"
               tabIndex={-1}
               onClick={() => setShowPassword((v) => !v)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              className="absolute right-0 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center text-ink-muted hover:text-ink"
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
               {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -146,7 +147,7 @@ export function AuthForm({ mode }: AuthFormProps) {
         {/* Role selector (signup only) */}
         {!isLogin && (
           <div className="space-y-2">
-            <Label className="text-sm font-medium text-foreground">I am joining as...</Label>
+            <Label className={AUTH_LABEL}>I am joining as...</Label>
             <input type="hidden" name="role" value={selectedRole ?? ""} />
             <div className="grid grid-cols-2 gap-3">
               {(
@@ -171,32 +172,19 @@ export function AuthForm({ mode }: AuthFormProps) {
                     key={role}
                     type="button"
                     onClick={() => setSelectedRole(role)}
+                    aria-pressed={active}
                     disabled={isPending}
                     className={cn(
-                      "flex flex-col items-center gap-2 rounded-lg border p-4 text-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                      active
-                        ? "border-ink bg-secondary"
-                        : "border-border/60 bg-muted/30 hover:bg-muted/60 hover:border-border",
+                      "flex flex-col items-center gap-2 rounded-lg border-1.5 border-ink p-4 text-center focus:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                      active ? "bg-ink text-vellum" : "bg-vellum tex-vellum text-ink hover:bg-secondary",
                     )}
                   >
-                    <div
-                      className={cn(
-                        "w-9 h-9 rounded-lg flex items-center justify-center",
-                        active ? "bg-secondary" : "bg-muted",
-                      )}
-                    >
-                      <Icon className={cn("h-4.5 w-4.5", active ? "text-primary" : "text-muted-foreground")} />
-                    </div>
+                    <Icon className="h-5 w-5" aria-hidden="true" />
                     <div>
-                      <div
-                        className={cn(
-                          "text-sm font-semibold leading-tight",
-                          active ? "text-primary" : "text-foreground",
-                        )}
-                      >
-                        {title}
+                      <div className="text-[15px] font-semibold leading-tight">{title}</div>
+                      <div className={cn("mt-0.5 text-[13px] leading-tight", active ? "text-vellum/80" : "text-ink-muted")}>
+                        {sub}
                       </div>
-                      <div className="text-[11px] text-muted-foreground mt-0.5 leading-tight">{sub}</div>
                     </div>
                   </button>
                 )
@@ -206,28 +194,12 @@ export function AuthForm({ mode }: AuthFormProps) {
         )}
 
         {/* Feedback message */}
-        {message && (
-          <div
-            className={cn(
-              "flex items-start gap-2.5 text-sm p-3.5 rounded-lg border",
-              isSuccess
-                ? "bg-success border-success text-success-foreground"
-                : "bg-destructive/10 border-destructive/30 text-destructive-foreground",
-            )}
-          >
-            {isSuccess ? (
-              <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
-            ) : (
-              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-            )}
-            <span>{message}</span>
-          </div>
-        )}
+        {message && <AuthNotice tone={isSuccess ? "success" : "error"}>{message}</AuthNotice>}
 
         {/* Submit */}
         <Button
           type="submit"
-          className="w-full h-11 rounded-lg font-semibold text-sm bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-200"
+          className={AUTH_SUBMIT}
           disabled={isPending || (!isLogin && selectedRole === null)}
         >
           {isPending
@@ -241,10 +213,10 @@ export function AuthForm({ mode }: AuthFormProps) {
       {/* Divider */}
       <div className="relative my-7">
         <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t border-border/50" />
+          <span className="w-full border-t border-rule" />
         </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-background lg:bg-secondary/30 px-3 text-muted-foreground tracking-wider">
+        <div className="relative flex justify-center text-[13px]">
+          <span className="bg-vellum px-3 text-ink-muted">
             or continue with
           </span>
         </div>
@@ -255,7 +227,7 @@ export function AuthForm({ mode }: AuthFormProps) {
         <Button
           variant="outline"
           disabled={isPending}
-          className="h-11 rounded-lg border-border/60 bg-muted/30 hover:bg-muted/60 text-foreground font-medium"
+          className={AUTH_SECONDARY}
         >
           <svg role="img" viewBox="0 0 24 24" className="mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg">
             <title>Google</title>
@@ -266,7 +238,7 @@ export function AuthForm({ mode }: AuthFormProps) {
         <Button
           variant="outline"
           disabled={isPending}
-          className="h-11 rounded-lg border-border/60 bg-muted/30 hover:bg-muted/60 text-foreground font-medium"
+          className={AUTH_SECONDARY}
         >
           <svg role="img" viewBox="0 0 24 24" className="mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg">
             <title>GitHub</title>
@@ -277,11 +249,11 @@ export function AuthForm({ mode }: AuthFormProps) {
       </div>
 
       {/* Switch mode link */}
-      <p className="mt-7 text-center text-sm text-muted-foreground">
+      <p className="mt-7 text-center text-[15px] text-ink-muted">
         {isLogin ? "New to TattooMaps?" : "Already have an account?"}{" "}
         <Link
           href={`${isLogin ? "/signup" : "/login"}${next ? `?next=${encodeURIComponent(next)}` : ""}`}
-          className="font-semibold text-navy underline-offset-2 hover:underline"
+          className={AUTH_LINK}
         >
           {isLogin ? "Create a free account" : "Sign in instead"}
         </Link>
