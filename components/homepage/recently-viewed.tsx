@@ -5,16 +5,17 @@ import Image from "next/image"
 import Link from "next/link"
 import { getRecentlyViewed, type RecentlyViewedArtist } from "@/components/utils/recently-viewed"
 import { initials } from "@/lib/initials"
-import { safeImageSrc } from "@/lib/utils/safe-image"
+import { allowedImageSrc } from "@/lib/utils/safe-image"
+import { useImageFailed } from "@/components/brand/safe-image"
 
 /** 34px square mini-plate: the artist's photo, or their initials. */
 function MiniPlate({ name, avatarUrl }: { name: string; avatarUrl: string }) {
-  const src = safeImageSrc(avatarUrl)
-  const hasPhoto = src !== "/placeholder.svg"
+  const src = allowedImageSrc(avatarUrl)
+  const { ref, failed, onError } = useImageFailed(src)
   return (
     <span className="relative flex h-[34px] w-[34px] shrink-0 items-center justify-center overflow-hidden border-1.5 border-ink bg-vellum">
-      {hasPhoto ? (
-        <Image src={src} alt="" fill sizes="34px" className="object-cover" />
+      {src && !failed ? (
+        <Image ref={ref} src={src} alt="" fill sizes="34px" className="object-cover" onError={onError} />
       ) : (
         <span className="font-heading text-[13px] leading-none text-ink" aria-hidden="true">
           {initials(name) || "?"}

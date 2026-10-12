@@ -1,5 +1,4 @@
 import Link from "next/link"
-import Image from "next/image"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -8,7 +7,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Star, MapPin, Clock, Tag } from "lucide-react"
 import type { Artist, AvailabilityStatus } from "@/types/artist"
 import { SaveButton } from "@/components/saved/save-button"
-import { safeImageSrc } from "@/lib/utils/safe-image"
+import { allowedImageSrc } from "@/lib/utils/safe-image"
+import { SafeImage } from "@/components/brand/safe-image"
 import { styleEntries } from "@/lib/styles"
 import { StyleBadge } from "@/components/brand/style-badge"
 import { initials } from "@/lib/initials"
@@ -31,7 +31,8 @@ export function ArtistCard({ artist, distance, initialSaved }: ArtistCardProps) 
   const hasRating = artist.rating > 0
   const locationLine = [artist.location.city, artist.location.state].filter(Boolean).join(", ")
   const avail = AVAILABILITY_CONFIG[artist.availabilityStatus] ?? AVAILABILITY_CONFIG.available
-  const hasPreview = artist.previewImages.length > 0
+  const previews = artist.previewImages.filter((url) => allowedImageSrc(url))
+  const hasPreview = previews.length > 0
 
   return (
     <Card className="relative overflow-hidden transition-all hover:border-ink flex flex-col">
@@ -48,14 +49,9 @@ export function ArtistCard({ artist, distance, initialSaved }: ArtistCardProps) 
       {/* Portfolio strip */}
       {hasPreview && (
         <div className="grid grid-cols-3 h-24 overflow-hidden">
-          {artist.previewImages.slice(0, 3).map((url, i) => (
+          {previews.slice(0, 3).map((url, i) => (
             <div key={i} className="relative overflow-hidden bg-muted">
-              <Image
-                src={safeImageSrc(url)}
-                alt={`${artist.name} portfolio ${i + 1}`}
-                fill
-                className="object-cover"
-              />
+              <SafeImage src={url} alt={`${artist.name} portfolio ${i + 1}`} name={artist.name} showInitials={false} sizes="120px" />
             </div>
           ))}
         </div>

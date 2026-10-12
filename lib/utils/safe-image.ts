@@ -8,22 +8,20 @@ const ALLOWED_IMAGE_HOSTS = new Set([
   "d1kq2dqeox7x40.cloudfront.net",
 ])
 
+// next/image throws a hard error for any hostname not in remotePatterns.
+// Scraped image URLs can point anywhere, so validate before handing a URL to
+// next/image. A missing or disallowed image gives null, and callers show the
+// brand fallback instead: <SafeImage> or <Plate> (initials on vellum), or an
+// <AvatarFallback> initials circle. Images that fail to load fall back the same way.
+
 /** The URL when next/image may load it, else null (callers show initials, never a placeholder). */
 export function allowedImageSrc(url: string | null | undefined): string | null {
-  const src = safeImageSrc(url)
-  return src === "/placeholder.svg" ? null : src
-}
-
-// next/image throws a hard error for any hostname not in remotePatterns.
-// Scraped image URLs can point anywhere, so validate before handing a URL
-// to next/image and fall back to a local placeholder rather than crashing.
-export function safeImageSrc(url: string | null | undefined): string {
-  if (!url) return "/placeholder.svg"
+  if (!url) return null
   try {
     const { hostname } = new URL(url)
-    return ALLOWED_IMAGE_HOSTS.has(hostname) ? url : "/placeholder.svg"
+    return ALLOWED_IMAGE_HOSTS.has(hostname) ? url : null
   } catch {
-    return "/placeholder.svg"
+    return null
   }
 }
 

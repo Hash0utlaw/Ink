@@ -1,10 +1,9 @@
 import Link from "next/link"
-import Image from "next/image"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Sparkles, Zap, ArrowRight } from "lucide-react"
 import type { FlashListing } from "@/lib/supabase/flash"
-import { safeImageSrc } from "@/lib/utils/safe-image"
+import { SafeImage } from "@/components/brand/safe-image"
 import { initials } from "@/lib/initials"
 
 
@@ -41,11 +40,14 @@ export function NewestFlash({ listings }: NewestFlashProps) {
                 className="group shrink-0 w-48 flex flex-col rounded-lg overflow-hidden border border-border/50 bg-vellum tex-vellum hover:border-ink transition-all"
               >
                 <div className="relative aspect-square overflow-hidden bg-muted">
-                  <Image
-                    src={safeImageSrc(listing.imageUrl)}
+                  <SafeImage
+                    src={listing.imageUrl}
                     alt={listing.title}
-                    fill
-                    className="object-cover transition-transform duration-300"
+                    name={listing.artistName}
+                    primaryStyle={listing.style}
+                    initialsSize={56}
+                    sizes="192px"
+                    className="transition-transform duration-300"
                   />
                   {listing.isExclusive && (
                     <div className="absolute top-2 right-2">

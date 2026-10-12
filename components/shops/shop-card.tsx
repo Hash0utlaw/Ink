@@ -10,6 +10,7 @@ import { SaveButton } from "@/components/saved/save-button"
 import { styleEntries } from "@/lib/styles"
 import { StyleBadge } from "@/components/brand/style-badge"
 import { initials } from "@/lib/initials"
+import { SafeImage } from "@/components/brand/safe-image"
 
 export function ShopCard({
   shop,
@@ -23,10 +24,12 @@ export function ShopCard({
   return (
     <Card className="overflow-hidden transition-all hover:border-ink flex flex-col">
       <div className="relative h-32 w-full overflow-hidden">
-        <img
-          src={shop.coverImageUrl || "/placeholder.svg"}
+        <SafeImage
+          src={shop.coverImageUrl}
           alt={`${shop.name} interior`}
-          className="h-full w-full object-cover"
+          name={shop.name}
+          showInitials={false}
+          sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
         />
         <SaveButton
           itemType="shop"
@@ -38,8 +41,8 @@ export function ShopCard({
       </div>
       <CardHeader className="flex flex-row items-start gap-4 p-4 -mt-12">
         <Avatar className="w-20 h-20 border-4 border-background bg-background">
-          <AvatarImage src={shop.logoUrl || "/placeholder.svg"} alt={`${shop.name} logo`} />
-          <AvatarFallback className="bg-vellum text-ink font-heading border-1.5 border-ink">{initials(shop.name)}</AvatarFallback>
+          <AvatarImage src={shop.logoUrl || undefined} alt={`${shop.name} logo`} />
+          <AvatarFallback className="bg-vellum text-ink font-heading text-[26px] border-1.5 border-ink">{initials(shop.name) || "?"}</AvatarFallback>
         </Avatar>
         <div className="flex-1 pt-12">
           <div className="flex items-start justify-between gap-2">

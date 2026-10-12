@@ -23,8 +23,8 @@ export const SUPPORT_EMAIL = "support@tattoomaps.com"
 /** Sender for all transactional emails. */
 export const FROM_EMAIL = process.env.RESEND_FROM_EMAIL ?? "TattooMaps <bookings@tattoo-maps.com>"
 
-/** Reply-To for emails sent to clients, claimants and artists. */
-export const REPLY_TO = process.env.RESEND_REPLY_TO || undefined
+/** Reply-To for every email sent to clients, claimants and artists: the support inbox. */
+export const REPLY_TO = SUPPORT_EMAIL
 
 /** Inbox for admin notifications. */
 export const ADMIN_NOTIFY_EMAIL = process.env.ADMIN_NOTIFY_EMAIL || undefined

@@ -48,7 +48,7 @@ export function ProfileForm({ initialName, initialEmail, initialLocation, avatar
         <CardContent className="space-y-6">
           {/* No avatar upload for client accounts yet, so there's no "Change photo" button. */}
           <Avatar className="h-20 w-20">
-            <AvatarImage src={avatarUrl || "/placeholder.svg"} />
+            <AvatarImage src={avatarUrl || undefined} alt="" />
             <AvatarFallback className="bg-vellum text-ink font-heading border-1.5 border-ink">{initials(name) || "?"}</AvatarFallback>
           </Avatar>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
