@@ -46,13 +46,11 @@ export function ProfileForm({ initialName, initialEmail, initialLocation, avatar
           <CardDescription>Update your name, email and location.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="flex items-center gap-4">
-            <Avatar className="h-20 w-20">
-              <AvatarImage src={avatarUrl || "/placeholder.svg"} />
-              <AvatarFallback className="bg-vellum text-ink font-heading border-1.5 border-ink">{initials(name) || "?"}</AvatarFallback>
-            </Avatar>
-            <Button variant="outline">Change photo</Button>
-          </div>
+          {/* No avatar upload for client accounts yet, so there's no "Change photo" button. */}
+          <Avatar className="h-20 w-20">
+            <AvatarImage src={avatarUrl || "/placeholder.svg"} />
+            <AvatarFallback className="bg-vellum text-ink font-heading border-1.5 border-ink">{initials(name) || "?"}</AvatarFallback>
+          </Avatar>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="name">Full name</Label>
