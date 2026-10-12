@@ -18,7 +18,7 @@ const SECTIONS = [
   { id: "accounts", title: "Accounts" },
   { id: "platform-use", title: "Use of the Platform" },
   { id: "artist-terms", title: "Artist & Studio Terms" },
-  { id: "bookings", title: "Bookings & Payments" },
+  { id: "bookings", title: "Requests" },
   { id: "content", title: "User Content" },
   { id: "intellectual-property", title: "Intellectual Property" },
   { id: "disclaimers", title: "Disclaimers" },
@@ -135,7 +135,7 @@ export default function TermsOfServicePage() {
                 />
               </Section>
 
-              <Section id="bookings" title="6. Bookings & Payments">
+              <Section id="bookings" title="6. Requests">
                 <Prose>
                   TattooMaps facilitates bookings between clients and artists. Artists and shops set their own prices, deposits and policies, and arrange them with you directly. TattooMaps is not responsible for disputes between clients and artists regarding services, refunds, or deposits. If a dispute arises, we encourage both parties to resolve it directly. We may offer mediation assistance at our discretion.
                 </Prose>
