@@ -38,203 +38,45 @@ import { getSupabaseAdmin } from "./lib/supabase-admin"
 import { UndoLog } from "./lib/undo-log"
 import { fetchAll, fetchIn, modeBanner, parseCSV, writeCsv } from "./lib/cleanup-utils"
 import { withRetry } from "./lib/retry"
+import {
+  ARTIST_COLUMNS,
+  FILL_FIELDS,
+  SHOP_COLUMNS,
+  blank,
+  buildGroups,
+  compareArtistsByAge,
+  toArtist,
+  toShop,
+  type Artist,
+  type FillField,
+  type Group,
+  type Shop,
+  referencedArtistIds,
+  referencingTables,
+} from "./lib/chain-artists"
 
 const ARGS = parseScriptArgs()
 const SCRIPT = "dedupe-chain-artists"
 const REPORT = "data/reports/dedupe-chain-artists-dryrun.csv"
-const MIN_SHARED_KEYS = 3
 const BATCH = 500
-const FILL_FIELDS = ["avatar_url", "instagram_handle", "bio", "website_url", "booking_url"] as const
-
-type Row = Record<string, unknown>
-
-interface Artist {
-  id: string
-  name: string
-  key: string
-  styles: string[]
-  shopId: string
-  claimed: boolean
-  createdAt: string
-  row: Row
-}
-
-interface Shop {
-  id: string
-  name: string
-  city: string
-  state: string
-  reviews: number | null
-  hasImage: boolean
-  createdAt: string
-}
-
-interface Group {
-  clusterId: string
-  key: string
-  rows: Artist[]
-}
 
 interface Plan {
   clusterId: string
   keeper: Artist
   hides: Artist[]
-  fills: Partial<Record<(typeof FILL_FIELDS)[number], unknown>>
-}
-
-const blank = (v: unknown) => v == null || String(v).trim() === ""
-const str = (v: unknown) => (v == null ? "" : String(v))
-
-/** Most reviews (nulls last), then has a cover or logo, then oldest, then id. */
-function compareShopsForHome(a: Shop, b: Shop): number {
-  const ra = a.reviews ?? -1
-  const rb = b.reviews ?? -1
-  if (ra !== rb) return rb - ra
-  if (a.hasImage !== b.hasImage) return a.hasImage ? -1 : 1
-  if (a.createdAt !== b.createdAt) return a.createdAt < b.createdAt ? -1 : 1
-  return a.id < b.id ? -1 : 1
-}
-
-/** Oldest, then id. */
-function compareArtistsByAge(a: Artist, b: Artist): number {
-  if (a.createdAt !== b.createdAt) return a.createdAt < b.createdAt ? -1 : 1
-  return a.id < b.id ? -1 : 1
-}
-
-class UnionFind {
-  private parent = new Map<string, string>()
-  find(x: string): string {
-    let p = this.parent.get(x) ?? x
-    if (p !== x) {
-      p = this.find(p)
-      this.parent.set(x, p)
-    }
-    return p
-  }
-  union(a: string, b: string) {
-    const ra = this.find(a)
-    const rb = this.find(b)
-    if (ra !== rb) this.parent.set(ra < rb ? rb : ra, ra < rb ? ra : rb)
-  }
-}
-
-/** Every table that can point at an artist id, and the ids each one uses. */
-async function referencedArtistIds(supabase: ReturnType<typeof getSupabaseAdmin>): Promise<Map<string, Set<string>>> {
-  const refs = new Map<string, Set<string>>()
-  const add = (table: string, ids: unknown[]) => {
-    const set = refs.get(table) ?? new Set<string>()
-    for (const id of ids) if (id) set.add(String(id))
-    refs.set(table, set)
-  }
-  for (const table of ["portfolio_images", "booking_requests", "flash_listings", "reviews", "claim_requests", "claim_links"]) {
-    const rows = await withRetry(`fetch ${table}`, () => fetchAll(supabase, table, "id, artist_id"))
-    add(table, rows.map((r) => r.artist_id))
-  }
-  const saved = await withRetry("fetch saved_items", () =>
-    fetchAll(supabase, "saved_items", "id, item_id, item_type", (q) => q.eq("item_type", "artist")),
-  )
-  add("saved_items", saved.map((r) => r.item_id))
-  // shop_artists.artist_profile_id has no foreign key; reported, not a reason to skip.
-  const roster = await withRetry("fetch shop_artists", () =>
-    fetchAll(supabase, "shop_artists", "id, artist_profile_id", (q) => q.not("artist_profile_id", "is", null)),
-  )
-  add("shop_artists (report only)", roster.map((r) => r.artist_profile_id))
-  return refs
+  fills: Partial<Record<FillField, unknown>>
 }
 
 async function detect(supabase: ReturnType<typeof getSupabaseAdmin>) {
   const raw = await withRetry("fetch artists", () =>
-    fetchAll(
-      supabase,
-      "artists",
-      `id, display_name, styles, shop_id, is_claimed, user_id, created_at, ${FILL_FIELDS.join(", ")}`,
-      (q) => q.eq("is_active", true),
-    ),
+    fetchAll(supabase, "artists", ARTIST_COLUMNS, (q) => q.eq("is_active", true)),
   )
-  const artists: Artist[] = raw
-    .filter((r) => r.shop_id)
-    .map((r) => {
-      const styles = Array.isArray(r.styles) ? (r.styles as string[]) : []
-      return {
-        id: String(r.id),
-        name: str(r.display_name),
-        key: `${str(r.display_name).trim().toLowerCase()}:${styles.join("+")}`,
-        styles,
-        shopId: String(r.shop_id),
-        claimed: r.is_claimed === true || r.user_id != null,
-        createdAt: str(r.created_at),
-        row: r,
-      }
-    })
-
+  const artists: Artist[] = raw.filter((r) => r.shop_id).map(toArtist)
   const shopIds = Array.from(new Set(artists.map((a) => a.shopId)))
-  const shopRows = await withRetry("fetch shops", () =>
-    fetchIn(supabase, "shops", "id, name, city, state, review_count, cover_image_url, logo_url, created_at", "id", shopIds),
-  )
-  const shops = new Map<string, Shop>(
-    shopRows.map((s) => [
-      String(s.id),
-      {
-        id: String(s.id),
-        name: str(s.name),
-        city: str(s.city),
-        state: str(s.state),
-        reviews: s.review_count == null ? null : Number(s.review_count),
-        hasImage: !blank(s.cover_image_url) || !blank(s.logo_url),
-        createdAt: str(s.created_at),
-      },
-    ]),
-  )
+  const shopRows = await withRetry("fetch shops", () => fetchIn(supabase, "shops", SHOP_COLUMNS, "id", shopIds))
+  const shops = new Map<string, Shop>(shopRows.map((s) => [String(s.id), toShop(s)]))
+  const { clusters, homeShop, groups } = buildGroups(artists, shops)
 
-  // Shops per key, then pairs of shops sharing 3+ keys.
-  const shopsByKey = new Map<string, Set<string>>()
-  for (const a of artists) {
-    const set = shopsByKey.get(a.key) ?? new Set<string>()
-    set.add(a.shopId)
-    shopsByKey.set(a.key, set)
-  }
-  const shared = new Map<string, number>()
-  for (const set of shopsByKey.values()) {
-    if (set.size < 2) continue
-    const list = Array.from(set).sort()
-    for (let i = 0; i < list.length; i++)
-      for (let j = i + 1; j < list.length; j++) {
-        const pair = `${list[i]}|${list[j]}`
-        shared.set(pair, (shared.get(pair) ?? 0) + 1)
-      }
-  }
-  const uf = new UnionFind()
-  for (const [pair, n] of shared) {
-    if (n < MIN_SHARED_KEYS) continue
-    const [a, b] = pair.split("|")
-    uf.union(a, b)
-  }
-
-  // Clusters: connected shops (2 or more).
-  const members = new Map<string, string[]>()
-  for (const id of shopIds) {
-    const root = uf.find(id)
-    members.set(root, [...(members.get(root) ?? []), id])
-  }
-  const clusters = new Map<string, string[]>()
-  for (const [root, ids] of members) if (ids.length > 1) clusters.set(root, ids)
-  const clusterOf = new Map<string, string>()
-  for (const [root, ids] of clusters) for (const id of ids) clusterOf.set(id, root)
-  const homeShop = new Map<string, Shop>()
-  for (const [root, ids] of clusters) {
-    homeShop.set(root, ids.map((id) => shops.get(id)!).filter(Boolean).sort(compareShopsForHome)[0])
-  }
-
-  // Duplicate groups: per cluster and key; outside clusters, per shop and key.
-  const byGroup = new Map<string, Group>()
-  for (const a of artists) {
-    const cluster = clusterOf.get(a.shopId)
-    const groupKey = cluster ? `c:${cluster}:${a.key}` : `s:${a.shopId}:${a.name.trim().toLowerCase()}`
-    const g = byGroup.get(groupKey) ?? { clusterId: cluster ?? `shop:${a.shopId}`, key: a.key, rows: [] }
-    g.rows.push(a)
-    byGroup.set(groupKey, g)
-  }
-  const groups = Array.from(byGroup.values()).filter((g) => g.rows.length > 1)
   // Same-shop duplicates (same key) anywhere, for the report.
   const sameShop = new Map<string, number>()
   for (const a of artists) sameShop.set(`${a.shopId}:${a.key}`, (sameShop.get(`${a.shopId}:${a.key}`) ?? 0) + 1)
@@ -274,9 +116,7 @@ function plan(
     }
     const hides = group.rows.filter((r) => r.id !== keeper.id).sort((a, b) => (a.id < b.id ? -1 : 1))
 
-    const referencedBy = Array.from(refs.entries())
-      .filter(([table]) => !table.includes("report only"))
-      .flatMap(([table, ids]) => (hides.some((h) => ids.has(h.id)) ? [table] : []))
+    const referencedBy = referencingTables(refs, hides.map((h) => h.id))
     if (referencedBy.length > 0) {
       skipped.push({ group, reason: `a copy is referenced by ${referencedBy.join(", ")}` })
       continue
