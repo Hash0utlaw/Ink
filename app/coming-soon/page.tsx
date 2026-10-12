@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import Image from "next/image"
-import { countListed } from "@/lib/supabase/sitemap"
+import { SUPPORT_EMAIL } from "@/lib/site-config"
+import { getRoundedListedCounts } from "@/lib/supabase/sitemap"
 
 // Live counts, refreshed hourly.
 export const revalidate = 3600
@@ -13,22 +14,10 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 }
 
-/** Listed shop and artist counts rounded down to the thousand, or null if they can't be read. */
-async function getRoundedCounts(): Promise<{ shops: string; artists: string } | null> {
-  try {
-    const [shops, artists] = await Promise.all([countListed("shops"), countListed("artists")])
-    const floor = (n: number) => Math.floor(n / 1000) * 1000
-    if (floor(shops) === 0 || floor(artists) === 0) return null
-    return { shops: floor(shops).toLocaleString("en-US"), artists: floor(artists).toLocaleString("en-US") }
-  } catch {
-    return null
-  }
-}
-
 // Standalone pre-launch page: no site header, footer or nav. The middleware
 // rewrites every gated request here (see lib/launch-gate.ts).
 export default async function ComingSoonPage() {
-  const counts = await getRoundedCounts()
+  const counts = await getRoundedListedCounts()
   const what = counts
     ? `${counts.shops} shops and ${counts.artists} artists in the U.S.`
     : "Tattoo shops and artists across the U.S."
@@ -57,8 +46,8 @@ export default async function ComingSoonPage() {
           </p>
           <p className="mt-4 text-sm text-ink-muted">
             Artist or shop owner? Email{" "}
-            <a href="mailto:support@tattoomaps.com" className="font-semibold text-navy underline underline-offset-2 hover:no-underline">
-              support@tattoomaps.com
+            <a href={`mailto:${SUPPORT_EMAIL}`} className="font-semibold text-navy underline underline-offset-2 hover:no-underline">
+              {SUPPORT_EMAIL}
             </a>
             .
           </p>
