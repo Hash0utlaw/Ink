@@ -4,6 +4,8 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
+import { StyleBadge } from "@/components/brand/style-badge"
+import { styleLabel } from "@/lib/styles"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { Trash2, Loader2, Sparkles } from "lucide-react"
@@ -47,33 +49,33 @@ export function FlashManageCard({ listing }: FlashManageCardProps) {
   }
 
   return (
-    <div className="flex gap-3 p-3 border rounded-lg bg-vellum tex-vellum">
-      <div className="relative w-16 h-16 rounded-md overflow-hidden bg-muted shrink-0">
+    <div className="flex gap-3 rounded-lg border-1.5 border-ink bg-vellum tex-vellum p-3">
+      <div className="relative h-16 w-16 shrink-0 overflow-hidden border-1.5 border-ink bg-paper">
         <Image src={safeImageSrc(listing.imageUrl)} alt={listing.title} fill className="object-cover" />
       </div>
 
       <div className="flex-1 min-w-0 space-y-1">
         <div className="flex items-center gap-1.5">
-          <p className="font-semibold text-sm truncate">{listing.title}</p>
+          <p className="truncate font-semibold">{listing.title}</p>
           {listing.isExclusive && (
-            <Sparkles className="w-3.5 h-3.5 text-primary shrink-0" />
+            <Sparkles className="h-3.5 w-3.5 shrink-0 text-flash-red" aria-label="Exclusive" />
           )}
         </div>
-        <div className="flex flex-wrap gap-1">
-          <span className="text-sm font-bold">
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="text-sm font-semibold tabular-nums">
             ${listing.price}{listing.priceMax ? `–$${listing.priceMax}` : ""}
           </span>
-          {listing.style && <Badge variant="secondary" className="text-xs">{listing.style}</Badge>}
-          {listing.size && <Badge variant="outline" className="text-xs">{listing.size}</Badge>}
+          {listing.style && <StyleBadge slug={listing.style} label={styleLabel(listing.style) ?? listing.style} />}
+          {listing.size && <Badge variant="outline">{listing.size}</Badge>}
         </div>
-        <div className="flex items-center gap-2 pt-0.5">
+        <div className="flex items-center gap-2 pt-1">
           <Switch
             checked={available}
             onCheckedChange={toggleAvailable}
             disabled={toggling}
-            className="scale-75 -ml-1"
+            aria-label="Show this listing on the Flash page"
           />
-          <span className="text-xs text-muted-foreground">
+          <span className="text-sm text-ink-muted">
             {toggling ? "Saving..." : available ? "Available" : "Hidden"}
           </span>
         </div>
@@ -82,11 +84,12 @@ export function FlashManageCard({ listing }: FlashManageCardProps) {
       <Button
         size="icon"
         variant="ghost"
-        className="shrink-0 h-8 w-8 text-muted-foreground hover:text-destructive"
+        aria-label="Delete listing"
+        className="shrink-0 text-ink-muted hover:text-destructive"
         onClick={deleteListing}
         disabled={deleting}
       >
-        {deleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+        {deleting ? <Loader2 className="animate-spin" aria-hidden="true" /> : <Trash2 aria-hidden="true" />}
       </Button>
     </div>
   )

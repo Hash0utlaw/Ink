@@ -37,7 +37,7 @@ export default async function EditProfilePage() {
 
   return (
     <div className="space-y-8">
-      <h1 className="text-2xl font-bold">Edit Profile</h1>
+      <h1 className="font-heading text-[30px] leading-tight text-balance md:text-[34px]">Edit profile</h1>
 
       {artist && (
         <Card>
@@ -56,21 +56,13 @@ export default async function EditProfilePage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Availability & Pricing</CardTitle>
-          <CardDescription>
-            These signals appear on your artist card and help clients find the right time and budget.
-          </CardDescription>
+          <CardTitle>Availability</CardTitle>
         </CardHeader>
         <CardContent>
           {artist ? (
-            <AvailabilitySettings
-              initialAvailability={artist.availability_status ?? "available"}
-              initialPriceTier={artist.price_tier ?? "mid"}
-              initialResponseHours={artist.avg_response_hours}
-              initialDiscount={artist.first_booking_discount}
-            />
+            <AvailabilitySettings initialAvailability={artist.availability_status ?? "available"} />
           ) : (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-ink-muted">
               No artist profile found. Contact support if this is unexpected.
             </p>
           )}

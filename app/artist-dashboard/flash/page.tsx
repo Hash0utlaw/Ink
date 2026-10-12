@@ -1,7 +1,4 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Plus, Zap } from "lucide-react"
 import { createClient } from "@/utils/supabase/server"
 import { getCurrentUserId, getUserProfile } from "@/lib/supabase/users"
 import { getArtistFlashListings } from "@/lib/supabase/flash"
@@ -38,46 +35,33 @@ export default async function ArtistFlashPage() {
   const limit = FLASH_LIMITS[tier] ?? FLASH_LIMITS.free
   const activeCount = listings.filter((l) => l.isAvailable).length
   const atLimit = limit !== null && activeCount >= limit
-  const usageLabel = limit === null ? `${activeCount} listings (unlimited)` : `${activeCount}/${limit} listings used`
+  const usageLabel = limit === null ? `${activeCount} listings` : `${activeCount} of ${limit} listings in use`
+  // The limit is enforced by POST /api/flash; this only explains it.
+  const limitNote =
+    tier === "free" ? "Free accounts can list up to 3 flash designs." : `Your account can list up to ${limit} flash designs.`
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="rounded-full bg-secondary p-2">
-            <Zap className="w-5 h-5 text-primary" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold">Flash Listings</h1>
-            <p className="text-sm text-muted-foreground">{usageLabel}</p>
-          </div>
-        </div>
-        {atLimit && (
-          <Badge className="bg-warning text-warning-foreground border-warning text-xs">
-            Pro plans coming soon
-          </Badge>
-        )}
+      <div>
+        <h1 className="font-heading text-[30px] leading-tight text-balance md:text-[34px]">Flash listings</h1>
+        <p className="mt-1 text-ink-muted tabular-nums">
+          {usageLabel}
+          {limit !== null && `. ${limitNote}`}
+        </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-5">
         {/* Upload form */}
         <div className="lg:col-span-2">
-          <Card className="bg-muted/30 border-border/50">
+          <Card>
             <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2">
-                <Plus className="w-4 h-4" />
-                Add Flash Listing
-              </CardTitle>
+              <CardTitle>Add a flash listing</CardTitle>
             </CardHeader>
             <CardContent>
               {atLimit ? (
-                <div className="py-6 text-center space-y-3">
-                  <p className="text-sm text-muted-foreground">
-                    You&apos;ve reached the {tier} tier limit of {limit} listings.
-                  </p>
-                  <Button className="bg-primary hover:bg-primary/90" disabled>
-                    Pro plans coming soon
-                  </Button>
+                <div className="space-y-1">
+                  <p className="font-semibold text-ink">All {limit} listings are in use.</p>
+                  <p className="text-ink-muted">Hide or delete a listing to add another.</p>
                 </div>
               ) : (
                 <FlashUploadForm />
@@ -87,15 +71,12 @@ export default async function ArtistFlashPage() {
         </div>
 
         {/* Existing listings */}
-        <div className="lg:col-span-3 space-y-4">
+        <div className="space-y-4 lg:col-span-3">
           {listings.length === 0 ? (
-            <Card className="bg-muted/20 border-dashed border-border">
-              <CardContent className="py-16 text-center">
-                <Zap className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
-                <p className="font-semibold text-muted-foreground">No flash listings yet</p>
-                <p className="text-sm text-muted-foreground/70 mt-1">
-                  Add your first design to appear on the Flash discovery page.
-                </p>
+            <Card>
+              <CardContent className="p-6">
+                <p className="font-semibold text-ink">No flash listings yet.</p>
+                <p className="text-ink-muted">Add your first design to appear on the Flash discovery page.</p>
               </CardContent>
             </Card>
           ) : (

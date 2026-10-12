@@ -1,6 +1,8 @@
 import { getBookingsForArtist } from "@/lib/supabase/bookings"
 import { getCurrentUserId } from "@/lib/supabase/users"
 import { AppointmentsView } from "@/components/artist-dashboard/appointments-view"
+import { Badge } from "@/components/ui/badge"
+import { StatusSwatch } from "@/components/dashboard/booking-status"
 
 export default async function AppointmentsPage() {
   const userId = await getCurrentUserId()
@@ -10,12 +12,13 @@ export default async function AppointmentsPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Appointments</h1>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <h1 className="font-heading text-[30px] leading-tight text-balance md:text-[34px]">Appointments</h1>
         {pendingCount > 0 && (
-          <span className="rounded-lg bg-warning text-warning-foreground border border-warning px-3 py-1 text-sm font-medium">
+          <Badge variant="outline" className="gap-1.5 text-sm tabular-nums">
+            <StatusSwatch className="bg-warning" />
             {pendingCount} pending
-          </span>
+          </Badge>
         )}
       </div>
 

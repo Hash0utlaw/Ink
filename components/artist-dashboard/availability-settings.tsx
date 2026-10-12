@@ -2,41 +2,26 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { CheckCircle2, Loader2 } from "lucide-react"
-import type { AvailabilityStatus, PriceTier } from "@/types/artist"
+import { Loader2 } from "lucide-react"
+import { cn } from "@/lib/utils"
+import type { AvailabilityStatus } from "@/types/artist"
+
+// Price tier, average response time and first-session discount are not shown
+// on any public page yet, so their fields are hidden; the columns stay as they are.
 
 const AVAILABILITY_OPTIONS: { value: AvailabilityStatus; label: string; dot: string }[] = [
   { value: "available",          label: "Available now",       dot: "bg-success" },
   { value: "next_week",          label: "Available next week", dot: "bg-warning" },
-  { value: "one_to_two_months",  label: "Booked 1–2 months",  dot: "bg-warning" },
-  { value: "not_taking_clients", label: "Not taking clients",  dot: "bg-muted-foreground"  },
-]
-
-const PRICE_OPTIONS: { value: PriceTier; label: string; sub: string }[] = [
-  { value: "budget",  label: "$",    sub: "Under $100/hr" },
-  { value: "mid",     label: "$$",   sub: "$100–$200/hr"  },
-  { value: "premium", label: "$$$",  sub: "$200–$300/hr"  },
-  { value: "luxury",  label: "$$$$", sub: "$300+/hr"      },
+  { value: "one_to_two_months",  label: "Booked 1–2 months",   dot: "bg-warning" },
+  { value: "not_taking_clients", label: "Not taking clients",  dot: "bg-ink-muted" },
 ]
 
 interface AvailabilitySettingsProps {
   initialAvailability: AvailabilityStatus
-  initialPriceTier: PriceTier
-  initialResponseHours: number | null
-  initialDiscount: number | null
 }
 
-export function AvailabilitySettings({
-  initialAvailability,
-  initialPriceTier,
-  initialResponseHours,
-  initialDiscount,
-}: AvailabilitySettingsProps) {
+export function AvailabilitySettings({ initialAvailability }: AvailabilitySettingsProps) {
   const [availability, setAvailability] = useState<AvailabilityStatus>(initialAvailability)
-  const [priceTier, setPriceTier] = useState<PriceTier>(initialPriceTier)
-  const [responseHours, setResponseHours] = useState(initialResponseHours?.toString() ?? "")
-  const [discount, setDiscount] = useState(initialDiscount?.toString() ?? "")
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -48,12 +33,7 @@ export function AvailabilitySettings({
       const res = await fetch("/api/artist/availability", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          availability_status: availability,
-          price_tier: priceTier,
-          avg_response_hours: responseHours ? parseInt(responseHours) : null,
-          first_booking_discount: discount ? parseInt(discount) : null,
-        }),
+        body: JSON.stringify({ availability_status: availability }),
       })
       if (res.ok) {
         setSaved(true)
@@ -69,97 +49,47 @@ export function AvailabilitySettings({
 
   return (
     <div className="space-y-6">
-      {/* Availability status */}
-      <div>
-        <p className="text-sm font-medium mb-2">Availability</p>
-        <div className="grid grid-cols-2 gap-2">
-          {AVAILABILITY_OPTIONS.map((opt) => (
-            <button
-              key={opt.value}
-              type="button"
-              onClick={() => setAvailability(opt.value)}
-              className={`flex items-center gap-2 rounded-lg border px-3 py-2.5 text-sm text-left transition-colors ${
-                availability === opt.value
-                  ? "border-ink bg-secondary text-primary"
-                  : "border-border bg-muted/30 text-muted-foreground hover:bg-muted/60"
-              }`}
-            >
-              <span className={`w-2 h-2 rounded-full shrink-0 ${opt.dot}`} />
-              {opt.label}
-            </button>
-          ))}
+      <fieldset>
+        <legend className="mb-2 text-sm font-semibold text-ink">Availability</legend>
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          {AVAILABILITY_OPTIONS.map((opt) => {
+            const on = availability === opt.value
+            return (
+              <button
+                key={opt.value}
+                type="button"
+                aria-pressed={on}
+                onClick={() => setAvailability(opt.value)}
+                className={cn(
+                  "flex min-h-11 items-center gap-2 rounded-lg border-1.5 border-ink px-3 text-left text-[15px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                  on ? "bg-ink text-vellum" : "bg-vellum tex-vellum text-ink hover:bg-secondary",
+                )}
+              >
+                <span className={cn("h-2.5 w-2.5 shrink-0 border-1.5", on ? "border-vellum" : "border-ink", opt.dot)} />
+                {opt.label}
+              </button>
+            )
+          })}
         </div>
+      </fieldset>
+
+      {error && <p className="text-sm font-semibold text-destructive">{error}</p>}
+
+      <div className="flex items-center gap-3">
+        <Button onClick={save} disabled={saving}>
+          {saving ? (
+            <>
+              <Loader2 className="animate-spin" aria-hidden="true" />
+              Saving…
+            </>
+          ) : (
+            "Save availability"
+          )}
+        </Button>
+        <span aria-live="polite" className="text-sm font-semibold text-success">
+          {saved ? "Saved" : ""}
+        </span>
       </div>
-
-      {/* Price tier */}
-      <div>
-        <p className="text-sm font-medium mb-2">Price tier</p>
-        <div className="grid grid-cols-4 gap-2">
-          {PRICE_OPTIONS.map((opt) => (
-            <button
-              key={opt.value}
-              type="button"
-              onClick={() => setPriceTier(opt.value)}
-              className={`flex flex-col items-center rounded-lg border px-2 py-3 transition-colors ${
-                priceTier === opt.value
-                  ? "border-ink bg-secondary text-primary"
-                  : "border-border bg-muted/30 text-muted-foreground hover:bg-muted/60"
-              }`}
-            >
-              <span className="text-base font-bold">{opt.label}</span>
-              <span className="text-xs mt-0.5 text-center leading-tight">{opt.sub}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Response time */}
-      <div>
-        <label className="text-sm font-medium mb-1.5 block">Avg response time (hours)</label>
-        <Input
-          type="number"
-          placeholder="e.g. 4"
-          value={responseHours}
-          onChange={(e) => setResponseHours(e.target.value)}
-          min="1"
-          max="168"
-          className="max-w-xs"
-        />
-        <p className="text-xs text-muted-foreground mt-1">Shows as "Replies in ~4h" on your card</p>
-      </div>
-
-      {/* First-booking discount */}
-      <div>
-        <label className="text-sm font-medium mb-1.5 block">
-          First-booking discount (%)
-        </label>
-        <Input
-          type="number"
-          placeholder="e.g. 10"
-          value={discount}
-          onChange={(e) => setDiscount(e.target.value)}
-          min="0"
-          max="50"
-          className="max-w-xs"
-        />
-        <p className="text-xs text-muted-foreground mt-1">Shows as "10% off first session" badge on artist cards</p>
-      </div>
-
-      {error && <p className="text-sm text-destructive">{error}</p>}
-
-      <Button
-        className="bg-primary hover:bg-primary/90 gap-2"
-        onClick={save}
-        disabled={saving}
-      >
-        {saving ? (
-          <><Loader2 className="w-4 h-4 animate-spin" />Saving…</>
-        ) : saved ? (
-          <><CheckCircle2 className="w-4 h-4 text-success" />Saved!</>
-        ) : (
-          "Save availability"
-        )}
-      </Button>
     </div>
   )
 }
