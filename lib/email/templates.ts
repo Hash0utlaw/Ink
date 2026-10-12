@@ -80,6 +80,7 @@ export function newRequestArtistEmail(r: RequestDetails): Email {
           ["Size", r.size],
           ["Placement", r.placement],
         ]),
+        button("Open your requests", siteUrl("/artist-dashboard/appointments")),
       ],
       reason: BECAUSE.artist,
     }),
