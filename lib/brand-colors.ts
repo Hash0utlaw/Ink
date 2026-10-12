@@ -17,3 +17,19 @@ export const MAP_COLORS = {
 } as const
 
 export type MapColor = keyof typeof MAP_COLORS
+
+// Emails and share images can't read CSS variables either: email clients get
+// inline styles, and next/og renders outside the DOM.
+export const BRAND_HEX = {
+  paper: "#EFE4CC",
+  vellum: "#FBF6EA",
+  ink: "#221A14",
+  inkMuted: "#5E5045",
+  rule: "#B9AC93",
+  night: "#1A1512",
+  navy: "#1F3350",
+  cream: "#F6EEDC",
+  flashRed: "#B3261E",
+  // Only for text on flash red.
+  white: "#FFFFFF",
+} as const

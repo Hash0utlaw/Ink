@@ -26,7 +26,10 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
   const labels = styleLabels(artist.styles)
   const primaryStyle = labels[0] ?? "Tattoo"
   const loc = [artist.location.city, artist.location.state].filter(Boolean).join(", ")
-  const coverImage = artist.portfolioImages?.[0] ?? artist.avatarUrl ?? "/opengraph-image"
+  const coverImage = artist.portfolioImages?.[0] ?? artist.avatarUrl ?? null
+  const shareImages = coverImage
+    ? [{ url: coverImage, width: 1200, height: 630, alt: artist.name }]
+    : [{ url: `/artists/${artist.id}/share-image`, width: 1200, height: 630, alt: artist.name }]
 
   // Another active artist shares this name and city: add the (unique) handle so the title stays unique.
   const twin = await artistHasNameTwin({
@@ -48,8 +51,9 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
     openGraph: {
       title: `${artist.name} | TattooMaps`,
       description: `${primaryStyle} tattoo artist${loc ? ` in ${loc}` : ""}. View portfolio and book on TattooMaps.`,
-      images: coverImage ? [{ url: coverImage, width: 1200, height: 630, alt: artist.name }] : ["/opengraph-image"],
+      images: shareImages,
     },
+    twitter: { card: "summary_large_image", images: shareImages },
   }
 }
 

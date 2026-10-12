@@ -32,6 +32,18 @@ export async function countListed(table: Table): Promise<number> {
   return count ?? 0
 }
 
+/** Listed shop and artist counts rounded down to the thousand ("26,000"), or null if they can't be read. */
+export async function getRoundedListedCounts(): Promise<{ shops: string; artists: string } | null> {
+  try {
+    const [shops, artists] = await Promise.all([countListed("shops"), countListed("artists")])
+    const floor = (n: number) => Math.floor(n / 1000) * 1000
+    if (floor(shops) === 0 || floor(artists) === 0) return null
+    return { shops: floor(shops).toLocaleString("en-US"), artists: floor(artists).toLocaleString("en-US") }
+  } catch {
+    return null
+  }
+}
+
 /** Listed ids ordered by id, rows [offset, offset + limit). */
 export async function getListedIds(table: Table, offset: number, limit: number): Promise<string[]> {
   const supabase = publicClient()

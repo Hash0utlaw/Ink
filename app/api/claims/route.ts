@@ -4,8 +4,8 @@ import { createClient } from "@/utils/supabase/server"
 import { createAdminClient } from "@/utils/supabase/admin"
 import { getArtistBySlug } from "@/lib/supabase/artists"
 import { getShopBySlug } from "@/lib/supabase/shops"
-import { ADMIN_NOTIFY_EMAIL, FROM_EMAIL, REPLY_TO, SITE_URL } from "@/lib/site-config"
-import { escapeHtml } from "@/lib/escape-html"
+import { ADMIN_NOTIFY_EMAIL, FROM_EMAIL, REPLY_TO } from "@/lib/site-config"
+import { claimAdminEmail, claimReceiptEmail } from "@/lib/email/templates"
 import { hoursAgo, isNonEmptyString, isValidEmail } from "@/lib/validation"
 
 export const dynamic = "force-dynamic"
@@ -65,26 +65,24 @@ export async function POST(request: Request) {
     const fromAddress = FROM_EMAIL
     const notifyEmail = ADMIN_NOTIFY_EMAIL ?? fromAddress.match(/<(.+)>/)?.[1] ?? fromAddress
 
+    const toAdmin = claimAdminEmail({ listing, name, email: claimantEmail, phone, instagram })
+    const toClaimant = claimReceiptEmail({ name, listing })
+
     const emailPromises: Promise<unknown>[] = [
       resend.emails.send({
         from: fromAddress,
         to: notifyEmail,
-        subject: `New claim request: ${listing}`,
-        html: `<p>New profile claim submitted.</p>
-               <p><strong>Listing:</strong> ${escapeHtml(listing)}</p>
-               <p><strong>Name:</strong> ${escapeHtml(name)}</p>
-               <p><strong>Email:</strong> ${escapeHtml(claimantEmail)}</p>
-               ${phone ? `<p><strong>Phone:</strong> ${escapeHtml(phone)}</p>` : ""}
-               ${instagram ? `<p><strong>Instagram:</strong> ${escapeHtml(instagram)}</p>` : ""}
-               <p><a href="${SITE_URL}/admin/intros">Review pending claims →</a></p>`,
+        subject: toAdmin.subject,
+        html: toAdmin.html,
+        text: toAdmin.text,
       }),
       resend.emails.send({
         from: fromAddress,
         to: claimantEmail,
         replyTo: REPLY_TO,
-        subject: "We received your claim request",
-        html: `<p>Hi ${escapeHtml(name)},</p>
-               <p>Thanks for claiming <strong>${escapeHtml(listing)}</strong> on TattooMaps. We'll verify and get back to you within 2 business days.</p>`,
+        subject: toClaimant.subject,
+        html: toClaimant.html,
+        text: toClaimant.text,
       }),
     ]
 

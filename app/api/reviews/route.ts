@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/utils/supabase/server"
 import { getUserProfile } from "@/lib/supabase/users"
 import { Resend } from "resend"
-import { FROM_EMAIL, REPLY_TO, SITE_URL } from "@/lib/site-config"
+import { FROM_EMAIL, REPLY_TO } from "@/lib/site-config"
+import { newReviewArtistEmail } from "@/lib/email/templates"
 
 export const dynamic = "force-dynamic"
 
@@ -97,22 +98,17 @@ export async function POST(req: NextRequest) {
         const profile = await getUserProfile(artistRow.user_id)
         artistEmail = profile?.email ?? undefined
       }
-      const stars = "★".repeat(rating) + "☆".repeat(5 - rating)
 
       if (artistEmail) {
         const resend = new Resend(process.env.RESEND_API_KEY)
+        const message = newReviewArtistEmail({ artistName, clientName, rating, reviewText })
         await resend.emails.send({
           from: FROM_EMAIL,
           to: artistEmail,
           replyTo: REPLY_TO,
-          subject: `New ${rating}-star review from ${clientName}`,
-          html: `
-            <p>Hi ${artistName},</p>
-            <p>${clientName} left you a ${rating}-star review:</p>
-            <p style="font-size:24px;">${stars}</p>
-            ${reviewText ? `<blockquote>${reviewText}</blockquote>` : ""}
-            <p><a href="${SITE_URL}/artist-dashboard">View your dashboard →</a></p>
-          `,
+          subject: message.subject,
+          html: message.html,
+          text: message.text,
         })
       }
     } catch {

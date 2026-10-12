@@ -2,8 +2,8 @@ import { timingSafeEqual } from "crypto"
 import { NextResponse } from "next/server"
 import { Resend } from "resend"
 import { createAdminClient } from "@/utils/supabase/admin"
-import { ADMIN_NOTIFY_EMAIL, FROM_EMAIL, SITE_URL } from "@/lib/site-config"
-import { escapeHtml } from "@/lib/escape-html"
+import { ADMIN_NOTIFY_EMAIL, FROM_EMAIL } from "@/lib/site-config"
+import { introDigestEmail } from "@/lib/email/templates"
 import { hoursAgo } from "@/lib/validation"
 import { hoursSince, introShop, type IntroArtist } from "@/lib/intro-outreach"
 
@@ -63,35 +63,29 @@ export async function GET(request: Request) {
   }
 
   const now = Date.now()
-  const items = requests
-    .map((r) => {
+  const digest = introDigestEmail({
+    requests: requests.map((r) => {
       const shop = r.artists ? introShop(r.artists) : null
-      const where = [shop?.name, [shop?.city, shop?.state].filter(Boolean).join(" ")].filter(Boolean).join(", ")
-      const what = [r.size, r.placement].filter(Boolean).join(", ")
-      const status =
-        r.outreach_status === "new"
-          ? `new, ${hoursSince(r.created_at, now)}h old`
-          : `contacted ${hoursSince(r.outreach_contacted_at ?? r.created_at, now)}h ago`
-      return `<li><strong>${escapeHtml(r.artists?.display_name ?? "Unknown artist")}</strong>${
-        where ? ` at ${escapeHtml(where)}` : ""
-      }${what ? ` — ${escapeHtml(what)}` : ""} <em>(${status})</em></li>`
-    })
-    .join("")
-
-  const html = `
-    <h2>Intro digest</h2>
-    <p><strong>${requests.length}</strong> request${requests.length === 1 ? "" : "s"} need attention.</p>
-    ${items ? `<ul>${items}</ul>` : ""}
-    <p><strong>${claimCount}</strong> pending claim${claimCount === 1 ? "" : "s"}.</p>
-    <p><a href="${SITE_URL}/admin/intros">Open the intros dashboard →</a></p>
-  `
+      return {
+        artistName: r.artists?.display_name ?? "Unknown artist",
+        where: [shop?.name, [shop?.city, shop?.state].filter(Boolean).join(" ")].filter(Boolean).join(", "),
+        what: [r.size, r.placement].filter(Boolean).join(", "),
+        status:
+          r.outreach_status === "new"
+            ? `new, ${hoursSince(r.created_at, now)}h old`
+            : `contacted ${hoursSince(r.outreach_contacted_at ?? r.created_at, now)}h ago`,
+      }
+    }),
+    pendingClaims: claimCount,
+  })
 
   const resend = new Resend(process.env.RESEND_API_KEY)
   const { data, error: sendError } = await resend.emails.send({
     from: FROM_EMAIL,
     to: ADMIN_NOTIFY_EMAIL,
-    subject: `Intro digest: ${requests.length} waiting, ${claimCount} pending claim${claimCount === 1 ? "" : "s"}`,
-    html,
+    subject: digest.subject,
+    html: digest.html,
+    text: digest.text,
   })
   if (sendError) {
     return NextResponse.json({ error: sendError.message }, { status: 502 })
