@@ -1,225 +1,316 @@
 import { Suspense } from "react"
 import type { Metadata } from "next"
 import Link from "next/link"
+import { redirect } from "next/navigation"
+import { Map as MapIcon } from "lucide-react"
 import { Header } from "@/components/layout/header"
 import { HeaderSkeleton } from "@/components/layout/header-skeleton"
 import { Footer } from "@/components/layout/footer"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Star, MapPin, Wand2, ArrowLeft } from "lucide-react"
-import { getArtists } from "@/lib/supabase/artists"
-import type { Artist } from "@/types/artist"
+import { FinderPlate } from "@/components/find-artist/finder-plate"
+import { PRIMARY_BUTTON, SECONDARY_BUTTON, TEXT_LINK } from "@/components/find-artist/finder-ui"
+import {
+  finderHref,
+  formatMiles,
+  joinStyles,
+  mapHref,
+  resultsHref,
+  type FinderAnswers,
+} from "@/components/find-artist/finder-url"
+import {
+  findArtistPages,
+  lookupPlace,
+  MAX_STYLES,
+  nearestShops,
+  shopsHref,
+  stateName,
+  styleCountsNear,
+  toCoords,
+  toRadius,
+  WIDEN_RADII,
+  type FinderArtist,
+  type FinderPlace,
+} from "@/lib/finder"
 import { styleLabel, toStyleSlugs } from "@/lib/styles"
-import { initials } from "@/lib/initials"
+import { cn } from "@/lib/utils"
 
 export const metadata: Metadata = {
-  title: "Your Artist Matches — TattooMaps",
+  title: "Artist finder results | TattooMaps",
+  robots: { index: false, follow: true },
 }
 
-const BUDGET_TO_PRICE: Record<string, string[]> = {
-  low: ["low"],
-  medium: ["low", "medium"],
-  high: ["medium", "high"],
-  luxury: ["high"],
+export const dynamic = "force-dynamic"
+
+type SearchParams = Record<string, string | string[] | undefined>
+const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v) ?? ""
+
+/**
+ * The place from the URL. New links carry near/lat/lng; old ones
+ * (?style=Fine%20Line&city=Austin&state=TX&size=…&budget=…) carry a city and
+ * state or a ZIP, looked up the same way as step 1. Size and budget are ignored.
+ */
+async function placeFrom(sp: SearchParams): Promise<FinderPlace | null> {
+  const coords = toCoords(one(sp.lat), one(sp.lng))
+  if (coords) return { label: one(sp.near).trim().slice(0, 80) || "your location", ...coords }
+  const zip = one(sp.zip).trim()
+  const query = zip || [one(sp.city).trim(), one(sp.state).trim()].filter(Boolean).join(", ")
+  return query ? lookupPlace(query) : null
 }
 
-function scoreArtist(
-  artist: Artist,
-  opts: { style: string; size: string; budget: string; city: string; state: string }
-): number {
-  let score = 0
-  if (opts.style && artist.styles.includes(opts.style)) {
-    score += 3
+const CHIP = "inline-flex min-h-9 items-center rounded border-1.5 border-ink bg-vellum tex-vellum px-3 text-sm font-medium"
+const MAX_PAGES = 20
+
+export default async function FinderResultsPage({ searchParams }: { searchParams: SearchParams }) {
+  const place = await placeFrom(searchParams)
+  if (!place) redirect("/find-artist")
+
+  const styles = toStyleSlugs(one(searchParams.style).split(",").filter(Boolean)).slice(0, MAX_STYLES)
+  const radius = toRadius(one(searchParams.r))
+  const page = Math.min(Math.max(Math.floor(Number(one(searchParams.page))) || 1, 1), MAX_PAGES)
+  const answers: FinderAnswers = { near: place.label, lat: place.lat, lng: place.lng, r: radius, styles }
+
+  // Nothing at the chosen radius: retry at the larger ones until something turns up.
+  let found = await findArtistPages({ lat: place.lat, lng: place.lng, radius, styles, pages: page })
+  let usedRadius = radius
+  if (found.total === 0 && !found.error) {
+    for (const wider of WIDEN_RADII.filter((r) => r > radius)) {
+      usedRadius = wider
+      found = await findArtistPages({ lat: place.lat, lng: place.lng, radius: wider, styles, pages: page })
+      if (found.total > 0 || found.error) break
+    }
   }
-  if (opts.city && artist.location.city?.toLowerCase() === opts.city.toLowerCase()) {
-    score += 2
-  } else if (opts.state && artist.location.state?.toLowerCase() === opts.state.toLowerCase()) {
-    score += 1
-  }
-  if (opts.budget) {
-    const allowed = BUDGET_TO_PRICE[opts.budget] ?? []
-    if (allowed.includes(artist.priceRange)) score += 1
-  }
-  return score
-}
+  const { artists, total, error } = found
+  const widened = usedRadius !== radius && total > 0
 
-function matchLabel(score: number, maxScore: number): { label: string; color: string } {
-  const pct = maxScore > 0 ? score / maxScore : 0
-  if (pct >= 0.8) return { label: "Top match", color: "bg-success text-success-foreground border-success" }
-  if (pct >= 0.5) return { label: "Great match", color: "bg-secondary text-primary border-ink" }
-  return { label: "Good match", color: "bg-muted text-muted-foreground border-border" }
-}
+  // "Shops near you": only for a style search that didn't need widening.
+  const showShops = styles.length > 0 && !widened && total > 0 && !error
+  const [counts, shops] = showShops
+    ? await Promise.all([
+        styleCountsNear(place.lat, place.lng, radius).catch(() => ({}) as Record<string, number>),
+        nearestShops(place.lat, place.lng, radius, 4),
+      ])
+    : [{} as Record<string, number>, []]
+  const unlisted = counts.__none ?? 0
 
-
-function priceLabel(range: string) {
-  return { low: "$", medium: "$$", high: "$$$" }[range] ?? "$$"
-}
-
-export default async function FindArtistResultsPage({
-  searchParams,
-}: {
-  searchParams: { style?: string; size?: string; budget?: string; city?: string; state?: string }
-}) {
-  const { size = "", budget = "", city = "", state: stateParam = "" } = searchParams
-  // ?style= is a slug; old links may carry a name ("Fine Line") — map it.
-  const style: string = searchParams.style ? toStyleSlugs([searchParams.style])[0] ?? "" : ""
-  const styleName = style ? styleLabel(style) ?? style : ""
-
-  const filters: Parameters<typeof getArtists>[0] = {}
-  if (style) filters.styles = [style]
-  if (stateParam) filters.state = stateParam
-  if (city) filters.city = city
-  filters.pageSize = 48
-
-  const { data: artists } = await getArtists(filters)
-
-  const scored = artists
-    .map((a) => ({ artist: a, score: scoreArtist(a, { style, size, budget, city, state: stateParam }) }))
-    .sort((a, b) => b.score - a.score)
-    .filter((r) => r.score > 0 || (!style && !city && !stateParam))
-
-  const maxScore = scored.length > 0 ? scored[0].score : 1
-  const locationLabel = city ? `${city}${stateParam ? `, ${stateParam}` : ""}` : stateParam || "nationwide"
+  const styleText = joinStyles(styles.map((s) => styleLabel(s) ?? s))
+  const styleWord = styleText ? `${styleText} ` : ""
+  const noun = (n: number) => (n === 1 ? "artist" : "artists")
 
   return (
-    <div className="flex min-h-screen flex-col bg-paper tex-paper">
+    <div className="flex min-h-screen flex-col">
       <Suspense fallback={<HeaderSkeleton />}>
         <Header />
       </Suspense>
-
-      <main className="flex-1">
-        {/* Result header */}
-        <div className="border-b border-border/50 bg-muted/30">
-          <div className="container mx-auto px-4 py-6">
-            <div className="flex items-center gap-3 mb-3">
-              <Button variant="ghost" size="sm" asChild className="gap-1.5 text-muted-foreground">
-                <Link href="/find-artist">
-                  <ArrowLeft className="w-4 h-4" /> Refine search
-                </Link>
-              </Button>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="rounded bg-secondary p-2">
-                <Wand2 className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-extrabold">
-                  {scored.length} {scored.length === 1 ? "artist" : "artists"} match{scored.length === 1 ? "es" : ""} your style
-                </h1>
-                <p className="text-sm text-muted-foreground">
-                  {[style ? styleName : null, locationLabel, size].filter(Boolean).join(", ")}
-                </p>
-              </div>
-            </div>
-
-            {/* Active filter pills */}
-            <div className="flex flex-wrap gap-2 mt-4">
-              {[
-                style && { key: "style", label: styleName },
-                size && { key: "size", label: size },
-                budget && { key: "budget", label: { low: "Under $200", medium: "$200–$500", high: "$500–$1,000", luxury: "$1,000+" }[budget] ?? budget },
-                city && { key: "city", label: city },
-                stateParam && { key: "state", label: stateParam },
-              ]
-                .filter(Boolean)
-                .map((f) => f && (
-                  <Badge key={f.key} variant="secondary" className="text-xs">{f.label}</Badge>
-                ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="container mx-auto px-4 py-8">
-          {scored.length === 0 ? (
-            <div className="py-24 text-center">
-              <Wand2 className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-              <p className="text-lg font-semibold">No exact matches found</p>
-              <p className="text-sm text-muted-foreground mt-1 mb-6">Try broadening your search — remove location or try a different style.</p>
-              <Button asChild className="bg-primary hover:bg-primary/90">
-                <Link href="/find-artist">Refine my search</Link>
-              </Button>
-            </div>
+      <main className="flex-1 bg-paper tex-paper">
+        <div className="mx-auto flex w-full max-w-[1180px] flex-col gap-8 px-4 pb-20 pt-10 sm:px-6 sm:pt-12">
+          {error ? (
+            <ErrorBox answers={answers} />
+          ) : total === 0 ? (
+            <EmptyState answers={answers} styleWord={styleWord} />
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {scored.map(({ artist, score }) => {
-                const match = matchLabel(score, maxScore)
-                const loc = [artist.location.city, artist.location.state].filter(Boolean).join(", ")
-                return (
+            <>
+              <header className="flex flex-col gap-3">
+                <span className="text-sm text-ink-muted">Artist finder</span>
+                <h1 className="font-heading text-[32px] leading-[1.08] text-balance sm:text-[46px]">
+                  <span className="tabular-nums">{total}</span> {styleWord}
+                  {noun(total)} within {usedRadius} miles
+                </h1>
+                <span className="font-place text-[20px] italic">Nearest first, from {place.label}</span>
+                {widened && (
+                  <p className="border-1.5 border-l-[6px] border-ink border-l-navy bg-paper tex-paper px-4 py-3.5 text-[15px] leading-normal">
+                    No {styleWord}artists listed within {radius} miles of {place.label}. We widened the search and found
+                    the {total === 1 ? "nearest one" : `${total} nearest`}.
+                  </p>
+                )}
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className={CHIP}>{place.label}</span>
+                  <span className={cn(CHIP, "tabular-nums")}>{widened ? `Up to ${usedRadius} mi` : `${radius} mi`}</span>
+                  {styles.map((s) => (
+                    <span key={s} className={CHIP}>
+                      {styleLabel(s)}
+                    </span>
+                  ))}
                   <Link
-                    key={artist.id}
-                    href={`/artists/${artist.id}`}
-                    className="group flex gap-4 p-4 rounded border border-border/50 bg-vellum tex-vellum hover:border-ink transition-all"
+                    href={finderHref(answers)}
+                    className={cn("ml-1.5 inline-flex min-h-11 items-center text-[15px]", TEXT_LINK)}
                   >
-                    <Avatar className="w-16 h-16 shrink-0 border-2 border-ink">
-                      <AvatarImage src={artist.avatarUrl} alt={artist.name} />
-                      <AvatarFallback className="text-lg bg-vellum text-ink font-heading border-1.5 border-ink">
-                        {initials(artist.name)}
-                      </AvatarFallback>
-                    </Avatar>
-
-                    <div className="flex-1 min-w-0 space-y-1">
-                      <div className="flex items-start justify-between gap-2">
-                        <p className="font-bold text-sm leading-tight">{artist.name}</p>
-                        <Badge className={`shrink-0 text-xs ${match.color}`}>{match.label}</Badge>
-                      </div>
-
-                      {artist.shopName && (
-                        <p className="text-xs text-muted-foreground">at {artist.shopName}</p>
-                      )}
-
-                      {loc && (
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <MapPin className="w-3 h-3" />{loc}
-                        </div>
-                      )}
-
-                      <div className="flex items-center gap-2 flex-wrap">
-                        {artist.rating > 0 && (
-                          <span className="flex items-center gap-0.5 text-xs">
-                            <Star className="w-3 h-3 text-flash-yellow fill-flash-yellow" />
-                            {artist.rating}
-                          </span>
-                        )}
-                        <span className="text-xs text-muted-foreground">{priceLabel(artist.priceRange)}</span>
-                        {artist.isClaimed && artist.isAvailable && (
-                          <span className="text-xs text-success">Available</span>
-                        )}
-                      </div>
-
-                      {artist.styles.length > 0 && (
-                        <div className="flex flex-wrap gap-1">
-                          {artist.styles.slice(0, 3).map((slug) => (
-                            <Badge key={slug} variant="secondary" className={`text-xs ${slug === style ? "border-ink text-primary" : ""}`}>
-                              {styleLabel(slug)}
-                            </Badge>
-                          ))}
-                        </div>
-                      )}
-                    </div>
+                    Change answers
                   </Link>
-                )
-              })}
-            </div>
-          )}
+                </div>
+              </header>
 
-          {scored.length > 0 && (
-            <div className="mt-12 text-center">
-              <p className="text-sm text-muted-foreground mb-3">Not seeing the right fit?</p>
-              <div className="flex justify-center gap-3 flex-wrap">
-                <Button variant="outline" asChild>
-                  <Link href="/find-artist">Refine search</Link>
-                </Button>
-                <Button variant="outline" asChild>
-                  <Link href="/artists">Browse all artists</Link>
-                </Button>
+              <section aria-label="Artists" className="flex flex-col gap-4">
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b-1.5 border-ink pb-3">
+                  <span className="text-[15px] tabular-nums text-ink-muted">
+                    Showing {artists.length} of {total}
+                  </span>
+                  <Link href={mapHref(answers)} className={cn(SECONDARY_BUTTON, "min-h-11")}>
+                    <MapIcon className="h-[18px] w-[18px]" aria-hidden="true" />
+                    See on the map
+                  </Link>
+                </div>
+                <ul className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {artists.map((artist) => (
+                    <li key={artist.id}>
+                      <ArtistCard artist={artist} picked={styles} />
+                    </li>
+                  ))}
+                </ul>
+                {artists.length < total && page < MAX_PAGES && (
+                  <div className="mt-2 flex justify-center">
+                    <Link href={resultsHref(answers, page + 1)} scroll={false} className={SECONDARY_BUTTON}>
+                      Show more artists
+                    </Link>
+                  </div>
+                )}
+              </section>
+
+              {showShops && shops.length > 0 && (
+                <section aria-labelledby="finder-shops-heading" className="flex flex-col gap-2.5">
+                  <div className="flex flex-col gap-1.5 border-b-1.5 border-ink pb-3">
+                    <h2 id="finder-shops-heading" className="font-heading text-[30px] leading-[1.15]">
+                      Shops near you
+                    </h2>
+                    <p className="text-[15px] leading-normal text-ink-muted">
+                      {unlisted > 0 && `${unlisted} ${noun(unlisted)} near you haven't listed their styles yet. `}
+                      These shops are close by and worth a look.
+                    </p>
+                  </div>
+                  <ul className="grid md:grid-cols-2 md:gap-x-10">
+                    {shops.map((shop) => (
+                      <li key={shop.id}>
+                        <Link
+                          href={`/shops/${shop.id}`}
+                          className="flex min-h-11 items-center justify-between gap-3 border-b border-rule py-3.5 text-ink hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        >
+                          <span className="flex flex-col gap-0.5">
+                            <span className="font-heading text-[19px] leading-[1.2]">{shop.name}</span>
+                            {shop.reviewCount > 0 && (
+                              <span className="text-[13px] tabular-nums text-ink-muted">
+                                Rated {shop.rating.toFixed(1)} from {shop.reviewCount}{" "}
+                                {shop.reviewCount === 1 ? "review" : "reviews"}
+                              </span>
+                            )}
+                          </span>
+                          <span className="whitespace-nowrap text-sm font-semibold tabular-nums">
+                            {formatMiles(shop.distance_mi)}
+                          </span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                  <Link
+                    href={shopsHref(place.label)}
+                    className={cn("inline-flex min-h-11 items-center self-start text-[15px]", TEXT_LINK)}
+                  >
+                    See all shops near {place.label.replace(/^Near\s+/i, "")}
+                  </Link>
+                </section>
+              )}
+
+              <div className="flex flex-wrap items-center justify-between gap-4 rounded border-1.5 border-ink bg-paper tex-paper p-6">
+                <div className="flex flex-col gap-1">
+                  <h2 className="font-heading text-[22px] leading-[1.2]">Found someone you like?</h2>
+                  <p className="text-[15px] text-ink-muted">
+                    Open their page and send a request. It goes straight to the artist or their shop.
+                  </p>
+                </div>
+                <Link href="/artists" className={cn("inline-flex min-h-11 items-center text-[15px]", TEXT_LINK)}>
+                  Browse all artists
+                </Link>
               </div>
-            </div>
+            </>
           )}
         </div>
       </main>
-
       <Footer />
     </div>
+  )
+}
+
+/** One result: plate, name and distance, shop, place, up to three style tags (picked ones first). */
+function ArtistCard({ artist, picked }: { artist: FinderArtist; picked: string[] }) {
+  const tags = [
+    ...artist.styles.filter((s) => picked.includes(s)),
+    ...artist.styles.filter((s) => !picked.includes(s)),
+  ].slice(0, 3)
+  const { city, state } = artist.location
+  return (
+    <Link
+      href={`/artists/${artist.id}`}
+      className="flex h-full gap-4 rounded border-1.5 border-ink bg-vellum tex-vellum p-4 text-ink hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+    >
+      <FinderPlate src={artist.avatarUrl} name={artist.name} />
+      <div className="flex min-w-0 flex-1 flex-col gap-[5px]">
+        <div className="flex items-baseline justify-between gap-2.5">
+          <span className="min-w-0 break-words font-heading text-[22px] leading-[1.15]">{artist.name}</span>
+          <span className="whitespace-nowrap text-sm font-semibold tabular-nums">{formatMiles(artist.distanceMi)}</span>
+        </div>
+        {artist.shopName && <span className="text-sm">at {artist.shopName}</span>}
+        {city && (
+          <span className="font-place text-[15px] italic text-ink-muted">
+            {city}
+            {state ? `, ${stateName(state)}` : ""}
+          </span>
+        )}
+        {tags.length > 0 && (
+          <span className="mt-0.5 flex flex-wrap gap-[5px]">
+            {tags.map((slug) => (
+              <span
+                key={slug}
+                className={cn(
+                  "inline-flex items-center rounded border-1.5 border-ink px-2 py-[3px] text-[13px] font-medium",
+                  picked.includes(slug) ? "bg-ink text-cream" : "bg-vellum text-ink",
+                )}
+              >
+                {styleLabel(slug)}
+              </span>
+            ))}
+          </span>
+        )}
+      </div>
+    </Link>
+  )
+}
+
+/** Nothing even at the widest radius. */
+function EmptyState({ answers, styleWord }: { answers: FinderAnswers; styleWord: string }) {
+  return (
+    <section className="flex flex-col gap-5">
+      <span className="text-sm text-ink-muted">Artist finder</span>
+      <h1 className="font-heading text-[32px] leading-[1.08] text-balance sm:text-[46px]">
+        No {styleWord}artists within {WIDEN_RADII[WIDEN_RADII.length - 1]} miles of {answers.near} yet.
+      </h1>
+      <div className="flex flex-wrap gap-2.5">
+        {answers.styles.length > 0 ? (
+          <>
+            <Link href={finderHref(answers, "style")} className={SECONDARY_BUTTON}>
+              Try another style
+            </Link>
+            <Link href={resultsHref({ ...answers, styles: [] })} className={PRIMARY_BUTTON}>
+              Show every artist near me
+            </Link>
+          </>
+        ) : (
+          <Link href={finderHref(answers)} className={PRIMARY_BUTTON}>
+            Try another place
+          </Link>
+        )}
+      </div>
+    </section>
+  )
+}
+
+function ErrorBox({ answers }: { answers: FinderAnswers }) {
+  return (
+    <section className="flex flex-col gap-5">
+      <span className="text-sm text-ink-muted">Artist finder</span>
+      <h1 className="font-heading text-[32px] leading-[1.08] sm:text-[46px]">We couldn&apos;t load artists right now</h1>
+      <p className="text-[17px] text-ink-muted">Please try again in a moment.</p>
+      <div>
+        <Link href={resultsHref(answers)} className={PRIMARY_BUTTON}>
+          Try again
+        </Link>
+      </div>
+    </section>
   )
 }

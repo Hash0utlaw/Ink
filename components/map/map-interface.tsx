@@ -79,7 +79,14 @@ async function fetchDetails(ids: string[]): Promise<MapboxLocation[]> {
   return (json.data ?? []) as MapboxLocation[]
 }
 
-export function MapInterface() {
+interface MapInterfaceProps {
+  /** Start here ([lng, lat]) at zoom 10 instead of the whole US (from /map?lat=&lng=). */
+  initialCenter?: [number, number] | null
+  /** The list heading's place for initialCenter, e.g. "Tampa, FL". */
+  initialPlace?: string | null
+}
+
+export function MapInterface({ initialCenter = null, initialPlace = null }: MapInterfaceProps = {}) {
   const { toast } = useToast()
   // Every pin (stub locations), and full records fetched so far, by id.
   const [pins, setPins] = useState<MapboxLocation[]>([])
@@ -90,11 +97,11 @@ export function MapInterface() {
   const [bounds, setBounds] = useState<MapBounds | null>(null)
   const [selectedLocation, setSelectedLocation] = useState<MapboxLocation | null>(null)
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null)
-  const [mapCenter, setMapCenter] = useState<[number, number]>([-98.5795, 39.8283])
-  const [mapZoom, setMapZoom] = useState(4)
+  const [mapCenter, setMapCenter] = useState<[number, number]>(initialCenter ?? [-98.5795, 39.8283])
+  const [mapZoom, setMapZoom] = useState(initialCenter ? 10 : 4)
   const [mapStyle, setMapStyle] = useState<MapStyle>("chart")
   // The query, when it geocoded to a place (for the sidebar heading).
-  const [searchedPlace, setSearchedPlace] = useState<string | null>(null)
+  const [searchedPlace, setSearchedPlace] = useState<string | null>(initialCenter ? initialPlace : null)
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [loading, setLoading] = useState(true)
   const [dataError, setDataError] = useState<string | null>(null)
