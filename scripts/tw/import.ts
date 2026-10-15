@@ -48,7 +48,8 @@ import { isPlaceholderName, normalizeArtistName } from "../lib/artist-names"
 import { ARTIST_COLUMNS, SHOP_COLUMNS, buildGroups, milesBetween, toArtist, toShop, type Row } from "../lib/chain-artists"
 import { PROFILES_FILE, REPORT_DIR, flag, readJsonl } from "./lib/common"
 import { instagramHandle, type Profile } from "./lib/parse"
-import { JUNK_HANDLES, dbHandle, nameKey, normCity, normDomain, normName, normPhone, placeKey } from "./lib/normalize"
+import { JUNK_HANDLES, dbHandle, nameKey, normDomain, normPhone, placeKey } from "./lib/normalize"
+import { SUPPLY_SHOP, UNREADABLE, cleanName, coreName, isGenericName, makeHandle, namesAgree } from "./lib/names"
 
 const APPLY = flag("--apply")
 const SCRIPT = "tattooswizard-import"
@@ -59,7 +60,6 @@ const REVIEW_FILE = path.join(REPORT_DIR, "tw-shop-review.csv")
 const SKIPPED_FILE = path.join(REPORT_DIR, "tattooswizard-import-skipped.csv")
 const SHOP_PAGES_FILE = path.join(REPORT_DIR, "tw-shop-pages.csv")
 const BATCH = 500
-const NAME_MIN = 0.6
 const MAX_STYLES = 4
 const TAG_MIN_PIECES = 3
 const TAG_MIN_SHARE = 0.15
@@ -154,51 +154,10 @@ export function styleRule(p: Profile): StyleSlug[] {
 const SHOP_WORDS = /\b(tattoos?|tattooing|studios?|piercing|parlou?r|collective|gallery|llc|inc|co|company)\b/i
 const NOT_ARTIST = /\b(supply|supplies|products?|convention|expo|aftercare|care|dot com|magazine|academy|school|removal)\b|\.com\b/i
 
-const NAME_STOP = new Set([
-  "tattoo", "tattoos", "tattooing", "tattooer", "studio", "studios", "co", "company", "llc", "inc", "and",
-  "parlor", "parlour", "parlors", "shop", "shoppe", "shops", "the",
-])
-
-/** Name with generic words and the city name removed, no spaces. */
-function coreName(name: string, cities: (string | null)[]): string {
-  let s = ` ${normName(name)} `
-  for (const c of cities) {
-    for (const form of new Set([normName(c), normCity(c)])) if (form) s = s.split(` ${form} `).join(" ")
-  }
-  return s.split(" ").filter((t) => t && !NAME_STOP.has(t)).join("")
-}
-
-/** "Tattoo", "Las Vegas Tattoo Artist": nothing left once generic words and the city go. */
-function isGenericName(name: string, cities: (string | null)[]): boolean {
-  const ARTIST_WORDS = new Set(["artist", "artists", "tattooist", "custom", "by"])
-  let s = ` ${normName(name)} `
-  for (const c of cities) for (const form of new Set([normName(c), normCity(c)])) if (form) s = s.split(` ${form} `).join(" ")
-  return s.split(" ").filter((t) => t && !NAME_STOP.has(t) && !ARTIST_WORDS.has(t)).length === 0
-}
 
 // Not artists, by hand (TattoosWizard usernames): a product company, a shop page.
 const SKIP_PROFILES = new Set(["inkeeze", "nativeinktattoo"])
-// Our shop is a supplier rather than a studio.
-const SUPPLY_SHOP = /\b(suppl(y|ies)|products?|equipment|wholesale|distribut\w*|manufactur\w*)\b/i
-// Letters outside the Latin script ("ᏴOᏞO" uses Cherokee lookalikes).
-const UNREADABLE = /(?=\p{L})\P{Script=Latin}/u
 
-/**
- * Display name for a new artist: fancy Unicode letters ("𝐀𝐃𝐀𝐌") → plain,
- * emoji and decorative symbols removed, ALL-CAPS → Title Case. Names with any
- * lowercase letter keep their casing.
- */
-export function cleanName(raw: string): string {
-  // Symbols first, so NFKC doesn't turn "™" into "TM".
-  let s = raw.replace(/[\p{Extended_Pictographic}\p{So}\p{Sk}\p{Co}\u200d\ufe0e\ufe0f\u20e3]/gu, " ").normalize("NFKC")
-  s = s.replace(/[|•·∘⋰⋱✧*~_=<>^#@[\]{}]+/g, " ")
-  s = s.split(" ").filter((t) => !/^[.,:;]+$/.test(t)).join(" ")
-  s = s.replace(/\s+/g, " ").trim().replace(/^[\s.,:;!?'"()-]+|[\s,:;!?(-]+$/g, "").trim()
-  if (/\p{Lu}/u.test(s) && !/\p{Ll}/u.test(s)) {
-    s = s.toLowerCase().replace(/(^|[\s\-'.(/"“])(\p{L})/gu, (_, sep: string, c: string) => sep + c.toUpperCase())
-  }
-  return s
-}
 
 /**
  * "shop": the profile is the shop's own page — named like a shop ("Black Dagger
@@ -215,22 +174,6 @@ function shopPageCheck(name: string, shopName: string, cities: (string | null)[]
   return a && b && similarity(a, b) >= 0.8 ? "unsure" : null
 }
 
-/** Step 2's name check. Returns the similarity it found, or null if they don't agree. */
-export function namesAgree(a: string | null, b: string | null, cities: (string | null)[]): number | null {
-  if (!a || !b) return null
-  let ca = coreName(a, cities)
-  let cb = coreName(b, cities)
-  // A name that is only generic words ("Tattoo Studio") compares whole.
-  if (!ca || !cb) {
-    ca = nameKey(a)
-    cb = nameKey(b)
-    return ca && ca === cb ? 1 : null
-  }
-  const sim = similarity(ca, cb)
-  if (sim >= NAME_MIN) return sim
-  const [short, long] = ca.length <= cb.length ? [ca, cb] : [cb, ca]
-  return short.length >= 3 && long.includes(short) ? sim : null
-}
 
 /**
  * Ours is "junk": "instagram", "@", a URL with no handle in it, or link text
@@ -253,22 +196,6 @@ const fmtPhone = (raw: string | null) => {
 }
 const checkedAt = (p: Profile) => (p.followers_checked_at ? new Date(`${p.followers_checked_at.slice(0, 10)}T00:00:00Z`).toISOString() : null)
 
-function slugPart(s: string): string {
-  return stripToSlug(s.normalize("NFKD").replace(/[̀-ͯ]/g, ""))
-}
-function stripToSlug(s: string): string {
-  return s.toLowerCase().trim().replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "")
-}
-/** "name--shop-slug", same as promote-shop-artists.ts; a number is added if taken. */
-function makeHandle(name: string, ig: string | null, shop: DbShop, taken: Set<string>): string {
-  const namePart = slugPart(name) || stripToSlug((ig ?? "").replace(/[._]/g, "-")) || "artist"
-  const shopPart = (shop.slug ?? shop.id).toLowerCase().replace(/[^a-z0-9-]/g, "").replace(/-+/g, "-")
-  const base = `${namePart}--${shopPart}`
-  let h = base
-  for (let n = 2; taken.has(h); n++) h = `${base}-${n}`
-  taken.add(h)
-  return h
-}
 
 // ---- plan -------------------------------------------------------------------
 
