@@ -18,6 +18,12 @@ export interface Shop {
   }
   phone: string
   website: string
+  instagramUrl?: string
+  /** shops.instagram_followers; null when we have no real count. */
+  instagramFollowers?: number | null
+  tiktokUrl?: string
+  facebookUrl?: string
+  youtubeUrl?: string
   residentArtistIds: string[]
   about: string
   reviews: Review[]

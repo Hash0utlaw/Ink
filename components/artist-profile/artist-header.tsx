@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Instagram, Globe, BadgeCheck } from "lucide-react"
+import { Globe, BadgeCheck } from "lucide-react"
 import type { Artist } from "@/types/artist"
 import { SaveButton } from "@/components/saved/save-button"
 import { ShareButton } from "@/components/share/share-button"
@@ -9,7 +9,10 @@ import { StyleBadgeList } from "./style-badge-list"
 import { Plate } from "@/components/brand/plate"
 import { WhereToFindPanel, hasWhereToFind } from "@/components/brand/where-to-find"
 import type { ArtistShop } from "@/lib/supabase/artists"
+import { SocialIcon } from "@/components/brand/social-icon"
 import { formatMapAddress } from "@/lib/format-address"
+import { followersLabel } from "@/lib/format-count"
+import { cleanHandle, profileUrl } from "@/lib/socials"
 import { allowedImageSrc } from "@/lib/utils/safe-image"
 import { STATE_ABBR_TO_NAME } from "@/lib/utils/states"
 import { cn } from "@/lib/utils"
@@ -19,6 +22,9 @@ const SECONDARY =
 // Same as "Get directions" in the Where to find panel.
 const OUTLINE =
   "inline-flex min-h-11 items-center justify-center rounded border-1.5 border-ink px-4 text-[15px] font-semibold text-ink hover:bg-vellum focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+// The Round 10 social buttons: vellum, 1.5px ink, icon then "@handle".
+const SOCIAL_BUTTON =
+  "inline-flex min-h-11 items-center rounded border-1.5 border-ink bg-vellum tex-vellum px-3.5 text-[15px] font-semibold text-ink hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 const TEXT_LINK = "font-semibold text-navy underline underline-offset-2 hover:no-underline"
 
 interface ArtistHeaderProps {
@@ -31,7 +37,9 @@ interface ArtistHeaderProps {
 }
 
 export function ArtistHeader({ artist, initialSaved, shopHref, shop = null }: ArtistHeaderProps) {
-  const igHandle = artist.instagramHandle?.replace(/^@/, "").trim()
+  const igHandle = cleanHandle("instagram", artist.instagramHandle)
+  const tiktokHandle = cleanHandle("tiktok", artist.tiktokHandle)
+  const igFollowers = igHandle ? followersLabel(artist.instagramFollowers) : null
   const websiteUrl = artist.websiteUrl?.trim()
   const showVerified = artist.hasAccount && artist.isVerified
   // Availability defaults to on for every listing; it's only real once claimed.
@@ -102,6 +110,34 @@ export function ArtistHeader({ artist, initialSaved, shopHref, shop = null }: Ar
           <div className="mt-6 min-w-0 space-y-5">
             {artist.styles.length > 0 && <StyleBadgeList styles={artist.styles} max={4} />}
 
+            {(igHandle || tiktokHandle) && (
+              <div className="flex flex-wrap items-center gap-2.5">
+                {igHandle && (
+                  <a
+                    href={profileUrl("instagram", igHandle)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`@${igHandle} on Instagram`}
+                    className={`${SOCIAL_BUTTON} gap-2`}
+                  >
+                    <SocialIcon network="instagram" />@{igHandle}
+                  </a>
+                )}
+                {tiktokHandle && (
+                  <a
+                    href={profileUrl("tiktok", tiktokHandle)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`@${tiktokHandle} on TikTok`}
+                    className={`${SOCIAL_BUTTON} gap-2`}
+                  >
+                    <SocialIcon network="tiktok" />@{tiktokHandle}
+                  </a>
+                )}
+                {igFollowers && <span className="text-[15px] tabular-nums text-ink-muted">{igFollowers} on Instagram</span>}
+              </div>
+            )}
+
             <div className="flex flex-wrap gap-2">
               {artist.isClaimed ? (
                 // Outline, so "Send request" stays the page's one red button.
@@ -125,18 +161,8 @@ export function ArtistHeader({ artist, initialSaved, shopHref, shop = null }: Ar
               />
             </div>
 
-            {(igHandle || websiteUrl) && (
+            {websiteUrl && (
               <div className="flex flex-wrap gap-x-5 gap-y-2 text-[15px]">
-                {igHandle && (
-                  <a
-                    href={`https://instagram.com/${igHandle}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`inline-flex min-h-11 items-center gap-1.5 ${TEXT_LINK}`}
-                  >
-                    <Instagram className="h-4 w-4" aria-hidden="true" />@{igHandle}
-                  </a>
-                )}
                 {websiteUrl && (
                   <a
                     href={websiteUrl.startsWith("http") ? websiteUrl : `https://${websiteUrl}`}

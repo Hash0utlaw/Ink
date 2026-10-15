@@ -27,6 +27,15 @@ const DEFAULT_FILTERS: ArtistFilterValues = {
   radiusMiles: 25,
 }
 
+const SORTS: ArtistFilterValues["sortBy"][] = ["rating", "review_count", "name", "followers"]
+
+/** ?sort=followers, or the older ?sortBy=…; best rated by default. */
+function sortFromParams(params: URLSearchParams): ArtistFilterValues["sortBy"] {
+  if (params.get("sort") === "followers") return "followers"
+  const sortBy = params.get("sortBy") as ArtistFilterValues["sortBy"]
+  return SORTS.includes(sortBy) ? sortBy : "rating"
+}
+
 function filtersFromParams(params: URLSearchParams): ArtistFilterValues {
   return {
     // Slugs; old links may carry names ("Fine Line") — mapped to slugs.
@@ -39,7 +48,7 @@ function filtersFromParams(params: URLSearchParams): ArtistFilterValues {
     city: params.get("city") ?? "",
     state: params.get("state") ?? "",
     zip: params.get("zip") ?? "",
-    sortBy: (params.get("sortBy") as ArtistFilterValues["sortBy"]) ?? "rating",
+    sortBy: sortFromParams(params),
     radiusMiles: Number(params.get("radiusMiles")) || 25,
   }
 }
@@ -69,7 +78,8 @@ export function ArtistSearchInterface({ showAvailableNow = false }: { showAvaila
       if (newFilters.city) params.set("city", newFilters.city)
       if (newFilters.state) params.set("state", newFilters.state)
       if (newFilters.zip) params.set("zip", newFilters.zip)
-      if (newFilters.sortBy !== "rating") params.set("sortBy", newFilters.sortBy)
+      if (newFilters.sortBy === "followers") params.set("sort", "followers")
+      else if (newFilters.sortBy !== "rating") params.set("sortBy", newFilters.sortBy)
       router.replace(`/artists?${params.toString()}`, { scroll: false })
     },
     [router],

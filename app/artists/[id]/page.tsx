@@ -8,6 +8,7 @@ import { getArtistById, getArtistShop, getOtherShopArtists, shopArtistRedirectPa
 import { getCurrentUserId } from "@/lib/supabase/users"
 import { getSavedIdsForUser } from "@/lib/supabase/saved"
 import { getReviewsForArtist } from "@/lib/supabase/reviews"
+import { getPortfolio } from "@/lib/supabase/portfolio"
 import { ProfileCover } from "@/components/brand/profile-cover"
 import { ArtistHeader } from "@/components/artist-profile/artist-header"
 import { uploadedImageSrc } from "@/lib/utils/safe-image"
@@ -26,7 +27,7 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
   const labels = styleLabels(artist.styles)
   const primaryStyle = labels[0] ?? "Tattoo"
   const loc = [artist.location.city, artist.location.state].filter(Boolean).join(", ")
-  const coverImage = artist.portfolioImages?.[0] ?? artist.avatarUrl ?? null
+  const coverImage = (await getPortfolio(artist.id))[0]?.url ?? (artist.avatarUrl || null)
   const shareImages = coverImage
     ? [{ url: coverImage, width: 1200, height: 630, alt: artist.name }]
     : [{ url: `/artists/${artist.id}/share-image`, width: 1200, height: 630, alt: artist.name }]
@@ -70,10 +71,11 @@ export default async function ArtistProfilePage({ params }: { params: { id: stri
   const userId = await getCurrentUserId()
   const savedIds = userId ? await getSavedIdsForUser(userId, "artist") : []
   const isSaved = savedIds.includes(artist.id)
-  const [reviews, shop, others] = await Promise.all([
+  const [reviews, shop, others, portfolio] = await Promise.all([
     getReviewsForArtist(artist.id),
     artist.shopId ? getArtistShop(artist.shopId) : Promise.resolve(null),
     artist.shopId ? getOtherShopArtists(artist.shopId, artist.id) : Promise.resolve({ artists: [], total: 0 }),
+    getPortfolio(artist.id),
   ])
 
   const loc = [artist.location.city, artist.location.state].filter(Boolean).join(", ")
@@ -134,7 +136,7 @@ export default async function ArtistProfilePage({ params }: { params: { id: stri
             shop={shop}
           />
           <div className="mt-14 grid grid-cols-1 gap-14 lg:mt-20 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-12">
-            <ProfileSections artist={artist} reviews={reviews} />
+            <ProfileSections artist={artist} portfolio={portfolio} reviews={reviews} />
             <BookingSection artist={artist} />
           </div>
           {shop && others.artists.length > 0 && (

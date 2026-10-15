@@ -15,6 +15,8 @@ import { ShopHeader } from "@/components/shop-profile/shop-header"
 import { uploadedImageSrc } from "@/lib/utils/safe-image"
 import { ShopArtists } from "@/components/shop-profile/shop-artists"
 import { NearbyShops } from "@/components/shop-profile/nearby-shops"
+import { ShopWork } from "@/components/shop-profile/shop-work"
+import { getShopWork } from "@/lib/supabase/portfolio"
 import { ProfileSection, ReviewList } from "@/components/artist-profile/profile-sections"
 import { STATE_ABBR_TO_NAME, cityToSlug, stateAbbrToSlug } from "@/lib/utils/states"
 import { shopHasNameTwin } from "@/lib/supabase/seo"
@@ -56,11 +58,12 @@ export default async function ShopProfilePage({ params }: { params: { id: string
   if (!shop) notFound()
 
   const userId = await getCurrentUserId()
-  const [residentArtists, savedIds, reviews, nearby] = await Promise.all([
+  const [residentArtists, savedIds, reviews, nearby, work] = await Promise.all([
     getShopArtists(params.id),
     userId ? getSavedIdsForUser(userId, "shop") : Promise.resolve([] as string[]),
     getReviewsForShop(shop.id),
     getNearbyShops(shop),
+    getShopWork(shop.id, 8),
   ])
   const isSaved = savedIds.includes(shop.id)
 
@@ -162,6 +165,7 @@ export default async function ShopProfilePage({ params }: { params: { id: string
           )}
           <div className="mt-14 space-y-14 lg:mt-20 lg:space-y-20">
             <ShopArtists shopName={shop.name} artists={residentArtists} />
+            <ShopWork photos={work} />
             {shop.about && (
               <ProfileSection id="about" title={`About ${shop.name}`}>
                 <p className="max-w-prose whitespace-pre-line text-base leading-[1.55] text-ink text-pretty">{shop.about}</p>

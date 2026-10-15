@@ -122,6 +122,9 @@ dependencies:
   framer-motion:
     specifier: latest
     version: 12.23.22(@emotion/is-prop-valid@1.4.0)(react-dom@18.3.1)(react@18.3.1)
+  heic2any:
+    specifier: 0.0.4
+    version: 0.0.4
   input-otp:
     specifier: latest
     version: 1.4.2(react-dom@18.3.1)(react@18.3.1)
@@ -4011,6 +4014,10 @@ packages:
     engines: {node: '>= 0.4'}
     dependencies:
       function-bind: 1.1.2
+
+  /heic2any@0.0.4:
+    resolution: {integrity: sha512-3lLnZiDELfabVH87htnRolZ2iehX9zwpRyGNz22GKXIu0fznlblf0/ftppXKNqS26dqFSeqfIBhAmAj/uSp0cA==}
+    dev: false
 
   /html-to-text@9.0.5:
     resolution: {integrity: sha512-qY60FjREgVZL03vJU6IfMV4GDjGBIoOyvuFdpBDIX9yTlDw0TjxVBQp+P8NvpdIXNJvfWBTNul7fsAQJq2FNpg==}

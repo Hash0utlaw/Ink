@@ -19,8 +19,9 @@ export async function GET(request: Request) {
     const exactCity = searchParams.get("exactCity") === "1"
     const state = searchParams.get("state") ?? undefined
     const zip = searchParams.get("zip") ?? undefined
-    const sortByRaw = searchParams.get("sortBy")
-    const validSortBy = ["rating", "review_count", "name"] as const
+    // ?sort=followers is the page URL's spelling of sortBy=followers.
+    const sortByRaw = searchParams.get("sort") === "followers" ? "followers" : searchParams.get("sortBy")
+    const validSortBy = ["rating", "review_count", "name", "followers"] as const
     const sortBy = validSortBy.includes(sortByRaw as (typeof validSortBy)[number])
       ? (sortByRaw as ArtistFilters["sortBy"])
       : undefined

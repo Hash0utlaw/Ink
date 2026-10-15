@@ -7,6 +7,9 @@ export const metadata: Metadata = {
   alternates: { canonical: "/contact" },
 }
 
-export default function ContactPage() {
-  return <ContactClient />
+const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v) ?? ""
+
+/** ?topic= picks a topic and ?message= starts the message ("Report this photo" links use both). */
+export default function ContactPage({ searchParams }: { searchParams: Record<string, string | string[] | undefined> }) {
+  return <ContactClient initialTopic={one(searchParams.topic)} initialMessage={one(searchParams.message).slice(0, 2000)} />
 }

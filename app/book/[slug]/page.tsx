@@ -12,28 +12,17 @@ import { Footer } from "@/components/layout/footer"
 import { getArtistBySlug } from "@/lib/supabase/artists"
 import { getFlashById } from "@/lib/supabase/flash"
 import { PublicBookingForm } from "@/components/booking/public-booking-form"
-import { createClient } from "@/utils/supabase/server"
+import { getPortfolio } from "@/lib/supabase/portfolio"
 import { allowedImageSrc } from "@/lib/utils/safe-image"
 import { SafeImage } from "@/components/brand/safe-image"
 import { styleLabel, styleLabels } from "@/lib/styles"
 import { initials } from "@/lib/initials"
 import { requestNextStep } from "@/lib/request-copy"
 
+/** The first three public portfolio photos (active uploads, in the artist's order). */
 async function getPortfolioImages(artistId: string): Promise<string[]> {
-  try {
-    const supabase = createClient()
-    const { data } = await supabase
-      .from("portfolio_images")
-      .select("image_url")
-      .eq("artist_id", artistId)
-      .order("display_order", { ascending: true })
-      .limit(3)
-    return (data ?? []).map((r: { image_url: string }) => r.image_url).filter(Boolean)
-  } catch {
-    return []
-  }
+  return (await getPortfolio(artistId)).slice(0, 3).map((p) => p.url)
 }
-
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const artist = await getArtistBySlug(params.slug)

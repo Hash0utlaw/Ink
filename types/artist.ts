@@ -47,6 +47,12 @@ export interface Artist {
     [key: string]: string
   }
   instagramHandle?: string
+  /** artists.instagram_followers; null when we have no real count. */
+  instagramFollowers: number | null
+  /** artists.tiktok_handle, without the @. */
+  tiktokHandle?: string
+  /** First active portfolio photo (our storage only); the card image when there's no avatar. Set by callers that look it up. */
+  cardPhotoUrl?: string | null
   websiteUrl?: string
   isClaimed: boolean
   /** True when a TattooMaps account owns this profile (artists.user_id is set). */

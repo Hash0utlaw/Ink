@@ -7,7 +7,9 @@ import { ShareButton } from "@/components/share/share-button"
 import { StyleBadgeList } from "@/components/artist-profile/style-badge-list"
 import { Plate } from "@/components/brand/plate"
 import { WhereToFindPanel, hasWhereToFind } from "@/components/brand/where-to-find"
+import { FollowList } from "@/components/brand/follow-list"
 import { formatMapAddress } from "@/lib/format-address"
+import { shopSocialLinks } from "@/lib/socials"
 import { allowedImageSrc } from "@/lib/utils/safe-image"
 import { STATE_ABBR_TO_NAME } from "@/lib/utils/states"
 import { cn } from "@/lib/utils"
@@ -36,6 +38,7 @@ export function ShopHeader({ shop, initialSaved, breadcrumb, artistCount = 0 }: 
   const coordinates: [number, number] | null = lat && lng ? [lng, lat] : null
   const address = formatMapAddress(shop.location.address, shop.location.city, shop.location.state, shop.location.zip)
   const showPanel = hasWhereToFind({ address, coordinates })
+  const follow = shopSocialLinks(shop)
 
   return (
     // Sits right under the page's full-bleed ProfileCover; the plate and panel overlap it.
@@ -111,6 +114,8 @@ export function ShopHeader({ shop, initialSaved, breadcrumb, artistCount = 0 }: 
               </div>
             )}
 
+            {!showPanel && <FollowList links={follow} className="max-w-[360px]" />}
+
             {!shop.isClaimed && (
               <p className="max-w-prose text-[15px] leading-[1.55] text-ink-muted text-pretty">
                 {shop.name}&apos;s details come from public listings. If you own this shop,{" "}
@@ -133,6 +138,7 @@ export function ShopHeader({ shop, initialSaved, breadcrumb, artistCount = 0 }: 
               rating={shop.rating}
               reviewCount={shop.reviewCount}
               hours={shop.hours}
+              follow={follow}
             />
           </div>
         )}

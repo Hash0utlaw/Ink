@@ -4,11 +4,34 @@ import type { Artist } from "@/types/artist"
 import { Plate } from "@/components/brand/plate"
 import { StyleBadge } from "@/components/brand/style-badge"
 import { styleEntries } from "@/lib/styles"
+import { SocialIcon } from "@/components/brand/social-icon"
+import { followersLabel } from "@/lib/format-count"
 import { allowedImageSrc } from "@/lib/utils/safe-image"
 
 /** What a card or row needs; the homepage and "Also at this shop" pass less than a full Artist. */
 export type CardArtist = Pick<Artist, "id" | "name" | "avatarUrl" | "styles"> &
-  Partial<Pick<Artist, "shopName" | "rating" | "reviewCount" | "isStub" | "location">>
+  Partial<Pick<Artist, "shopName" | "rating" | "reviewCount" | "isStub" | "location" | "instagramFollowers" | "cardPhotoUrl">>
+
+/** The card's photo: the avatar, else the first portfolio photo; null for stubs or nothing loadable. */
+export function cardImageSrc(artist: CardArtist): string | null {
+  if (artist.isStub) return null
+  return allowedImageSrc(artist.avatarUrl) ?? allowedImageSrc(artist.cardPhotoUrl)
+}
+
+/** "[Instagram icon] 1.9M followers" when we have a real count; nothing otherwise. */
+export function FollowersLine({ count, className }: { count: number | null | undefined; className?: string }) {
+  const label = followersLabel(count)
+  if (!label) return null
+  return (
+    <span className={className ?? "inline-flex items-center gap-1.5 text-sm font-semibold tabular-nums text-ink"}>
+      <SocialIcon network="instagram" />
+      <span>
+        {label}
+        <span className="sr-only"> on Instagram</span>
+      </span>
+    </span>
+  )
+}
 
 interface ArtistPlateCardProps {
   artist: CardArtist
@@ -24,7 +47,7 @@ interface ArtistPlateCardProps {
  * stubs (shop_artists rows) have no profile, so they show the name only, unlinked.
  */
 export function ArtistPlateCard({ artist, showShop = false, distance, sizes }: ArtistPlateCardProps) {
-  const photo = artist.isStub ? null : allowedImageSrc(artist.avatarUrl)
+  const photo = cardImageSrc(artist)
   const styles = artist.isStub ? [] : styleEntries(artist.styles)
   const city = artist.location?.city ?? ""
   const rating = artist.rating ?? 0
@@ -61,6 +84,12 @@ export function ArtistPlateCard({ artist, showShop = false, distance, sizes }: A
             </span>
           )}
         </span>
+      )}
+      {!artist.isStub && (
+        <FollowersLine
+          count={artist.instagramFollowers}
+          className="mt-1.5 flex items-center gap-1.5 text-sm font-semibold tabular-nums text-ink"
+        />
       )}
       {styles.length > 0 && (
         <span className="mt-2 flex flex-wrap items-center gap-1.5">
