@@ -57,6 +57,7 @@ const PLAN_FILE = path.join(REPORT_DIR, "tattooswizard-import-dryrun.json")
 const REPORT_FILE = path.join(REPORT_DIR, APPLY ? "tattooswizard-import-report.applied.md" : "tattooswizard-import-report.md")
 const REVIEW_FILE = path.join(REPORT_DIR, "tw-shop-review.csv")
 const SKIPPED_FILE = path.join(REPORT_DIR, "tattooswizard-import-skipped.csv")
+const SHOP_PAGES_FILE = path.join(REPORT_DIR, "tw-shop-pages.csv")
 const BATCH = 500
 const NAME_MIN = 0.6
 const MAX_STYLES = 4
@@ -173,6 +174,30 @@ function isGenericName(name: string, cities: (string | null)[]): boolean {
   let s = ` ${normName(name)} `
   for (const c of cities) for (const form of new Set([normName(c), normCity(c)])) if (form) s = s.split(` ${form} `).join(" ")
   return s.split(" ").filter((t) => t && !NAME_STOP.has(t) && !ARTIST_WORDS.has(t)).length === 0
+}
+
+// Not artists, by hand (TattoosWizard usernames): a product company, a shop page.
+const SKIP_PROFILES = new Set(["inkeeze", "nativeinktattoo"])
+// Our shop is a supplier rather than a studio.
+const SUPPLY_SHOP = /\b(suppl(y|ies)|products?|equipment|wholesale|distribut\w*|manufactur\w*)\b/i
+// Letters outside the Latin script ("ᏴOᏞO" uses Cherokee lookalikes).
+const UNREADABLE = /(?=\p{L})\P{Script=Latin}/u
+
+/**
+ * Display name for a new artist: fancy Unicode letters ("𝐀𝐃𝐀𝐌") → plain,
+ * emoji and decorative symbols removed, ALL-CAPS → Title Case. Names with any
+ * lowercase letter keep their casing.
+ */
+export function cleanName(raw: string): string {
+  // Symbols first, so NFKC doesn't turn "™" into "TM".
+  let s = raw.replace(/[\p{Extended_Pictographic}\p{So}\p{Sk}\p{Co}\u200d\ufe0e\ufe0f\u20e3]/gu, " ").normalize("NFKC")
+  s = s.replace(/[|•·∘⋰⋱✧*~_=<>^#@[\]{}]+/g, " ")
+  s = s.split(" ").filter((t) => !/^[.,:;]+$/.test(t)).join(" ")
+  s = s.replace(/\s+/g, " ").trim().replace(/^[\s.,:;!?'"()-]+|[\s,:;!?(-]+$/g, "").trim()
+  if (/\p{Lu}/u.test(s) && !/\p{Ll}/u.test(s)) {
+    s = s.toLowerCase().replace(/(^|[\s\-'.(/"“])(\p{L})/gu, (_, sep: string, c: string) => sep + c.toUpperCase())
+  }
+  return s
 }
 
 /**
@@ -454,13 +479,13 @@ async function buildPlan(supabase: ReturnType<typeof getSupabaseAdmin>) {
     }
   }
 
+  const shopPages: Record<string, unknown>[] = []
   const plannedAtShop = new Map<string, string[]>()
   const plannedIg = new Set<string>()
   const emptyShops = new Set<string>()
   for (const c of cands.sort((a, b) => (b.p.instagram_followers ?? -1) - (a.p.instagram_followers ?? -1) || a.p.url.localeCompare(b.p.url))) {
     const { p, shop } = c
-    // Fancy Unicode letters ("𝐀𝐃𝐀𝐌") → plain ones, so names compare and display normally.
-    const name = (p.name ?? "").normalize("NFKC").replace(/\s+/g, " ").trim()
+    const name = cleanName(p.name ?? "")
     if (!c.pass) {
       review("artist", "shop names don't agree", p, c.r, shop, c.score)
       continue
@@ -484,10 +509,23 @@ async function buildPlan(supabase: ReturnType<typeof getSupabaseAdmin>) {
     const page = shopPageCheck(name, shop.name, [p.city, shop.city])
     if (page === "shop") {
       skip("profile is the shop's own page, not an artist", p, shop)
+      shopPages.push({ name, instagram_handle: p.instagram_handle, followers: p.instagram_followers, matched_shop_id: shop.id, matched_shop_name: shop.name, profile_url: p.url })
       continue
     }
     if (page === "unsure") {
       review("artist", "name is the shop's name (shop page or solo artist?)", p, c.r, shop, c.score)
+      continue
+    }
+    if (SKIP_PROFILES.has(p.username)) {
+      skip("not an artist (named by hand)", p, shop)
+      continue
+    }
+    if (SUPPLY_SHOP.test(shop.name)) {
+      skip("shop is a supply, product or equipment company", p, shop)
+      continue
+    }
+    if (UNREADABLE.test(name)) {
+      review("artist", "unreadable name", p, c.r, shop, c.score)
       continue
     }
     const nm = normalizeArtistName(name)
@@ -569,6 +607,7 @@ async function buildPlan(supabase: ReturnType<typeof getSupabaseAdmin>) {
     skips,
     notes,
     emptyShops: emptyShops.size,
+    shopPages,
     activeBefore: artists.length,
     chain: { groupsNow, groupsAfter: groupsAfter.length, sample: groupsAfter.slice(0, 5).map((g) => g.rows.map((r) => `${r.name} @ ${r.shopId}`).join(" / ")) },
     finder: { before: finderBefore, predictedAfter: finderBefore + finderGain },
@@ -638,6 +677,7 @@ function writeOutputs(plan: Plan) {
     ["kind", "reason", "tw_name", "tw_url", "tw_city", "followers", "our_shop_name", "our_shop_id", "our_shop_city", "match_key", "score"],
     plan.reviews as unknown as Record<string, unknown>[],
   )
+  writeCsv(SHOP_PAGES_FILE, ["name", "instagram_handle", "followers", "matched_shop_id", "matched_shop_name", "profile_url"], plan.shopPages)
   writeCsv(SKIPPED_FILE, ["reason", "tw_name", "tw_url", "our_shop_name", "our_shop_id", "detail"], plan.skips as unknown as Record<string, unknown>[])
 }
 
