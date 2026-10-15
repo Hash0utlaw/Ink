@@ -34,3 +34,7 @@ data/reports/
 
 # Overture / Foursquare staging databases (scripts/overture/fetch.ts)
 data/overture/
+
+# TattoosWizard research (scripts/tw/): parsed data and raw page cache
+data/tw/
+data/cache/
