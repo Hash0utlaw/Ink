@@ -21,6 +21,7 @@ import { ProfileSection, ReviewList } from "@/components/artist-profile/profile-
 import { STATE_ABBR_TO_NAME, cityToSlug, stateAbbrToSlug } from "@/lib/utils/states"
 import { shopHasNameTwin } from "@/lib/supabase/seo"
 import { canonicalUrl, jsonLdHtml, metaDescription, withoutEmpty } from "@/lib/seo"
+import { workingWebsite } from "@/lib/socials"
 
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
   const shop = await getShopById(params.id)
@@ -80,7 +81,7 @@ export default async function ShopProfilePage({ params }: { params: { id: string
     "image": shop.coverImageUrl,
     "telephone": shop.phone,
     "url": canonicalUrl(`/shops/${shop.id}`),
-    "sameAs": shop.website ? [shop.website] : undefined,
+    "sameAs": workingWebsite(shop) || undefined,
     "address": {
       "@type": "PostalAddress",
       // Some addresses also hold "City, ST 12345"; keep only the street.
