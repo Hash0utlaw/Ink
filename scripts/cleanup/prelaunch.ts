@@ -141,6 +141,8 @@ function streetKey(s: Row): string {
   const street = String(s.address ?? "").split(",")[0].trim()
   if (!/\d/.test(street)) return "" // "Downtown Mall" isn't a street address
   return normalizeAddressForGeocoding(street.replace(/\./g, ""))
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "") // "Kālia Rd" = "Kalia Rd"
     .toLowerCase()
     .replace(/[^a-z0-9 ]/g, " ")
     .split(/\s+/)
