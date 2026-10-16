@@ -44,7 +44,7 @@ export interface ArtistFilterValues {
   city: string
   state: string
   zip: string
-  sortBy: "rating" | "review_count" | "name"
+  sortBy: "rating" | "review_count" | "name" | "followers"
   radiusMiles: number
 }
 
@@ -219,7 +219,7 @@ export function FilterSidebar({ filters, onFilterChange, onNearMe, showAvailable
         <Select
           value={filters.sortBy}
           onValueChange={(value) =>
-            onFilterChange({ ...filters, sortBy: value as "rating" | "review_count" | "name" })
+            onFilterChange({ ...filters, sortBy: value as ArtistFilterValues["sortBy"] })
           }
         >
           <SelectTrigger className={FIELD_CLASS} aria-label="Sort by">
@@ -228,6 +228,7 @@ export function FilterSidebar({ filters, onFilterChange, onNearMe, showAvailable
           <SelectContent>
             <SelectItem value="rating">Best rated</SelectItem>
             <SelectItem value="review_count">Most reviewed</SelectItem>
+            <SelectItem value="followers">Most followed</SelectItem>
             <SelectItem value="name">A to Z</SelectItem>
           </SelectContent>
         </Select>

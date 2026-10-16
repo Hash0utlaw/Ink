@@ -2,6 +2,7 @@ import { createClient } from "@/utils/supabase/server"
 import type { Artist, Review, AvailabilityStatus, PriceTier } from "@/types/artist"
 import { sortStyleSlugs, toStyleSlugs } from "@/lib/styles"
 import { displayName } from "@/lib/display-name"
+import { withCardPhotos } from "@/lib/supabase/portfolio"
 
 export type ArtistFilters = {
   styles?: string[]
@@ -14,7 +15,8 @@ export type ArtistFilters = {
   exactCity?: boolean
   state?: string
   zip?: string // artists have no ZIP column; matched on their shop's ZIP
-  sortBy?: "rating" | "review_count" | "name"
+  /** "followers": most Instagram followers first, unknown counts last, then name. */
+  sortBy?: "rating" | "review_count" | "name" | "followers"
   page?: number
   pageSize?: number
 }
@@ -70,6 +72,8 @@ export function rowToArtist(row: Record<string, unknown>): Artist {
     reviews: Array.isArray(row.reviews) ? (row.reviews as Review[]) : [],
     hours: ((shop?.hours ?? row.hours) as Record<string, string>) ?? {},
     instagramHandle: String(row.instagram_handle ?? ""),
+    instagramFollowers: row.instagram_followers != null ? Number(row.instagram_followers) : null,
+    tiktokHandle: String(row.tiktok_handle ?? ""),
     websiteUrl: String(row.website_url ?? ""),
     isClaimed: Boolean(row.is_claimed ?? false),
     hasAccount: row.user_id != null,
@@ -119,7 +123,12 @@ export async function getArtists(
     }
 
     const sortCol = filters.sortBy ?? "display_name"
-    const sortMap: Record<string, string> = { rating: "rating", review_count: "review_count", name: "display_name" }
+    const sortMap: Record<string, string> = {
+      rating: "rating",
+      review_count: "review_count",
+      name: "display_name",
+      followers: "instagram_followers",
+    }
     // Rating and review count best first, names A to Z; name and id break ties so pages don't overlap.
     const sortColumn = sortMap[sortCol] ?? "display_name"
     query = query
@@ -135,8 +144,10 @@ export async function getArtists(
 
     const { data, count, error } = await query
     if (error) return { data: [], count: 0, error: error.message }
+    const artists = ((data ?? []) as unknown as Record<string, unknown>[]).map((row) => rowToArtist(row))
     return {
-      data: ((data ?? []) as unknown as Record<string, unknown>[]).map((row) => rowToArtist(row)),
+      // No avatar: the first portfolio photo is the card image.
+      data: await withCardPhotos(artists),
       count: count ?? 0,
       error: null,
     }

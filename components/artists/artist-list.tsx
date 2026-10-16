@@ -3,12 +3,11 @@ import { StyleBadge } from "@/components/brand/style-badge"
 import { STYLE_EDGE_COLOR } from "@/components/brand/style-symbol"
 import { initials } from "@/lib/initials"
 import { styleEntries } from "@/lib/styles"
-import { allowedImageSrc } from "@/lib/utils/safe-image"
-import { ArtistPlateCard, ArtistPlateGrid, ratingLine, type CardArtist } from "./artist-plate-card"
+import { ArtistPlateCard, ArtistPlateGrid, FollowersLine, cardImageSrc, ratingLine, type CardArtist } from "./artist-plate-card"
 
-/** Has a photo next/image can load (stubs never do). */
+/** Has a photo next/image can load: an avatar or a portfolio photo (stubs never do). */
 export function hasPhoto(artist: CardArtist) {
-  return !artist.isStub && allowedImageSrc(artist.avatarUrl) != null
+  return cardImageSrc(artist) != null
 }
 
 /** Photos first, keeping the given order within each group. */
@@ -44,6 +43,12 @@ export function ArtistRow({ artist, showShop = false, distance }: { artist: Card
         <span className="block font-heading text-[20px] leading-tight text-ink">{artist.name}</span>
         {meta.length > 0 && (
           <span className="mt-0.5 block text-[15px] tabular-nums text-ink-muted">{meta.join(". ")}</span>
+        )}
+        {!artist.isStub && (
+          <FollowersLine
+            count={artist.instagramFollowers}
+            className="mt-1 flex items-center gap-1.5 text-sm font-semibold tabular-nums text-ink"
+          />
         )}
         {badges.length > 0 && (
           <span className="mt-2 flex flex-wrap gap-1.5">

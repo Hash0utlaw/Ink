@@ -12,6 +12,15 @@ export interface FinderAnswers {
   r: number
   /** Style slugs, at most 3. */
   styles: string[]
+  /** Results order: nearest first (default) or most Instagram followers first. */
+  sort?: FinderSort
+}
+
+export type FinderSort = "distance" | "followers"
+
+/** ?sort=followers, else nearest first. */
+export function toFinderSort(value: unknown): FinderSort {
+  return value === "followers" ? "followers" : "distance"
 }
 
 function params(a: FinderAnswers): URLSearchParams {
@@ -33,6 +42,7 @@ export function finderHref(a: FinderAnswers, step?: "style"): string {
 
 export function resultsHref(a: FinderAnswers, page = 1): string {
   const p = params(a)
+  if (a.sort === "followers") p.set("sort", "followers")
   if (page > 1) p.set("page", String(page))
   return `/find-artist/results?${p}`
 }

@@ -30,7 +30,7 @@ type Filters = {
   city: string
   state: string
   zip: string
-  sortBy: "rating" | "review_count" | "name"
+  sortBy: "rating" | "review_count" | "name" | "followers"
   radiusMiles: number
 }
 

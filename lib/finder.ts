@@ -10,6 +10,8 @@ import { parseLocation } from "@/lib/parse-location"
 import { STATE_ABBR_TO_NAME } from "@/lib/utils/states"
 import type { Artist } from "@/types/artist"
 import type { Shop } from "@/types/shop"
+import type { FinderSort } from "@/components/find-artist/finder-url"
+import { withCardPhotos } from "@/lib/supabase/portfolio"
 
 /** The radius choices on step 1, in miles. */
 export const FINDER_RADII = [10, 25, 50, 100] as const
@@ -130,7 +132,7 @@ export async function nearLabel(lat: number, lng: number): Promise<string> {
   return "Near you"
 }
 
-/** Artists within the radius, nearest first, with the total that matched. */
+/** Artists within the radius, nearest first (or most followed first), with the total that matched. */
 export async function findArtists(opts: {
   lat: number
   lng: number
@@ -138,6 +140,7 @@ export async function findArtists(opts: {
   styles: string[]
   limit: number
   offset?: number
+  sort?: FinderSort
 }): Promise<{ artists: FinderArtist[]; total: number; error: string | null }> {
   const supabase = createClient()
   const { data, error } = await supabase.rpc("finder_artists_near", {
@@ -147,11 +150,14 @@ export async function findArtists(opts: {
     p_styles: opts.styles.length > 0 ? opts.styles : null,
     p_limit: opts.limit,
     p_offset: opts.offset ?? 0,
+    p_sort: opts.sort ?? "distance",
   })
   if (error) return { artists: [], total: 0, error: error.message }
   const rows = (data ?? []) as Record<string, unknown>[]
+  const artists = rows.map((row) => ({ ...rowToArtist(row), distanceMi: Number(row.distance_mi ?? 0) }))
   return {
-    artists: rows.map((row) => ({ ...rowToArtist(row), distanceMi: Number(row.distance_mi ?? 0) })),
+    // No avatar: the first portfolio photo is the card image.
+    artists: await withCardPhotos(artists),
     total: Number(rows[0]?.total_count ?? 0),
     error: null,
   }
@@ -167,6 +173,7 @@ export async function findArtistPages(opts: {
   radius: number
   styles: string[]
   pages: number
+  sort?: FinderSort
 }): Promise<{ artists: FinderArtist[]; total: number; error: string | null }> {
   const results = await Promise.all(
     Array.from({ length: opts.pages }, (_, i) => findArtists({ ...opts, limit: PAGE_SIZE, offset: i * PAGE_SIZE })),

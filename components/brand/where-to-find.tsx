@@ -1,5 +1,7 @@
 import Link from "next/link"
 import { staticMapUrl } from "@/lib/mapbox"
+import type { SocialLink } from "@/lib/socials"
+import { FollowList } from "./follow-list"
 import { NeatlineFrame } from "./neatline-frame"
 
 const OUTLINE_BUTTON =
@@ -39,6 +41,8 @@ export interface WhereToFindPanelProps {
   rating?: number
   reviewCount?: number
   hours?: Record<string, string>
+  /** Shop pages: the Follow list (only the networks the shop has). */
+  follow?: SocialLink[]
 }
 
 /** True when there's enough to show the panel: an address or coordinates. */
@@ -61,6 +65,7 @@ export function WhereToFindPanel({
   rating = 0,
   reviewCount = 0,
   hours,
+  follow = [],
 }: WhereToFindPanelProps) {
   if (!hasWhereToFind({ address, coordinates })) return null
 
@@ -134,6 +139,8 @@ export function WhereToFindPanel({
             ))}
           </dl>
         )}
+
+        <FollowList links={follow} className="mt-4" />
 
         <a href={directions} target="_blank" rel="noopener noreferrer" className={`mt-4 w-full ${OUTLINE_BUTTON}`}>
           Get directions

@@ -29,6 +29,7 @@ const CONTACT_REASONS = [
   "Problem with a request",
   "Account or login problem",
   "Report a listing",
+  "Report a photo",
   "Artist / studio onboarding",
   "Press or partnership",
   "Other",
@@ -51,12 +52,12 @@ const CONTACT_CHANNELS = [
   },
 ]
 
-export function ContactClient() {
+export function ContactClient({ initialTopic = "", initialMessage = "" }: { initialTopic?: string; initialMessage?: string }) {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    reason: "",
-    message: "",
+    reason: CONTACT_REASONS.includes(initialTopic) ? initialTopic : "",
+    message: initialMessage,
   })
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)

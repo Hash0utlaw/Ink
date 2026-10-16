@@ -14,8 +14,11 @@ import {
   joinStyles,
   mapHref,
   resultsHref,
+  toFinderSort,
   type FinderAnswers,
+  type FinderSort,
 } from "@/components/find-artist/finder-url"
+import { FollowersLine } from "@/components/artists/artist-plate-card"
 import {
   findArtistPages,
   lookupPlace,
@@ -66,15 +69,16 @@ export default async function FinderResultsPage({ searchParams }: { searchParams
   const styles = toStyleSlugs(one(searchParams.style).split(",").filter(Boolean)).slice(0, MAX_STYLES)
   const radius = toRadius(one(searchParams.r))
   const page = Math.min(Math.max(Math.floor(Number(one(searchParams.page))) || 1, 1), MAX_PAGES)
-  const answers: FinderAnswers = { near: place.label, lat: place.lat, lng: place.lng, r: radius, styles }
+  const sort = toFinderSort(one(searchParams.sort))
+  const answers: FinderAnswers = { near: place.label, lat: place.lat, lng: place.lng, r: radius, styles, sort }
 
   // Nothing at the chosen radius: retry at the larger ones until something turns up.
-  let found = await findArtistPages({ lat: place.lat, lng: place.lng, radius, styles, pages: page })
+  let found = await findArtistPages({ lat: place.lat, lng: place.lng, radius, styles, pages: page, sort })
   let usedRadius = radius
   if (found.total === 0 && !found.error) {
     for (const wider of WIDEN_RADII.filter((r) => r > radius)) {
       usedRadius = wider
-      found = await findArtistPages({ lat: place.lat, lng: place.lng, radius: wider, styles, pages: page })
+      found = await findArtistPages({ lat: place.lat, lng: place.lng, radius: wider, styles, pages: page, sort })
       if (found.total > 0 || found.error) break
     }
   }
@@ -114,7 +118,9 @@ export default async function FinderResultsPage({ searchParams }: { searchParams
                   <span className="tabular-nums">{total}</span> {styleWord}
                   {noun(total)} within {usedRadius} miles
                 </h1>
-                <span className="font-place text-[20px] italic">Nearest first, from {place.label}</span>
+                <span className="font-place text-[20px] italic">
+                  {sort === "followers" ? "Most followed first" : "Nearest first"}, from {place.label}
+                </span>
                 {widened && (
                   <p className="border-1.5 border-l-[6px] border-ink border-l-navy bg-paper tex-paper px-4 py-3.5 text-[15px] leading-normal">
                     No {styleWord}artists listed within {radius} miles of {place.label}. We widened the search and found
@@ -143,6 +149,7 @@ export default async function FinderResultsPage({ searchParams }: { searchParams
                   <span className="text-[15px] tabular-nums text-ink-muted">
                     Showing {artists.length} of {total}
                   </span>
+                  <SortLinks answers={answers} sort={sort} />
                   <Link href={mapHref(answers)} className={cn(SECONDARY_BUTTON, "min-h-11")}>
                     <MapIcon className="h-[18px] w-[18px]" aria-hidden="true" />
                     See on the map
@@ -239,7 +246,7 @@ function ArtistCard({ artist, picked }: { artist: FinderArtist; picked: string[]
       href={`/artists/${artist.id}`}
       className="flex h-full gap-4 rounded border-1.5 border-ink bg-vellum tex-vellum p-4 text-ink hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
     >
-      <FinderPlate src={artist.avatarUrl} name={artist.name} />
+      <FinderPlate src={artist.avatarUrl || artist.cardPhotoUrl || ""} name={artist.name} />
       <div className="flex min-w-0 flex-1 flex-col gap-[5px]">
         <div className="flex items-baseline justify-between gap-2.5">
           <span className="min-w-0 break-words font-heading text-[22px] leading-[1.15]">{artist.name}</span>
@@ -252,6 +259,7 @@ function ArtistCard({ artist, picked }: { artist: FinderArtist; picked: string[]
             {state ? `, ${stateName(state)}` : ""}
           </span>
         )}
+        <FollowersLine count={artist.instagramFollowers} />
         {tags.length > 0 && (
           <span className="mt-0.5 flex flex-wrap gap-[5px]">
             {tags.map((slug) => (
@@ -269,6 +277,38 @@ function ArtistCard({ artist, picked }: { artist: FinderArtist; picked: string[]
         )}
       </div>
     </Link>
+  )
+}
+
+const SORT_LINK =
+  "inline-flex min-h-11 items-center rounded border-1.5 border-ink px-3.5 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+
+/** Sort: Nearest or Most followed, as links that keep every other answer. */
+function SortLinks({ answers, sort }: { answers: FinderAnswers; sort: FinderSort }) {
+  const options: { value: FinderSort; label: string }[] = [
+    { value: "distance", label: "Nearest" },
+    { value: "followers", label: "Most followed" },
+  ]
+  return (
+    <div role="group" aria-label="Sort artists" className="flex flex-wrap items-center gap-2">
+      <span className="mr-1 text-sm text-ink-muted" aria-hidden="true">
+        Sort
+      </span>
+      {options.map((o) => (
+        <Link
+          key={o.value}
+          href={resultsHref({ ...answers, sort: o.value })}
+          scroll={false}
+          aria-current={sort === o.value ? "true" : undefined}
+          className={cn(
+            SORT_LINK,
+            sort === o.value ? "bg-ink text-cream" : "bg-vellum tex-vellum text-ink hover:bg-secondary",
+          )}
+        >
+          {o.label}
+        </Link>
+      ))}
+    </div>
   )
 }
 

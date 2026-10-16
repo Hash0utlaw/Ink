@@ -1,16 +1,31 @@
 import type { ReactNode } from "react"
 import type { Artist } from "@/types/artist"
 import type { Review } from "@/lib/supabase/reviews"
-import { allowedImageSrc } from "@/lib/utils/safe-image"
+import Link from "next/link"
+import type { PortfolioPhoto } from "@/lib/supabase/portfolio"
 import { PortfolioGallery } from "./portfolio-gallery"
 
 /** A profile section: Young Serif 30px heading, then its content. */
-export function ProfileSection({ id, title, children }: { id: string; title: ReactNode; children: ReactNode }) {
+export function ProfileSection({
+  id,
+  title,
+  count,
+  children,
+}: {
+  id: string
+  title: ReactNode
+  /** Plain text beside the heading, e.g. "8 photos". */
+  count?: string
+  children: ReactNode
+}) {
   return (
     <section aria-labelledby={id}>
-      <h2 id={id} className="font-heading text-[26px] leading-[1.15] text-ink lg:text-[30px]">
-        {title}
-      </h2>
+      <div className="flex flex-wrap items-baseline gap-x-2.5">
+        <h2 id={id} className="font-heading text-[26px] leading-[1.15] text-ink lg:text-[30px]">
+          {title}
+        </h2>
+        {count && <span className="text-sm tabular-nums text-ink-muted">{count}</span>}
+      </div>
       <div className="mt-4">{children}</div>
     </section>
   )
@@ -31,22 +46,58 @@ function formatDate(iso: string) {
   return isNaN(d.getTime()) ? "" : d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })
 }
 
+const TEXT_LINK = "font-semibold text-navy underline underline-offset-2 hover:no-underline"
+
+/** Nothing uploaded yet: an honest empty state that turns into a claim prompt (unclaimed pages only). */
+function NoPortfolio({ artist }: { artist: Artist }) {
+  const claimed = artist.isClaimed || artist.hasAccount
+  const claimHref = artist.handle ? `/claim?artist=${encodeURIComponent(artist.handle)}` : "/claim"
+  return (
+    <div className="flex flex-col gap-2 rounded border-1.5 border-ink bg-vellum tex-vellum p-5 lg:p-7">
+      <p className="font-heading text-[22px] leading-[1.2] text-ink">No portfolio yet</p>
+      <p className="text-[15px] leading-[1.5] text-ink-muted text-pretty">
+        {claimed
+          ? `${artist.name} hasn't added work to TattooMaps yet. Check back soon.`
+          : `${artist.name} hasn't added work to TattooMaps yet. Ask the shop for recent work.`}
+      </p>
+      {!claimed && (
+        <p className="mt-1.5 text-sm text-ink text-pretty">
+          Are you {artist.name}?{" "}
+          <Link href={claimHref} className={TEXT_LINK}>
+            Claim this page
+          </Link>{" "}
+          to upload your portfolio.
+        </p>
+      )}
+    </div>
+  )
+}
+
 /** Portfolio, About and Reviews for an artist profile. */
-export function ProfileSections({ artist, reviews }: { artist: Artist; reviews: Review[] }) {
-  // Only photos next/image can load; no placeholders.
-  const photos = Array.from(new Set([...artist.portfolioImages, ...artist.previewImages]))
-    .map((url) => allowedImageSrc(url))
-    .filter((url): url is string => !!url)
+export function ProfileSections({
+  artist,
+  portfolio,
+  reviews,
+}: {
+  artist: Artist
+  /** Active photos uploaded to TattooMaps, in the artist's order (lib/supabase/portfolio.ts). */
+  portfolio: PortfolioPhoto[]
+  reviews: Review[]
+}) {
+  const count = portfolio.length > 0 ? `${portfolio.length} ${portfolio.length === 1 ? "photo" : "photos"}` : undefined
 
   return (
     <div className="space-y-14">
-      <ProfileSection id="portfolio" title="Portfolio">
-        {photos.length > 0 ? (
-          <PortfolioGallery images={photos} name={artist.name} />
+      <ProfileSection id="portfolio" title="Portfolio" count={count}>
+        {portfolio.length > 0 ? (
+          <PortfolioGallery
+            images={portfolio.map((p) => ({ src: p.url, caption: p.caption, id: p.id }))}
+            name={artist.name}
+            phoneLimit={6}
+            pagePath={`/artists/${artist.id}`}
+          />
         ) : (
-          <EmptyBox title="No photos yet">
-            Ask the shop for recent work, or check back after {artist.name} claims this page.
-          </EmptyBox>
+          <NoPortfolio artist={artist} />
         )}
       </ProfileSection>
 
