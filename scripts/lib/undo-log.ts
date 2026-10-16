@@ -6,6 +6,8 @@
 // scripts/undo.ts replays a file in reverse to restore the old values.
 // Entries with op "insert" record a whole new row (new_value is the row);
 // undo.ts deletes those rows, and only for the tables/scripts it allows.
+// Entries with op "note" record a value that was kept, not written (old_value
+// = new_value); undo scripts skip them.
 
 import fs from "fs"
 import path from "path"
@@ -19,7 +21,8 @@ export interface UndoEntry {
   new_value: unknown
   script: string
   timestamp: string
-  op?: "insert"
+  op?: "insert" | "note"
+  note?: string
 }
 
 const UNDO_DIR = path.resolve("data/undo")

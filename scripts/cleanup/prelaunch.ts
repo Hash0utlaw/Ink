@@ -4,7 +4,13 @@
 // and fields are only filled when empty. The exceptions, both asked for:
 // Part C rewrites display_name, Part E clears broken avatar_url values.
 //   A. Listings that aren't tattoo shops (supply companies, expos, conventions):
-//      hidden. Their artists are hidden too; when the same person (normalized
+//      hidden. A flagged one (⚠: many reviews, has artists, reads as a tattoo
+//      shop that also sells supplies, or an event word inside a shop name) stays
+//      visible unless its name has a supply word and no shop word, it has no
+//      active artists, and its own website is a store (cart, checkout, "shop
+//      now", product pages) with no artist or booking page; KEEP_VISIBLE always
+//      stays. Smoke and vape shops are hidden when they have no active artists.
+//      Their artists are hidden too; when the same person (normalized
 //      name) is active at exactly one real shop, that row first gets the copy's
 //      Instagram handle, followers and styles (empty fields only).
 //   B. Duplicate listings: same normalized name AND (within 150 m, or the same
@@ -12,10 +18,15 @@
 //      most of Instagram / website / phone / hours / photo, then oldest; a claimed
 //      listing always keeps. Active artists move to the keeper unless it already
 //      has that name (those copies are hidden); shop_artists stubs move the same
-//      way; the keeper's empty fields are filled; the duplicates are hidden.
+//      way; the keeper's empty fields are filled (an empty phone from the
+//      duplicate; when both have one, the keeper's stays and the duplicate's is
+//      noted in the undo log); the duplicates are hidden. Held, not merged, and
+//      listed in prelaunch-partB-held.csv: address matches pinned more than 1 km
+//      apart, and duplicates that are claimed, have a claimed artist, or have
+//      bookings, claim requests or links, saves or site reviews.
 //   C. Artist display names: tagline endings ("Tattoo Artist", "Tattooer", plus
 //      a city or state next to them) removed; ALL-CAPS names title-cased; definite
-//      non-names hidden; odd ones listed in data/reports/names-review.csv.
+//      non-names hidden; odd ones (and any with "?") listed in data/reports/names-review.csv.
 //      Claimed artists are never touched.
 //   D. Shops with a dead or parked website and no reviews, no Instagram and no
 //      active artists: possibly_closed = true (hidden from the finder and map).
@@ -35,7 +46,7 @@ config({ path: ".env.local" })
 import fs from "fs"
 import path from "path"
 import { getSupabaseAdmin } from "../lib/supabase-admin"
-import { UndoLog } from "../lib/undo-log"
+import { UndoLog, type UndoEntry } from "../lib/undo-log"
 import {
   UnionFind,
   coords,
@@ -67,6 +78,7 @@ const NAME_CHANGES_CSV = path.join(REPORT_DIR, "prelaunch-partC-names.csv")
 const NAMES_REVIEW_CSV = path.join(REPORT_DIR, "names-review.csv")
 const CLOSED_CSV = path.join(REPORT_DIR, "prelaunch-partD-possibly-closed.csv")
 const PHOTOS_CSV = path.join(REPORT_DIR, "prelaunch-partE-photos.csv")
+const HELD_CSV = path.join(REPORT_DIR, "prelaunch-partB-held.csv")
 
 const DUP_RADIUS_M = 150
 const PHOTO_CONCURRENCY = 8
@@ -116,6 +128,66 @@ const ALWAYS_NOT_A_SHOP = [
   "Body Art Expo",
   "The All American Tattoo Convention",
 ]
+// Flagged listings that stay visible whatever their website shows (name prefixes).
+const KEEP_VISIBLE = [
+  "Righteous Ink",
+  "Hold Fast",
+  "Marc Wade",
+  "Signature",
+  "Planet X",
+  "Skard4lyfeink",
+  "Expo Piercing + Ink",
+  "Cyan Tattoo and Arts Expo",
+  "The Rogue Tattoory & Art Expo",
+]
+const SUPPLY_ONLY_WORD = /\b(suppl(y|ies)|products?)\b/i
+const SMOKE_WORD = /\bsmoke\s*shop|\bvape\b|\btobacco\b/i
+// Not the listing's own site, so it can't show whether the listing is a store.
+const THIRD_PARTY_HOST = /(^|\.)(instagram\.com|facebook\.com|etsy\.com|youtube\.com|tiktok\.com|yelp\.com|google\.com|linktr\.ee|tattoshopsnearme\.com|toptattooplaces\.com)$|\.top$/
+const STORE_SIGN = /\/cart\b|\/checkout\b|add[\s-]to[\s-]cart|shop[\s-]now|\/products?\/|\/collections\/|cdn\.shopify\.com|woocommerce/i
+// A link to an artist or booking page: by its path or by its text.
+const BOOKING_HREF = /\/(our-?)?(artists?|team|booking|book(-now|-online|-an-appointment)?|appointments?|consultations?)(\/|\.html?|\?|#|$)/i
+const BOOKING_TEXT = /^(our |meet the |tattoo )?(artists?|team|booking|book( now| online| an appointment| appointment)?|appointments?|consultations?|schedule)$/i
+const SITE_TIMEOUT_MS = 10000
+const SITE_CACHE = path.join(path.resolve("data/cache/prelaunch"), "site-checks.json")
+type SiteCheck = { result: "store" | "not_store" | "unchecked"; detail: string; checked_at: string }
+
+/** Fetches a listing's homepage and says whether it is a store with no artist or booking page. */
+async function checkSite(raw: string): Promise<SiteCheck> {
+  const at = new Date().toISOString()
+  const url = /^https?:\/\//i.test(raw.trim()) ? raw.trim() : `https://${raw.trim()}`
+  const host = hostOf(url)
+  if (!host || THIRD_PARTY_HOST.test(host)) return { result: "unchecked", detail: `not its own site (${host || raw})`, checked_at: at }
+  const ctrl = new AbortController()
+  const timer = setTimeout(() => ctrl.abort(), SITE_TIMEOUT_MS)
+  try {
+    const res = await fetch(url, { redirect: "follow", signal: ctrl.signal, headers: { "User-Agent": USER_AGENT } })
+    if (!res.ok) return { result: "unchecked", detail: `HTTP ${res.status}`, checked_at: at }
+    const html = await res.text()
+    const store = html.match(STORE_SIGN)?.[0]
+    const links = Array.from(html.matchAll(/<a\b[^>]*href=["']([^"']*)["'][^>]*>([\s\S]*?)<\/a>/gi)).map((m) => ({
+      href: m[1],
+      text: m[2].replace(/<[^>]+>/g, " ").replace(/&amp;/g, "&").replace(/\s+/g, " ").trim(),
+    }))
+    const booking = links.find((l) => BOOKING_HREF.test(l.href.split(/[?#]/)[0] + "/") || BOOKING_TEXT.test(l.text))
+    if (booking) return { result: "not_store", detail: `artist or booking link: "${booking.text || booking.href}"`, checked_at: at }
+    if (!store) return { result: "not_store", detail: "no cart, checkout or product pages", checked_at: at }
+    return { result: "store", detail: `store ("${store.trim()}"), no artist or booking page`, checked_at: at }
+  } catch (e) {
+    const err = e as Error & { cause?: { code?: string } }
+    return { result: "unchecked", detail: `no connection (${err.name === "AbortError" ? "timeout" : err.cause?.code ?? err.message})`, checked_at: at }
+  } finally {
+    clearTimeout(timer)
+  }
+}
+function loadSiteChecks(): Map<string, SiteCheck> {
+  try {
+    return new Map(Object.entries(JSON.parse(fs.readFileSync(SITE_CACHE, "utf-8"))))
+  } catch {
+    return new Map()
+  }
+}
+
 // Step 2's expo listings (their sites listed 144 and 201 people).
 const EXPO_DOMAINS = ["pittsburghtattooexpo.com", "themotorcitytattooexpo.com"]
 const hostOf = (url: unknown) => {
@@ -180,7 +252,7 @@ const TAGLINE = new RegExp(`^(.*?)${SEP}*\\b(?:tattoo\\s*artists?|tattooers?)\\b
 // Handle-style names ("Gordn.ink") aren't web addresses; they go to review.
 const URL_LIKE = /https?:\/\/|www\.|\b[a-z0-9-]+\.(com|net|org|biz|info)\b/i
 const EMAIL = /\S+@\S+\.\S+/
-const NON_NAME_PHRASE = /book\s*now|appointment|our\s+team|\?/i
+const NON_NAME_PHRASE = /book\s*now|appointment|our\s+team/i
 const PAGE_WORDS = new Set([
   "services", "social media", "next dates", "contact", "contact us", "gallery", "about", "about us", "home",
   "booking", "faq", "faqs", "aftercare", "portfolio", "testimonials", "pricing", "privacy policy", "our artists",
@@ -255,6 +327,7 @@ export function decideName(raw: string, cities: string[]): NameDecision {
   const phrase = name.match(NON_NAME_PHRASE)
   if (phrase) return { kind: "hide", why: `contains "${phrase[0].toLowerCase()}"` }
   if (PAGE_WORDS.has(name.toLowerCase().replace(/[^a-z ]/g, "").trim())) return { kind: "hide", why: "page word" }
+  if (name.includes("?")) return { kind: "review", why: 'contains "?"' }
 
   let out = name
   const whys: string[] = []
@@ -343,6 +416,9 @@ async function checkPhoto(raw: string): Promise<PhotoResult> {
 // ── Plan ─────────────────────────────────────────────────────────────────────
 
 async function buildPlan(supabase: ReturnType<typeof getSupabaseAdmin>, photoChecks: Map<string, PhotoResult>, checkPhotos: boolean) {
+  // The dry run checks flagged listings' websites; --apply reuses those results.
+  const siteChecks = loadSiteChecks()
+  const checkSites = checkPhotos
   const shops = await withRetry("fetch active shops", () => fetchAll<Row>(supabase, "shops", SHOP_COLUMNS, (q) => q.eq("is_active", true)))
   const artists = await withRetry("fetch active artists", () => fetchAll<Row>(supabase, "artists", ARTIST_COLUMNS, (q) => q.eq("is_active", true)))
   const shopById = new Map(shops.map((s) => [String(s.id), s]))
@@ -421,9 +497,57 @@ async function buildPlan(supabase: ReturnType<typeof getSupabaseAdmin>, photoChe
   for (const d of EXPO_DOMAINS) if (!candidates.some((c) => hostOf(c.website).endsWith(d))) problems.push(`Part A: no active listing has the website ${d}.`)
   candidates.sort((a, b) => a.group.localeCompare(b.group) || String(a.name).localeCompare(String(b.name)))
 
-  const notAShop = candidates.filter((c) => c.group === "likely_not_a_shop")
+  // Which candidates are hidden: the unflagged not-a-shop ones, flagged ones
+  // whose own website is a store, and smoke or vape shops with no artists.
+  const keepVisible = KEEP_VISIBLE.map(normalizeName)
+  const keepFound = new Set<string>()
+  const sitesToCheck = candidates.filter((c) => c.group === "likely_not_a_shop" && c.check && c.website && c.artists === 0 && SUPPLY_ONLY_WORD.test(c.name) && !SHOP_WORD.test(c.name) && !keepVisible.some((k) => normalizeName(c.name).startsWith(k)))
+  if (checkSites) {
+    const fresh = sitesToCheck.filter((c) => !siteChecks.has(String(c.website).trim()))
+    if (fresh.length) console.log(`Part A: checking ${fresh.length} flagged listings' websites…`)
+    await runPool(fresh, 4, async (c) => {
+      siteChecks.set(String(c.website).trim(), await checkSite(String(c.website)))
+    })
+    fs.mkdirSync(path.dirname(SITE_CACHE), { recursive: true })
+    fs.writeFileSync(SITE_CACHE, JSON.stringify(Object.fromEntries(siteChecks), null, 1))
+  }
+  for (const c of candidates) {
+    const keep = keepVisible.find((k) => normalizeName(c.name).startsWith(k))
+    if (keep) keepFound.add(keep)
+    c.flagged = c.group === "likely_not_a_shop" && !!c.check
+    if (c.group === "likely_not_a_shop" && !c.check) {
+      c.action = "hide"
+      c.action_why = c.reason
+    } else if (c.flagged) {
+      c.action = "keep"
+      if (keep) c.action_why = "on the keep-visible list"
+      else if (!SUPPLY_ONLY_WORD.test(c.name) || SHOP_WORD.test(c.name)) c.action_why = "name isn't a supply word alone"
+      else if (c.artists > 0) c.action_why = "has active artists"
+      else if (!c.website) c.action_why = "no website to check"
+      else {
+        const site = siteChecks.get(String(c.website).trim()) ?? { result: "unchecked", detail: "not checked" }
+        c.action = site.result === "store" ? "hide" : "keep"
+        c.action_why = site.result === "unchecked" ? `website can't be checked: ${site.detail}` : `website: ${site.detail}`
+      }
+    } else if (SMOKE_WORD.test(c.name)) {
+      c.smoke = true
+      c.action = c.artists > 0 ? "keep" : "hide"
+      c.action_why = c.artists > 0 ? `smoke or vape shop with ${c.artists} active artists` : "smoke or vape shop, no active artists"
+    } else {
+      c.action = "keep"
+      c.action_why = c.reason
+    }
+  }
+  for (const k of KEEP_VISIBLE) if (!keepFound.has(normalizeName(k))) problems.push(`Part A: "${k}" from the keep-visible list matched no candidate listing.`)
+  const smokeCount = candidates.filter((c) => c.smoke).length
+  if (smokeCount !== 5) problems.push(`Part A: found ${smokeCount} smoke or vape listings, not the 5 expected.`)
+  for (const c of candidates.filter((c) => c.smoke && c.action === "keep")) problems.push(`Part A: smoke or vape shop ${c.name} (${c.city}) has ${c.artists} active artists, so it stays visible.`)
+
+  const notAShop = candidates.filter((c) => c.action === "hide")
   for (const c of notAShop) {
     if (c.owner) {
+      c.action = "keep"
+      c.action_why = "claimed by an owner"
       problems.push(`Part A: ${c.name} (${c.city}) is claimed by an owner, so it was left visible.`)
       continue
     }
@@ -507,7 +631,39 @@ async function buildPlan(supabase: ReturnType<typeof getSupabaseAdmin>, photoChe
   const stubs = await withRetry("fetch shop_artists", () =>
     fetchIn<Row>(supabase, "shop_artists", "id, shop_id, name", "shop_id", Array.from(clusters.values()).filter((c) => c.length > 1).flat().map((s) => s.id)),
   )
+  // Everything else that points at a listing's id. artists and shop_artists
+  // move to the keeper; shop_styles is the listing's own style tags (it stays
+  // with the hidden row and doesn't hold a merge). Reviews have no shop_id;
+  // they belong to a booking request, so they count against that booking's shop.
+  const clusterIds = Array.from(clusters.values()).filter((c) => c.length > 1).flat().map((s) => s.id)
+  const refs = new Map<string, Set<string>>() // shop id → reasons to hold
+  const addRef = (id: unknown, why: string) => id && refs.set(String(id), new Set([...(refs.get(String(id)) ?? []), why]))
+  const bookings = await withRetry("fetch booking_requests", () => fetchIn<Row>(supabase, "booking_requests", "id, shop_id", "shop_id", clusterIds))
+  for (const r of bookings) addRef(r.shop_id, "has bookings")
+  for (const r of await withRetry("fetch reviews", () => fetchIn<Row>(supabase, "reviews", "id, booking_request_id", "booking_request_id", bookings.map((b) => b.id))))
+    addRef(bookings.find((b) => b.id === r.booking_request_id)?.shop_id, "has site reviews")
+  for (const t of ["claim_requests", "claim_links"])
+    for (const r of await withRetry(`fetch ${t}`, () => fetchIn<Row>(supabase, t, "id, shop_id", "shop_id", clusterIds))) addRef(r.shop_id, "has claim requests or links")
+  for (const r of await withRetry("fetch saved_items", () => fetchIn<Row>(supabase, "saved_items", "id, item_id", "item_id", clusterIds))) addRef(r.item_id, "saved by users")
+  // Claimed artists, active or not.
+  for (const r of await withRetry("fetch artists at listings", () => fetchIn<Row>(supabase, "artists", "id, shop_id, user_id, is_claimed", "shop_id", clusterIds)))
+    if (claimed(r)) addRef(r.shop_id, "has a claimed artist")
+  // shop_styles has no id column (fetchAll orders by id); only which shops have rows matters.
+  const styled = new Set<string>()
+  for (let i = 0; i < clusterIds.length; i += 50) {
+    const chunk = clusterIds.slice(i, i + 50)
+    const rows = await withRetry("fetch shop_styles", async () => {
+      const { data, error } = await supabase.from("shop_styles").select("shop_id").in("shop_id", chunk).limit(1000)
+      if (error) throw new Error(error.message)
+      return data ?? []
+    })
+    for (const r of rows) styled.add(String(r.shop_id))
+  }
+
   const merges: Row[] = []
+  const held: Row[] = []
+  const phoneNotes: Omit<UndoEntry, "script" | "timestamp">[] = []
+  let dupesWithStyles = 0
   let partBMoved = 0
   let partBArtistsHidden = 0
   let partBFieldsFilled = 0
@@ -529,6 +685,21 @@ async function buildPlan(supabase: ReturnType<typeof getSupabaseAdmin>, photoChe
       const l = link(keeper, s)
       if (!l) {
         problems.push(`Part B: ${s.name} (${place(s)}, ${s.id}) only matches the keeper through another listing; left alone.`)
+        continue
+      }
+      const why = [
+        l.how === "same street address" && l.meters != null && l.meters > 1000 && "pins more than 1 km apart",
+        s.owner_user_id && "claimed (has an owner)",
+        ...(refs.get(s.id) ?? []),
+      ].filter(Boolean) as string[]
+      if (why.length) {
+        const kc = coords(keeper)
+        const dc = coords(s)
+        held.push({
+          reason: why.join("; "), keeper: keeper.name, duplicate: s.name, city: place(keeper), distance_m: l.meters == null ? "" : Math.round(l.meters), matched_by: l.how,
+          keeper_pin: kc ? kc.join(", ") : "", duplicate_pin: dc ? dc.join(", ") : "", keeper_address: keeper.address ?? "", duplicate_address: s.address ?? "",
+          keeper_reviews: keeper.review_count ?? 0, duplicate_reviews: s.review_count ?? 0, keeper_id: keeper.id, duplicate_id: s.id,
+        })
         continue
       }
       dupes.push({ shop: s, ...l })
@@ -598,7 +769,11 @@ async function buildPlan(supabase: ReturnType<typeof getSupabaseAdmin>, photoChe
       const kp = normalizePhone(keeper.phone)
       const dp = normalizePhone(d.shop.phone)
       const conflict = kp && dp && kp !== dp
-      if (conflict) phoneConflicts++
+      if (styled.has(d.shop.id)) dupesWithStyles++
+      if (conflict) {
+        phoneConflicts++
+        phoneNotes.push({ table: "shops", id: d.shop.id, field: "phone", old_value: d.shop.phone, new_value: d.shop.phone, op: "note", note: `duplicate of ${keeper.id}; keeper kept its phone ${keeper.phone}` })
+      }
       merges.push({
         keeper: keeper.name,
         keeper_id: keeper.id,
@@ -707,10 +882,9 @@ async function buildPlan(supabase: ReturnType<typeof getSupabaseAdmin>, photoChe
   const shopReviews = await fetchIn<Row>(supabase, "reviews", "id, shop_id", "shop_id", hiddenShopIds).catch(() => [] as Row[])
   if (shopReviews.length) problems.push(`${shopReviews.length} site review(s) are on listings being hidden.`)
   const relative = photoRows.filter((r) => String(r.result).includes("not a full web address")).length
-  if (relative) problems.push(`Part E: ${relative} of the cleared photos are relative paths copied from shop sites ("uploads/jo.jpg"), not web addresses; they can't load on our site, so they're cleared with the broken ones.`)
-  const far = merges.filter((m) => m.matched_by === "same street address" && m.distance_m !== "" && Number(m.distance_m) > 1000).length
-  if (far) problems.push(`Part B: ${far} duplicates matched on the same street address but are pinned more than 1 km from the keeper (one of the two map pins is off).`)
-  if (phoneConflicts) problems.push(`Part B: ${phoneConflicts} merged duplicates have a different phone number from their keeper (listed in prelaunch-partB-merges.csv, merged anyway per the rule).`)
+  if (relative) problems.push(`Part E: ${relative} of the cleared photos are relative paths copied from shop sites ("uploads/jo.jpg"); they can never load, so they're cleared and undo-logged with the broken ones.`)
+  if (phoneConflicts) problems.push(`Part B: ${phoneConflicts} merged duplicates have a different phone number from their keeper; the keeper's stays and the duplicate's is noted in the undo log.`)
+  if (dupesWithStyles) problems.push(`Part B: ${dupesWithStyles} merged duplicates have shop_styles rows (their own style tags). Not counted as a hold: the rows stay on the hidden listing.`)
 
   return {
     before,
@@ -720,6 +894,8 @@ async function buildPlan(supabase: ReturnType<typeof getSupabaseAdmin>, photoChe
     candidates,
     partAArtists,
     merges,
+    held,
+    phoneNotes,
     partB: { moved: partBMoved, hidden: partBArtistsHidden, filled: partBFieldsFilled, stubs: partBStubsMoved },
     nameChanges,
     nameReview,
@@ -784,6 +960,7 @@ function report(p: Plan, undoFile: string | null, notes: string[]): string {
         ["A", "Artists merged into the same person at a real shop", fmt(aArtistsMerged)],
         ["A", "Artists hidden with their listing", fmt(aArtistsHidden)],
         ["B", "Duplicate listings hidden", fmt(p.merges.length)],
+        ["B", "Duplicates held (not merged)", fmt(p.held.length)],
         ["B", "Artists moved to the keeper", fmt(p.partB.moved)],
         ["B", "Artist copies hidden (keeper already had that name)", fmt(p.partB.hidden)],
         ["B", "Keeper fields filled", fmt(p.partB.filled)],
@@ -808,10 +985,28 @@ function report(p: Plan, undoFile: string | null, notes: string[]): string {
     out.push(`*${g}* (${rows.length})`, "")
     out.push(table(["Name", "City", "Artists", "Website", "Reviews", "Why", "Might be a real shop"], rows.map((c) => [c.name, c.city, c.artists, c.website, c.reviews, c.reason + (c.owner ? ", claimed" : ""), c.check])), "")
   }
+  const flagged = p.candidates.filter((c) => c.flagged)
+  out.push(`*Flagged (⚠) listings* (${flagged.length}: ${flagged.filter((c) => c.action === "hide").length} hidden, ${flagged.filter((c) => c.action === "keep").length} kept visible)`, "")
+  out.push(table(["Name", "City", "Action", "Why"], flagged.sort((a, b) => a.action.localeCompare(b.action)).map((c) => [c.name, c.city, c.action, c.action_why])), "")
+  const smoke = p.candidates.filter((c) => c.smoke)
+  out.push(`*Smoke and vape listings* (${smoke.length})`, "")
+  out.push(table(["Name", "City", "Artists", "Action"], smoke.map((c) => [c.name, c.city, c.artists, c.action])), "")
   if (p.partAArtists.length) {
     out.push(`*Artists at the hidden listings* (${p.partAArtists.length})`, "")
     out.push(table(["Artist", "Listing", "What happens", "Same person at", "Filled there"], p.partAArtists.map((r) => [r.artist, r.listing, r.outcome, r.other_shop, r.filled])), "")
   }
+
+  const heldBy: Record<string, number> = {}
+  for (const h of p.held) for (const r of String(h.reason).split("; ")) heldBy[r] = (heldBy[r] ?? 0) + 1
+  out.push(`**Part B held merges** (${p.held.length}, in prelaunch-partB-held.csv; a duplicate can have more than one reason)`, "")
+  out.push(table(["Reason", "Duplicates"], Object.entries(heldBy).sort((a, b) => b[1] - a[1]).map(([k, v]) => [k, fmt(v)])), "")
+  out.push(
+    "Tables checked for the duplicate's shop id: artists (shop_id; claimed artists hold, others move), shop_artists (shop_id; moved), " +
+      "booking_requests (shop_id), claim_requests (shop_id), claim_links (shop_id), shop_styles (shop_id; style tags, not a hold), " +
+      "saved_items (item_id, no foreign key), reviews (through booking_request_id; no shop_id), shops.owner_user_id. " +
+      "flash_listings, portfolio_images and user_profiles have no shop reference.",
+    "",
+  )
 
   out.push("**Spot-check**", "")
   out.push(`10 duplicate merges (of ${fmt(p.merges.length)}):`, "")
@@ -844,7 +1039,7 @@ function report(p: Plan, undoFile: string | null, notes: string[]): string {
 
   out.push(
     "Files: " +
-      [CANDIDATES_CSV, PART_A_ARTISTS_CSV, MERGES_CSV, NAME_CHANGES_CSV, NAMES_REVIEW_CSV, CLOSED_CSV, PHOTOS_CSV].map((f) => `\`${path.relative(process.cwd(), f)}\``).join(", ") +
+      [CANDIDATES_CSV, PART_A_ARTISTS_CSV, MERGES_CSV, HELD_CSV, NAME_CHANGES_CSV, NAMES_REVIEW_CSV, CLOSED_CSV, PHOTOS_CSV].map((f) => `\`${path.relative(process.cwd(), f)}\``).join(", ") +
       ".",
     "",
   )
@@ -853,12 +1048,13 @@ function report(p: Plan, undoFile: string | null, notes: string[]): string {
 }
 
 function writeCsvs(p: Plan) {
-  writeCsv(CANDIDATES_CSV, ["group", "reason", "check", "name", "city", "artists", "website", "reviews", "owner", "shop_id"], p.candidates)
+  writeCsv(CANDIDATES_CSV, ["group", "reason", "check", "action", "action_why", "name", "city", "artists", "website", "reviews", "owner", "shop_id"], p.candidates)
   writeCsv(PART_A_ARTISTS_CSV, ["artist", "listing", "listing_city", "instagram", "outcome", "other_shop", "filled", "artist_id"], p.partAArtists)
   writeCsv(MERGES_CSV, ["keeper", "duplicate", "city", "distance_m", "matched_by", "keeper_reviews", "duplicate_reviews", "keeper_address", "duplicate_address", "phone_conflict", "fields_filled", "keeper_id", "duplicate_id"], p.merges)
   writeCsv(NAME_CHANGES_CSV, ["action", "before", "after", "why", "shop", "city", "artist_id"], p.nameChanges)
   writeCsv(NAMES_REVIEW_CSV, ["name", "why", "original", "shop", "city", "artist_id"], p.nameReview)
   writeCsv(CLOSED_CSV, ["name", "city", "website", "website_status", "phone", "facebook", "created_at", "shop_id"], p.closed)
+  writeCsv(HELD_CSV, ["reason", "keeper", "duplicate", "city", "distance_m", "matched_by", "keeper_pin", "duplicate_pin", "keeper_address", "duplicate_address", "keeper_reviews", "duplicate_reviews", "keeper_id", "duplicate_id"], p.held)
   writeCsv(PHOTOS_CSV, ["name", "host", "result", "avatar_url", "artist_id"], p.photoRows)
 }
 
@@ -910,6 +1106,7 @@ async function main() {
 
   // Write in part order; one undo line per field, appended before the write.
   const undo = new UndoLog(SCRIPT)
+  undo.append(plan.phoneNotes) // duplicates' other phones, kept for reference
   let done = 0
   for (const part of ["A", "B", "C", "D", "E"] as const) {
     const ws = plan.writes.filter((w) => w.part === part)

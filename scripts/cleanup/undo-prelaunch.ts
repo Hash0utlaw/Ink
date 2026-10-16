@@ -41,6 +41,7 @@ async function main() {
     .split("\n")
     .filter(Boolean)
     .map((line) => JSON.parse(line) as UndoEntry)
+    .filter((e) => e.op !== "note") // kept values (a duplicate's other phone), nothing to restore
   const foreign = entries.filter((e) => e.script !== SCRIPT || !TABLES.has(e.table) || e.op === "insert")
   if (foreign.length) throw new Error(`${foreign.length} entries are not from ${SCRIPT}; refusing.`)
 

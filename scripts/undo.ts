@@ -54,7 +54,7 @@ async function main() {
   // "__deleted__" lines record rows a previous undo deleted; they can't be replayed.
   const deletedRecords = all.filter((e) => e.field === "__deleted__").length
   if (deletedRecords > 0) console.log(`  ${deletedRecords} deleted-row records skipped (can't be re-inserted by undo)`)
-  const entries = all.filter((e) => e.op !== "insert" && e.field !== "__deleted__")
+  const entries = all.filter((e) => e.op !== "insert" && e.op !== "note" && e.field !== "__deleted__")
   for (const e of inserts) {
     if (DELETABLE_INSERTS[e.script] !== e.table) {
       console.error(`Refusing: insert entry for ${e.table} from ${e.script} — undo only deletes rows listed in DELETABLE_INSERTS.`)
