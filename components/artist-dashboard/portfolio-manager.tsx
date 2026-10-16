@@ -117,21 +117,37 @@ export function PortfolioManager({ userId, artistName, publicHref, initialPhotos
   const moveButtons = useRef(new Map<string, HTMLButtonElement | null>())
   const [focusAfterMove, setFocusAfterMove] = useState<string | null>(null)
   const queue = useRef<Promise<void>>(Promise.resolve())
+  const removeButtons = useRef(new Map<string, HTMLButtonElement | null>())
+  const chooseButton = useRef<HTMLButtonElement>(null)
+  const [focusAfterRemove, setFocusAfterRemove] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!focusAfterRemove) return
+    ;(focusAfterRemove === "choose" ? chooseButton.current : removeButtons.current.get(focusAfterRemove))?.focus()
+    setFocusAfterRemove(null)
+  }, [focusAfterRemove, photos])
+
+  // Saves go out one at a time, in order, so two quick moves can't land out of order.
+  const saveChain = useRef<Promise<unknown>>(Promise.resolve())
 
   // Saves one batch of changes, showing "Saving" then "Saved" (or the error).
-  const persist = useCallback(async (updates: Record<string, unknown>[]) => {
+  const persist = useCallback((updates: Record<string, unknown>[]): Promise<boolean> => {
     pending.current += 1
     setSave({ kind: "saving" })
-    try {
-      await patchPhotos(updates)
-      pending.current -= 1
-      if (pending.current === 0) setSave({ kind: "saved" })
-      return true
-    } catch (e) {
-      pending.current -= 1
-      setSave({ kind: "error", message: (e as Error).message })
-      return false
-    }
+    const run = saveChain.current.then(async () => {
+      try {
+        await patchPhotos(updates)
+        pending.current -= 1
+        if (pending.current === 0) setSave({ kind: "saved" })
+        return true
+      } catch (e) {
+        pending.current -= 1
+        setSave({ kind: "error", message: (e as Error).message })
+        return false
+      }
+    })
+    saveChain.current = run
+    return run
   }, [])
 
   // Captions still waiting on their debounce go out when the artist leaves the page or tab.
@@ -227,8 +243,12 @@ export function PortfolioManager({ userId, artistName, publicHref, initialPhotos
     captionTimers.current.delete(photo.id)
     const ok = await persist([{ id: photo.id, is_active: false, ...(captionPending ? { caption: photo.caption } : {}) }])
     if (!ok) return
-    setPhotos((list) => list.filter((p) => p.id !== photo.id))
+    const rest = photosRef.current.filter((p) => p.id !== photo.id)
+    setPhotos(rest)
+    // Keep keyboard focus nearby: the next photo's Remove, else the previous one's, else Choose photos.
+    setFocusAfterRemove(rest[index]?.id ?? rest[index - 1]?.id ?? "choose")
     toast({
+      duration: 10000,
       title: "Photo removed",
       description: photo.caption ? `"${photo.caption}" is off your page.` : "It's off your page.",
       action: (
@@ -380,7 +400,7 @@ export function PortfolioManager({ userId, artistName, publicHref, initialPhotos
             e.target.value = ""
           }}
         />
-        <button type="button" className={PRIMARY} disabled={full} onClick={() => inputRef.current?.click()}>
+        <button ref={chooseButton} type="button" className={PRIMARY} disabled={full} onClick={() => inputRef.current?.click()}>
           Choose photos
         </button>
       </div>
@@ -500,7 +520,15 @@ export function PortfolioManager({ userId, artistName, publicHref, initialPhotos
                       <ArrowDown className="h-4 w-4" aria-hidden="true" />
                     </button>
                   </span>
-                  <button type="button" onClick={() => void remove(i)} aria-label={`Remove ${name}`} className={TEXT_BUTTON}>
+                  <button
+                    type="button"
+                    ref={(el) => {
+                      removeButtons.current.set(photo.id, el)
+                    }}
+                    onClick={() => void remove(i)}
+                    aria-label={`Remove ${name}`}
+                    className={TEXT_BUTTON}
+                  >
                     Remove
                   </button>
                 </div>
