@@ -18,6 +18,8 @@ export interface Shop {
   }
   phone: string
   website: string
+  /** shops.website_status from the crawl: ok, redirected, not_found, dead, parked or error. */
+  websiteStatus?: string | null
   instagramUrl?: string
   /** shops.instagram_followers; null when we have no real count. */
   instagramFollowers?: number | null

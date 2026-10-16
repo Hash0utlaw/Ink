@@ -9,7 +9,7 @@ import { Plate } from "@/components/brand/plate"
 import { WhereToFindPanel, hasWhereToFind } from "@/components/brand/where-to-find"
 import { FollowList } from "@/components/brand/follow-list"
 import { formatMapAddress } from "@/lib/format-address"
-import { shopSocialLinks } from "@/lib/socials"
+import { shopSocialLinks, workingWebsite } from "@/lib/socials"
 import { allowedImageSrc } from "@/lib/utils/safe-image"
 import { STATE_ABBR_TO_NAME } from "@/lib/utils/states"
 import { cn } from "@/lib/utils"
@@ -32,7 +32,7 @@ export function ShopHeader({ shop, initialSaved, breadcrumb, artistCount = 0 }: 
   const photo = allowedImageSrc(shop.logoUrl)
   const stateName = STATE_ABBR_TO_NAME[shop.location.state] ?? shop.location.state
   const place = [shop.location.city, stateName].filter(Boolean).join(", ")
-  const websiteUrl = shop.website?.trim()
+  const websiteUrl = workingWebsite(shop)
   const claimHref = shop.slug ? `/claim?shop=${encodeURIComponent(shop.slug)}` : "/claim"
   const { lat, lng } = shop.location
   const coordinates: [number, number] | null = lat && lng ? [lng, lat] : null

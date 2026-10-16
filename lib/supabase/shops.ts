@@ -47,6 +47,7 @@ function rowToShop(row: Record<string, unknown>): Shop {
     },
     phone: String(row.phone ?? ""),
     website: String(row.website ?? ""),
+    websiteStatus: row.website_status != null ? String(row.website_status) : null,
     instagramUrl: String(row.instagram_url ?? ""),
     instagramFollowers: row.instagram_followers != null ? Number(row.instagram_followers) : null,
     tiktokUrl: String(row.tiktok_url ?? ""),

@@ -22,6 +22,15 @@ export interface SocialLink {
   detail: string
 }
 
+// Crawl results that mean the shop's website doesn't work (website_status).
+const BROKEN_WEBSITE = new Set(["dead", "parked", "not_found"])
+
+/** The shop's website for display, or "" when the crawl found it dead, parked or not found. */
+export function workingWebsite(shop: { website?: string | null; websiteStatus?: string | null }): string {
+  if (shop.websiteStatus && BROKEN_WEBSITE.has(shop.websiteStatus)) return ""
+  return shop.website?.trim() ?? ""
+}
+
 /** The URL when it's a usable http(s) link, else null. */
 export function safeHttpUrl(raw: string | null | undefined): string | null {
   const s = raw?.trim()
