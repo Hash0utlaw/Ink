@@ -36,8 +36,11 @@
 // Run: npx tsx scripts/cleanup/prelaunch.ts [--apply]
 //   Dry run by default: writes data/reports/prelaunch-dryrun.json (the plan),
 //   prelaunch-report.md and the CSVs listed in the report.
-//   --apply recomputes and stops if parts A–D differ from the dry run. Photos
-//   cleared in the dry run are checked once more; any that load now are kept.
+//   --apply recomputes and stops if parts A–D differ from the dry run, or if
+//   --expect-totals <shops>,<listed>,<artists> doesn't match the totals after.
+//   Photos the dry run found broken are checked once more: relative paths and
+//   404/410 are cleared; failed connections and timeouts are kept and listed in
+//   prelaunch-partE-connection-failures.csv for a later re-check.
 //   Undo: npx tsx scripts/cleanup/undo-prelaunch.ts --input <log> [--apply]
 
 import { config } from "dotenv"
@@ -78,6 +81,7 @@ const NAME_CHANGES_CSV = path.join(REPORT_DIR, "prelaunch-partC-names.csv")
 const NAMES_REVIEW_CSV = path.join(REPORT_DIR, "names-review.csv")
 const CLOSED_CSV = path.join(REPORT_DIR, "prelaunch-partD-possibly-closed.csv")
 const PHOTOS_CSV = path.join(REPORT_DIR, "prelaunch-partE-photos.csv")
+const PHOTO_FAILURES_CSV = path.join(REPORT_DIR, "prelaunch-partE-connection-failures.csv")
 const HELD_CSV = path.join(REPORT_DIR, "prelaunch-partB-held.csv")
 
 const DUP_RADIUS_M = 150
@@ -1089,20 +1093,39 @@ async function main() {
     for (const k of [...missing.slice(0, 10).map((k) => `- ${k}`), ...extra.slice(0, 10).map((k) => `+ ${k}`)]) console.error(`  ${k}`)
     process.exit(1)
   }
+  const expect = process.argv[process.argv.indexOf("--expect-totals") + 1]
+  if (process.argv.includes("--expect-totals")) {
+    const got = [plan.after.shops, plan.after.listed, plan.after.artists].join(",")
+    if (got !== expect) {
+      console.error(`Totals after would be ${got} (shops, finder, artists), expected ${expect}. Nothing written.`)
+      process.exit(1)
+    }
+  }
 
   // Part E: only photos the dry run found broken, each checked once more now.
+  // Relative paths and 404/410 are cleared; anything else is kept.
   const dryPhotos = new Set(dry.writes.filter((w) => w.part === "E").map((w) => w.id))
   const photoWrites = plan.writes.filter((w) => w.part === "E" && dryPhotos.has(w.id))
-  const recovered = new Set<string>()
+  const clear = new Set<string>()
+  const recheck = new Map<string, PhotoResult>()
   console.log(`Re-checking ${photoWrites.length} broken photos…`)
   await runPool(photoWrites, PHOTO_CONCURRENCY, async (w) => {
-    const r = await checkPhoto(String(w.old))
-    const v = photoVerdict(r)
-    if (v !== "gone" && v !== "unreachable") recovered.add(w.id)
+    const r = await checkPhoto(String(w.old).trim())
+    recheck.set(w.id, r)
+    if (r.error === "not a full web address" || photoVerdict(r) === "gone") clear.add(w.id)
   })
-  if (recovered.size) notes.push(`Part E: ${recovered.size} photos that failed in the dry run loaded on the re-check, so they were kept.`)
-  plan.writes = [...plan.writes.filter((w) => w.part !== "E"), ...photoWrites.filter((w) => !recovered.has(w.id))]
-  plan.photoRows = plan.photoRows.filter((r) => !recovered.has(String(r.artist_id)))
+  const rel = photoWrites.filter((w) => recheck.get(w.id)!.error === "not a full web address").length
+  const failures = plan.photoRows
+    .filter((r) => dryPhotos.has(String(r.artist_id)) && recheck.get(String(r.artist_id))?.status == null && !clear.has(String(r.artist_id)))
+    .map((r) => ({ ...r, recheck: `no connection (${recheck.get(String(r.artist_id))!.error})` }))
+  const loaded = photoWrites.length - clear.size - failures.length
+  writeCsv(PHOTO_FAILURES_CSV, ["name", "host", "result", "recheck", "avatar_url", "artist_id"], failures)
+  notes.push(
+    `Part E: ${rel} relative paths cleared / ${clear.size - rel} 404-410 cleared / ${failures.length} connection failures kept ` +
+      `(listed in ${path.relative(process.cwd(), PHOTO_FAILURES_CSV)})` + (loaded ? `; ${loaded} loaded or gave another HTTP status on the re-check and were kept.` : "."),
+  )
+  plan.writes = [...plan.writes.filter((w) => w.part !== "E"), ...photoWrites.filter((w) => clear.has(w.id))]
+  plan.photoRows = plan.photoRows.filter((r) => clear.has(String(r.artist_id)))
 
   // Write in part order; one undo line per field, appended before the write.
   const undo = new UndoLog(SCRIPT)
