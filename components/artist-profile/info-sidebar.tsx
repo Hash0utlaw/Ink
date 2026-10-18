@@ -145,7 +145,12 @@ export function InfoSidebar({
               )}
 
               <Button
-                className="min-h-11 w-full rounded border-1.5 border-ink bg-flash-red text-[15px] font-semibold text-white hover:bg-flash-red/90"
+                className={
+                  // No shop: "Request an intro" in How to book is the page's one red button, so this is ink (Round 11).
+                  artist.shopId
+                    ? "min-h-11 w-full rounded border-1.5 border-ink bg-flash-red text-[15px] font-semibold text-white hover:bg-flash-red/90"
+                    : "min-h-11 w-full rounded border-1.5 border-ink bg-ink text-[15px] font-semibold text-cream hover:bg-ink/90"
+                }
                 onClick={handleSubmit}
                 disabled={isSubmitting}
               >
