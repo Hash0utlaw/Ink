@@ -188,9 +188,15 @@ async function main() {
       break
     }
 
-    if ((i + 1) % 25 === 0 || PREFLIGHT) {
-      const rate = ((i + 1) / ((Date.now() - started) / 3_600_000)).toFixed(0)
-      if (!PREFLIGHT) console.log(`  ${i + 1}/${queue.length}  usage ${out.usage.max}%  ${rate}/h  ${JSON.stringify(counts)}`)
+    // One line per 100 lookups; npm run ig:status prints the latest one.
+    if ((i + 1) % 100 === 0 && !PREFLIGHT) {
+      const perHour = (i + 1) / ((Date.now() - started) / 3_600_000)
+      const remaining = queue.length - (i + 1)
+      const eta = new Date(Date.now() + (remaining / perHour) * 3_600_000)
+      const errors = (counts.invalid_username ?? 0) + (counts.rate_limited ?? 0) + (counts.other_error ?? 0)
+      console.log(
+        `PROGRESS ${new Date().toISOString()} | done ${i + 1} / remaining ${remaining} | ok ${counts.ok ?? 0} / not_business ${counts.not_business ?? 0} / errors ${errors} | usage ${out.usage.max}% | ${perHour.toFixed(0)}/h | ETA ${eta.toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })}`,
+      )
     }
 
     if (out.usage.max >= 90) {
