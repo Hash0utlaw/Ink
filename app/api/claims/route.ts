@@ -7,14 +7,16 @@ import { getShopBySlug } from "@/lib/supabase/shops"
 import { ADMIN_NOTIFY_EMAIL, FROM_EMAIL, REPLY_TO } from "@/lib/site-config"
 import { claimAdminEmail, claimReceiptEmail } from "@/lib/email/templates"
 import { hoursAgo, isNonEmptyString, isValidEmail } from "@/lib/validation"
+import { isWorkplace } from "@/lib/workplace"
 
 export const dynamic = "force-dynamic"
 
 const MAX_CLAIMS_PER_DAY = 5
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 export async function POST(request: Request) {
   try {
-    const { artistSlug, shopSlug, name, email, phone, instagram, listing } = await request.json()
+    const { artistSlug, shopSlug, name, email, phone, instagram, listing, workplace, workplaceShopId } = await request.json()
 
     if (!isNonEmptyString(name) || !isValidEmail(email) || !isNonEmptyString(listing)) {
       return NextResponse.json(
@@ -45,7 +47,17 @@ export async function POST(request: Request) {
       shopSlug ? getShopBySlug(shopSlug) : Promise.resolve(null),
     ])
 
+    // "Where do you work?" (artist claims only); applied by approveClaim. Never an address.
+    const workplaceFields =
+      artist && isWorkplace(workplace)
+        ? {
+            workplace,
+            workplace_shop_id: workplace === "shop" && typeof workplaceShopId === "string" && UUID.test(workplaceShopId) ? workplaceShopId : null,
+          }
+        : {}
+
     const { error: dbError } = await supabase.from("claim_requests").insert({
+      ...workplaceFields,
       artist_id: artist?.id ?? null,
       shop_id: shop?.id ?? null,
       claimant_name: name.trim(),

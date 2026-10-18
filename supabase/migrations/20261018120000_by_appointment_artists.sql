@@ -1,8 +1,7 @@
--- By-appointment artists: artists who work privately (no public shop) get a
--- city-level location of their own, so the finder and the map can list them.
--- DRAFT for Step 6. Not applied.
+-- Artists without a shop: a city-level location of their own, so the finder
+-- and the map can list them. Step 6 part 2. Not applied until approved.
 --
--- Privacy rule: a private artist's location is a city center, never a street
+-- Privacy rule: an artist's own location is a city center, never a street
 -- address or an exact point.
 --   * No address, ZIP or street column is added. Every artists column is public
 --     (RLS "Artists are publicly readable" and to_jsonb(a) in the finder), so
@@ -13,15 +12,20 @@
 --   * scripts/by-appointment/import.ts fills them with the city center from our
 --     own active shops (the same average /find-artist uses for "City, ST").
 --
--- Artists with a shop are unchanged: they are found at their shop, and a shop
--- always wins over an artist's own city point (the private branch requires
--- shop_id is null). Until rows have works_by_appointment = true and a point,
--- all three functions return exactly what they return today.
+-- Who is found at their city point: active artists with no shop and a point
+-- ("has an area location"). The shop always wins: an artist with a shop_id is
+-- found at the shop, as today. Until rows have a point, all three functions
+-- return exactly what they return today.
+--
+-- is_private_studio is only a label ("Private studio" instead of "Studio not
+-- listed"). Nothing in any import sets it; a claimed artist sets it by choosing
+-- "Private studio" (dashboard, or the claim form once the claim is approved).
+-- Choosing "At a shop" sets shop_id and clears it.
 --
 -- Signatures are unchanged, so create or replace keeps the existing grants.
 
 alter table public.artists
-  add column if not exists works_by_appointment boolean not null default false,
+  add column if not exists is_private_studio boolean not null default false,
   add column if not exists area_latitude numeric(5,2),
   add column if not exists area_longitude numeric(6,2);
 
@@ -33,8 +37,8 @@ alter table public.artists
   add constraint artists_area_point_range
     check (area_latitude between -90 and 90 and area_longitude between -180 and 180);
 
-comment on column public.artists.works_by_appointment is
-  'Works privately, by appointment, with no public shop. Never store a street address for these artists.';
+comment on column public.artists.is_private_studio is
+  'Set by the artist (claimed) when they work from a private studio. Never store a street address for them.';
 comment on column public.artists.area_latitude is
   'City-center latitude (2 decimals) for artists without a shop. Never a home or studio address.';
 comment on column public.artists.area_longitude is
@@ -42,10 +46,20 @@ comment on column public.artists.area_longitude is
 
 create index if not exists artists_area_point_idx
   on public.artists (area_latitude, area_longitude)
-  where is_active and shop_id is null and works_by_appointment and area_latitude is not null;
+  where is_active and shop_id is null and area_latitude is not null;
 
--- Finder: shop artists as before, plus by-appointment artists at their city
--- center. Private rows come back with "shops": null and "by_appointment": true;
+-- Claim form: "Where do you work?" Applied to the artist when the claim is
+-- approved (app/admin/intros/actions.ts approveClaim). Never an address.
+alter table public.claim_requests
+  add column if not exists workplace text,
+  add column if not exists workplace_shop_id uuid references public.shops(id) on delete set null;
+alter table public.claim_requests
+  drop constraint if exists claim_requests_workplace_check,
+  add constraint claim_requests_workplace_check
+    check (workplace is null or workplace in ('shop', 'private_studio'));
+
+-- Finder: shop artists as before, plus artists with no shop at their city
+-- center. Those rows come back with "shops": null and "area_only": true;
 -- the distance is to the city center.
 create or replace function public.finder_artists_near(
   p_lat double precision,
@@ -62,7 +76,7 @@ stable
 set search_path to 'public'
 as $function$
   with pts as (
-    select a, s, s.latitude::float8 as lat, s.longitude::float8 as lng, false as private
+    select a, s, s.latitude::float8 as lat, s.longitude::float8 as lng, false as area_only
     from artists a
     join shops s on s.id = a.shop_id
     where a.is_active
@@ -79,7 +93,6 @@ as $function$
     from artists a
     where a.is_active
       and a.shop_id is null
-      and a.works_by_appointment
       and a.area_latitude is not null
       and a.area_longitude is not null
       and a.area_latitude::float8 between p_lat - p_radius_mi / 69.0 and p_lat + p_radius_mi / 69.0
@@ -88,7 +101,7 @@ as $function$
       and (p_styles is null or cardinality(p_styles) = 0 or a.styles && p_styles)
   ),
   hits as (
-    select pts.a, pts.s, pts.private, d.dist
+    select pts.a, pts.s, pts.area_only, d.dist
     from pts
     cross join lateral (
       select 3958.8 * 2 * asin(least(1.0, sqrt(
@@ -103,8 +116,8 @@ as $function$
          || jsonb_build_object(
               'distance_mi', round(h.dist::numeric, 1),
               'total_count', count(*) over (),
-              'by_appointment', h.private,
-              'shops', case when h.private then null else jsonb_build_object(
+              'area_only', h.area_only,
+              'shops', case when h.area_only then null else jsonb_build_object(
                 'name', (h.s).name, 'address', (h.s).address, 'city', (h.s).city,
                 'state', (h.s).state, 'latitude', (h.s).latitude, 'longitude', (h.s).longitude
               ) end
@@ -144,7 +157,6 @@ as $function$
     from artists a
     where a.is_active
       and a.shop_id is null
-      and a.works_by_appointment
       and a.area_latitude is not null
       and a.area_longitude is not null
       and a.area_latitude::float8 between p_lat - p_radius_mi / 69.0 and p_lat + p_radius_mi / 69.0
@@ -183,7 +195,7 @@ stable
 set search_path to 'public'
 as $function$
   with pts as (
-    select a, s.name, s.address, s.city, s.state, s.latitude::float8 as lat, s.longitude::float8 as lng, false as private
+    select a, s.name, s.address, s.city, s.state, s.latitude::float8 as lat, s.longitude::float8 as lng, false as area_only
     from artists a
     join shops s on s.id = a.shop_id
     where a.is_active
@@ -199,7 +211,6 @@ as $function$
     from artists a
     where a.is_active
       and a.shop_id is null
-      and a.works_by_appointment
       and a.area_latitude is not null
       and a.area_longitude is not null
       and a.area_latitude::float8 between p_lat - p_radius_mi / 69.0 and p_lat + p_radius_mi / 69.0
@@ -209,8 +220,8 @@ as $function$
   select (to_jsonb(pts.a) - 'claim_email')
          || jsonb_build_object(
               'distance_mi', round(d.dist::numeric, 2),
-              'by_appointment', pts.private,
-              'shops', case when pts.private then null else jsonb_build_object('name', pts.name, 'address', pts.address, 'city', pts.city, 'state', pts.state) end
+              'area_only', pts.area_only,
+              'shops', case when pts.area_only then null else jsonb_build_object('name', pts.name, 'address', pts.address, 'city', pts.city, 'state', pts.state) end
             )
   from pts
   cross join lateral (

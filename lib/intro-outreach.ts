@@ -21,6 +21,12 @@ export interface IntroArtist {
   display_name: string | null
   handle: string | null
   shops: IntroShop | IntroShop[] | null
+  // The artist's own links (INTRO_ARTIST_COLUMNS): the only way to reach an artist with no shop.
+  instagram_handle?: string | null
+  website_url?: string | null
+  booking_url?: string | null
+  city?: string | null
+  state?: string | null
 }
 
 export interface IntroRequest {
@@ -34,6 +40,8 @@ export interface IntroRequest {
 
 export const INTRO_SHOP_COLUMNS =
   "name, address, city, state, zip, phone, email, website, facebook_url, instagram_url"
+/** Artist columns for the intro alert and admin list (with id, display_name, handle). */
+export const INTRO_ARTIST_COLUMNS = "instagram_handle, website_url, booking_url, city, state"
 
 export function introShop(artist: IntroArtist): IntroShop | null {
   if (!artist.shops) return null
@@ -95,7 +103,7 @@ export function hoursSince(iso: string, now = Date.now()): number {
 export function buildIntroAlertEmail(artist: IntroArtist, request: IntroRequest) {
   const shop = introShop(artist)
   const artistName = artist.display_name || "Unknown artist"
-  const location = [shop?.city, shop?.state].filter(Boolean).join(" ")
+  const location = [shop?.city ?? artist.city, shop?.state ?? artist.state].filter(Boolean).join(" ")
   const subject = `Intro request: ${artistName} at ${shop?.name ?? "no shop"}${location ? `, ${location}` : ""}`
 
   const contacts: [string, string, string][] = []
@@ -107,6 +115,13 @@ export function buildIntroAlertEmail(artist: IntroArtist, request: IntroRequest)
   add("Website", externalUrl(shop?.website))
   add("Facebook", externalUrl(shop?.facebook_url))
   add("Instagram", externalUrl(shop?.instagram_url))
+  // No shop (Round 11): the artist's own Instagram, website and booking link.
+  if (!shop) {
+    const ig = artist.instagram_handle?.trim().replace(/^@/, "")
+    if (ig) add("Instagram", `https://www.instagram.com/${encodeURIComponent(ig)}`, `@${ig}`)
+    add("Website", externalUrl(artist.website_url))
+    add("Booking link", externalUrl(artist.booking_url))
+  }
 
   return introAlertEmail({
     artistName,

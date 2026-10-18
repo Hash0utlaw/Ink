@@ -172,7 +172,7 @@ export async function buildPlan(supabase: SupabaseClient): Promise<{ planned: Pl
       shop_id: null,
       city,
       state: p.state,
-      works_by_appointment: true,
+      is_private_studio: false,
       area_latitude: center.lat,
       area_longitude: center.lng,
       is_active: true,

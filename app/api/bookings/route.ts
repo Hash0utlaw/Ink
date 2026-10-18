@@ -5,7 +5,7 @@ import { createAdminClient } from "@/utils/supabase/admin"
 import { ADMIN_NOTIFY_EMAIL, FROM_EMAIL, REPLY_TO } from "@/lib/site-config"
 import { newRequestArtistEmail, requestReceiptEmail } from "@/lib/email/templates"
 import { hoursAgo, isNonEmptyString, isValidEmail } from "@/lib/validation"
-import { buildIntroAlertEmail, INTRO_SHOP_COLUMNS, introShop, type IntroArtist, type IntroRequest } from "@/lib/intro-outreach"
+import { buildIntroAlertEmail, INTRO_ARTIST_COLUMNS, INTRO_SHOP_COLUMNS, introShop, type IntroArtist, type IntroRequest } from "@/lib/intro-outreach"
 import { requestNextStep } from "@/lib/request-copy"
 
 export const dynamic = "force-dynamic"
@@ -63,7 +63,7 @@ export async function POST(request: Request) {
 
     const { data: artistData } = await admin
       .from("artists")
-      .select(`id, display_name, handle, user_id, shop_id, shops(${INTRO_SHOP_COLUMNS})`)
+      .select(`id, display_name, handle, user_id, shop_id, ${INTRO_ARTIST_COLUMNS}, shops(${INTRO_SHOP_COLUMNS})`)
       .eq("id", artistId)
       .maybeSingle()
 
@@ -167,7 +167,12 @@ export async function POST(request: Request) {
     }
 
     // Same next step as the form (lib/request-copy.ts); no response-time promises.
-    const nextStep = requestNextStep({ name: artistName, shopName: introShop(artistRow)?.name, hasAccount: false })
+    const nextStep = requestNextStep({
+      name: artistName,
+      shopName: introShop(artistRow)?.name,
+      hasAccount: false,
+      hasInstagram: Boolean(artistRow.instagram_handle?.trim()),
+    })
     const clientEmailContent = requestReceiptEmail(
       artistNotified
         ? { kind: "sent", clientName, artistName }

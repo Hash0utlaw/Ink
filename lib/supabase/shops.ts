@@ -247,6 +247,8 @@ export async function getShopArtists(shopId: string): Promise<Artist[]> {
       handle: String(row.id ?? ""),
       name: displayName(String(row.name ?? "")),
       shopName: "",
+      isPrivateStudio: false,
+      hasAreaLocation: false,
       specialties: row.specialty ? [String(row.specialty)] : [],
       // Stub rows aren't in artists.styles yet; rules only (no AI) — see lib/styles.ts.
       styles: row.specialty ? matchStyleSlugs(String(row.specialty)) : [],

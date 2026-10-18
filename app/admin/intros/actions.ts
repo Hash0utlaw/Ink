@@ -5,6 +5,7 @@ import { Resend } from "resend"
 import { createClient } from "@/utils/supabase/server"
 import { createAdminClient } from "@/utils/supabase/admin"
 import { isAdmin } from "@/lib/admin"
+import { isWorkplace, workplacePatch } from "@/lib/workplace"
 import { FROM_EMAIL, REPLY_TO } from "@/lib/site-config"
 import { claimApprovedEmail, claimedRequestArtistEmail, claimedRequestClientEmail } from "@/lib/email/templates"
 
@@ -122,7 +123,8 @@ export async function approveClaim(claimId: string): Promise<ActionResult> {
 
   const { data: claim, error: claimError } = await admin
     .from("claim_requests")
-    .select("id, artist_id, shop_id, claimant_name, claimant_email, status")
+    // "*": workplace / workplace_shop_id exist only once the area-location migration runs.
+    .select("*")
     .eq("id", claimId)
     .maybeSingle()
   if (claimError || !claim) return { ok: false, error: claimError?.message ?? "Claim not found" }
@@ -133,6 +135,8 @@ export async function approveClaim(claimId: string): Promise<ActionResult> {
     claimant_name: string
     claimant_email: string
     status: string
+    workplace?: string | null
+    workplace_shop_id?: string | null
   }
   if (c.status !== "pending") return { ok: false, error: `Claim is already ${c.status}` }
   if (!c.artist_id && !c.shop_id) return { ok: false, error: "This claim isn't linked to an artist or shop" }
@@ -163,6 +167,20 @@ export async function approveClaim(claimId: string): Promise<ActionResult> {
     .eq("id", claimId)
   if (error) return { ok: false, error: error.message }
 
+  // "Where do you work?" from the claim form: at a listed shop, or a private studio (city only).
+  let workplaceNote = ""
+  if (c.artist_id && isWorkplace(c.workplace)) {
+    const { data: artistRow } = await admin.from("artists").select("id, city, state, area_latitude").eq("id", c.artist_id).maybeSingle()
+    const result = artistRow
+      ? await workplacePatch(admin, artistRow as { city: string | null; state: string | null; area_latitude: number | null }, c.workplace, c.workplace_shop_id)
+      : { error: "artist not found" }
+    if ("error" in result) workplaceNote = ` Where they work wasn't changed: ${result.error}`
+    else {
+      const { error: wpError } = await admin.from("artists").update(result.patch).eq("id", c.artist_id)
+      workplaceNote = wpError ? ` Where they work wasn't changed: ${wpError.message}` : ""
+    }
+  }
+
   const approved = claimApprovedEmail({ name: c.claimant_name })
   const resend = new Resend(process.env.RESEND_API_KEY)
   const { error: emailError } = await resend.emails.send({
@@ -175,8 +193,8 @@ export async function approveClaim(claimId: string): Promise<ActionResult> {
   })
 
   revalidatePath("/admin/intros")
-  if (emailError) return { ok: false, error: `Approved, but the email failed: ${emailError.message}` }
-  return { ok: true, message: "Claim approved" }
+  if (emailError) return { ok: false, error: `Approved, but the email failed: ${emailError.message}.${workplaceNote}` }
+  return { ok: true, message: workplaceNote ? `Claim approved.${workplaceNote}` : "Claim approved" }
 }
 
 export async function rejectClaim(claimId: string): Promise<ActionResult> {

@@ -1,8 +1,9 @@
 "use client"
 
 import { useEffect, useRef, useState, useCallback } from "react"
-import { type MapboxLocation, type MapStyle, defaultMapConfig, mapStyles } from "@/lib/mapbox"
+import { type MapArea, type MapboxLocation, type MapStyle, defaultMapConfig, mapStyles } from "@/lib/mapbox"
 import { MAP_COLORS } from "@/lib/brand-colors"
+import { AREA_MARKER_BUTTON, AREA_MARKER_DOT, AREA_MARKER_DOT_SELECTED, formatSealCount } from "@/components/brand/map-pin"
 
 // Some scraped locations have missing/malformed coordinates. Mapbox's
 // LngLatBounds.extend() accepts them silently but throws later inside
@@ -25,6 +26,26 @@ function isValidCoordinate(coords: unknown): coords is [number, number] {
 const MAPBOX_GL_VERSION = "3.0.1"
 
 const LOCATIONS_SOURCE_ID = "locations"
+// City circles' halos (artists with no shop). The circles themselves are DOM
+// markers (see the "City circles" effect); this source only draws the faint
+// navy area around each one, so it reads as a city, not a spot.
+const AREAS_SOURCE_ID = "areas"
+
+/** "12 more artists in Miami": the city circle's label and its list's title. */
+export function areaLabel(area: Pick<MapArea, "count" | "city">): string {
+  return `${area.count} more ${area.count === 1 ? "artist" : "artists"}${area.city ? ` in ${area.city}` : ""}`
+}
+
+function areasGeojson(areas: MapArea[]) {
+  return {
+    type: "FeatureCollection",
+    features: areas.map((a) => ({
+      type: "Feature",
+      geometry: { type: "Point", coordinates: [a.lng, a.lat] },
+      properties: { key: a.key },
+    })),
+  }
+}
 
 // Points cluster up to this zoom; from CLUSTER_MAX_ZOOM + 1 every pin is drawn
 // on its own, which is when the list numbers its rows (map-interface.tsx).
@@ -178,6 +199,10 @@ interface MapboxMapProps {
   style?: MapStyle
   /** Location id → list number (1–9) to draw on that pin. */
   pinNumbers?: Map<string, number>
+  /** City circles: artists with no shop, one per city-center point. Never spread into pins. */
+  areas?: MapArea[]
+  selectedAreaKey?: string | null
+  onAreaSelect?: (area: MapArea) => void
   onMapLoad?: (map: any) => void
   onMoveEnd?: (bounds: MapBounds) => void
   className?: string
@@ -192,6 +217,9 @@ export function MapboxMap({
   zoom = defaultMapConfig.zoom,
   style = "chart",
   pinNumbers,
+  areas = [],
+  selectedAreaKey = null,
+  onAreaSelect,
   onMapLoad,
   onMoveEnd,
   className = "",
@@ -201,6 +229,10 @@ export function MapboxMap({
   const onMapLoadRef = useRef(onMapLoad)
   const onMoveEndRef = useRef(onMoveEnd)
   const onLocationSelectRef = useRef(onLocationSelect)
+  const onAreaSelectRef = useRef(onAreaSelect)
+  const areasRef = useRef<MapArea[]>(areas)
+  // key → { marker, dot } for the city circles currently on the map.
+  const areaMarkersRef = useRef<Map<string, { marker: any; dot: HTMLSpanElement; button: HTMLButtonElement }>>(new Map())
   const [mapLoaded, setMapLoaded] = useState(false)
   const [mapboxLoaded, setMapboxLoaded] = useState(false)
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -228,6 +260,9 @@ export function MapboxMap({
   useEffect(() => {
     onLocationSelectRef.current = onLocationSelect
   }, [onLocationSelect])
+  useEffect(() => {
+    onAreaSelectRef.current = onAreaSelect
+  }, [onAreaSelect])
 
   // Extracted out of the effect so handleRetry (below) can re-invoke the exact
   // same loading logic instead of duplicating it.
@@ -269,6 +304,26 @@ export function MapboxMap({
   const ensureClusterLayers = useCallback(() => {
     const m = map.current
     if (!m) return
+
+    // City halos sit under everything else; from zoom 8 up, when a city is big enough to read.
+    if (!m.getSource(AREAS_SOURCE_ID)) {
+      m.addSource(AREAS_SOURCE_ID, { type: "geojson", data: areasGeojson(areasRef.current) })
+      m.addLayer({
+        id: "area-halo",
+        type: "circle",
+        source: AREAS_SOURCE_ID,
+        paint: {
+          "circle-color": MAP_COLORS.navy,
+          "circle-opacity": ["interpolate", ["linear"], ["zoom"], 7, 0, 9, 0.14],
+          "circle-stroke-color": MAP_COLORS.navy,
+          "circle-stroke-opacity": ["interpolate", ["linear"], ["zoom"], 7, 0, 9, 1],
+          "circle-stroke-width": 1.5,
+          "circle-radius": 54,
+        },
+      })
+    } else {
+      m.getSource(AREAS_SOURCE_ID).setData(areasGeojson(areasRef.current))
+    }
 
     if (!m.getSource(LOCATIONS_SOURCE_ID)) {
       m.addSource(LOCATIONS_SOURCE_ID, {
@@ -529,6 +584,7 @@ export function MapboxMap({
         map.current.remove()
         map.current = null
       }
+      areaMarkersRef.current.clear()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accessToken, mapboxLoaded])
@@ -550,6 +606,7 @@ export function MapboxMap({
       map.current.remove()
       map.current = null
     }
+    areaMarkersRef.current.clear()
     clusterHandlersAttachedRef.current = false
     setLoadError(null)
     setMapLoaded(false)
@@ -636,6 +693,61 @@ export function MapboxMap({
     baseFeaturesRef.current = features
     applyData()
   }, [locations, pinNumbers, mapLoaded, applyData])
+
+  // City circles: one DOM button per city-center point (so each has a label and
+  // takes focus). Markers survive style swaps; they're only added or removed here.
+  useEffect(() => {
+    areasRef.current = areas
+    const m = map.current
+    if (!m || !mapLoaded || !window.mapboxgl) return
+    m.getSource(AREAS_SOURCE_ID)?.setData(areasGeojson(areas))
+
+    const current = areaMarkersRef.current
+    const next = new Set(areas.map((a) => a.key))
+    for (const [key, entry] of current) {
+      if (!next.has(key)) {
+        entry.marker.remove()
+        current.delete(key)
+      }
+    }
+    for (const area of areas) {
+      const existing = current.get(area.key)
+      const label = areaLabel(area)
+      if (existing) {
+        existing.dot.textContent = formatSealCount(area.count)
+        existing.button.setAttribute("aria-label", label)
+        existing.button.onclick = (e) => {
+          e.stopPropagation()
+          onAreaSelectRef.current?.(area)
+        }
+        continue
+      }
+      const button = document.createElement("button")
+      button.type = "button"
+      button.className = AREA_MARKER_BUTTON
+      button.setAttribute("aria-label", label)
+      const dot = document.createElement("span")
+      dot.className = AREA_MARKER_DOT
+      dot.setAttribute("aria-hidden", "true")
+      dot.textContent = formatSealCount(area.count)
+      button.appendChild(dot)
+      button.onclick = (e) => {
+        e.stopPropagation()
+        onAreaSelectRef.current?.(area)
+      }
+      const marker = new window.mapboxgl.Marker({ element: button, anchor: "center" }).setLngLat([area.lng, area.lat]).addTo(m)
+      current.set(area.key, { marker, dot, button })
+    }
+  }, [areas, mapLoaded])
+
+  // The open city circle turns red, like a selected pin.
+  useEffect(() => {
+    for (const [key, { dot, button }] of areaMarkersRef.current) {
+      const selected = key === selectedAreaKey
+      dot.className = selected ? `${AREA_MARKER_DOT} ${AREA_MARKER_DOT_SELECTED}` : AREA_MARKER_DOT
+      button.setAttribute("aria-pressed", selected ? "true" : "false")
+    }
+  }, [selectedAreaKey, areas, mapLoaded])
 
   // Highlight the selected point via Mapbox feature-state instead of
   // mutating a per-marker DOM element (there are no more per-marker elements).

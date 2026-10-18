@@ -46,3 +46,13 @@ export function ClusterSeal({ count, className }: { count: number | string; clas
     </span>
   )
 }
+
+// City circle (Round 11): artists with no shop, one per city-center point. A
+// navy 34px dot with a vellum count inside a 44px button. It never spreads into
+// pins. The map builds it as a DOM marker (a real button, so it has a label and
+// takes focus); these are its classes.
+export const AREA_MARKER_BUTTON =
+  "flex h-11 w-11 cursor-pointer items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+export const AREA_MARKER_DOT =
+  "flex h-[34px] w-[34px] items-center justify-center rounded-full border-1.5 border-ink bg-navy font-sans text-sm font-bold tabular-nums text-vellum"
+export const AREA_MARKER_DOT_SELECTED = "border-2 bg-flash-red text-white"

@@ -181,3 +181,49 @@ export function artistQuery(bounds: Bounds | null, styleParams: string[], rating
     return q
   }
 }
+
+// ---- artists with no shop, at their city's center ------------------------------
+
+// Never an address: these rows have only city, state and a 2-decimal point.
+export const AREA_PIN_COLUMNS = "id, city, state, area_latitude, area_longitude"
+export const AREA_LIST_COLUMNS = "id, display_name, instagram_followers, is_private_studio, city, state"
+
+/** Active artists with no shop and a city point; same style filter as artistQuery. */
+export function areaArtistQuery(styleParams: string[]): QueryFactory {
+  const supabase = createClient()
+  const styles = toStyleSlugs(styleParams)
+  return (columns, head) => {
+    let q = supabase
+      .from("artists")
+      .select(columns, head ? { count: "exact", head: true } : undefined)
+      .eq("is_active", true)
+      .is("shop_id", null)
+      .not("area_latitude", "is", null)
+      .not("area_longitude", "is", null)
+    if (styles.length > 0) q = q.overlaps("styles", styles)
+    return q
+  }
+}
+
+/** "25.77,-80.28" for a 2-decimal point. */
+export const areaKey = (lat: number, lng: number) => `${lat.toFixed(2)},${lng.toFixed(2)}`
+
+/** One entry per city point: [lat, lng, count, city, state]. */
+export function groupAreas(rows: Record<string, unknown>[]): [number, number, number, string, string][] {
+  const groups = new Map<string, { lat: number; lng: number; count: number; cities: Map<string, number>; state: string }>()
+  for (const r of rows) {
+    const lat = Number(r.area_latitude)
+    const lng = Number(r.area_longitude)
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) continue
+    const key = areaKey(lat, lng)
+    const g = groups.get(key) ?? { lat: Number(lat.toFixed(2)), lng: Number(lng.toFixed(2)), count: 0, cities: new Map(), state: String(r.state ?? "") }
+    g.count++
+    const city = String(r.city ?? "").trim()
+    if (city) g.cities.set(city, (g.cities.get(city) ?? 0) + 1)
+    groups.set(key, g)
+  }
+  return Array.from(groups.values()).map((g) => {
+    const city = Array.from(g.cities.entries()).sort((a, b) => b[1] - a[1])[0]?.[0] ?? ""
+    return [g.lat, g.lng, g.count, city, g.state]
+  })
+}

@@ -17,6 +17,13 @@ export interface Artist {
   shopName: string
   /** artists.shop_id, when the artist is listed at a shop. */
   shopId?: string
+  /** artists.is_private_studio: the (claimed) artist says they work from a private studio. Only they set it. */
+  isPrivateStudio: boolean
+  /**
+   * No shop, but a city-level point (artists.area_latitude/longitude, 2 decimals):
+   * found in the finder and on the map at their city's center. Never an address.
+   */
+  hasAreaLocation: boolean
   /** Free-text tags as scraped/entered. Display and filtering use `styles`. */
   specialties: string[]
   /** Canonical style slugs from lib/styles.ts (artists.styles), in STYLES order. */

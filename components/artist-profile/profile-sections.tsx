@@ -4,6 +4,7 @@ import type { Review } from "@/lib/supabase/reviews"
 import Link from "next/link"
 import type { PortfolioPhoto } from "@/lib/supabase/portfolio"
 import { PortfolioGallery } from "./portfolio-gallery"
+import { firstName } from "@/components/brand/private-studio"
 
 /** A profile section: Young Serif 30px heading, then its content. */
 export function ProfileSection({
@@ -56,9 +57,13 @@ function NoPortfolio({ artist }: { artist: Artist }) {
     <div className="flex flex-col gap-2 rounded border-1.5 border-ink bg-vellum tex-vellum p-5 lg:p-7">
       <p className="font-heading text-[22px] leading-[1.2] text-ink">No portfolio yet</p>
       <p className="text-[15px] leading-[1.5] text-ink-muted text-pretty">
-        {claimed
-          ? `${artist.name} hasn't added work to TattooMaps yet. Check back soon.`
-          : `${artist.name} hasn't added work to TattooMaps yet. Ask the shop for recent work.`}
+        {!artist.shopId
+          ? artist.instagramHandle?.trim()
+            ? `${firstName(artist.name)} hasn't added work to TattooMaps yet. Their Instagram has their latest work.`
+            : `${firstName(artist.name)} hasn't added work to TattooMaps yet. Check back soon.`
+          : claimed
+            ? `${artist.name} hasn't added work to TattooMaps yet. Check back soon.`
+            : `${artist.name} hasn't added work to TattooMaps yet. Ask the shop for recent work.`}
       </p>
       {!claimed && (
         <p className="mt-1.5 text-sm text-ink text-pretty">

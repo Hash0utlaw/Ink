@@ -1,8 +1,9 @@
 // scripts/by-appointment/import.ts — Step 6: list private (by appointment)
 // TattoosWizard artists. Fetches nothing; reads the Step 1 cache and the database.
 //
-// Inserts one artists row per private artist (scripts/by-appointment/plan.ts
-// decides who): shop_id null, works_by_appointment true, city + state, and
+// Inserts one artists row per artist with no shop (scripts/by-appointment/plan.ts
+// decides who): shop_id null, is_private_studio false (only the artist sets
+// that, by claiming), city + state, and
 // area_latitude / area_longitude = the city center from our own active shops
 // (2 decimals). Never a street address, ZIP, TattoosWizard's own point, email
 // or phone. Photos are not copied (they're hosted by TattoosWizard).
@@ -50,7 +51,7 @@ const BATCH = 500
 // Columns an insert may set. Anything else in a record is a bug: stop.
 const ALLOWED = new Set([
   "id", "display_name", "handle", "instagram_handle", "instagram_followers", "instagram_checked_at", "tiktok_handle", "styles",
-  "website_url", "booking_url", "shop_id", "city", "state", "works_by_appointment", "area_latitude", "area_longitude",
+  "website_url", "booking_url", "shop_id", "city", "state", "is_private_studio", "area_latitude", "area_longitude",
   "is_active", "is_claimed", "source",
 ])
 
@@ -88,12 +89,14 @@ async function main() {
       const v = Number(r[k])
       if (!Number.isFinite(v) || Math.round(v * 100) / 100 !== v) throw new Error(`Refusing: ${k}=${r[k]} is not a 2-decimal city point`)
     }
-    if (r.shop_id !== null || r.works_by_appointment !== true) throw new Error("Refusing: private rows must have no shop and works_by_appointment true")
+    if (r.shop_id !== null) throw new Error("Refusing: these rows must have no shop")
+    // Only the artist sets "Private studio" (claim or dashboard), never an import.
+    if (r.is_private_studio !== false) throw new Error("Refusing: an import never sets is_private_studio")
   }
 
   const hash = planHash(records)
   if (APPLY) {
-    const probe = await supabase.from("artists").select("id, works_by_appointment, area_latitude, area_longitude").limit(1)
+    const probe = await supabase.from("artists").select("id, is_private_studio, area_latitude, area_longitude").limit(1)
     if (probe.error) throw new Error(`The by-appointment migration isn't applied (${probe.error.message}). Apply supabase/migrations/20261018120000_by_appointment_artists.sql first.`)
     if (!fs.existsSync(PLAN_FILE)) throw new Error("No dry-run plan found. Run without --apply first.")
     const plan = JSON.parse(fs.readFileSync(PLAN_FILE, "utf-8")) as { hash: string; inserts: number }
@@ -141,9 +144,9 @@ async function main() {
   const cities = new Set(records.map((r) => `${r.city}|${r.state}`))
   const L: string[] = []
   L.push(`## Step 6 import plan: ${APPLY ? "APPLIED" : "DRY RUN (nothing written)"}`, "")
-  L.push(`**In one sentence:** ${APPLY ? "Added" : "Would add"} ${fmt(records.length)} by-appointment artists in ${fmt(cities.size)} cities, each placed at their city's center with no address, and skipped ${fmt(skipped.length)} (already listed, junk, or held for review).`, "")
+  L.push(`**In one sentence:** ${APPLY ? "Added" : "Would add"} ${fmt(records.length)} artists with no listed studio in ${fmt(cities.size)} cities, each placed at their city's center with no address, and skipped ${fmt(skipped.length)} (already listed, junk, or held for review).`, "")
   L.push("| What | Count |", "|---|---|")
-  L.push(`| Private TattoosWizard artists | ${fmt(planned.length)} |`)
+  L.push(`| TattoosWizard artists with no shop found | ${fmt(planned.length)} |`)
   L.push(`| Would insert | ${fmt(records.length)} |`)
   L.push(`| Already listed (left where they are) | ${fmt(count("duplicate"))} |`)
   for (const [r, n] of reasons("duplicate")) L.push(`| &nbsp;&nbsp;– ${r} | ${fmt(n)} |`)
@@ -153,13 +156,14 @@ async function main() {
   for (const [r, n] of reasons("review")) L.push(`| &nbsp;&nbsp;– ${r} | ${fmt(n)} |`)
   L.push(`| Inserts with styles / Instagram / followers | ${fmt(records.filter((r) => (r.styles as string[]).length).length)} / ${fmt(records.filter((r) => r.instagram_handle).length)} / ${fmt(records.filter((r) => r.instagram_followers).length)} |`)
   L.push(`| Inserts with website / booking link / TikTok | ${fmt(records.filter((r) => r.website_url).length)} / ${fmt(records.filter((r) => r.booking_url).length)} / ${fmt(records.filter((r) => r.tiktok_handle).length)} |`)
+  L.push(`| Shown as "Studio not listed" / is_private_studio true | ${fmt(records.filter((r) => r.is_private_studio === false).length)} / ${fmt(records.filter((r) => r.is_private_studio !== false).length)} |`)
   L.push(`| Active artists: now / after | ${fmt(snapshot.activeArtists)} / ${fmt(snapshot.activeArtists + records.length)} |`)
   L.push("")
   L.push("**10 example artists** (spread through the list, most followed first)", "", "| Name | City | Instagram | Followers | Styles | Card line | Pin at |", "|---|---|---|---|---|---|---|")
   for (const x of seeded(inserts, 10)) {
     const r = x.outcome.record
     L.push(
-      `| ${r.display_name} | ${r.city}, ${r.state} | ${r.instagram_handle ? `[@${r.instagram_handle}](https://www.instagram.com/${r.instagram_handle})` : "—"} | ${followers(r.instagram_followers)} | ${(r.styles as string[]).map((s) => styleLabel(s)).join(", ") || "—"} | By appointment · ${r.city}, ${r.state} | ${r.city} center (${Number(r.area_latitude).toFixed(2)}, ${Number(r.area_longitude).toFixed(2)}) |`,
+      `| ${r.display_name} | ${r.city}, ${r.state} | ${r.instagram_handle ? `[@${r.instagram_handle}](https://www.instagram.com/${r.instagram_handle})` : "—"} | ${followers(r.instagram_followers)} | ${(r.styles as string[]).map((s) => styleLabel(s)).join(", ") || "—"} | Studio not listed, ${r.city}, ${r.state} | ${r.city} center (${Number(r.area_latitude).toFixed(2)}, ${Number(r.area_longitude).toFixed(2)}) |`,
     )
   }
   L.push("")

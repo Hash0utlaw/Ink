@@ -1,7 +1,11 @@
-# By-appointment artists: plan (Step 6, part 1)
+# Artists with no shop: plan and build (Step 6)
 
-Research and plan only. Nothing here is applied: the migration is a draft, the
-import has only been dry-run, and no UI is built.
+Part 1 was the research and plan. Part 2 builds it, following design Round 11.
+TattoosWizard has no "private" label: only 37 of the 1,101 say "private studio",
+and only in machine-written text. So imported rows are shown as
+**"Studio not listed"**, and `is_private_studio` is false for every one of them.
+Only a claimed artist can choose "Private studio" (claim form or dashboard).
+The migration is applied only after approval.
 
 ## The artists
 
@@ -53,10 +57,10 @@ for the same reason.
 ## Options
 
 **a) An artist-level city point (recommended).** Add
-`works_by_appointment boolean`, plus `area_latitude numeric(5,2)` and
+`is_private_studio boolean` (a label only the artist sets), plus `area_latitude numeric(5,2)` and
 `area_longitude numeric(6,2)`, to `artists`. The finder, style counts and
 near search take shop artists as before, plus artists who have no shop,
-`works_by_appointment` set and a point.
+a city point.
 - Pros:
   - One row per artist.
   - Privacy is enforced by the column types: 2 decimals is about 1 km, and the
@@ -132,7 +136,7 @@ These are checked against the database now, not the Step 1 snapshot:
 | Finder filter (optional) | A "By appointment" chip or toggle next to the style chips. |
 
 App code that would change along with the UI (not built):
-- `rowToArtist`: read `area_latitude`/`area_longitude` and `works_by_appointment`.
+- `rowToArtist`: read `area_latitude`/`area_longitude` and `is_private_studio`.
 - `/api/map/pins` and `lib/map-data.ts`: a second query for by-appointment artists.
 - `lib/request-copy.ts` and `lib/intro-outreach.ts`: the no-shop copy and contacts.
 
@@ -146,4 +150,4 @@ App code that would change along with the UI (not built):
    deletes them.
 4. Review the 258 held artists. For the 49 cities with none of our shops, take
    centers from the Census Gazetteer.
-5. Optionally flag the 73 existing artists with no shop as by-appointment.
+5. Optionally give the 73 existing artists with no shop a city point.
