@@ -4,8 +4,9 @@ import { useState, useEffect, useCallback, useMemo, useRef } from "react"
 import { MapboxMap, UNCLUSTERED_ZOOM, getViewBounds, type MapBounds } from "./mapbox-map"
 import { MapSidebar } from "./map-sidebar"
 import { LocationDetails } from "./location-details"
+import { AreaDetails } from "./area-details"
 import { List } from "lucide-react"
-import type { MapboxLocation, MapStyle } from "@/lib/mapbox"
+import type { MapArea, MapAreaArtist, MapboxLocation, MapStyle } from "@/lib/mapbox"
 import { NeatlineFrame } from "@/components/brand/neatline-frame"
 import { cn } from "@/lib/utils"
 import { calculateDistance, getCurrentLocation, geocodePlace, mapboxConfig } from "@/lib/mapbox"
@@ -39,6 +40,11 @@ const MAP_STYLE_OPTIONS: { value: MapStyle; label: string }[] = [
 ]
 
 type Pin = [string, number, number, number, string?] // id, lat, lng, rating, primary style slug
+type AreaPin = [number, number, number, string, string] // lat, lng, count, city, state
+
+function toArea([lat, lng, count, city, state]: AreaPin): MapArea {
+  return { key: `${lat.toFixed(2)},${lng.toFixed(2)}`, lat, lng, count, city, state }
+}
 
 // Minimal MapboxLocation for a pin — enough for clustering, colors, filters
 // and click lookup; replaced by the full record from /api/map/details.
@@ -96,6 +102,14 @@ export function MapInterface({ initialCenter = null, initialPlace = null }: MapI
   const [inView, setInView] = useState<{ shops: number; artists: number } | null>(null)
   const [bounds, setBounds] = useState<MapBounds | null>(null)
   const [selectedLocation, setSelectedLocation] = useState<MapboxLocation | null>(null)
+  // City circles (artists with no shop) and the open one's list.
+  const [areas, setAreas] = useState<MapArea[]>([])
+  const [selectedArea, setSelectedArea] = useState<MapArea | null>(null)
+  const [areaList, setAreaList] = useState<{ artists: MapAreaArtist[] | null; total: number; error: boolean }>({
+    artists: null,
+    total: 0,
+    error: false,
+  })
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null)
   const [mapCenter, setMapCenter] = useState<[number, number]>(initialCenter ?? [-98.5795, 39.8283])
   const [mapZoom, setMapZoom] = useState(initialCenter ? 10 : 4)
@@ -137,6 +151,7 @@ export function MapInterface({ initialCenter = null, initialPlace = null }: MapI
           ...((json.shops ?? []) as Pin[]).map((p) => pinToLocation("shop", p)),
           ...((json.artists ?? []) as Pin[]).map((p) => pinToLocation("artist", p)),
         ])
+        setAreas(((json.areas ?? []) as AreaPin[]).map(toArea))
       } catch (error) {
         console.error("Failed to load map pins:", error)
         if (!cancelled) {
@@ -191,6 +206,35 @@ export function MapInterface({ initialCenter = null, initialPlace = null }: MapI
       return true
     })
   }, [pins, filters.locationType, filters.rating, filters.radius, userLocation])
+
+  // City circles after the same type and radius filters (they're artists).
+  const mapAreas = useMemo(() => {
+    if (filters.locationType === "shop") return []
+    return areas.filter(
+      (a) => !(userLocation && filters.radius > 0 && calculateDistance(userLocation, [a.lng, a.lat]) > filters.radius)
+    )
+  }, [areas, filters.locationType, filters.radius, userLocation])
+
+  // Opening a city circle closes the pin card, and the other way round.
+  const handleAreaSelect = useCallback(
+    async (area: MapArea) => {
+      setSelectedLocation(null)
+      setSelectedArea(area)
+      setAreaList({ artists: null, total: area.count, error: false })
+      try {
+        const params = new URLSearchParams({ lat: area.lat.toFixed(2), lng: area.lng.toFixed(2) })
+        if (stylesKey) params.set("styles", stylesKey)
+        const res = await fetch(`/api/map/area?${params}`)
+        if (!res.ok) throw new Error(`area ${res.status}`)
+        const json = await res.json()
+        setAreaList({ artists: (json.artists ?? []) as MapAreaArtist[], total: Number(json.total ?? area.count), error: false })
+      } catch (error) {
+        console.error("Failed to load area list:", error)
+        setAreaList({ artists: null, total: area.count, error: true })
+      }
+    },
+    [stylesKey]
+  )
 
   // Pins in view → counts + top MAX_CARDS by rating → fetch any uncached
   // details → sidebar cards. Stale responses are dropped via requestRef.
@@ -334,6 +378,7 @@ export function MapInterface({ initialCenter = null, initialPlace = null }: MapI
         setSelectedLocation(null)
         return
       }
+      setSelectedArea(null)
       setMapCenter(location.coordinates)
       setMapZoom(16)
       const cached = detailsCacheRef.current.get(location.id)
@@ -392,6 +437,9 @@ export function MapInterface({ initialCenter = null, initialPlace = null }: MapI
             zoom={mapZoom}
             style={mapStyle}
             pinNumbers={pinNumbers}
+            areas={mapAreas}
+            selectedAreaKey={selectedArea?.key ?? null}
+            onAreaSelect={handleAreaSelect}
             onMoveEnd={handleMoveEnd}
             onMapLoad={handleMapLoad}
             className="w-full h-full"
@@ -432,6 +480,17 @@ export function MapInterface({ initialCenter = null, initialPlace = null }: MapI
           </div>
 
           {/* Selected shop, docked bottom-left (bottom on mobile) */}
+          {selectedArea && !selectedLocation && (
+            <AreaDetails
+              area={selectedArea}
+              artists={areaList.artists}
+              total={areaList.total}
+              error={areaList.error}
+              styles={filters.styles}
+              onClose={() => setSelectedArea(null)}
+            />
+          )}
+
           {selectedLocation && (
             <LocationDetails
               location={selectedLocation}

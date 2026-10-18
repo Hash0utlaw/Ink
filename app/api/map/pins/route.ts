@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
-import { ARTIST_LIMIT, SHOP_LIMIT, artistQuery, fetchAllPages, shopQuery } from "@/lib/map-data"
+import { AREA_PIN_COLUMNS, ARTIST_LIMIT, SHOP_LIMIT, areaArtistQuery, artistQuery, fetchAllPages, groupAreas, shopQuery } from "@/lib/map-data"
 import { sortStyleSlugs } from "@/lib/styles"
 
 export const dynamic = "force-dynamic"
@@ -11,6 +11,9 @@ export const dynamic = "force-dynamic"
 //   artists: [id, lat, lng, rating, primaryStyle?] — the 5th element (a
 //            lib/styles.ts slug) only drives the pin color (see mapbox-map.tsx
 //            getStyleColor) and is omitted when the artist has no styles.
+//   areas:   [lat, lng, count, city, state] — artists with no shop, one entry
+//            per city-center point (2 decimals). The map draws each as one
+//            navy circle; the list comes from /api/map/area.
 // ids are raw UUIDs; the client adds the "shop-"/"artist-" prefixes.
 
 const round = (n: unknown, places: number) => {
@@ -22,7 +25,7 @@ export async function GET(request: NextRequest) {
   const stylesParam = request.nextUrl.searchParams.get("styles")
   const styles = stylesParam ? stylesParam.split(",").filter(Boolean) : []
 
-  const [shops, artists] = await Promise.all([
+  const [shops, artists, areaArtists] = await Promise.all([
     fetchAllPages(shopQuery(null, 0), "id, latitude, longitude, rating", SHOP_LIMIT, "pins shops"),
     fetchAllPages(
       artistQuery(null, styles, 0),
@@ -30,6 +33,8 @@ export async function GET(request: NextRequest) {
       ARTIST_LIMIT,
       "pins artists"
     ),
+    // Empty (logged) until the area-location migration is applied.
+    fetchAllPages(areaArtistQuery(styles), AREA_PIN_COLUMNS, ARTIST_LIMIT, "pins areas"),
   ])
 
   const shopPins = shops.rows.map((r) => [r.id, round(r.latitude, 5), round(r.longitude, 5), round(r.rating ?? 0, 1)])
@@ -45,7 +50,13 @@ export async function GET(request: NextRequest) {
   })
 
   return NextResponse.json(
-    { v: 1, shops: shopPins, artists: artistPins, totals: { shops: shops.total, artists: artists.total } },
+    {
+      v: 1,
+      shops: shopPins,
+      artists: artistPins,
+      areas: groupAreas(areaArtists.rows),
+      totals: { shops: shops.total, artists: artists.total, areaArtists: areaArtists.total },
+    },
     { headers: { "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400" } }
   )
 }

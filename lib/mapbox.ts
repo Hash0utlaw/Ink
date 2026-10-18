@@ -22,6 +22,28 @@ export interface MapboxLocation {
   instagram?: string
 }
 
+/**
+ * Artists with no shop, grouped at one city-center point (2 decimals, never an
+ * address). Drawn as one navy circle with a count that never spreads into pins.
+ */
+export interface MapArea {
+  /** "25.77,-80.28": the point, also the lookup key for /api/map/area. */
+  key: string
+  lat: number
+  lng: number
+  count: number
+  city: string
+  state: string
+}
+
+/** One artist in a city circle's list. */
+export interface MapAreaArtist {
+  id: string
+  name: string
+  followers: number | null
+  privateStudio: boolean
+}
+
 /** "Shop", "Artist at Ink Co." or "Artist": the muted line under a map list name. */
 export function locationKindLabel(location: Pick<MapboxLocation, "type" | "shopName">): string {
   if (location.type === "shop") return "Shop"

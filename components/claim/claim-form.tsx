@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { CheckCircle } from "lucide-react"
+import { WorkplaceChoice, type PickedShop, type WorkplaceValue } from "@/components/artist-dashboard/workplace-choice"
 
 interface ClaimFormProps {
   artistSlug: string | null
@@ -22,6 +23,9 @@ export function ClaimForm({ artistSlug, shopSlug, listingName }: ClaimFormProps)
   const [loading, setLoading] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState(false)
+  // Artist claims only: "Where do you work?", applied when the claim is approved.
+  const [workplace, setWorkplace] = useState<WorkplaceValue>("unchanged")
+  const [workplaceShop, setWorkplaceShop] = useState<PickedShop | null>(null)
 
   async function handleSubmit() {
     if (!name || !email || !listing) return
@@ -31,7 +35,17 @@ export function ClaimForm({ artistSlug, shopSlug, listingName }: ClaimFormProps)
       const response = await fetch("/api/claims", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ artistSlug, shopSlug, name, email, phone, instagram, listing }),
+        body: JSON.stringify({
+          artistSlug,
+          shopSlug,
+          name,
+          email,
+          phone,
+          instagram,
+          listing,
+          ...(artistSlug && workplace === "private_studio" && { workplace }),
+          ...(artistSlug && workplace === "shop" && workplaceShop && { workplace, workplaceShopId: workplaceShop.id }),
+        }),
       })
       if (!response.ok) throw new Error("Failed to submit claim")
       setSubmitted(true)
@@ -113,6 +127,16 @@ export function ClaimForm({ artistSlug, shopSlug, listingName }: ClaimFormProps)
             className="bg-card border-border focus:border-ink"
           />
         </div>
+
+        {artistSlug && (
+          <WorkplaceChoice
+            value={workplace}
+            onChange={setWorkplace}
+            shop={workplaceShop}
+            onShopChange={setWorkplaceShop}
+            disabled={loading}
+          />
+        )}
 
         {error && (
           <p className="text-sm text-destructive">Something went wrong submitting your claim. Please try again.</p>

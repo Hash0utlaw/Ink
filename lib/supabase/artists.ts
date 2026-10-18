@@ -40,6 +40,8 @@ export function rowToArtist(row: Record<string, unknown>): Artist {
         ? (row.shops[0] as Record<string, unknown> | undefined)
         : (row.shops as Record<string, unknown>))
     : null
+  // A city center (2 decimals) for artists with no shop; the shop always wins.
+  const hasAreaLocation = !row.shop_id && row.area_latitude != null && row.area_longitude != null
 
   return {
     id: String(row.id ?? ""),
@@ -47,6 +49,8 @@ export function rowToArtist(row: Record<string, unknown>): Artist {
     name: displayName(String(row.display_name ?? "")),
     shopName: displayName(String(shop?.name ?? "")),
     shopId: row.shop_id ? String(row.shop_id) : undefined,
+    isPrivateStudio: Boolean(row.is_private_studio ?? false),
+    hasAreaLocation,
     specialties: Array.isArray(row.specialties) ? (row.specialties as string[]) : [],
     styles: Array.isArray(row.styles) ? sortStyleSlugs(row.styles as string[]) : [],
     rating: Number(row.rating ?? 0),
@@ -55,8 +59,8 @@ export function rowToArtist(row: Record<string, unknown>): Artist {
       address: String(shop?.address ?? ""),
       city: String(row.city ?? shop?.city ?? ""),
       state: String(row.state ?? shop?.state ?? ""),
-      lat: Number(row.latitude ?? shop?.latitude ?? 0),
-      lng: Number(row.longitude ?? shop?.longitude ?? 0),
+      lat: Number(row.latitude ?? shop?.latitude ?? (hasAreaLocation ? row.area_latitude : 0) ?? 0),
+      lng: Number(row.longitude ?? shop?.longitude ?? (hasAreaLocation ? row.area_longitude : 0) ?? 0),
     },
     avatarUrl: String(row.avatar_url ?? ""),
     coverImageUrl: String(row.cover_image_url ?? ""),

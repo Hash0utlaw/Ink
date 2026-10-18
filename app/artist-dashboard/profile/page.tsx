@@ -4,6 +4,7 @@ import { createClient } from "@/utils/supabase/server"
 import { getCurrentUserId } from "@/lib/supabase/users"
 import type { AvailabilityStatus, PriceTier } from "@/types/artist"
 import { ImageUploader } from "@/components/artist-dashboard/image-uploader"
+import { WorkplaceSettings } from "@/components/artist-dashboard/workplace-settings"
 import { allowedImageSrc } from "@/lib/utils/safe-image"
 
 async function getArtistProfile(userId: string) {
@@ -11,8 +12,8 @@ async function getArtistProfile(userId: string) {
     const supabase = createClient()
     const { data } = await supabase
       .from("artists")
-      // "*" rather than a column list: cover_image_url only exists once its migration runs.
-      .select("*")
+      // "*" rather than a column list: cover_image_url and is_private_studio only exist once their migrations run.
+      .select("*, shops(name)")
       .eq("user_id", userId)
       .maybeSingle()
     return data as {
@@ -25,6 +26,8 @@ async function getArtistProfile(userId: string) {
       first_booking_discount: number | null
       avatar_url: string | null
       cover_image_url?: string | null
+      is_private_studio?: boolean | null
+      shops?: { name: string | null } | null
     } | null
   } catch {
     return null
@@ -50,6 +53,18 @@ export default async function EditProfilePage() {
           <CardContent className="space-y-8">
             <ImageUploader kind="avatar" artistId={artist.id} initialUrl={allowedImageSrc(artist.avatar_url)} />
             <ImageUploader kind="cover" artistId={artist.id} initialUrl={allowedImageSrc(artist.cover_image_url)} />
+          </CardContent>
+        </Card>
+      )}
+
+      {artist && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Where you work</CardTitle>
+            <CardDescription>A listed shop, or a private studio. Only your city is shown, never an address.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <WorkplaceSettings currentShopName={artist.shops?.name ?? null} isPrivateStudio={artist.is_private_studio === true} />
           </CardContent>
         </Card>
       )}

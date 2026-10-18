@@ -19,6 +19,7 @@ import {
   type FinderSort,
 } from "@/components/find-artist/finder-url"
 import { FollowersLine } from "@/components/artists/artist-plate-card"
+import { PrivateStudioLabel } from "@/components/brand/private-studio"
 import {
   findArtistPages,
   lookupPlace,
@@ -250,9 +251,18 @@ function ArtistCard({ artist, picked }: { artist: FinderArtist; picked: string[]
       <div className="flex min-w-0 flex-1 flex-col gap-[5px]">
         <div className="flex items-baseline justify-between gap-2.5">
           <span className="min-w-0 break-words font-heading text-[22px] leading-[1.15]">{artist.name}</span>
-          <span className="whitespace-nowrap text-sm font-semibold tabular-nums">{formatMiles(artist.distanceMi)}</span>
+          {/* Artists with no shop are measured to their city's center: "about 2 mi", whole miles, at least 1. */}
+          <span className={cn("whitespace-nowrap text-sm font-semibold tabular-nums", artist.hasAreaLocation && "text-ink-muted")}>
+            {artist.hasAreaLocation ? `about ${Math.max(1, Math.round(artist.distanceMi))} mi` : formatMiles(artist.distanceMi)}
+          </span>
         </div>
-        {artist.shopName && <span className="text-sm">at {artist.shopName}</span>}
+        {artist.shopName ? (
+          <span className="text-sm">at {artist.shopName}</span>
+        ) : artist.isPrivateStudio ? (
+          <PrivateStudioLabel className="text-sm" iconClassName="h-3.5 w-3.5" />
+        ) : (
+          artist.hasAreaLocation && <span className="text-sm text-ink-muted">Studio not listed</span>
+        )}
         {city && (
           <span className="font-place text-[15px] italic text-ink-muted">
             {city}

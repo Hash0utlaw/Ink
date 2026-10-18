@@ -5,6 +5,8 @@ import type { Artist } from "@/types/artist"
 import { SaveButton } from "@/components/saved/save-button"
 import { ShareButton } from "@/components/share/share-button"
 import { RequestIntroButton } from "./request-intro-button"
+import { HowToBookPanel } from "./how-to-book"
+import { PrivateStudioLabel } from "@/components/brand/private-studio"
 import { StyleBadgeList } from "./style-badge-list"
 import { Plate } from "@/components/brand/plate"
 import { WhereToFindPanel, hasWhereToFind } from "@/components/brand/where-to-find"
@@ -50,11 +52,13 @@ export function ArtistHeader({ artist, initialSaved, shopHref, shop = null }: Ar
   const claimHref = artist.handle ? `/claim?artist=${encodeURIComponent(artist.handle)}` : "/claim"
   const shopAddress = shop ? formatMapAddress(shop.address, shop.city, shop.state, shop.zip) : ""
   const showPanel = !!shop && hasWhereToFind({ address: shopAddress, coordinates: shop.coordinates })
+  // No shop: "How to book" replaces "Where to find" (Round 11). Never an address or a map.
+  const noShop = !artist.shopId
 
   return (
     // Sits right under the page's full-bleed ProfileCover; the plate and panel overlap it.
     <div>
-      <div className={cn("grid gap-8", showPanel ? "lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-12" : "max-w-[720px]")}>
+      <div className={cn("grid gap-8", showPanel || noShop ? "lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-12" : "max-w-[720px]")}>
         <div className="min-w-0">
           <div className="flex items-start gap-4 lg:gap-6">
             {/* The plate overlaps the cover by 56px (104px from lg), inset from its edge, above it. */}
@@ -73,6 +77,21 @@ export function ArtistHeader({ artist, initialSaved, shopHref, shop = null }: Ar
               <h1 className="font-heading text-[30px] leading-[1.05] text-ink text-balance lg:text-[44px]">
                 {artist.name}
               </h1>
+              {noShop && (
+                <p className="mt-2 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-base text-ink lg:text-[19px]">
+                  {artist.isPrivateStudio ? (
+                    <>
+                      <PrivateStudioLabel iconClassName="h-4 w-4" />
+                      <span>Address shared after booking</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Tattoo artist</span>
+                      <span className="text-ink-muted">Studio not listed</span>
+                    </>
+                  )}
+                </p>
+              )}
               {artist.shopName && (
                 <p className="mt-2 text-base text-ink lg:text-[19px]">
                   Tattoo artist at{" "}
@@ -111,14 +130,15 @@ export function ArtistHeader({ artist, initialSaved, shopHref, shop = null }: Ar
             {artist.styles.length > 0 && <StyleBadgeList styles={artist.styles} max={4} />}
 
             {(igHandle || tiktokHandle) && (
-              <div className="flex flex-wrap items-center gap-2.5">
+              // No shop, on a phone: Instagram moves into the button row below (Round 11).
+              <div className={cn("flex flex-wrap items-center gap-2.5", noShop && !tiktokHandle && "max-lg:hidden")}>
                 {igHandle && (
                   <a
                     href={profileUrl("instagram", igHandle)}
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label={`@${igHandle} on Instagram`}
-                    className={`${SOCIAL_BUTTON} gap-2`}
+                    className={cn(SOCIAL_BUTTON, "gap-2", noShop && "max-lg:hidden")}
                   >
                     <SocialIcon network="instagram" />@{igHandle}
                   </a>
@@ -134,7 +154,11 @@ export function ArtistHeader({ artist, initialSaved, shopHref, shop = null }: Ar
                     <SocialIcon network="tiktok" />@{tiktokHandle}
                   </a>
                 )}
-                {igFollowers && <span className="text-[15px] tabular-nums text-ink-muted">{igFollowers} on Instagram</span>}
+                {igFollowers && (
+                  <span className={cn("text-[15px] tabular-nums text-ink-muted", noShop && "max-lg:hidden")}>
+                    {igFollowers} on Instagram
+                  </span>
+                )}
               </div>
             )}
 
@@ -144,6 +168,20 @@ export function ArtistHeader({ artist, initialSaved, shopHref, shop = null }: Ar
                 <Button variant="ghost" className={OUTLINE} asChild>
                   <Link href={`/book/${artist.handle || artist.id}`}>Book now</Link>
                 </Button>
+              ) : noShop ? (
+                // "Request an intro" is the red button in How to book; on a phone this row
+                // shows Instagram instead of a second one (Round 11).
+                igHandle && (
+                  <a
+                    href={profileUrl("instagram", igHandle)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`@${igHandle} on Instagram`}
+                    className={cn(SOCIAL_BUTTON, "flex-1 justify-center gap-2 lg:hidden")}
+                  >
+                    <SocialIcon network="instagram" />@{igHandle}
+                  </a>
+                )
               ) : (
                 <RequestIntroButton className={OUTLINE}>Request an intro</RequestIntroButton>
               )}
@@ -177,7 +215,7 @@ export function ArtistHeader({ artist, initialSaved, shopHref, shop = null }: Ar
               </div>
             )}
 
-            {!artist.hasAccount && (
+            {!artist.hasAccount && !noShop && (
               <p className="max-w-prose text-[15px] leading-[1.55] text-ink-muted text-pretty">
                 {artist.name}&apos;s details come from public listings. If this is you,{" "}
                 <Link href={claimHref} className={TEXT_LINK}>
@@ -188,6 +226,12 @@ export function ArtistHeader({ artist, initialSaved, shopHref, shop = null }: Ar
             )}
           </div>
         </div>
+
+        {noShop && (
+          <div className="relative z-10 lg:-mt-[104px]">
+            <HowToBookPanel artist={artist} />
+          </div>
+        )}
 
         {showPanel && shop && (
           <div className="relative z-10 lg:-mt-[104px]">

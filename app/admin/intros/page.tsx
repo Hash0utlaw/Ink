@@ -12,6 +12,7 @@ import { createClient } from "@/utils/supabase/server"
 import { createAdminClient } from "@/utils/supabase/admin"
 import { isAdmin } from "@/lib/admin"
 import {
+  INTRO_ARTIST_COLUMNS,
   INTRO_SHOP_COLUMNS,
   buildOutreachMailto,
   buildOutreachMessage,
@@ -71,7 +72,7 @@ export default async function AdminIntrosPage() {
     admin
       .from("booking_requests")
       .select(
-        `id, created_at, outreach_status, outreach_contacted_at, size, placement, style, preferred_date, description, artists(id, display_name, handle, shops(${INTRO_SHOP_COLUMNS}))`,
+        `id, created_at, outreach_status, outreach_contacted_at, size, placement, style, preferred_date, description, artists(id, display_name, handle, ${INTRO_ARTIST_COLUMNS}, shops(${INTRO_SHOP_COLUMNS}))`,
       )
       .in("outreach_status", ["new", "contacted"])
       .order("created_at", { ascending: true }),

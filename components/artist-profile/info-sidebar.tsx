@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { CheckCircle2, Loader2 } from "lucide-react"
 import type { Artist } from "@/types/artist"
-import { requestFormNote, requestSentMessage } from "@/lib/request-copy"
+import { noShopRequestIntro, requestFormNote, requestSentMessage } from "@/lib/request-copy"
+import { firstName } from "@/components/brand/private-studio"
 
 export interface BookingFormData {
   name: string
@@ -56,7 +57,10 @@ export function InfoSidebar({
     </div>
   )
   const INPUT = "h-11 border-1.5 border-ink bg-white text-base"
-  const copy = { name: artist.name, shopName: artist.shopName, hasAccount: artist.hasAccount }
+  const hasInstagram = Boolean(artist.instagramHandle?.trim())
+  const copy = { name: artist.name, shopName: artist.shopName, hasAccount: artist.hasAccount, hasInstagram }
+  // No shop and no account: say plainly how the request reaches them (Round 11).
+  const noShopIntro = !artist.shopId && !artist.hasAccount ? noShopRequestIntro(firstName(artist.name), hasInstagram) : null
 
   return (
     <div className="lg:sticky lg:top-6">
@@ -64,6 +68,7 @@ export function InfoSidebar({
         <h2 id="request-form" className="font-heading text-[22px] leading-[1.15] text-ink">
           Request an intro
         </h2>
+        {noShopIntro && !submitSuccess && <p className="mt-2 text-[15px] leading-[1.5] text-ink text-pretty">{noShopIntro}</p>}
         <div className="mt-4">
           {submitSuccess ? (
             <div className="flex flex-col items-center gap-3 py-8 text-center">
@@ -140,7 +145,12 @@ export function InfoSidebar({
               )}
 
               <Button
-                className="min-h-11 w-full rounded border-1.5 border-ink bg-flash-red text-[15px] font-semibold text-white hover:bg-flash-red/90"
+                className={
+                  // No shop: "Request an intro" in How to book is the page's one red button, so this is ink (Round 11).
+                  artist.shopId
+                    ? "min-h-11 w-full rounded border-1.5 border-ink bg-flash-red text-[15px] font-semibold text-white hover:bg-flash-red/90"
+                    : "min-h-11 w-full rounded border-1.5 border-ink bg-ink text-[15px] font-semibold text-cream hover:bg-ink/90"
+                }
                 onClick={handleSubmit}
                 disabled={isSubmitting}
               >
@@ -155,7 +165,7 @@ export function InfoSidebar({
               </Button>
 
               <p className="text-center text-[13px] text-ink-muted">
-                {requestFormNote(copy)}
+                {noShopIntro ? "Free to request, with no payment or commitment." : requestFormNote(copy)}
               </p>
             </div>
           )}
