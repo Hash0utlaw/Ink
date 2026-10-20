@@ -1,6 +1,8 @@
 // scripts/ig/undo-import.ts
 // Reverses scripts/ig/import.ts from its undo log: instagram_followers and
-// instagram_checked_at get their old values back (null where they were empty).
+// instagram_checked_at get their old values back (null where they were empty),
+// and a cleared wrong-account handle (artists.instagram_handle /
+// shops.instagram_url) gets its old value back.
 // Run: npx tsx scripts/ig/undo-import.ts --input data/undo/ig-followers-import-<timestamp>.jsonl [--apply]
 //   Dry run by default: reports what would be undone and any row whose current
 //   value no longer matches what the import wrote (changed since, left alone).
@@ -20,7 +22,8 @@ import { withRetry } from "../lib/retry"
 const ARGS = parseScriptArgs()
 const SCRIPT = "ig-followers-import"
 const TABLES = new Set(["artists", "shops"])
-const FIELDS = new Set(["instagram_followers", "instagram_checked_at"])
+const FIELDS = new Set(["instagram_followers", "instagram_checked_at", "instagram_handle", "instagram_url"])
+const HANDLE_FIELD: Record<string, string> = { artists: "instagram_handle", shops: "instagram_url" }
 
 // Timestamps come back from Postgres as "+00:00", the log has "Z".
 const norm = (v: unknown) => (typeof v === "string" && /^\d{4}-\d\d-\d\dT/.test(v) ? new Date(v).toISOString() : v ?? null)
@@ -43,7 +46,7 @@ async function main() {
   const foreign = entries.filter((e) => e.script !== SCRIPT || !TABLES.has(e.table) || !FIELDS.has(e.field))
   if (foreign.length) throw new Error(`${foreign.length} entries are not from ${SCRIPT}; refusing.`)
 
-  // A row is restored only if both of its fields still hold what the import wrote.
+  // A row is restored only if every logged field still holds what the import wrote.
   const supabase = getSupabaseAdmin()
   const restores: { table: string; id: string; patch: Record<string, unknown>; entries: UndoEntry[] }[] = []
   const changedSince: string[] = []
@@ -53,7 +56,7 @@ async function main() {
     const byId = new Map<string, UndoEntry[]>()
     for (const e of mine) byId.set(e.id, [...(byId.get(e.id) ?? []), e])
     const current = new Map(
-      (await withRetry(`fetch ${table}`, () => fetchIn(supabase, table, "id, instagram_followers, instagram_checked_at", "id", Array.from(byId.keys())))).map((r) => [String(r.id), r]),
+      (await withRetry(`fetch ${table}`, () => fetchIn(supabase, table, `id, instagram_followers, instagram_checked_at, ${HANDLE_FIELD[table]}`, "id", Array.from(byId.keys())))).map((r) => [String(r.id), r]),
     )
     for (const [id, es] of byId) {
       const row = current.get(id)
