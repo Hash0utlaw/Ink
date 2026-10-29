@@ -1,4 +1,5 @@
 import { createClient } from "@/utils/supabase/server"
+import { createAdminClient } from "@/utils/supabase/admin"
 import { toStyleSlugs } from "@/lib/styles"
 import { displayName } from "@/lib/display-name"
 
@@ -121,9 +122,14 @@ export async function getNewestFlash(limit = 6): Promise<FlashListing[]> {
   }
 }
 
+/**
+ * All of one artist's listings, hidden ones included, for their own dashboard.
+ * Service role: RLS only shows available listings, so a hidden one would vanish
+ * from its owner's list. Pass only the signed-in artist's own id.
+ */
 export async function getArtistFlashListings(artistId: string): Promise<FlashListing[]> {
   try {
-    const supabase = createClient()
+    const supabase = createAdminClient()
     const { data, error } = await supabase
       .from("flash_listings")
       .select("*, artists(display_name, handle, avatar_url)")
