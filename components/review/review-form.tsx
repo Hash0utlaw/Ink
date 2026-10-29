@@ -4,20 +4,24 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { CheckCircle2, Loader2, Star } from "lucide-react"
+import { Honeypot } from "@/components/forms/honeypot"
+import { MAX } from "@/lib/validation"
 
 interface ReviewFormProps {
   bookingId: string
-  clientName: string
+  /** The signed token from the review link. */
+  token: string
   artistName: string
 }
 
-export function ReviewForm({ bookingId, clientName, artistName }: ReviewFormProps) {
+export function ReviewForm({ bookingId, token, artistName }: ReviewFormProps) {
   const [rating, setRating] = useState(0)
   const [hovered, setHovered] = useState(0)
   const [reviewText, setReviewText] = useState("")
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [hp, setHp] = useState("")
 
   async function handleSubmit() {
     if (!rating) return
@@ -27,7 +31,7 @@ export function ReviewForm({ bookingId, clientName, artistName }: ReviewFormProp
       const res = await fetch("/api/reviews", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ bookingId, rating, reviewText: reviewText.trim() || null, clientName }),
+        body: JSON.stringify({ bookingId, token, rating, reviewText: reviewText.trim() || null, hp }),
       })
       if (res.ok) {
         setSubmitted(true)
@@ -94,7 +98,9 @@ export function ReviewForm({ bookingId, clientName, artistName }: ReviewFormProp
           value={reviewText}
           onChange={(e) => setReviewText(e.target.value)}
           rows={4}
+          maxLength={MAX.review}
         />
+        <Honeypot value={hp} onChange={setHp} />
       </div>
 
       {error && <p className="text-sm text-destructive">{error}</p>}

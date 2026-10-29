@@ -4,62 +4,50 @@ import { createClient } from "@/utils/supabase/server"
 import { createAdminClient } from "@/utils/supabase/admin"
 import { ADMIN_NOTIFY_EMAIL, FROM_EMAIL, REPLY_TO } from "@/lib/site-config"
 import { newRequestArtistEmail, requestReceiptEmail } from "@/lib/email/templates"
-import { hoursAgo, isNonEmptyString, isValidEmail } from "@/lib/validation"
+import { MAX, isBot, isNonEmptyString, isValidEmail, optionalDate, optionalText, requiredText } from "@/lib/validation"
+import { RATE_LIMIT_MESSAGE, allowRequest } from "@/lib/rate-limit"
 import { buildIntroAlertEmail, INTRO_ARTIST_COLUMNS, INTRO_SHOP_COLUMNS, introShop, type IntroArtist, type IntroRequest } from "@/lib/intro-outreach"
 import { requestNextStep } from "@/lib/request-copy"
 
 export const dynamic = "force-dynamic"
 
-const MAX_NAME_LENGTH = 200
-const MAX_DESCRIPTION_LENGTH = 5000
-const MAX_REQUESTS_PER_DAY = 5
-
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const {
-      artistId,
-      clientName,
-      clientEmail,
-      clientPhone,
-      preferredDate,
-      description,
-      size,
-      placement,
-      style,
-      budget,
-    } = body
+    if (isBot(body)) return NextResponse.json({ success: true, artistNotified: false })
+
+    const { artistId } = body
+    const clientName = requiredText(body.clientName, MAX.name)
+    const clientPhone = optionalText(body.clientPhone, MAX.phone)
+    const preferredDate = optionalDate(body.preferredDate)
+    const description = optionalText(body.description, MAX.message)
+    const size = optionalText(body.size, MAX.short)
+    const placement = optionalText(body.placement, MAX.short)
+    const style = optionalText(body.style, MAX.short)
+    const budget = optionalText(body.budget, MAX.short)
 
     if (
       !isNonEmptyString(artistId) ||
-      !isNonEmptyString(clientName) ||
-      clientName.length > MAX_NAME_LENGTH ||
-      !isValidEmail(clientEmail) ||
-      (description != null && (typeof description !== "string" || description.length > MAX_DESCRIPTION_LENGTH))
+      !clientName ||
+      !isValidEmail(body.clientEmail) ||
+      [clientPhone, preferredDate, description, size, placement, style, budget].includes(undefined)
     ) {
       return NextResponse.json(
         {
           success: false,
-          message: `Please provide the artist, your name (up to ${MAX_NAME_LENGTH} characters), a valid email, and a description of up to ${MAX_DESCRIPTION_LENGTH.toLocaleString()} characters.`,
+          message: `Please provide the artist, your name (up to ${MAX.name} characters), a valid email, and a description of up to ${MAX.message.toLocaleString()} characters.`,
         },
         { status: 400 },
       )
     }
 
-    const email = clientEmail.trim()
-    const admin = createAdminClient()
+    const email = body.clientEmail.trim()
 
-    const { count: recentRequests } = await admin
-      .from("booking_requests")
-      .select("id", { count: "exact", head: true })
-      .ilike("client_email", email.replace(/[\\%_]/g, (ch) => `\\${ch}`))
-      .gte("created_at", hoursAgo(24))
-    if ((recentRequests ?? 0) >= MAX_REQUESTS_PER_DAY) {
-      return NextResponse.json(
-        { success: false, message: "You've sent several requests today. Please try again tomorrow." },
-        { status: 429 },
-      )
+    if (!(await allowRequest(request, "booking", email))) {
+      return NextResponse.json({ success: false, message: RATE_LIMIT_MESSAGE }, { status: 429 })
     }
+
+    const admin = createAdminClient()
 
     const { data: artistData } = await admin
       .from("artists")
@@ -75,26 +63,32 @@ export async function POST(request: Request) {
     const isUnclaimed = !artistRow.user_id
     const createdAt = new Date().toISOString()
 
-    const supabase = createClient()
+    // Signed in? Tie the request to the account so it shows on their dashboard.
+    const {
+      data: { user },
+    } = await createClient().auth.getUser()
 
-    const { error: dbError } = await supabase.from("booking_requests").insert({
+    // Service role: clients have no insert grant on booking_requests.
+    const { error: dbError } = await admin.from("booking_requests").insert({
       artist_id: artistId,
       shop_id: artistRow.shop_id ?? null,
-      client_name: clientName.trim(),
+      client_user_id: user?.id ?? null,
+      client_name: clientName,
       client_email: email,
-      client_phone: clientPhone ?? null,
-      preferred_date: preferredDate ?? null,
+      client_phone: clientPhone,
+      preferred_date: preferredDate,
       description: description ?? "",
-      size: size ?? null,
-      placement: placement ?? null,
-      style: style ?? null,
-      budget: budget ?? null,
+      size,
+      placement,
+      style,
+      budget,
       outreach_status: isUnclaimed ? "new" : null,
       created_at: createdAt,
     })
 
     if (dbError) {
-      return NextResponse.json({ success: false, message: dbError.message }, { status: 500 })
+      console.error("[bookings] insert failed:", dbError.message)
+      return NextResponse.json({ success: false, message: "Failed to create booking" }, { status: 500 })
     }
 
     const resend = new Resend(process.env.RESEND_API_KEY)

@@ -110,7 +110,8 @@ export async function updateBookingStatus(
     const supabase = createClient()
     const { error } = await supabase
       .from("booking_requests")
-      .update({ status, updated_at: new Date().toISOString() })
+      // Clients may only write status; the updated_at trigger stamps the time.
+      .update({ status })
       .eq("id", bookingId)
     return { error: error?.message ?? null }
   } catch (e) {

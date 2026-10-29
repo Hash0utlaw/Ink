@@ -5,6 +5,7 @@ import { getBookingById, updateBookingStatus } from "@/lib/supabase/bookings"
 import { FROM_EMAIL, REPLY_TO } from "@/lib/site-config"
 import { siteUrl } from "@/lib/email/layout"
 import { bookingConfirmedEmail, bookingDeclinedEmail, reviewRequestEmail } from "@/lib/email/templates"
+import { reviewToken } from "@/lib/review-token"
 
 export const dynamic = "force-dynamic"
 
@@ -42,8 +43,10 @@ export async function PATCH(
     const { error: updateError } = await updateBookingStatus(params.id, newStatus)
     if (updateError) return NextResponse.json({ error: updateError }, { status: 500 })
 
+    // The review link is signed; without REVIEW_LINK_SECRET no review email goes out.
+    const token = action === "complete" ? reviewToken(booking.id) : null
     const resendKey = process.env.RESEND_API_KEY
-    if (resendKey && booking.clientEmail) {
+    if (resendKey && booking.clientEmail && (action !== "complete" || token)) {
       const resend = new Resend(resendKey)
       const artistName = (artistRow as { display_name: string }).display_name ?? "the artist"
       const from = FROM_EMAIL
@@ -57,7 +60,7 @@ export async function PATCH(
             })
           : action === "decline"
             ? bookingDeclinedEmail({ clientName: booking.clientName, artistName })
-            : reviewRequestEmail({ clientName: booking.clientName, artistName, reviewUrl: siteUrl(`/review/${booking.id}`) })
+            : reviewRequestEmail({ clientName: booking.clientName, artistName, reviewUrl: siteUrl(`/review/${booking.id}?t=${token}`) })
 
       await resend.emails
         .send({

@@ -8,6 +8,7 @@ import { CheckCircle2, Loader2 } from "lucide-react"
 import type { Artist } from "@/types/artist"
 import { noShopRequestIntro, requestFormNote, requestSentMessage } from "@/lib/request-copy"
 import { firstName } from "@/components/brand/private-studio"
+import { Honeypot } from "@/components/forms/honeypot"
 
 export interface BookingFormData {
   name: string
@@ -17,6 +18,8 @@ export interface BookingFormData {
   description: string
   size: string
   placement: string
+  /** The hidden honeypot field; empty for people. */
+  hp: string
 }
 
 interface InfoSidebarProps {
@@ -41,10 +44,11 @@ export function InfoSidebar({
   const [description, setDescription] = useState("")
   const [size, setSize] = useState("")
   const [placement, setPlacement] = useState("")
+  const [hp, setHp] = useState("")
 
   function handleSubmit() {
     if (onBookingSubmit) {
-      onBookingSubmit({ name, email, phone, date, description, size, placement })
+      onBookingSubmit({ name, email, phone, date, description, size, placement, hp })
     }
   }
 
@@ -143,6 +147,8 @@ export function InfoSidebar({
                   disabled={isSubmitting}
                 />
               )}
+
+              <Honeypot value={hp} onChange={setHp} />
 
               <Button
                 className={

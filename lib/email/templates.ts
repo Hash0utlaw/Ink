@@ -13,7 +13,6 @@ type Maybe = string | null | undefined
 
 const BECAUSE = {
   admin: "because this address is the TattooMaps admin inbox.",
-  contact: "because you sent a message through the TattooMaps contact form.",
   client: "because you sent a booking request on TattooMaps.",
   artist: "because you have a TattooMaps artist account.",
   claimant: "because you asked to claim a listing on TattooMaps.",
@@ -35,17 +34,6 @@ export function contactAdminEmail(m: { name: string; email: string; reason: stri
         quote(m.message),
       ],
       reason: BECAUSE.admin,
-    }),
-  }
-}
-
-export function contactReceiptEmail(m: { name: string }): Email {
-  return {
-    subject: "We received your message",
-    ...renderEmail({
-      heading: "We received your message",
-      blocks: [p(`Hi ${m.name},`), p("Thanks for writing in. We read every message and will reply to this email address.")],
-      reason: BECAUSE.contact,
     }),
   }
 }

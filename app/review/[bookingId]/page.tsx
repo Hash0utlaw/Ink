@@ -4,17 +4,25 @@ import { Footer } from "@/components/layout/footer"
 import { getBookingForReview, getReviewByBookingId } from "@/lib/supabase/reviews"
 import { ReviewForm } from "@/components/review/review-form"
 import { CheckCircle2 } from "lucide-react"
+import { isValidReviewToken } from "@/lib/review-token"
 
 export const metadata: Metadata = {
   title: "Leave a Review — TattooMaps",
   robots: { index: false }, // don't index one-time review links
 }
 
-export default async function ReviewPage({ params }: { params: { bookingId: string } }) {
-  const [booking, existing] = await Promise.all([
-    getBookingForReview(params.bookingId),
-    getReviewByBookingId(params.bookingId),
-  ])
+export default async function ReviewPage({
+  params,
+  searchParams,
+}: {
+  params: { bookingId: string }
+  searchParams: { t?: string }
+}) {
+  // Only the signed link from the "Leave a review" email opens the form.
+  const tokenOk = isValidReviewToken(params.bookingId, searchParams.t)
+  const [booking, existing] = tokenOk
+    ? await Promise.all([getBookingForReview(params.bookingId), getReviewByBookingId(params.bookingId)])
+    : [null, null]
 
   // Already reviewed
   if (existing) {
@@ -64,7 +72,7 @@ export default async function ReviewPage({ params }: { params: { bookingId: stri
           </div>
           <ReviewForm
             bookingId={params.bookingId}
-            clientName={booking.clientName}
+            token={searchParams.t ?? ""}
             artistName={booking.artistName}
           />
         </div>

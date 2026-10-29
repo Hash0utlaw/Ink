@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { CheckCircle2, Loader2, ShieldCheck } from "lucide-react"
 import { STYLES } from "@/lib/styles"
 import { requestFormNote, requestSentMessage } from "@/lib/request-copy"
+import { Honeypot } from "@/components/forms/honeypot"
 
 interface Prefill {
   description?: string
@@ -45,6 +46,7 @@ export function PublicBookingForm({ artistId, artistName, shopName, hasAccount, 
   const [placement, setPlacement] = useState("")
   const [style, setStyle] = useState(prefill?.style ?? "")
   const [budget, setBudget] = useState("")
+  const [hp, setHp] = useState("")
 
   async function handleSubmit() {
     if (!name || !email || !description) return
@@ -65,6 +67,7 @@ export function PublicBookingForm({ artistId, artistName, shopName, hasAccount, 
           placement: placement || null,
           style: style || null,
           budget: budget || null,
+          hp,
         }),
       })
       if (res.ok) {
@@ -215,6 +218,7 @@ export function PublicBookingForm({ artistId, artistName, shopName, hasAccount, 
             <label className="text-sm font-medium mb-1.5 block">Phone (optional)</label>
             <Input type="tel" placeholder="(555) 000-0000" value={phone} onChange={(e) => setPhone(e.target.value)} />
           </div>
+          <Honeypot value={hp} onChange={setHp} />
 
           {error && <p className="text-sm text-destructive">{error}</p>}
 
