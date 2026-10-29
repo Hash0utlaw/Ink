@@ -55,13 +55,13 @@ export async function getUserProfile(userId: string): Promise<UserProfile | null
 
 export async function updateUserProfile(
   userId: string,
-  updates: { name?: string; email?: string; location?: string }
+  updates: { name?: string; location?: string }
 ): Promise<{ error: string | null }> {
   try {
+    // Clients may only write display_name, city, state and avatar_url (column grants).
     const supabase = createClient()
     const dbUpdates: Record<string, string> = {}
     if (updates.name !== undefined) dbUpdates.display_name = updates.name
-    if (updates.email !== undefined) dbUpdates.email = updates.email
     if (updates.location !== undefined) {
       const [city, state] = updates.location.split(",").map((s) => s.trim())
       dbUpdates.city = city ?? ""

@@ -5,8 +5,10 @@ import { getArtistFlashListings } from "@/lib/supabase/flash"
 import { FlashUploadForm } from "@/components/artist-dashboard/flash-upload-form"
 import { FlashManageCard } from "@/components/artist-dashboard/flash-manage-card"
 
+// No billing yet: the free limit is set high enough that no artist reaches it.
+// Keep in sync with app/api/flash/route.ts.
 const FLASH_LIMITS: Record<string, number | null> = {
-  free: 3,
+  free: 30,
   pro: 30,
   shop: null, // unlimited
 }
@@ -36,18 +38,13 @@ export default async function ArtistFlashPage() {
   const activeCount = listings.filter((l) => l.isAvailable).length
   const atLimit = limit !== null && activeCount >= limit
   const usageLabel = limit === null ? `${activeCount} listings` : `${activeCount} of ${limit} listings in use`
-  // The limit is enforced by POST /api/flash; this only explains it.
-  const limitNote =
-    tier === "free" ? "Free accounts can list up to 3 flash designs." : `Your account can list up to ${limit} flash designs.`
+  // The limit is enforced by POST /api/flash.
 
   return (
     <div className="space-y-8">
       <div>
         <h1 className="font-heading text-[30px] leading-tight text-balance md:text-[34px]">Flash listings</h1>
-        <p className="mt-1 text-ink-muted tabular-nums">
-          {usageLabel}
-          {limit !== null && `. ${limitNote}`}
-        </p>
+        <p className="mt-1 text-ink-muted tabular-nums">{usageLabel}</p>
       </div>
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-5">

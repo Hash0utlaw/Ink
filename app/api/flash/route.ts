@@ -2,8 +2,10 @@ import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/utils/supabase/server"
 import { isStyleSlug, toStyleSlugs } from "@/lib/styles"
 
+// No billing yet: the free limit is set high enough that no artist reaches it.
+// Keep in sync with app/artist-dashboard/flash/page.tsx.
 const FLASH_LIMITS: Record<string, number | null> = {
-  free: 3,
+  free: 30,
   pro: 30,
   shop: null, // unlimited
 }

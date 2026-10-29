@@ -21,17 +21,26 @@ export function ProfileForm({ initialName, initialEmail, initialLocation, avatar
   const [location, setLocation] = useState(initialLocation)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [message, setMessage] = useState("")
 
   async function handleSave() {
     setSaving(true)
     setSaved(false)
+    setMessage("")
     try {
       const response = await fetch("/api/profile", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, location }),
       })
-      if (response.ok) setSaved(true)
+      const json = (await response.json().catch(() => ({}))) as { emailPending?: boolean; message?: string }
+      if (response.ok) {
+        setSaved(true)
+        // A new email only takes effect once its confirmation link is clicked.
+        if (json.emailPending) setMessage(`Check ${email} for a link to confirm your new email address.`)
+      } else {
+        setMessage(json.message ?? "Something went wrong. Please try again.")
+      }
     } finally {
       setSaving(false)
     }
@@ -65,9 +74,14 @@ export function ProfileForm({ initialName, initialEmail, initialLocation, avatar
             <Label htmlFor="location">Location</Label>
             <Input id="location" value={location} onChange={(e) => setLocation(e.target.value)} />
           </div>
+          {message && (
+            <p aria-live="polite" className="text-sm text-ink-muted">
+              {message}
+            </p>
+          )}
           <div className="flex items-center justify-end gap-3">
             <span aria-live="polite" className="text-sm font-semibold text-success">
-              {saved ? "Saved" : ""}
+              {saved && !message ? "Saved" : ""}
             </span>
             <Button onClick={handleSave} disabled={saving}>
               {saving ? "Saving…" : "Save changes"}

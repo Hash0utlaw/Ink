@@ -1,50 +1,47 @@
 import { NextResponse } from "next/server"
 import { Resend } from "resend"
-import { createClient } from "@/utils/supabase/server"
 import { createAdminClient } from "@/utils/supabase/admin"
 import { getArtistBySlug } from "@/lib/supabase/artists"
 import { getShopBySlug } from "@/lib/supabase/shops"
 import { ADMIN_NOTIFY_EMAIL, FROM_EMAIL, REPLY_TO } from "@/lib/site-config"
 import { claimAdminEmail, claimReceiptEmail } from "@/lib/email/templates"
-import { hoursAgo, isNonEmptyString, isValidEmail } from "@/lib/validation"
+import { MAX, isBot, isValidEmail, optionalText, requiredText } from "@/lib/validation"
+import { RATE_LIMIT_MESSAGE, allowRequest } from "@/lib/rate-limit"
 import { isWorkplace } from "@/lib/workplace"
 
 export const dynamic = "force-dynamic"
 
-const MAX_CLAIMS_PER_DAY = 5
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 export async function POST(request: Request) {
   try {
-    const { artistSlug, shopSlug, name, email, phone, instagram, listing, workplace, workplaceShopId } = await request.json()
+    const body = await request.json()
+    if (isBot(body)) return NextResponse.json({ success: true })
 
-    if (!isNonEmptyString(name) || !isValidEmail(email) || !isNonEmptyString(listing)) {
+    const { artistSlug, shopSlug, workplace, workplaceShopId } = body
+    const name = requiredText(body.name, MAX.name)
+    const phone = optionalText(body.phone, MAX.phone)
+    const instagram = optionalText(body.instagram, MAX.short)
+    const listing = requiredText(body.listing, MAX.listing)
+
+    if (!name || !isValidEmail(body.email) || !listing || phone === undefined || instagram === undefined) {
       return NextResponse.json(
         { success: false, message: "Please provide your name, a valid email and the listing." },
         { status: 400 },
       )
     }
 
-    const claimantEmail = email.trim()
-    const admin = createAdminClient()
+    const claimantEmail = body.email.trim()
 
-    const { count: recentClaims } = await admin
-      .from("claim_requests")
-      .select("id", { count: "exact", head: true })
-      .ilike("claimant_email", claimantEmail.replace(/[\\%_]/g, (ch) => `\\${ch}`))
-      .gte("created_at", hoursAgo(24))
-    if ((recentClaims ?? 0) >= MAX_CLAIMS_PER_DAY) {
-      return NextResponse.json(
-        { success: false, message: "Too many claim requests. Please try again tomorrow." },
-        { status: 429 },
-      )
+    if (!(await allowRequest(request, "claim", claimantEmail))) {
+      return NextResponse.json({ success: false, message: RATE_LIMIT_MESSAGE }, { status: 429 })
     }
 
-    const supabase = createClient()
+    const admin = createAdminClient()
 
     const [artist, shop] = await Promise.all([
-      artistSlug ? getArtistBySlug(artistSlug) : Promise.resolve(null),
-      shopSlug ? getShopBySlug(shopSlug) : Promise.resolve(null),
+      typeof artistSlug === "string" && artistSlug ? getArtistBySlug(artistSlug) : Promise.resolve(null),
+      typeof shopSlug === "string" && shopSlug ? getShopBySlug(shopSlug) : Promise.resolve(null),
     ])
 
     // "Where do you work?" (artist claims only); applied by approveClaim. Never an address.
@@ -56,21 +53,23 @@ export async function POST(request: Request) {
           }
         : {}
 
-    const { error: dbError } = await supabase.from("claim_requests").insert({
+    // Service role: clients have no insert grant on claim_requests.
+    const { error: dbError } = await admin.from("claim_requests").insert({
       ...workplaceFields,
       artist_id: artist?.id ?? null,
       shop_id: shop?.id ?? null,
-      claimant_name: name.trim(),
+      claimant_name: name,
       claimant_email: claimantEmail,
-      claimant_phone: phone || null,
-      instagram_handle: instagram || null,
+      claimant_phone: phone,
+      instagram_handle: instagram,
       note: listing,
       status: "pending",
       created_at: new Date().toISOString(),
     })
 
     if (dbError) {
-      return NextResponse.json({ success: false, message: dbError.message }, { status: 500 })
+      console.error("[claims] insert failed:", dbError.message)
+      return NextResponse.json({ success: false, message: "Failed to submit claim" }, { status: 500 })
     }
 
     const resend = new Resend(process.env.RESEND_API_KEY)

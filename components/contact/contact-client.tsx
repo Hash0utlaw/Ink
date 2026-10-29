@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent } from "@/components/ui/card"
+import { Honeypot } from "@/components/forms/honeypot"
 import {
   MessageCircle,
   Mail,
@@ -62,6 +63,7 @@ export function ContactClient({ initialTopic = "", initialMessage = "" }: { init
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(false)
+  const [hp, setHp] = useState("")
 
   function handleChange(field: string, value: string) {
     setFormData((prev) => ({ ...prev, [field]: value }))
@@ -76,7 +78,7 @@ export function ContactClient({ initialTopic = "", initialMessage = "" }: { init
       const response = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, hp }),
       })
       if (!response.ok) throw new Error("Failed to send message")
       setSubmitted(true)
@@ -172,6 +174,7 @@ export function ContactClient({ initialTopic = "", initialMessage = "" }: { init
                   </div>
                 ) : (
                   <form onSubmit={handleSubmit} className="space-y-5">
+                    <Honeypot value={hp} onChange={setHp} />
                     <div className="grid sm:grid-cols-2 gap-5">
                       <div className="space-y-2">
                         <Label htmlFor="name">Full Name</Label>

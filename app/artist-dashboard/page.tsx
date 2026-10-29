@@ -1,9 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { getBookingsForArtist } from "@/lib/supabase/bookings"
-import { getCurrentUserId, getUserProfile } from "@/lib/supabase/users"
+import { getCurrentUserId } from "@/lib/supabase/users"
 import { getArtistHandleForUser } from "@/lib/supabase/artists"
 import { ShareBookingLink } from "@/components/artist-dashboard/share-booking-link"
 import { NoRequestsYet } from "@/components/artist-dashboard/no-requests-yet"
@@ -20,13 +19,11 @@ function formatDate(dateStr: string | null): string {
 
 export default async function ArtistDashboardPage() {
   const userId = await getCurrentUserId()
-  const [bookings, profile, handle] = await Promise.all([
+  const [bookings, handle] = await Promise.all([
     userId ? getBookingsForArtist(userId) : Promise.resolve([]),
-    userId ? getUserProfile(userId) : Promise.resolve(null),
     userId ? getArtistHandleForUser(userId) : Promise.resolve(null),
   ])
 
-  const isPro = profile?.subscriptionTier === "pro"
   const pending = bookings.filter((b) => b.status === "pending")
   const confirmed = bookings.filter((b) => b.status === "confirmed")
   const recent = bookings.slice(0, 5)
@@ -42,7 +39,6 @@ export default async function ArtistDashboardPage() {
     <div className="space-y-8">
       <div className="flex items-center justify-between gap-4">
         <h1 className="font-heading text-[30px] leading-tight text-balance md:text-[34px]">Dashboard</h1>
-        {isPro && <Badge variant="outline">Pro</Badge>}
       </div>
 
       {bookings.length === 0 ? (

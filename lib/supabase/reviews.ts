@@ -1,4 +1,5 @@
 import { createClient } from "@/utils/supabase/server"
+import { createAdminClient } from "@/utils/supabase/admin"
 import { displayName } from "@/lib/display-name"
 
 export interface Review {
@@ -90,9 +91,12 @@ export async function getReviewsForShop(shopId: string): Promise<Review[]> {
   }
 }
 
+// The two below use the service role: booking_requests isn't readable by the
+// person reviewing. Call them only after checking the review link's token.
+
 export async function getReviewByBookingId(bookingId: string): Promise<Review | null> {
   try {
-    const supabase = createClient()
+    const supabase = createAdminClient()
     const { data, error } = await supabase
       .from("reviews")
       .select("*, artists(display_name, handle, avatar_url)")
@@ -114,7 +118,7 @@ export async function getBookingForReview(bookingId: string): Promise<{
   artistHandle: string
 } | null> {
   try {
-    const supabase = createClient()
+    const supabase = createAdminClient()
     const { data, error } = await supabase
       .from("booking_requests")
       .select("id, artist_id, client_name, status, artists(display_name, handle)")

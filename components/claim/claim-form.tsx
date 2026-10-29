@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { CheckCircle } from "lucide-react"
+import { Honeypot } from "@/components/forms/honeypot"
 import { WorkplaceChoice, type PickedShop, type WorkplaceValue } from "@/components/artist-dashboard/workplace-choice"
 
 interface ClaimFormProps {
@@ -23,6 +24,7 @@ export function ClaimForm({ artistSlug, shopSlug, listingName }: ClaimFormProps)
   const [loading, setLoading] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState(false)
+  const [hp, setHp] = useState("")
   // Artist claims only: "Where do you work?", applied when the claim is approved.
   const [workplace, setWorkplace] = useState<WorkplaceValue>("unchanged")
   const [workplaceShop, setWorkplaceShop] = useState<PickedShop | null>(null)
@@ -43,6 +45,7 @@ export function ClaimForm({ artistSlug, shopSlug, listingName }: ClaimFormProps)
           phone,
           instagram,
           listing,
+          hp,
           ...(artistSlug && workplace === "private_studio" && { workplace }),
           ...(artistSlug && workplace === "shop" && workplaceShop && { workplace, workplaceShopId: workplaceShop.id }),
         }),
@@ -137,6 +140,8 @@ export function ClaimForm({ artistSlug, shopSlug, listingName }: ClaimFormProps)
             disabled={loading}
           />
         )}
+
+        <Honeypot value={hp} onChange={setHp} />
 
         {error && (
           <p className="text-sm text-destructive">Something went wrong submitting your claim. Please try again.</p>

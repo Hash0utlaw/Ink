@@ -27,6 +27,7 @@ export function BookingSection({ artist }: BookingSectionProps) {
           description: data.description,
           size: data.size,
           placement: data.placement,
+          hp: data.hp,
         }),
       })
       if (res.ok) {

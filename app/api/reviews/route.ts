@@ -1,91 +1,84 @@
 import { NextRequest, NextResponse } from "next/server"
-import { createClient } from "@/utils/supabase/server"
-import { getUserProfile } from "@/lib/supabase/users"
+import { createAdminClient } from "@/utils/supabase/admin"
 import { Resend } from "resend"
 import { FROM_EMAIL, REPLY_TO } from "@/lib/site-config"
 import { newReviewArtistEmail } from "@/lib/email/templates"
+import { isValidReviewToken } from "@/lib/review-token"
+import { MAX, isBot, optionalText } from "@/lib/validation"
+import { RATE_LIMIT_MESSAGE, allowRequest } from "@/lib/rate-limit"
 
 export const dynamic = "force-dynamic"
 
+// Reviews come only from the signed "Leave a review" link for a completed
+// booking. Reads and the insert use the service role (clients have no insert
+// grant on reviews). The reviewer name is the one on the booking.
 export async function POST(req: NextRequest) {
   try {
-    const { bookingId, rating, reviewText, clientName } = await req.json()
+    const body = await req.json()
+    if (isBot(body)) return NextResponse.json({ success: true }, { status: 201 })
 
-    if (!bookingId || !rating || !clientName) {
-      return NextResponse.json({ error: "bookingId, rating, and clientName are required" }, { status: 400 })
+    const { bookingId, token, rating } = body
+    if (typeof bookingId !== "string" || !isValidReviewToken(bookingId, token)) {
+      return NextResponse.json({ error: "This review link isn't valid." }, { status: 403 })
     }
-    if (rating < 1 || rating > 5) {
-      return NextResponse.json({ error: "Rating must be between 1 and 5" }, { status: 400 })
+    if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
+      return NextResponse.json({ error: "Rating must be a whole number from 1 to 5" }, { status: 400 })
+    }
+    const reviewText = optionalText(body.reviewText, MAX.review)
+    if (reviewText === undefined) {
+      return NextResponse.json({ error: `Keep the review to ${MAX.review.toLocaleString()} characters or fewer.` }, { status: 400 })
     }
 
-    const supabase = createClient()
+    const admin = createAdminClient()
 
-    // Verify booking exists and is completed
-    const { data: booking, error: bookingError } = await supabase
+    const { data: booking } = await admin
       .from("booking_requests")
-      .select("id, artist_id, client_name, status")
+      .select("id, artist_id, client_name, client_email, status")
       .eq("id", bookingId)
       .maybeSingle()
-
-    if (bookingError || !booking) {
+    const b = booking as { id: string; artist_id: string | null; client_name: string | null; client_email: string | null; status: string } | null
+    if (!b || !b.artist_id) {
       return NextResponse.json({ error: "Booking not found" }, { status: 404 })
     }
-
-    const b = booking as { id: string; artist_id: string; client_name: string; status: string }
-
     if (b.status !== "completed") {
       return NextResponse.json({ error: "Reviews can only be submitted for completed bookings" }, { status: 403 })
     }
 
-    // Check no review already exists for this booking
-    const { data: existing } = await supabase
-      .from("reviews")
-      .select("id")
-      .eq("booking_request_id", bookingId)
-      .maybeSingle()
-
-    if (existing) {
-      return NextResponse.json({ error: "A review has already been submitted for this booking" }, { status: 409 })
+    if (!(await allowRequest(req, "review", b.client_email))) {
+      return NextResponse.json({ error: RATE_LIMIT_MESSAGE }, { status: 429 })
     }
 
-    // Insert review
-    const { data: review, error: insertError } = await supabase
+    const clientName = b.client_name?.trim() || "A client"
+
+    // One review per booking (also a unique constraint on booking_request_id).
+    const { data: review, error: insertError } = await admin
       .from("reviews")
       .insert({
-        booking_request_id: bookingId,
+        booking_request_id: b.id,
         artist_id: b.artist_id,
         client_name: clientName,
         rating,
-        review_text: reviewText?.trim() || null,
+        review_text: reviewText,
         is_verified: true,
       })
       .select()
       .single()
 
     if (insertError) {
-      return NextResponse.json({ error: insertError.message }, { status: 500 })
+      if (insertError.code === "23505") {
+        return NextResponse.json({ error: "A review has already been submitted for this booking" }, { status: 409 })
+      }
+      console.error("[reviews] insert failed:", insertError.message)
+      return NextResponse.json({ error: "Failed to save the review" }, { status: 500 })
     }
 
     // Roll up rating on the artist row
-    const { error: rpcError } = await supabase.rpc("update_artist_rating", { p_artist_id: b.artist_id })
-    if (rpcError) {
-      // Fallback: manual calculation if RPC doesn't exist yet
-      const { data: ratings } = await supabase
-        .from("reviews")
-        .select("rating")
-        .eq("artist_id", b.artist_id)
-      if (ratings && ratings.length > 0) {
-        const avg = ratings.reduce((sum: number, r: { rating: number }) => sum + r.rating, 0) / ratings.length
-        await supabase
-          .from("artists")
-          .update({ rating: Math.round(avg * 10) / 10, review_count: ratings.length })
-          .eq("id", b.artist_id)
-      }
-    }
+    const { error: rpcError } = await admin.rpc("update_artist_rating", { p_artist_id: b.artist_id })
+    if (rpcError) console.error("[reviews] update_artist_rating failed:", rpcError.message)
 
     // Notify artist of the new review
     try {
-      const { data: artist } = await supabase
+      const { data: artist } = await admin
         .from("artists")
         .select("display_name, user_id")
         .eq("id", b.artist_id)
@@ -95,8 +88,8 @@ export async function POST(req: NextRequest) {
       const artistName = artistRow?.display_name ?? "Artist"
       let artistEmail: string | undefined
       if (artistRow?.user_id) {
-        const profile = await getUserProfile(artistRow.user_id)
-        artistEmail = profile?.email ?? undefined
+        const { data: profile } = await admin.from("user_profiles").select("email").eq("id", artistRow.user_id).maybeSingle()
+        artistEmail = (profile as { email?: string | null } | null)?.email ?? undefined
       }
 
       if (artistEmail) {
@@ -117,6 +110,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, review }, { status: 201 })
   } catch (e) {
-    return NextResponse.json({ error: (e as Error).message }, { status: 500 })
+    console.error("[reviews] error:", e)
+    return NextResponse.json({ error: "Failed to save the review" }, { status: 500 })
   }
 }
