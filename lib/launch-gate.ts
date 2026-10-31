@@ -20,9 +20,12 @@ const ALLOWED_EXACT = new Set([
   "/favicon.ico",
   "/opengraph-image",
   "/twitter-image",
+  "/api/health", // uptime check
+  "/monitoring", // Sentry tunnel (rewritten to /sentry-tunnel)
+  "/sentry-tunnel",
 ])
 
-const ALLOWED_PREFIXES = ["/auth/", "/api/cron/", "/_next/", "/brand/"]
+const ALLOWED_PREFIXES = ["/auth/", "/api/cron/", "/_next/", "/_vercel/", "/brand/"]
 
 // Any path ending in a file extension (public/ assets: images, icons, fonts, manifests…).
 const STATIC_FILE = /\.[a-z0-9]+$/i
