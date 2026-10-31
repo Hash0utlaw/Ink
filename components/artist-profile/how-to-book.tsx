@@ -68,7 +68,8 @@ export function HowToBookPanel({ artist }: { artist: Artist }) {
         )}
 
         {artist.isClaimed && artist.acceptingClients === "no" ? (
-          <p className="border-t border-rule pt-3 font-semibold">{first} isn&apos;t taking new clients right now.</p>
+          // Not taking clients: the header says so once. Here, only the Instagram row above.
+          igHandle && <p className="border-t border-rule pt-3 font-semibold">Message {first} on Instagram.</p>
         ) : (
         <RequestIntroButton className="inline-flex min-h-12 items-center justify-center rounded border-1.5 border-ink bg-flash-red text-base font-semibold text-white hover:bg-flash-red/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
           Request an intro

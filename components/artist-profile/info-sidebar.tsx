@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { CheckCircle2, Loader2 } from "lucide-react"
 import type { Artist } from "@/types/artist"
-import { closedNote, noShopRequestIntro, requestFormNote, requestSentMessage, waitlistNote } from "@/lib/request-copy"
+import { noShopRequestIntro, requestFormNote, requestSentMessage, waitlistNote } from "@/lib/request-copy"
 import { SocialIcon } from "@/components/brand/social-icon"
 import { cleanHandle, profileUrl } from "@/lib/socials"
 import { firstName } from "@/components/brand/private-studio"
@@ -71,25 +71,24 @@ export function InfoSidebar({
   const accepting = artist.isClaimed ? artist.acceptingClients : "yes"
 
   if (accepting === "no") {
+    // The header says they aren't taking clients; here, only a way to reach them.
     const igHandle = cleanHandle("instagram", artist.instagramHandle)
+    if (!igHandle) return null
     return (
       <div className="lg:sticky lg:top-6">
         <section aria-labelledby="request-form" className="flex flex-col gap-3 rounded border-2 border-ink bg-vellum tex-vellum p-5">
           <h2 id="request-form" className="font-heading text-[22px] leading-[1.15] text-ink">
-            Not taking new clients
+            Message {firstName(artist.name)} on Instagram
           </h2>
-          <p className="text-[15px] leading-[1.5] text-ink text-pretty">{closedNote(artist.name)}</p>
-          {igHandle && (
-            <a
-              href={profileUrl("instagram", igHandle)}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={`@${igHandle} on Instagram`}
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded border-1.5 border-ink bg-vellum tex-vellum px-3.5 text-[15px] font-semibold text-ink hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              <SocialIcon network="instagram" />@{igHandle}
-            </a>
-          )}
+          <a
+            href={profileUrl("instagram", igHandle)}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`@${igHandle} on Instagram`}
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded border-1.5 border-ink bg-vellum tex-vellum px-3.5 text-[15px] font-semibold text-ink hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <SocialIcon network="instagram" />@{igHandle}
+          </a>
         </section>
       </div>
     )

@@ -135,7 +135,7 @@ export function ArtistHeader({ artist, initialSaved, shopHref, shop = null }: Ar
                       booking === "yes" ? "text-bottle-green" : booking === "no" ? "text-ink-muted" : "text-ink",
                     )}
                   >
-                    {acceptingLabel(booking)}
+                    {closed ? `${artist.name} isn't taking new clients right now` : acceptingLabel(booking)}
                   </strong>
                   .{prices ? <span className="tabular-nums"> {prices}</span> : null}
                   {artist.pricingNotes && <span className="block text-ink-muted">{artist.pricingNotes}</span>}
@@ -178,12 +178,6 @@ export function ArtistHeader({ artist, initialSaved, shopHref, shop = null }: Ar
                   </span>
                 )}
               </div>
-            )}
-
-            {closed && (
-              <p className="text-[15px] font-semibold text-ink">
-                {artist.name} isn&apos;t taking new clients right now.
-              </p>
             )}
 
             <div className="flex flex-wrap gap-2">
