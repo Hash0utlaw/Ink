@@ -221,15 +221,6 @@ export function priceLine(p: {
   return `${line.charAt(0).toUpperCase()}${line.slice(1)}.`
 }
 
-/** schema.org priceRange: the price line without its full stop ("Minimum $100, $150 to $200 an hour"); undefined when no prices are set. */
-export function schemaPriceRange(p: {
-  shopMinimum: number | null
-  hourlyRateMin: number | null
-  hourlyRateMax: number | null
-}): string | undefined {
-  return priceLine(p).replace(/\.$/, "") || undefined
-}
-
 /** The finder card's one line: "Taking new clients" or "Waitlist", only once claimed (the artist set it). No prices on cards. */
 export function cardBookingLine(a: { isClaimed: boolean; acceptingClients: AcceptingClients }): string | null {
   if (!a.isClaimed) return null

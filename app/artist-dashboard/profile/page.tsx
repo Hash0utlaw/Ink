@@ -99,7 +99,8 @@ export default async function EditProfilePage({ searchParams }: { searchParams: 
         </div>
       ) : (
         <>
-          <nav aria-label="Profile sections" className="-mx-1 flex gap-6 overflow-x-auto border-b border-rule px-1">
+          {/* Wraps to a second line on a phone instead of scrolling sideways. */}
+          <nav aria-label="Profile sections" className="flex flex-wrap gap-x-5 border-b border-rule sm:gap-x-6">
             {TABS.map((t) => (
               <Link
                 key={t.value}
@@ -107,7 +108,7 @@ export default async function EditProfilePage({ searchParams }: { searchParams: 
                 aria-current={tab === t.value ? "page" : undefined}
                 scroll={false}
                 className={cn(
-                  "-mb-px flex min-h-11 shrink-0 items-center whitespace-nowrap border-b-[3px] px-0.5 text-[15px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                  "-mb-px flex min-h-11 items-center whitespace-nowrap border-b-[3px] px-0.5 text-[15px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                   tab === t.value ? "border-ink text-ink" : "border-transparent text-ink-muted hover:text-ink",
                 )}
               >
