@@ -88,8 +88,10 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     /*
-     * Match all request paths except static assets and image optimization files.
+     * Match all request paths except static assets and image optimization files,
+     * Vercel Analytics (/_vercel), the Sentry tunnel and the health check: those
+     * need no session and must never be gated.
      */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!_next/static|_next/image|_vercel|monitoring|sentry-tunnel|api/health|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 }

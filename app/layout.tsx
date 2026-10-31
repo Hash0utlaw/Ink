@@ -6,6 +6,8 @@ import { cn } from "@/lib/utils"
 import { Toaster } from "@/components/ui/toaster"
 import { AdminGateBanner } from "@/components/layout/admin-gate-banner"
 import { SITE_URL } from "@/lib/site-config"
+import { Analytics } from "@vercel/analytics/next"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 // Brand fonts (see .claude/skills/tattoomaps-design) are stored in app/fonts so builds
 // never fetch from Google Fonts. All three are SIL OFL; see app/fonts/OFL-LICENSES.txt.
@@ -92,6 +94,8 @@ export default function RootLayout({
         <AdminGateBanner />
         {children}
         <Toaster />
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   )
