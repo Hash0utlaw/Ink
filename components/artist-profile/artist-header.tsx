@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Globe, BadgeCheck } from "lucide-react"
+import { Globe, BadgeCheck, CalendarDays } from "lucide-react"
 import type { Artist } from "@/types/artist"
 import { SaveButton } from "@/components/saved/save-button"
 import { ShareButton } from "@/components/share/share-button"
@@ -14,7 +14,8 @@ import type { ArtistShop } from "@/lib/supabase/artists"
 import { SocialIcon } from "@/components/brand/social-icon"
 import { formatMapAddress } from "@/lib/format-address"
 import { followersLabel } from "@/lib/format-count"
-import { cleanHandle, profileUrl } from "@/lib/socials"
+import { cleanHandle, profileUrl, safeHttpUrl } from "@/lib/socials"
+import { acceptingLabel, priceLine } from "@/lib/profile-details"
 import { allowedImageSrc } from "@/lib/utils/safe-image"
 import { STATE_ABBR_TO_NAME } from "@/lib/utils/states"
 import { cn } from "@/lib/utils"
@@ -44,8 +45,12 @@ export function ArtistHeader({ artist, initialSaved, shopHref, shop = null }: Ar
   const igFollowers = igHandle ? followersLabel(artist.instagramFollowers) : null
   const websiteUrl = artist.websiteUrl?.trim()
   const showVerified = artist.hasAccount && artist.isVerified
-  // Availability defaults to on for every listing; it's only real once claimed.
-  const showAvailable = artist.isClaimed && artist.isAvailable
+  // "Taking new clients" defaults to yes for every listing; it's only real once claimed.
+  const booking = artist.isClaimed ? artist.acceptingClients : null
+  const closed = booking === "no"
+  const prices = artist.isClaimed ? priceLine(artist) : ""
+  // Only the artist sets the booking link; imported rows' values aren't shown.
+  const bookingUrl = artist.isClaimed ? safeHttpUrl(artist.bookingUrl) : null
   const photo = allowedImageSrc(artist.avatarUrl)
   const stateName = STATE_ABBR_TO_NAME[artist.location.state] ?? artist.location.state
   const place = [artist.location.city, stateName].filter(Boolean).join(", ")
@@ -105,7 +110,7 @@ export function ArtistHeader({ artist, initialSaved, shopHref, shop = null }: Ar
                 </p>
               )}
               {place && <p className="mt-1 font-place text-[17px] italic text-ink-muted lg:text-[19px]">{place}</p>}
-              {(artist.rating > 0 || showVerified || showAvailable) && (
+              {(artist.rating > 0 || showVerified) && (
                 <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[15px] text-ink-muted">
                   {artist.rating > 0 && (
                     <span className="tabular-nums">
@@ -120,7 +125,20 @@ export function ArtistHeader({ artist, initialSaved, shopHref, shop = null }: Ar
                       Verified
                     </span>
                   )}
-                  {showAvailable && <span className="font-semibold text-bottle-green">Available for booking</span>}
+                </p>
+              )}
+              {booking && (
+                <p className="mt-2 max-w-prose text-[15px] leading-[1.5] text-ink text-pretty">
+                  <strong
+                    className={cn(
+                      "font-semibold",
+                      booking === "yes" ? "text-bottle-green" : booking === "no" ? "text-ink-muted" : "text-ink",
+                    )}
+                  >
+                    {acceptingLabel(booking)}
+                  </strong>
+                  .{prices ? <span className="tabular-nums"> {prices}</span> : null}
+                  {artist.pricingNotes && <span className="block text-ink-muted">{artist.pricingNotes}</span>}
                 </p>
               )}
             </div>
@@ -162,8 +180,28 @@ export function ArtistHeader({ artist, initialSaved, shopHref, shop = null }: Ar
               </div>
             )}
 
+            {closed && (
+              <p className="text-[15px] font-semibold text-ink">
+                {artist.name} isn&apos;t taking new clients right now.
+              </p>
+            )}
+
             <div className="flex flex-wrap gap-2">
-              {artist.isClaimed ? (
+              {closed ? (
+                // Not taking clients: no request or booking button. Instagram stays: in the row
+                // above, or here on a phone when there's no shop (Round 11 moves it here).
+                noShop && igHandle && (
+                  <a
+                    href={profileUrl("instagram", igHandle)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`@${igHandle} on Instagram`}
+                    className={cn(SOCIAL_BUTTON, "flex-1 justify-center gap-2 lg:hidden")}
+                  >
+                    <SocialIcon network="instagram" />@{igHandle}
+                  </a>
+                )
+              ) : artist.isClaimed ? (
                 // Outline, so "Send request" stays the page's one red button.
                 <Button variant="ghost" className={OUTLINE} asChild>
                   <Link href={`/book/${artist.handle || artist.id}`}>Book now</Link>
@@ -199,8 +237,19 @@ export function ArtistHeader({ artist, initialSaved, shopHref, shop = null }: Ar
               />
             </div>
 
-            {websiteUrl && (
+            {(websiteUrl || bookingUrl) && (
               <div className="flex flex-wrap gap-x-5 gap-y-2 text-[15px]">
+                {bookingUrl && (
+                  <a
+                    href={bookingUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`inline-flex min-h-11 items-center gap-1.5 ${TEXT_LINK}`}
+                  >
+                    <CalendarDays className="h-4 w-4" aria-hidden="true" />
+                    Booking link
+                  </a>
+                )}
                 {websiteUrl && (
                   <a
                     href={websiteUrl.startsWith("http") ? websiteUrl : `https://${websiteUrl}`}

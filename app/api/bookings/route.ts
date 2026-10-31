@@ -60,6 +60,17 @@ export async function POST(request: Request) {
     }
 
     const artistRow = artistData as unknown as IntroArtist & { user_id: string | null; shop_id: string | null }
+
+    // "Not right now" (Round 12): the page shows no form, and requests are refused here too.
+    // A separate read, so a database without the column yet (error) doesn't block requests.
+    const { data: accepting } = await admin.from("artists").select("accepting_clients, is_claimed").eq("id", artistId).maybeSingle()
+    const acceptingRow = accepting as { accepting_clients?: string | null; is_claimed?: boolean | null } | null
+    if (acceptingRow?.is_claimed && acceptingRow.accepting_clients === "no") {
+      return NextResponse.json(
+        { success: false, message: `${artistRow.display_name} isn't taking new clients right now.` },
+        { status: 409 },
+      )
+    }
     const isUnclaimed = !artistRow.user_id
     const createdAt = new Date().toISOString()
 

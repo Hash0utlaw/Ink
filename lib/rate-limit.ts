@@ -7,8 +7,14 @@ import { createAdminClient } from "@/utils/supabase/admin"
 
 export type RateLimitedAction = "contact" | "booking" | "claim" | "review"
 
+/** Signed-in edits, limited per account rather than per IP. */
+export type UserRateLimitedAction = "profile"
+
 const PER_IP = { limit: 5, windowSeconds: 60 * 60 } // 5 an hour
 const PER_EMAIL = { limit: 5, windowSeconds: 24 * 60 * 60 } // 5 a day
+const PER_USER: Record<UserRateLimitedAction, { limit: number; windowSeconds: number }> = {
+  profile: { limit: 30, windowSeconds: 60 * 60 }, // 30 saves an hour
+}
 
 export const RATE_LIMIT_MESSAGE = "You've sent several of these recently. Please try again later."
 
@@ -42,4 +48,10 @@ export async function allowRequest(request: Request, action: RateLimitedAction, 
   if (!(await hit(`${action}:ip`, clientIp(request), PER_IP.limit, PER_IP.windowSeconds))) return false
   if (email && !(await hit(`${action}:email`, email, PER_EMAIL.limit, PER_EMAIL.windowSeconds))) return false
   return true
+}
+
+/** Records one attempt by a signed-in user; false when over that action's limit. */
+export async function allowUserAction(action: UserRateLimitedAction, userId: string): Promise<boolean> {
+  const { limit, windowSeconds } = PER_USER[action]
+  return hit(`${action}:user`, userId, limit, windowSeconds)
 }

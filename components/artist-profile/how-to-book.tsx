@@ -67,9 +67,13 @@ export function HowToBookPanel({ artist }: { artist: Artist }) {
           </a>
         )}
 
+        {artist.isClaimed && artist.acceptingClients === "no" ? (
+          <p className="border-t border-rule pt-3 font-semibold">{first} isn&apos;t taking new clients right now.</p>
+        ) : (
         <RequestIntroButton className="inline-flex min-h-12 items-center justify-center rounded border-1.5 border-ink bg-flash-red text-base font-semibold text-white hover:bg-flash-red/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
           Request an intro
         </RequestIntroButton>
+        )}
 
         {!artist.hasAccount && (
           <p className="text-[13px] leading-[1.45] text-ink-muted text-pretty">

@@ -6,7 +6,9 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { CheckCircle2, Loader2 } from "lucide-react"
 import type { Artist } from "@/types/artist"
-import { noShopRequestIntro, requestFormNote, requestSentMessage } from "@/lib/request-copy"
+import { closedNote, noShopRequestIntro, requestFormNote, requestSentMessage, waitlistNote } from "@/lib/request-copy"
+import { SocialIcon } from "@/components/brand/social-icon"
+import { cleanHandle, profileUrl } from "@/lib/socials"
 import { firstName } from "@/components/brand/private-studio"
 import { Honeypot } from "@/components/forms/honeypot"
 
@@ -65,6 +67,33 @@ export function InfoSidebar({
   const copy = { name: artist.name, shopName: artist.shopName, hasAccount: artist.hasAccount, hasInstagram }
   // No shop and no account: say plainly how the request reaches them (Round 11).
   const noShopIntro = !artist.shopId && !artist.hasAccount ? noShopRequestIntro(firstName(artist.name), hasInstagram) : null
+  // Round 12: only a claimed artist sets these; unclaimed rows are always "yes".
+  const accepting = artist.isClaimed ? artist.acceptingClients : "yes"
+
+  if (accepting === "no") {
+    const igHandle = cleanHandle("instagram", artist.instagramHandle)
+    return (
+      <div className="lg:sticky lg:top-6">
+        <section aria-labelledby="request-form" className="flex flex-col gap-3 rounded border-2 border-ink bg-vellum tex-vellum p-5">
+          <h2 id="request-form" className="font-heading text-[22px] leading-[1.15] text-ink">
+            Not taking new clients
+          </h2>
+          <p className="text-[15px] leading-[1.5] text-ink text-pretty">{closedNote(artist.name)}</p>
+          {igHandle && (
+            <a
+              href={profileUrl("instagram", igHandle)}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`@${igHandle} on Instagram`}
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded border-1.5 border-ink bg-vellum tex-vellum px-3.5 text-[15px] font-semibold text-ink hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <SocialIcon network="instagram" />@{igHandle}
+            </a>
+          )}
+        </section>
+      </div>
+    )
+  }
 
   return (
     <div className="lg:sticky lg:top-6">
@@ -73,6 +102,11 @@ export function InfoSidebar({
           Request an intro
         </h2>
         {noShopIntro && !submitSuccess && <p className="mt-2 text-[15px] leading-[1.5] text-ink text-pretty">{noShopIntro}</p>}
+        {accepting === "waitlist" && !submitSuccess && (
+          <p className="mt-2 text-[15px] leading-[1.5] text-ink text-pretty">
+            <strong className="font-semibold">Waitlist only.</strong> {waitlistNote(firstName(artist.name))}
+          </p>
+        )}
         <div className="mt-4">
           {submitSuccess ? (
             <div className="flex flex-col items-center gap-3 py-8 text-center">

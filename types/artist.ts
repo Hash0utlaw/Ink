@@ -1,3 +1,5 @@
+import type { AcceptingClients } from "@/lib/profile-details"
+
 export interface Review {
   id: string
   userName: string
@@ -7,6 +9,7 @@ export interface Review {
   date: string
 }
 
+export type { AcceptingClients }
 export type AvailabilityStatus = "available" | "next_week" | "one_to_two_months" | "not_taking_clients"
 export type PriceTier = "budget" | "mid" | "premium" | "luxury"
 
@@ -48,6 +51,13 @@ export interface Artist {
   availabilityStatus: AvailabilityStatus
   avgResponseHours: number | null
   firstBookingDiscount: number | null
+  /** artists.accepting_clients: "Are you taking new clients?" Defaults to "yes"; only the artist sets it, so show it only once claimed. */
+  acceptingClients: AcceptingClients
+  /** Whole dollars, set by the artist in Profile details; null when not given. */
+  shopMinimum: number | null
+  hourlyRateMin: number | null
+  hourlyRateMax: number | null
+  pricingNotes?: string
   bio: string
   reviews: Review[]
   hours: {
@@ -61,6 +71,8 @@ export interface Artist {
   /** First active portfolio photo (our storage only); the card image when there's no avatar. Set by callers that look it up. */
   cardPhotoUrl?: string | null
   websiteUrl?: string
+  /** artists.booking_url: the artist's booking form or calendar. Imports filled it for many unclaimed rows too. */
+  bookingUrl?: string
   isClaimed: boolean
   /** True when a TattooMaps account owns this profile (artists.user_id is set). */
   hasAccount?: boolean

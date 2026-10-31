@@ -17,7 +17,8 @@ import { allowedImageSrc } from "@/lib/utils/safe-image"
 import { SafeImage } from "@/components/brand/safe-image"
 import { styleLabel, styleLabels } from "@/lib/styles"
 import { initials } from "@/lib/initials"
-import { requestNextStep } from "@/lib/request-copy"
+import { closedNote, requestNextStep, waitlistNote } from "@/lib/request-copy"
+import { firstName } from "@/components/brand/private-studio"
 
 /** The first three public portfolio photos (active uploads, in the artist's order). */
 async function getPortfolioImages(artistId: string): Promise<string[]> {
@@ -168,11 +169,19 @@ export default async function BookArtistPage({
                   </p>
                 </CardHeader>
                 <CardContent>
+                  {artist.isClaimed && artist.acceptingClients === "waitlist" && (
+                    <p className="mb-4 text-[15px] leading-[1.5] text-ink text-pretty">
+                      <strong className="font-semibold">Waitlist only.</strong> {waitlistNote(firstName(artist.name))}
+                    </p>
+                  )}
                   {!artist.isClaimed && (
                     <p className="text-xs text-muted-foreground bg-muted/50 border border-border/50 rounded-md px-3 py-2 mb-4">
                       This artist hasn&apos;t claimed their profile yet. Send your brief and we&apos;ll invite them to respond.
                     </p>
                   )}
+                  {artist.isClaimed && artist.acceptingClients === "no" ? (
+                    <p className="text-[15px] font-semibold leading-[1.5] text-ink text-pretty">{closedNote(artist.name)}</p>
+                  ) : (
                   <PublicBookingForm
                     artistId={artist.id}
                     artistName={artist.name}
@@ -184,6 +193,7 @@ export default async function BookArtistPage({
                       size: flashListing.size ?? undefined,
                     } : undefined}
                   />
+                  )}
                 </CardContent>
               </Card>
             </div>

@@ -41,3 +41,13 @@ export function requestFormNote(input: RequestCopyInput): string {
 export function requestSentMessage(input: RequestCopyInput): string {
   return input.hasAccount ? `${input.name} has your request and will get back to you.` : requestNextStep(input)
 }
+
+/** Above the request form when the artist picked "Waitlist only" (Round 12). */
+export function waitlistNote(firstName: string): string {
+  return `${firstName} is booking from a waitlist right now. Send a request to join it, and you'll hear back when a spot opens.`
+}
+
+/** In place of the request form when the artist picked "Not right now" (Round 12). */
+export function closedNote(name: string): string {
+  return `${name} isn't taking new clients right now, so requests are closed. You can still follow their work.`
+}

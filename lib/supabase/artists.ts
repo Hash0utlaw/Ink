@@ -3,6 +3,7 @@ import type { Artist, Review, AvailabilityStatus, PriceTier } from "@/types/arti
 import { sortStyleSlugs, toStyleSlugs } from "@/lib/styles"
 import { displayName } from "@/lib/display-name"
 import { withCardPhotos } from "@/lib/supabase/portfolio"
+import { isAcceptingClients } from "@/lib/profile-details"
 
 export type ArtistFilters = {
   styles?: string[]
@@ -72,6 +73,11 @@ export function rowToArtist(row: Record<string, unknown>): Artist {
     availabilityStatus: (row.availability_status as AvailabilityStatus) ?? "available",
     avgResponseHours: row.avg_response_hours != null ? Number(row.avg_response_hours) : null,
     firstBookingDiscount: row.first_booking_discount != null ? Number(row.first_booking_discount) : null,
+    acceptingClients: isAcceptingClients(row.accepting_clients) ? row.accepting_clients : "yes",
+    shopMinimum: row.shop_minimum != null ? Number(row.shop_minimum) : null,
+    hourlyRateMin: row.hourly_rate_min != null ? Number(row.hourly_rate_min) : null,
+    hourlyRateMax: row.hourly_rate_max != null ? Number(row.hourly_rate_max) : null,
+    pricingNotes: String(row.pricing_notes ?? ""),
     bio: String(row.bio ?? ""),
     reviews: Array.isArray(row.reviews) ? (row.reviews as Review[]) : [],
     hours: ((shop?.hours ?? row.hours) as Record<string, string>) ?? {},
@@ -79,6 +85,7 @@ export function rowToArtist(row: Record<string, unknown>): Artist {
     instagramFollowers: row.instagram_followers != null ? Number(row.instagram_followers) : null,
     tiktokHandle: String(row.tiktok_handle ?? ""),
     websiteUrl: String(row.website_url ?? ""),
+    bookingUrl: String(row.booking_url ?? ""),
     isClaimed: Boolean(row.is_claimed ?? false),
     hasAccount: row.user_id != null,
     isVerified: Boolean(row.is_verified ?? false),
@@ -364,7 +371,8 @@ export async function getWorthTheDriveArtists(limit = 6): Promise<Artist[]> {
       .eq("is_active", true)
       .gte("rating", 4.8)
       .gt("review_count", 0)
-      .neq("availability_status", "not_taking_clients")
+      // Unclaimed rows all have the default "yes"; claimed artists may say "no".
+      .neq("accepting_clients", "no")
       .order("review_count", { ascending: false })
       .limit(limit)
     if (error || !data) return []

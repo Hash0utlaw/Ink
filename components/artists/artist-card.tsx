@@ -5,7 +5,8 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Star, MapPin, Clock, Tag } from "lucide-react"
-import type { Artist, AvailabilityStatus } from "@/types/artist"
+import type { Artist } from "@/types/artist"
+import { cardBookingLine } from "@/lib/profile-details"
 import { SaveButton } from "@/components/saved/save-button"
 import { allowedImageSrc } from "@/lib/utils/safe-image"
 import { SafeImage } from "@/components/brand/safe-image"
@@ -20,17 +21,11 @@ interface ArtistCardProps {
 }
 
 
-const AVAILABILITY_CONFIG: Record<AvailabilityStatus, { dot: string; label: string; badge: string }> = {
-  available:             { dot: "bg-success",  label: "Available now",       badge: "border-success text-success-foreground bg-success" },
-  next_week:             { dot: "bg-warning",  label: "Available next week", badge: "border-warning text-warning-foreground bg-warning" },
-  one_to_two_months:     { dot: "bg-warning",  label: "Booked 1–2 months",  badge: "border-warning text-warning-foreground bg-warning" },
-  not_taking_clients:    { dot: "bg-muted-foreground",   label: "Not taking clients",  badge: "border-border text-muted-foreground bg-muted" },
-}
-
 export function ArtistCard({ artist, distance, initialSaved }: ArtistCardProps) {
   const hasRating = artist.rating > 0
   const locationLine = [artist.location.city, artist.location.state].filter(Boolean).join(", ")
-  const avail = AVAILABILITY_CONFIG[artist.availabilityStatus] ?? AVAILABILITY_CONFIG.available
+  // Round 12: "Taking new clients" or "Waitlist" once the artist has set it; replaces the old availability badge.
+  const booking = cardBookingLine(artist)
   const previews = artist.previewImages.filter((url) => allowedImageSrc(url))
   const hasPreview = previews.length > 0
 
@@ -100,12 +95,8 @@ export function ArtistCard({ artist, distance, initialSaved }: ArtistCardProps) 
       <CardContent className="p-4 pt-0 flex-1 space-y-2">
         {/* Availability + response time */}
         <div className="flex items-center gap-3 flex-wrap">
-          {/* Availability defaults to "available" for every listing; it's only real once claimed. */}
-          {artist.isClaimed && (
-            <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded border ${avail.badge}`}>
-              <span className={`w-1.5 h-1.5 rounded ${avail.dot}`} />
-              {avail.label}
-            </span>
+          {booking && (
+            <span className={`text-xs font-semibold ${booking === "Waitlist" ? "text-ink" : "text-bottle-green"}`}>{booking}</span>
           )}
           {artist.avgResponseHours != null && (
             <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">

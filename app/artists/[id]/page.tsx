@@ -19,6 +19,7 @@ import { RecordVisit } from "@/components/artist-profile/record-visit"
 import { styleLabels } from "@/lib/styles"
 import { artistHasNameTwin } from "@/lib/supabase/seo"
 import { canonicalUrl, jsonLdHtml, metaDescription } from "@/lib/seo"
+import { schemaPriceRange } from "@/lib/profile-details"
 
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
   const artist = await getArtistById(params.id)
@@ -79,6 +80,8 @@ export default async function ArtistProfilePage({ params }: { params: { id: stri
   ])
 
   const loc = [artist.location.city, artist.location.state].filter(Boolean).join(", ")
+  // Prices only come from the artist (Profile details), so only once claimed.
+  const priceRange = artist.isClaimed ? schemaPriceRange(artist) : undefined
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Person",
@@ -98,6 +101,7 @@ export default async function ArtistProfilePage({ params }: { params: { id: stri
     ...(artist.instagramHandle && {
       "sameAs": [`https://www.instagram.com/${artist.instagramHandle.replace("@", "")}`],
     }),
+    ...(priceRange && { "priceRange": priceRange }),
     ...(artist.rating > 0 && {
       "aggregateRating": {
         "@type": "AggregateRating",
