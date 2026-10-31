@@ -3,7 +3,7 @@ import Link from "next/link"
 
 export function ClaimBand() {
   return (
-    <section aria-labelledby="claim-heading" className="w-full border-y-3 border-ink bg-night tex-night-chart">
+    <section aria-labelledby="claim-heading" className="w-full border-y-3 border-ink bg-night tex-night">
       <div className="mx-auto flex w-full max-w-[1344px] flex-col items-start gap-6 px-6 py-12 md:flex-row md:items-center md:gap-10 md:py-14">
         <Image
           src="/brand/banner-cream.webp"
