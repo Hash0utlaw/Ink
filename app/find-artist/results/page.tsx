@@ -35,6 +35,7 @@ import {
   type FinderPlace,
 } from "@/lib/finder"
 import { styleLabel, toStyleSlugs } from "@/lib/styles"
+import { cardBookingLine } from "@/lib/profile-details"
 import { cn } from "@/lib/utils"
 
 export const metadata: Metadata = {
@@ -242,6 +243,7 @@ function ArtistCard({ artist, picked }: { artist: FinderArtist; picked: string[]
     ...artist.styles.filter((s) => !picked.includes(s)),
   ].slice(0, 3)
   const { city, state } = artist.location
+  const booking = cardBookingLine(artist)
   return (
     <Link
       href={`/artists/${artist.id}`}
@@ -270,6 +272,9 @@ function ArtistCard({ artist, picked }: { artist: FinderArtist; picked: string[]
           </span>
         )}
         <FollowersLine count={artist.instagramFollowers} />
+        {booking && (
+          <span className={cn("text-sm font-semibold", booking === "Waitlist" ? "text-ink" : "text-bottle-green")}>{booking}</span>
+        )}
         {tags.length > 0 && (
           <span className="mt-0.5 flex flex-wrap gap-[5px]">
             {tags.map((slug) => (
